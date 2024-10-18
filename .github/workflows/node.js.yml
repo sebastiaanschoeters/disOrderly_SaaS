@@ -7,7 +7,7 @@ on:
   push:
     branches: [ "main", "Supabase-Test" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "Supabase-Test" ]
 
 jobs:
   build:

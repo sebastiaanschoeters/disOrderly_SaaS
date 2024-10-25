@@ -11,7 +11,7 @@ const App = () => {
         <Router>
             {/* Route definitions */}
             <Routes>
-                <Route path="/" element={<HomePage />} />
+                <Route path="/" element={<ActivationPage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/activate" element={<ActivationPage />} />
                 <Route path="/activate/:activationCode" element={<ActivationPage />} />

@@ -1,5 +1,6 @@
 import logo from './logo.svg';
 import './App.css';
+import act from 'react'
 import {createClient} from "@supabase/supabase-js"
 import {useEffect, useState} from "react";
 

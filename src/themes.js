@@ -1,15 +1,6 @@
 // themes.js
 
 const themes = {
-    default: {
-        color1: '#013A63',
-        color2: '#2A6F97',
-        color3: '#468FAF',
-        color4: '#52B788',
-        color5: '#95D5B2',
-        textColorL: '#B3B3B3',
-        textColorD: '#000000'
-    },
     Donker_Thema: {
         color1: '#121212',
         color2: '#181818',
@@ -19,7 +10,7 @@ const themes = {
         textColorL: '#B3B3B3',
         textColorD: '#000000'
     },
-    Navy_Blauw: {
+    default: {
         color1: '#013A63',
         color2: '#2A6F97',
         color3: '#468FAF',

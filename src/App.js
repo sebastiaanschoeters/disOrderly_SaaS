@@ -1,6 +1,8 @@
 // App.js
 import React, { useState, useEffect } from 'react';
-import LoginPage from './LoginPage';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import ActivationPage from './different pages/ActivationPage';
+import LoginPage from './different pages/LoginPage';
 import themes from './themes'; // Import themes
 
 const App = () => {
@@ -15,25 +17,15 @@ const App = () => {
     }, [theme]);
 
     return (
-        <div style={{padding: '10px'}}>
-            <label htmlFor="theme-select">Choose a theme: </label>
-            <select
-                id="theme-select"
-                value={theme}
-                onChange={(e) => setTheme(e.target.value)}
-            >
-                {Object.keys(themes).map((themeKey) => (
-                    <option key={themeKey} value={themeKey}>
-                        {themeKey === "default"
-                            ? "Standaard"
-                            : themeKey.replace(/_/g, ' ').charAt(0).toUpperCase() + themeKey.replace(/_/g, ' ').slice(1)}
-                    </option>
-                ))}
-            </select>
-
-            <LoginPage/>
-        </div>
+        <Router>
+            <Routes>
+                <Route path="/" element={<LoginPage />} />
+                <Route path="/activate" element={<ActivationPage />} />
+                <Route path="/activate/:activationCode" element={<ActivationPage />} />
+            </Routes>
+        </Router>
     );
 };
 
 export default App;
+

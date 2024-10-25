@@ -4,8 +4,8 @@
 name: Node.js CI
 
 env:
-  VERCEL_ORG_ID: $team_OLiv4e0s41MIJLFDxyzLuiTz
-  VERCEL_PROJECT_ID: $prj_cdw5OPFy667OXrvSEbsAqxC1FkfH
+  VERCEL_ORG_ID: team_OLiv4e0s41MIJLFDxyzLuiTz
+  VERCEL_PROJECT_ID: prj_cdw5OPFy667OXrvSEbsAqxC1FkfH
 
 on:
   push:

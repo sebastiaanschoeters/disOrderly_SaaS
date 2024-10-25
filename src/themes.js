@@ -7,7 +7,8 @@ const themes = {
         color3: '#ffffff',
         color4: '#ffffff',
         color5: '#ffffff',
-        textColor: '#000000'
+        textColorL: '#B3B3B3',
+        textColorD: '#000000'
     },
     Donker_Thema: {
         color1: '#121212',

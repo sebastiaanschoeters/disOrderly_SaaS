@@ -2,11 +2,11 @@
 
 const themes = {
     default: {
-        color1: '#f0f2f5',
-        color2: '#ffffff',
-        color3: '#ffffff',
-        color4: '#ffffff',
-        color5: '#ffffff',
+        color1: '#013A63',
+        color2: '#2A6F97',
+        color3: '#468FAF',
+        color4: '#52B788',
+        color5: '#95D5B2',
         textColorL: '#B3B3B3',
         textColorD: '#000000'
     },

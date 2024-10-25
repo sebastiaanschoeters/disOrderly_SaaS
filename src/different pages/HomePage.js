@@ -4,7 +4,7 @@ import 'antd/dist/reset.css'; // Import Ant Design styles
 const HomePage = () => {
 return (
 
-    <div className="container--0-">
+    <div className="container--0-" data-testid="HomePage">
         <svg
             width="960"
             height="520"

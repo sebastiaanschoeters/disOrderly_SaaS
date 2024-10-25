@@ -2,6 +2,7 @@
 import React, {useEffect, useState} from 'react';
 import { Form, Input, Button, Checkbox, Card } from 'antd';
 import 'antd/dist/reset.css';
+import '../CSS/Ant design overide.css'
 import themes from "../themes";
 
 const LoginPage = () => {

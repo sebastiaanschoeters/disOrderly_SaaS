@@ -9,9 +9,9 @@
 }
 
 .ant-btn-primary {
-    background-color: var(--color4);
+    background-color: var(--color1);
     border-color: var(--color3);
-    color: var(--textColorD);
+    color: var(--textColorL);
 }
 
 .ant-btn-primary:hover,

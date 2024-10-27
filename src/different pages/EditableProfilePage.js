@@ -75,18 +75,18 @@ const ProfileCard = () => {
 
                 <p><strong>Interesses:</strong></p>
                 <div>
-                    <Tag>Voetbal</Tag>
-                    <Tag>Wandelen</Tag>
-                    <Tag>Gezelschapsspellen spelen</Tag>
-                    <Tag>Iets gaan drinken met vrienden</Tag>
+                    <Tag closeIcon>Voetbal</Tag>
+                    <Tag closeIcon>Wandelen</Tag>
+                    <Tag closeIcon>Gezelschapsspellen spelen</Tag>
+                    <Tag closeIcon>Iets gaan drinken met vrienden</Tag>
                 </div>
 
                 <Divider/>
 
                 <p><strong>Is op zoek naar:</strong></p>
                 <div>
-                    <Tag>Vrienden</Tag>
-                    <Tag>Relatie</Tag>
+                    <Tag closeIcon>Vrienden</Tag>
+                    <Tag closeIcon>Relatie</Tag>
                 </div>
 
                 <Divider/>

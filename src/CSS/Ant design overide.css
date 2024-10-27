@@ -1,11 +1,11 @@
 :root {
-    --color1: #f0f2f5; /* Default light theme color */
-    --color2: #ffffff;
-    --color3: #ffffff;
-    --color4: #ffffff;
-    --color5: #ffffff;
-    --textColorL: #ffffff;
-    --textColorD: #000000;
+    --color1: '#013A63';
+    --color2: '#2A6F97';
+    --color3: '#468FAF';
+    --color4: '#61A5C2';
+    --color5: '#89C2D9';
+    --textColorL: '#e6ebef';
+    --textColorD: '#00060a';
 }
 
 .ant-btn-primary {
@@ -14,17 +14,22 @@
     color: var(--textColorL);
 }
 
-.ant-btn-primary:hover,
+.ant-btn-secondary:hover,
+.ant-btn-primary:focus {
+    background-color: var(--color2);
+    border-color: var(--color2);
+    color: var(--textColorL);
+}
 
-.ant-btn-primary:focus { /* does not seem to do anything */
-    background-color: var(--color5);
-    border-color: var(--color5);
-    color: var(--textColorD);
+.ant-btn-primary:active{
+    background-color: var(--color3);
+    border-color: var(--color3);
+    color: var(--textColorL)
 }
 
 /* Card title background */
-.ant-card-head {  /* does not seem to do anything */
-    background-color: var(--color1);
+.ant-card-head {
+    background-color: var(--color5);
     color: var(--textColorD);
 }
 
@@ -34,7 +39,7 @@
 }
 
 /* Input field styles */
-.ant-input { /* does not seem to do anything */
+.ant-input {
     border-color: var(--color1);
 }
 
@@ -62,7 +67,3 @@
     color: var(--textColorD); /* Body text color */
 }
 
-/* Optional: Card hover effect */
-.ant-card:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Subtle shadow effect */
-}

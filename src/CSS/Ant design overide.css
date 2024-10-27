@@ -1,16 +1,18 @@
 :root {
-    --color1: '#013A63';
-    --color2: '#2A6F97';
-    --color3: '#468FAF';
-    --color4: '#61A5C2';
-    --color5: '#89C2D9';
-    --textColorL: '#e6ebef';
-    --textColorD: '#00060a';
+    --color1: #013A63;
+    --color2: #2A6F97;
+    --color3: #468FAF;
+    --color4: #61A5C2;
+    --color5: #89C2D9;
+    --textColorL: #e6ebef;
+    --textColorD: #00060a;
 }
-body, html{
+
+body, html {
     background-color: var(--color5);
 }
 
+/* Button Styles */
 .ant-btn-primary {
     background-color: var(--color1);
     border-color: var(--color1);
@@ -24,59 +26,77 @@ body, html{
     color: var(--textColorL);
 }
 
-.ant-btn-primary:active{
+.ant-btn-primary:active {
     background-color: var(--color3);
     border-color: var(--color3);
-    color: var(--textColorL)
+    color: var(--textColorL);
 }
 
-/* Card title background */
-.ant-card-head {
+/* Card Styles */
+.ant-card {
     background-color: var(--color5);
+    border: 1px solid var(--color5);
     color: var(--textColorD);
 }
 
-/* Form item label color */
-.ant-form-item-label > label {  /* does not seem to do anything */
-    color: var(--color3);
+.ant-card-head {
+    background-color: var(--color2);
+    color: var(--textColorD);
 }
 
-/* Input field styles */
-.ant-input {
+.ant-card-body {
+    color: var(--textColorD);
+}
+
+/* Divider Styles */
+.ant-divider {
+    border-top: 1px solid var(--textColorL);
+}
+
+/* Input and Select Styles */
+.ant-input, .ant-select-selector {
     border-color: var(--color1);
+    color: var(--textColorD);
 }
 
 .ant-input:focus,
-.ant-input:hover {
+.ant-input:hover,
+.ant-select-selector:focus,
+.ant-select-selector:hover {
     border-color: var(--color2);
-    box-shadow: var(--color4); /* Adjust the color to match your theme */
+    box-shadow: 0 0 0 2px rgba(66, 143, 175, 0.2); /* Adjusted focus shadow */
 }
 
-/* Card container styles */
-.ant-card {
-    background-color: var(--color5); /* Card background color */
-    border: 1px solid var(--color5); /* Card border color */
-    color: var(--textColorD); /* Text color inside the card */
+/* Checkbox Styles */
+.ant-checkbox-wrapper {
+    color: var(--textColorD);
 }
 
-/* Card title area */
-.ant-card-head {
-    background-color: var(--color2); /* Title background color */
-    color: var(--textColorD); /* Title text color */
+.ant-checkbox-checked .ant-checkbox-inner {
+    background-color: var(--color2);
+    border-color: var(--color1);
 }
 
-/* Card content area */
-.ant-card-body {
-    color: var(--textColorD); /* Body text color */
+.ant-checkbox-checked:hover .ant-checkbox-inner {
+    border-color: var(--color2); /* Change border on hover */
 }
 
-.ant-tag{
+.ant-checkbox-inner {
+    border-color: var(--color1);
+}
+
+.ant-checkbox-inner:after {
+    background-color: var(--color1); /* Checked state color */
+}
+
+.ant-checkbox-wrapper:hover .ant-checkbox-inner {
+    border-color: var(--color2);
+}
+
+/* Tag Styles */
+.ant-tag {
     background-color: var(--color4);
     border-color: var(--color4);
     color: var(--textColorD);
     border-radius: 10px;
-}
-
-.ant-divider {
-    border-top: 1px solid var(--textColorL);
 }

@@ -65,11 +65,11 @@ const ProfileCard = () => {
 
                 <Divider/>
 
-                <p><strong>Locatie:</strong> <Tag>Leuven</Tag></p>
+                <p><strong>Locatie:</strong> Leuven</p>
 
                 <Divider/>
 
-                <p><strong>Geslacht:</strong> <Tag>Man</Tag></p>
+                <p><strong>Geslacht:</strong> Man</p>
 
                 <Divider/>
 
@@ -91,11 +91,11 @@ const ProfileCard = () => {
 
                 <Divider/>
 
-                <p><strong>Woonsituatie:</strong> <Tag>Woont alleen</Tag></p>
+                <p><strong>Woonsituatie:</strong> Woont alleen</p>
 
                 <Divider/>
 
-                <p><strong>Kan zich zelfstanding verplaatsen:</strong> <Tag>Ja</Tag></p>
+                <p><strong>Kan zich zelfstanding verplaatsen:</strong> Ja</p>
             </Card>
 
             {/* Chat button in the bottom right */}

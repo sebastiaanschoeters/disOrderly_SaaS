@@ -1,17 +1,26 @@
-// Import necessary libraries
 import React, { useEffect, useState } from 'react';
-import { Card, Tag, Avatar, Button, Divider } from 'antd';
-import { MessageOutlined, CloseOutlined } from '@ant-design/icons';
+import { Card, Tag, Avatar, Button, Divider, Select, Checkbox, Input, Upload } from 'antd';
+import { CloseOutlined, SaveOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons';
 import 'antd/dist/reset.css';
 import '../CSS/Ant design overide.css';
 import themes from "../themes";
 
-// The ProfileCard component
 const ProfileCard = () => {
     const [theme, setTheme] = useState('default');
-    const [images, setImages] = useState([]); /* get images from database */
+    const [images, setImages] = useState([]);
+    const [profilePicture, setProfilePicture] = useState('https://example.com/photo.jpg'); // Initial profile picture URL
+    const [location, setLocation] = useState(null);
+    const [locationOptions, setLocationOptions] = useState([
+        { value: 'Leuven', label: 'Leuven' },
+        { value: 'Brussel', label: 'Brussel' },
+        { value: 'Gent', label: 'Gent' },
+        { value: 'Antwerpen', label: 'Antwerpen' },
+    ]);
+    const [inputValue, setInputValue] = useState('');
+    const [interests, setInterests] = useState(['Voetbal', 'Wandelen', 'Gezelschapsspellen spelen', 'Iets gaan drinken met vrienden']);
+    const [selectedInterests, setSelectedInterests] = useState([]); // Tracks selected interests
+    const [newInterest, setNewInterest] = useState(''); // Tracks the new interest input
 
-    // Apply the selected theme colors
     useEffect(() => {
         const selectedTheme = themes[theme];
         document.documentElement.style.setProperty('--color1', selectedTheme.color1);
@@ -23,13 +32,43 @@ const ProfileCard = () => {
         document.documentElement.style.setProperty('--textColorL', selectedTheme.textColorL);
     }, [theme]);
 
+    const handleLocationInputKeyDown = (e) => {
+        if (e.key === 'Enter' && inputValue) {
+            const newOption = { value: inputValue, label: inputValue };
+            setLocationOptions([...locationOptions, newOption]);
+            setLocation(inputValue);
+            setInputValue('');
+        }
+    };
+
+    const handleAddInterest = () => {
+        if (newInterest && !interests.includes(newInterest)) {
+            setInterests([...interests, newInterest]);
+            setNewInterest('');
+        }
+    };
+
+    const handleInterestSelectChange = (value) => {
+        setSelectedInterests(value);
+    };
+
+    const handleRemoveInterest = (interest) => {
+        setSelectedInterests(selectedInterests.filter(i => i !== interest));
+    };
+
+    const handleProfilePictureChange = ({ file }) => {
+        if (file.status === 'done') {
+            const imageUrl = URL.createObjectURL(file.originFileObj); // Create a temporary URL for the image
+            setProfilePicture(imageUrl);
+        }
+    };
+
     return (
         <div style={{ padding: '20px', position: 'relative', width: '100%' }}>
-            {/* Card Container */}
             <Card
                 style={{
                     width: '100%',
-                    margin: '0 auto', // Center horizontally
+                    margin: '0 auto',
                     paddingTop: '20px',
                 }}
                 cover={
@@ -45,71 +84,124 @@ const ProfileCard = () => {
                             ))
                         ) : (
                             <Avatar
-                                src="https://example.com/photo.jpg"
+                                src={profilePicture}
                                 alt="Martin's Profile Picture"
                                 size={100}
                                 style={{ margin: '20px auto', display: 'block' }}
                             />
                         )}
+                        {/* Profile Picture Upload */}
+                        <Upload
+                            showUploadList={false}
+                            onChange={handleProfilePictureChange}
+                        >
+                            <Button icon={<UploadOutlined />}>Kies nieuwe profiel foto</Button>
+                        </Upload>
                     </div>
                 }
             >
-                {/* Exit button in the top right */}
                 <Button
                     type="text"
-                    icon={<CloseOutlined/>}
-                    style={{position: 'absolute', top: '10px', right: '10px'}}
+                    icon={<CloseOutlined />}
+                    style={{ position: 'absolute', top: '10px', right: '10px' }}
                 />
 
-                <h2 style={{textAlign: 'center', margin: '0', fontSize: '24px'}}>Martin, 27</h2>
+                <h2 style={{ textAlign: 'center', margin: '0', fontSize: '24px' }}>Martin, 27</h2>
 
-                <Divider/>
+                <Divider />
 
-                <p><strong>Locatie:</strong> <Tag>Leuven</Tag></p>
+                <p><strong>Locatie:</strong>
+                    <Select
+                        showSearch
+                        allowClear
+                        placeholder="Selecteer locatie of voeg toe"
+                        style={{ width: '100%' }}
+                        value={location}
+                        onChange={(value) => setLocation(value)}
+                        options={locationOptions}
+                        onSearch={(value) => setInputValue(value)}
+                        onInputKeyDown={handleLocationInputKeyDown}
+                    />
+                </p>
 
-                <Divider/>
+                <Divider />
 
-                <p><strong>Geslacht:</strong> <Tag>Man</Tag></p>
+                <p><strong>Geslacht:</strong> <Select
+                    style={{ width: '20%' }}
+                    placeholder="Selecteer geslacht"
+                    options={[
+                        { value: 'Man', label: 'Man' },
+                        { value: 'Women', label: 'Vrouw' },
+                        { value: 'Non-binary', label: 'Non-binair' },
+                    ]}
+                /></p>
 
-                <Divider/>
+                <Divider />
 
                 <p><strong>Interesses:</strong></p>
-                <div>
-                    <Tag closeIcon>Voetbal</Tag>
-                    <Tag closeIcon>Wandelen</Tag>
-                    <Tag closeIcon>Gezelschapsspellen spelen</Tag>
-                    <Tag closeIcon>Iets gaan drinken met vrienden</Tag>
-                </div>
+                <Select
+                    mode="multiple"
+                    allowClear
+                    placeholder="Selecteer interesses of voeg toe"
+                    style={{ width: '100%', marginBottom: '10px' }}
+                    value={selectedInterests}
+                    onChange={handleInterestSelectChange}
+                    options={interests.map(interest => ({ value: interest, label: interest }))}
+                    onSearch={(value) => setNewInterest(value)} // For adding new interests
+                    onInputKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                            handleAddInterest();
+                        }
+                    }}
+                />
 
-                <Divider/>
+                <Divider />
 
                 <p><strong>Is op zoek naar:</strong></p>
                 <div>
-                    <Tag closeIcon>Vrienden</Tag>
-                    <Tag closeIcon>Relatie</Tag>
+                    <Checkbox >Vrienden</Checkbox>
+                    <Checkbox >Relatie</Checkbox>
+                    <Checkbox >Intieme ontmoeting</Checkbox>
                 </div>
 
-                <Divider/>
+                <Divider />
 
-                <p><strong>Woonsituatie:</strong> <Tag>Woont alleen</Tag></p>
+                <p><strong>Woonsituatie:</strong> <Select
+                    placeholder="Selecteer jouw woonsituatie"
+                    style={{ width: '25%' }}
+                    options={[
+                        { value: 'Alone', label: 'Woont alleen' },
+                        { value: 'Guided', label: 'Begeleid wonen' },
+                        { value: 'Parents', label: 'Bij ouders' },
+                        { value: 'group', label: 'In groepsverband' },
+                        { value: 'instance', label: 'zorginstelling' },
+                    ]}
+                /></p>
 
-                <Divider/>
+                <Divider />
 
-                <p><strong>Kan zich zelfstanding verplaatsen:</strong> <Tag>Ja</Tag></p>
+                <p><strong>Kan zich zelfstanding verplaatsen:</strong> <Select
+                    style={{ width: '20%' }}
+                    defaultValue='False'
+                    options={[
+                        { value: 'True', label: 'ja' },
+                        { value: 'False', label: 'nee' },
+                    ]}
+                /></p>
+
             </Card>
 
-            {/* Chat button in the bottom right */}
             <Button
                 type="primary"
-                icon={<MessageOutlined/>}
+                icon={<SaveOutlined />}
                 style={{
                     position: 'fixed',
                     bottom: '20px',
                     right: '20px',
-                    zIndex: 1000 // Ensures it stays on top
+                    zIndex: 1000
                 }}
             >
-                Chat met Martin
+                Veranderingen opslaan
             </Button>
         </div>
     );

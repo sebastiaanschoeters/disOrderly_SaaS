@@ -7,6 +7,9 @@
     --textColorL: '#e6ebef';
     --textColorD: '#00060a';
 }
+body, html{
+    background-color: var(--color5);
+}
 
 .ant-btn-primary {
     background-color: var(--color1);
@@ -51,8 +54,8 @@
 
 /* Card container styles */
 .ant-card {
-    background-color: var(--color4); /* Card background color */
-    border: 1px solid var(--color4); /* Card border color */
+    background-color: var(--color5); /* Card background color */
+    border: 1px solid var(--color5); /* Card border color */
     color: var(--textColorD); /* Text color inside the card */
 }
 
@@ -67,3 +70,13 @@
     color: var(--textColorD); /* Body text color */
 }
 
+.ant-tag{
+    background-color: var(--color4);
+    border-color: var(--color4);
+    color: var(--textColorD);
+    border-radius: 10px;
+}
+
+.ant-divider {
+    border-top: 1px solid var(--textColorL);
+}

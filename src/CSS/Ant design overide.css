@@ -63,8 +63,7 @@ body, html {
 .ant-input:hover,
 .ant-select-selector:focus,
 .ant-select-selector:hover {
-    border-color: var(--color2);
-    box-shadow: 0 0 0 2px rgba(66, 143, 175, 0.2); /* Adjusted focus shadow */
+    box-shadow: var(--color1); /* Adjusted focus shadow */
 }
 
 /* Checkbox Styles */
@@ -86,7 +85,7 @@ body, html {
 }
 
 .ant-checkbox-inner:after {
-    background-color: var(--color1); /* Checked state color */
+    background-color: var(--color2); /* Checked state color */
 }
 
 .ant-checkbox-wrapper:hover .ant-checkbox-inner {

@@ -72,7 +72,7 @@ const ProfileCard = () => {
                     paddingTop: '20px',
                 }}
                 cover={
-                    <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                         {images.length > 0 ? (
                             images.map((image, index) => (
                                 <img
@@ -91,12 +91,11 @@ const ProfileCard = () => {
                             />
                         )}
                         {/* Profile Picture Upload */}
-                        <Upload
-                            showUploadList={false}
-                            onChange={handleProfilePictureChange}
-                        >
-                            <Button icon={<UploadOutlined />}>Kies nieuwe profiel foto</Button>
-                        </Upload>
+                        <div style={{ marginTop: '10px' }}>
+                            <Upload showUploadList={false} onChange={handleProfilePictureChange}>
+                                <Button icon={<UploadOutlined />}>Kies nieuwe profiel foto</Button>
+                            </Upload>
+                        </div>
                     </div>
                 }
             >
@@ -110,12 +109,12 @@ const ProfileCard = () => {
 
                 <Divider />
 
-                <p><strong>Locatie:</strong>
+                <p><strong>Locatie: </strong>
                     <Select
                         showSearch
                         allowClear
                         placeholder="Selecteer locatie of voeg toe"
-                        style={{ width: '100%' }}
+                        style={{ minWidth: '25%' }}
                         value={location}
                         onChange={(value) => setLocation(value)}
                         options={locationOptions}
@@ -127,7 +126,7 @@ const ProfileCard = () => {
                 <Divider />
 
                 <p><strong>Geslacht:</strong> <Select
-                    style={{ width: '20%' }}
+                    style={{ minWidth: '25%' }}
                     placeholder="Selecteer geslacht"
                     options={[
                         { value: 'Man', label: 'Man' },
@@ -143,7 +142,7 @@ const ProfileCard = () => {
                     mode="multiple"
                     allowClear
                     placeholder="Selecteer interesses of voeg toe"
-                    style={{ width: '100%', marginBottom: '10px' }}
+                    style={{ minWidth:'25%', marginBottom: '10px' }}
                     value={selectedInterests}
                     onChange={handleInterestSelectChange}
                     options={interests.map(interest => ({ value: interest, label: interest }))}
@@ -168,7 +167,7 @@ const ProfileCard = () => {
 
                 <p><strong>Woonsituatie:</strong> <Select
                     placeholder="Selecteer jouw woonsituatie"
-                    style={{ width: '25%' }}
+                    style={{ minWidth: '25%' }}
                     options={[
                         { value: 'Alone', label: 'Woont alleen' },
                         { value: 'Guided', label: 'Begeleid wonen' },
@@ -181,7 +180,7 @@ const ProfileCard = () => {
                 <Divider />
 
                 <p><strong>Kan zich zelfstanding verplaatsen:</strong> <Select
-                    style={{ width: '20%' }}
+                    style={{ minWidth: '25%' }}
                     defaultValue='False'
                     options={[
                         { value: 'True', label: 'ja' },

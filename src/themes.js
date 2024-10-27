@@ -20,11 +20,11 @@ const themes = {
         textColorD: '#00060a'
     },
     Geel: {
-        color1: '#cccc00',
-        color2: '#ffff00',
-        color3: '#ffff33',
-        color4: '#ffff66',
-        color5: '#ffff99',
+        color1: '#666600',
+        color2: '#8f8f00',
+        color3: '#cccc00',
+        color4: '#d6d633',
+        color5: '#e0e066',
         textColorL: '#ffffe6',
         textColorD: '#191900'
     },

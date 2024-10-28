@@ -1,35 +1,44 @@
 :root {
-    --color1: #f0f2f5; /* Default light theme color */
-    --color2: #ffffff;
-    --color3: #ffffff;
-    --color4: #ffffff;
-    --color5: #ffffff;
-    --textColorL: #ffffff;
-    --textColorD: #000000;
+    --color1: '#013A63';
+    --color2: '#2A6F97';
+    --color3: '#468FAF';
+    --color4: '#61A5C2';
+    --color5: '#89C2D9';
+    --textColorL: '#e6ebef';
+    --textColorD: '#00060a';
+}
+body, html{
+    background-color: var(--color5);
 }
 
 .ant-btn-primary {
     background-color: var(--color1);
-    border-color: var(--color3);
+    border-color: var(--color1);
     color: var(--textColorL);
 }
 
-.ant-btn-primary:hover,
+.ant-btn-secondary:hover,
 .ant-btn-primary:focus {
     background-color: var(--color2);
     border-color: var(--color2);
-    color: var(--textColorD);
+    color: var(--textColorL);
+}
+
+.ant-btn-primary:active{
+    background-color: var(--color3);
+    border-color: var(--color3);
+    color: var(--textColorL)
 }
 
 /* Card title background */
 .ant-card-head {
-    background-color: var(--color1);
+    background-color: var(--color5);
     color: var(--textColorD);
 }
 
 /* Form item label color */
-.ant-form-item-label > label {
-    color: var(--color2);
+.ant-form-item-label > label {  /* does not seem to do anything */
+    color: var(--color3);
 }
 
 /* Input field styles */
@@ -40,13 +49,13 @@
 .ant-input:focus,
 .ant-input:hover {
     border-color: var(--color2);
-    box-shadow: 0 0 0 2px rgba(56, 142, 60, 0.2); /* Adjust the color to match your theme */
+    box-shadow: var(--color4); /* Adjust the color to match your theme */
 }
 
 /* Card container styles */
 .ant-card {
-    background-color: var(--color1); /* Card background color */
-    border: 1px solid var(--color2); /* Card border color */
+    background-color: var(--color5); /* Card background color */
+    border: 1px solid var(--color5); /* Card border color */
     color: var(--textColorD); /* Text color inside the card */
 }
 
@@ -61,7 +70,13 @@
     color: var(--textColorD); /* Body text color */
 }
 
-/* Optional: Card hover effect */
-.ant-card:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Subtle shadow effect */
+.ant-tag{
+    background-color: var(--color4);
+    border-color: var(--color4);
+    color: var(--textColorD);
+    border-radius: 10px;
+}
+
+.ant-divider {
+    border-top: 1px solid var(--textColorL);
 }

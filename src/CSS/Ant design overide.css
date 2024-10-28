@@ -32,6 +32,19 @@ body, html {
     color: var(--textColorL);
 }
 
+.ant-btn-default {
+    background-color: var(--textColorL);
+    color: var(--textColorD);
+}
+
+.ant-btn-default:hover{
+    background-color: var(--color4);
+}
+
+.ant-table-tbody >tr > td {
+    background-color: var(--color5);
+}
+
 /* Card Styles */
 .ant-card {
     background-color: var(--color5);

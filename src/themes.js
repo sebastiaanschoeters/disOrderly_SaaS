@@ -1,11 +1,11 @@
 // themes.js
 // theme.js
-import { blue, green, red, purple, orange,yellow, magenta, cyan, gray} from '@ant-design/colors'
+import { blue, green, red, purple, orange,yellow, magenta, cyan, gray } from '@ant-design/colors'
 
 export const antThemeTokens = (colors) => ({
-    colorPrimary: colors.primary6,         // Main color
+    colorPrimary: colors.primary7,         // Main color
     colorPrimaryHover: colors.primary5,    // Hover effect color
-    colorPrimaryActive: colors.primary7,   // Active state color
+    colorPrimaryActive: colors.primary8,   // Active state color
     colorSecondary: colors.primary4,       // Secondary action color
     colorBgBase: colors.primary2,          // Base background color
     colorBgContainer: colors.primary2,     // Background for containers
@@ -33,6 +33,71 @@ export const themes = {
         primary8: blue[7],
         primary9: blue[8],
         primary10: blue[9]
+    },
+
+    grijs:{
+        primary1: gray[0],
+        primary2: gray[1],
+        primary3: gray[2],
+        primary4: gray[3],
+        primary5: gray[4],
+        primary6: gray[5],
+        primary7: gray[6],
+        primary8: gray[7],
+        primary9: gray[8],
+        primary10: gray[9],
+    },
+
+    cyaan:{
+        primary1: cyan[0],
+        primary2: cyan[1],
+        primary3: cyan[2],
+        primary4: cyan[3],
+        primary5: cyan[4],
+        primary6: cyan[5],
+        primary7: cyan[6],
+        primary8: cyan[7],
+        primary9: cyan[8],
+        primary10: cyan[9],
+    },
+
+    roos: {
+        primary1: magenta[0],
+        primary2: magenta[1],
+        primary3: magenta[2],
+        primary4: magenta[3],
+        primary5: magenta[4],
+        primary6: magenta[5],
+        primary7: magenta[6],
+        primary8: magenta[7],
+        primary9: magenta[8],
+        primary10: magenta[9],
+    },
+
+    geel: {
+        primary1: yellow[0],
+        primary2: yellow[1],
+        primary3: yellow[2],
+        primary4: yellow[3],
+        primary5: yellow[4],
+        primary6: yellow[5],
+        primary7: yellow[6],
+        primary8: yellow[7],
+        primary9: yellow[8],
+        primary10: yellow[9],
+    },
+
+    orangje: {
+        primary1: orange[0],
+        primary2: orange[1],
+        primary3: orange[2],
+        primary4: orange[3],
+        primary5: orange[4],
+        primary6: orange[5],
+        primary7: orange[6],
+        primary8: orange[7],
+        primary9: orange[8],
+        primary10: orange[9],
     },
 
     paars: {

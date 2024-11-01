@@ -41,6 +41,10 @@ body, html {
     background-color: var(--color4);
 }
 
+.ant-btn-text{
+    color: var(--color1);
+}
+
 .ant-table-tbody >tr > td {
     background-color: var(--color5);
 }

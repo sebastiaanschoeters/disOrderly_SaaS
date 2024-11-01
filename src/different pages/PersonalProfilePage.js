@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Card, Tag, Avatar, Button, Divider, Select, Table, Popconfirm, message } from 'antd';
+import { Card, Tag, Avatar, Button, Divider, Select, Table, Popconfirm, message, ConfigProvider } from 'antd';
 import { CloseOutlined, SaveOutlined, DeleteOutlined } from '@ant-design/icons';
 import 'antd/dist/reset.css';
 import '../CSS/Ant design overide.css';
@@ -87,7 +87,6 @@ const ProfileCard = () => {
                 >
                     <Button
                         type="text"
-                        danger
                         icon={<DeleteOutlined />}
                         disabled={caretakers.length <= 1}
                     />
@@ -133,6 +132,25 @@ const ProfileCard = () => {
                     </div>
                 }
             >
+            </Card>
+                <p>
+                    <strong>Kies een kleur: </strong>
+                    <Select
+                        style={{minWidth: '25%'}}
+                        placeholder="Selecteer een kleur"
+                        options={Object.keys(themes).map((themeKey) => ({
+                            value: themeKey,
+                            label: themeKey === "default"
+                                ? "Standaard"
+                                : themeKey.replace(/_/g, ' ').charAt(0).toUpperCase() + themeKey.replace(/_/g, ' ').slice(1)
+                        }))}
+                        value={theme}
+                        onChange={(value) => setTheme(value)}
+                    />
+                </p>
+
+                <Divider/>
+
                 <p><strong>Begeleiding met toegang: </strong></p>
 
                 {/* Caretakers Table */}
@@ -144,16 +162,15 @@ const ProfileCard = () => {
                     showHeader={false}
                 />
 
-            </Card>
             <Divider/>
 
             <p><strong>Seksualiteit: </strong> <Select
                 style={{minWidth: '25%'}}
                 placeholder="Selecteer seksualiteit"
                 options={[
-                    {value: 'Hetero', label: 'Hetero'},
+                    {value: 'Hetero', label: 'Heteroseksueel'},
                     {value: 'Bi', label: 'Biseksueel'},
-                    {value: 'Gay', label: 'Gay'},
+                    {value: 'Homo', label: 'Homoseksueel'},
                 ]}
             /></p>
 

@@ -2,13 +2,13 @@
 
 const themes = {
     Donker_Thema: {
-        color1: '#121212',
-        color2: '#181818',
+        color5: '#121212',
+        color4: '#181818',
         color3: '#404040',
-        color4: '#282828',
-        color5: '#ffffff',
-        textColorL: '#B3B3B3',
-        textColorD: '#000000'
+        color2: '#282828',
+        color1: '#ffffff',
+        textColorD: '#B3B3B3',
+        textColorL: '#000000'
     },
     default: {
         color1: '#013A63',

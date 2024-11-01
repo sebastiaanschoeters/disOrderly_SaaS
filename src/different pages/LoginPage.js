@@ -1,25 +1,15 @@
 // Import necessary modules
 import React, {useEffect, useState} from 'react';
-import { Form, Input, Button, Checkbox, Card } from 'antd';
+import {Form, Input, Button, Checkbox, Card, ConfigProvider} from 'antd';
 import 'antd/dist/reset.css';
-import '../CSS/Ant design overide.css'
-import themes from "../themes";
+import { antThemeTokens, themes } from '../themes';
 
 const LoginPage = () => {
     const [theme, setTheme] = useState('default');
+    const themeColors = themes[theme] || themes.default;
 
-    // Apply the selected theme colors
-    useEffect(() => {
-        const selectedTheme = themes[theme];
-        document.documentElement.style.setProperty('--color1', selectedTheme.color1);
-        document.documentElement.style.setProperty('--color2', selectedTheme.color2);
-        document.documentElement.style.setProperty('--color3', selectedTheme.color3);
-        document.documentElement.style.setProperty('--color4', selectedTheme.color4);
-        document.documentElement.style.setProperty('--color5', selectedTheme.color5);
-        document.documentElement.style.setProperty('--textColorD', selectedTheme.textColorD);
-        document.documentElement.style.setProperty('--textColorL', selectedTheme.textColorL);
-    }, [theme]);
     return (
+        <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
         <div
             className="login-container"
             style={{
@@ -27,27 +17,11 @@ const LoginPage = () => {
                 justifyContent: 'center',
                 alignItems: 'center',
                 height: '100vh',
+                backgroundColor: themeColors.primary2,
             }}
         >
-            {/* Theme selection dropdown (outside of Routes) */}
-            <div style={{ padding: '10px' }}>
-                <label htmlFor="theme-select">Choose a theme: </label>
-                <select
-                    id="theme-select"
-                    value={theme}
-                    onChange={(e) => setTheme(e.target.value)}
-                >
-                    {Object.keys(themes).map((themeKey) => (
-                        <option key={themeKey} value={themeKey}>
-                            {themeKey === "default"
-                                ? "Standaard"
-                                : themeKey.replace(/_/g, ' ').charAt(0).toUpperCase() + themeKey.replace(/_/g, ' ').slice(1)}
-                        </option>
-                    ))}
-                </select>
-            </div>
 
-            <Card style={{ width: 300 }} title="Login">
+            <Card style={{ width: 300 }} title="Login" bordered={false}>
                 <Form
                     name="loginForm"
                     initialValues={{ remember: true }}
@@ -91,6 +65,7 @@ const LoginPage = () => {
                 </Form>
             </Card>
         </div>
+        </ConfigProvider>
     );
 };
 

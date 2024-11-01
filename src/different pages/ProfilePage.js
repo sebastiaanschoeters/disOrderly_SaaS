@@ -1,36 +1,27 @@
 // Import necessary libraries
 import React, { useEffect, useState } from 'react';
-import { Card, Tag, Avatar, Button, Divider } from 'antd';
+import {Card, Tag, Avatar, Button, Divider, ConfigProvider} from 'antd';
 import { MessageOutlined, CloseOutlined } from '@ant-design/icons';
 import 'antd/dist/reset.css';
-import '../CSS/Ant design overide.css';
-import themes from "../themes";
+import '../CSS/Ant design overide.css'
+import { antThemeTokens, themes } from '../themes';
 
 // The ProfileCard component
 const ProfileCard = () => {
     const [theme, setTheme] = useState('default');
+    const themeColors = themes[theme] || themes.default;
     const [images, setImages] = useState([]); /* get images from database */
 
-    // Apply the selected theme colors
-    useEffect(() => {
-        const selectedTheme = themes[theme];
-        document.documentElement.style.setProperty('--color1', selectedTheme.color1);
-        document.documentElement.style.setProperty('--color2', selectedTheme.color2);
-        document.documentElement.style.setProperty('--color3', selectedTheme.color3);
-        document.documentElement.style.setProperty('--color4', selectedTheme.color4);
-        document.documentElement.style.setProperty('--color5', selectedTheme.color5);
-        document.documentElement.style.setProperty('--textColorD', selectedTheme.textColorD);
-        document.documentElement.style.setProperty('--textColorL', selectedTheme.textColorL);
-    }, [theme]);
-
     return (
-        <div style={{ padding: '20px', position: 'relative', width: '100%' }}>
+        <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
+        <div style={{ padding: '20px', position: 'relative', width: '100%', height: '100vh',backgroundColor: themeColors.primary2 }}>
             {/* Card Container */}
             <Card
                 style={{
                     width: '100%',
                     margin: '0 auto', // Center horizontally
                     paddingTop: '20px',
+                    border: 'none',
                 }}
                 cover={
                     <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -112,6 +103,7 @@ const ProfileCard = () => {
                 Chat met Martin
             </Button>
         </div>
+        </ConfigProvider>
     );
 };
 

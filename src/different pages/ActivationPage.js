@@ -1,12 +1,15 @@
 // ActivationPage.js
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Form, Input, Button, Card, message } from 'antd';
+import { Form, Input, Button, Card, message, ConfigProvider } from 'antd';
+import { antThemeTokens, themes } from '../themes';
 
 const ActivationPage = () => {
     const { activationCode } = useParams(); // Get the activation code from URL
     const [loading, setLoading] = useState(false);
     const [form] = Form.useForm();
+    const [theme, setTheme] = useState('default');
+    const themeColors = themes[theme] || themes.default; // Get theme colors
 
     useEffect(() => {
         if (activationCode) {
@@ -21,33 +24,41 @@ const ActivationPage = () => {
     };
 
     return (
-        <div
-            style={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                height: '100vh',
-                //backgroundColor: '#f0f2f5',
-            }}
-        >
-            <Card style={{ width: 400 }} title="Account Activation">
-                <Form form={form} name="activationForm" onFinish={onFinish}>
-                    <Form.Item
-                        label="Activation Key"
-                        name="activationKey"
-                        rules={[{ required: true, message: 'Please enter your activation key!' }]}
-                    >
-                        <Input />
-                    </Form.Item>
+        <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
+            <div
+                style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    height: '100vh',
+                    backgroundColor: themeColors.primary2, // Set background color from theme
+                }}
+            >
+                <Card
+                    style={{
+                        width: 400,
+                        border: 'none',
+                    }}
+                    title="Account Activation"
+                >
+                    <Form form={form} name="activationForm" onFinish={onFinish}>
+                        <Form.Item
+                            label="Activation Key"
+                            name="activationKey"
+                            rules={[{ required: true, message: 'Please enter your activation key!' }]}
+                        >
+                            <Input />
+                        </Form.Item>
 
-                    <Form.Item>
-                        <Button type="primary" htmlType="submit" loading={loading} style={{ width: '100%' }}>
-                            Activate Account
-                        </Button>
-                    </Form.Item>
-                </Form>
-            </Card>
-        </div>
+                        <Form.Item>
+                            <Button type="primary" htmlType="submit" loading={loading} style={{ width: '100%' }}>
+                                Activate Account
+                            </Button>
+                        </Form.Item>
+                    </Form>
+                </Card>
+            </div>
+        </ConfigProvider>
     );
 };
 

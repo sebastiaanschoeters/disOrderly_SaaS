@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Card, Tag, Avatar, Button, Divider, Select, Popconfirm, message, ConfigProvider } from 'antd';
 import { CloseOutlined, SaveOutlined, DeleteOutlined } from '@ant-design/icons';
 import 'antd/dist/reset.css';
-import '../CSS/Ant design overide.css'
+import '../CSS/Ant design overide.css';
 import { antThemeTokens, themes } from '../themes';
 
 // Initial list of caretakers
@@ -19,7 +19,7 @@ const ProfileCard = () => {
     const [profilePicture, setProfilePicture] = useState('https://example.com/photo.jpg');
     const [caretakers, setCaretakers] = useState(initialCaretakers);
 
-    // Function to handle access level change for caretakers
+    // Update access level for caretakers
     const handleAccessLevelChange = (value, id) => {
         setCaretakers(prevCaretakers =>
             prevCaretakers.map(caretaker =>
@@ -28,7 +28,7 @@ const ProfileCard = () => {
         );
     };
 
-    // Function to delete a caretaker
+    // Remove a caretaker from the list
     const handleDelete = (id) => {
         if (caretakers.length <= 1) {
             message.warning("You must have at least one caretaker.");
@@ -43,9 +43,9 @@ const ProfileCard = () => {
                 padding: '20px',
                 position: 'relative',
                 width: '100%',
-                minHeight: '100vh', // Ensure it covers the full height
+                minHeight: '100vh',
                 backgroundColor: themeColors.primary2,
-                color : themeColors.primary10
+                color: themeColors.primary10,
             }}>
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                     {images.length > 0 ? (
@@ -54,7 +54,13 @@ const ProfileCard = () => {
                                 key={index}
                                 src={image}
                                 alt={`Uploaded ${index}`}
-                                style={{ width: '100px', height: '100px', objectFit: 'cover', margin: '5px' }}
+                                style={{
+                                    width: '100px',
+                                    height: '100px',
+                                    objectFit: 'cover',
+                                    borderRadius: '50%',
+                                    margin: '5px'
+                                }}
                             />
                         ))
                     ) : (
@@ -62,7 +68,7 @@ const ProfileCard = () => {
                             src={profilePicture}
                             alt="Martin's Profile Picture"
                             size={100}
-                            style={{ margin: '20px auto', display: 'block' }}
+                            style={{ margin: '20px auto', display: 'block', objectFit: 'cover' }}
                         />
                     )}
                     <h2 style={{ textAlign: 'center', margin: '0', fontSize: '24px' }}>Martin, 27</h2>
@@ -74,33 +80,35 @@ const ProfileCard = () => {
                     />
                 </div>
 
-                <p>
-                    <strong>Kies een kleur: </strong>
+                <p style={{ display: 'flex', alignItems: 'center', gap: '2%' }}>
+                    <strong style={{ width: '20%', minWidth: '150px' }}>Kies een kleur:</strong>
                     <Select
-                        style={{ minWidth: '25%' }}
+                        style={{ width: '78%' }}
                         placeholder="Selecteer een kleur"
-                        options={Object.keys(themes).map((themeKey) => ({
+                        options={Object.keys(themes).map(themeKey => ({
                             value: themeKey,
-                            label: themeKey.charAt(0).toUpperCase() + themeKey.slice(1)
+                            label: themeKey.charAt(0).toUpperCase() + themeKey.slice(1),
                         }))}
                         value={theme}
-                        onChange={(value) => setTheme(value)}
+                        onChange={value => setTheme(value)}
                     />
                 </p>
 
                 <Divider />
 
-                <p><strong>Begeleiding met toegang: </strong></p>
+                <p><strong>Begeleiding met toegang:</strong></p>
 
-                {/* Caretakers displayed as separate paragraphs */}
                 {caretakers.map(caretaker => (
-                    <div key={caretaker.id} style={{ marginBottom: '20px' }}>
-                        <Avatar src={caretaker.picture} style={{ marginRight: '10px' }} />
-                        <span>{caretaker.name}</span>
+                    <div
+                        key={caretaker.id}
+                        style={{ display: 'flex', alignItems: 'center', gap: '2%', marginBottom: '20px' }}
+                    >
+                        <Avatar src={caretaker.picture} style={{ width: '40px', height: '40px', objectFit: 'cover' }} />
+                        <span style={{ width: '18%' }}>{caretaker.name}</span>
                         <Select
                             value={caretaker.accessLevel}
-                            onChange={(value) => handleAccessLevelChange(value, caretaker.id)}
-                            style={{ width: '50%', marginLeft: '10px' }}
+                            onChange={value => handleAccessLevelChange(value, caretaker.id)}
+                            style={{ width: '50%' }}
                         >
                             <Select.Option value="full">Volledige toegang</Select.Option>
                             <Select.Option value="chat">Gesprekken</Select.Option>
@@ -126,9 +134,10 @@ const ProfileCard = () => {
 
                 <Divider />
 
-                <p><strong>Seksualiteit: </strong>
+                <p style={{ display: 'flex', alignItems: 'center', gap: '2%' }}>
+                    <strong style={{ width: '20%' }}>Seksualiteit:</strong>
                     <Select
-                        style={{ minWidth: '25%' }}
+                        style={{ width: '78%' }}
                         placeholder="Selecteer seksualiteit"
                         options={[
                             { value: 'Hetero', label: 'Heteroseksueel' },
@@ -147,7 +156,7 @@ const ProfileCard = () => {
                         position: 'fixed',
                         bottom: '20px',
                         right: '20px',
-                        zIndex: 1000
+                        zIndex: 1000,
                     }}
                 >
                     Veranderingen opslaan

@@ -14,3 +14,8 @@ Database needs:
         Profile living situation (1)
             Set list of things
         Profile mobility (1) --> boolean
+        Profile Caretakers
+            List of caretakers and their access levels
+        Profile color settings
+        Profile sexuality
+            list of possible to choose from

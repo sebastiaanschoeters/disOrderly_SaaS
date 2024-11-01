@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Form, Input, Button, Card, message, ConfigProvider } from 'antd';
+import '../CSS/Ant design overide.css'
 import { antThemeTokens, themes } from '../themes';
 
 const ActivationPage = () => {
@@ -31,7 +32,8 @@ const ActivationPage = () => {
                     justifyContent: 'center',
                     alignItems: 'center',
                     height: '100vh',
-                    backgroundColor: themeColors.primary2, // Set background color from theme
+                    backgroundColor: themeColors.primary2,
+                    color : themeColors.primary10
                 }}
             >
                 <Card

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Card, Tag, Avatar, Button, Divider, Select, Checkbox, Input, Upload, ConfigProvider } from 'antd';
 import { CloseOutlined, SaveOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons';
 import 'antd/dist/reset.css';
+import '../CSS/Ant design overide.css'
 import { antThemeTokens, themes } from '../themes';
 
 const ProfileCard = () => {
@@ -55,14 +56,6 @@ const ProfileCard = () => {
     return (
         <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
             <div style={{ padding: '20px', position: 'relative', width: '100%', height: '100vh', backgroundColor: themeColors.primary2 }}>
-                <Card
-                    style={{
-                        width: '100%',
-                        margin: '0 auto',
-                        paddingTop: '20px',
-                        border: 'none',
-                    }}
-                    cover={
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                             {images.length > 0 ? (
                                 images.map((image, index) => (
@@ -88,8 +81,7 @@ const ProfileCard = () => {
                                 </Upload>
                             </div>
                         </div>
-                    }
-                >
+
                     <Button
                         type="text"
                         icon={<CloseOutlined />}
@@ -178,7 +170,6 @@ const ProfileCard = () => {
                             { value: 'False', label: 'nee' },
                         ]}
                     /></p>
-                </Card>
 
                 <Button
                     type="primary"

@@ -14,16 +14,15 @@ const ProfileCard = () => {
 
     return (
         <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
-        <div style={{ padding: '20px', position: 'relative', width: '100%', height: '100vh',backgroundColor: themeColors.primary2 }}>
-            {/* Card Container */}
-            <Card
-                style={{
-                    width: '100%',
-                    margin: '0 auto', // Center horizontally
-                    paddingTop: '20px',
-                    border: 'none',
-                }}
-                cover={
+        <div
+            style={{
+                padding: '20px',
+                position: 'relative',
+                width: '100%',
+                height: '100vh',
+                backgroundColor: themeColors.primary2,
+                color : themeColors.primary10
+            }}>
                     <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap' }}>
                         {images.length > 0 ? (
                             images.map((image, index) => (
@@ -43,8 +42,7 @@ const ProfileCard = () => {
                             />
                         )}
                     </div>
-                }
-            >
+
                 {/* Exit button in the top right */}
                 <Button
                     type="text"
@@ -87,7 +85,6 @@ const ProfileCard = () => {
                 <Divider/>
 
                 <p><strong>Kan zich zelfstanding verplaatsen:</strong> Ja</p>
-            </Card>
 
             {/* Chat button in the bottom right */}
             <Button

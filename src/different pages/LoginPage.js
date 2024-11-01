@@ -2,6 +2,7 @@
 import React, {useEffect, useState} from 'react';
 import {Form, Input, Button, Checkbox, Card, ConfigProvider} from 'antd';
 import 'antd/dist/reset.css';
+import '../CSS/Ant design overide.css'
 import { antThemeTokens, themes } from '../themes';
 
 const LoginPage = () => {
@@ -18,6 +19,7 @@ const LoginPage = () => {
                 alignItems: 'center',
                 height: '100vh',
                 backgroundColor: themeColors.primary2,
+                color : themeColors.primary10
             }}
         >
 

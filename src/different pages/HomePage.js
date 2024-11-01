@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import 'antd/dist/reset.css'; // Import Ant Design styles
+import '../CSS/Ant design overide.css'
 
 const HomePage = () => {
 return (

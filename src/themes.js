@@ -1,6 +1,5 @@
-// themes.js
 // theme.js
-import { blue, green, red, purple, orange,yellow, magenta, cyan, gray } from '@ant-design/colors'
+import { blue, green, red, purple, orange, magenta, cyan, greyDark } from '@ant-design/colors';
 
 export const antThemeTokens = (colors) => ({
     colorPrimary: colors.primary7,         // Main color
@@ -8,7 +7,7 @@ export const antThemeTokens = (colors) => ({
     colorPrimaryActive: colors.primary8,   // Active state color
     colorSecondary: colors.primary4,       // Secondary action color
     colorBgBase: colors.primary2,          // Base background color
-    colorBgContainer: colors.primary2,     // Background for containers
+    colorBgContainer: colors.primary1,     // Background for containers
     colorBgLayout: colors.primary2,        // Background for layout
     colorBorder: colors.primary3,          // Default border color
     colorBorderSecondary: colors.primary4,  // Secondary border color
@@ -22,33 +21,7 @@ export const antThemeTokens = (colors) => ({
 });
 
 export const themes = {
-    default: {
-        primary1: blue[0],
-        primary2: blue[1],
-        primary3: blue[2],
-        primary4: blue[3],
-        primary5: blue[4],
-        primary6: blue[5],
-        primary7: blue[6],
-        primary8: blue[7],
-        primary9: blue[8],
-        primary10: blue[9]
-    },
-
-    grijs:{
-        primary1: gray[0],
-        primary2: gray[1],
-        primary3: gray[2],
-        primary4: gray[3],
-        primary5: gray[4],
-        primary6: gray[5],
-        primary7: gray[6],
-        primary8: gray[7],
-        primary9: gray[8],
-        primary10: gray[9],
-    },
-
-    cyaan:{
+    cyaan: {
         primary1: cyan[0],
         primary2: cyan[1],
         primary3: cyan[2],
@@ -61,33 +34,33 @@ export const themes = {
         primary10: cyan[9],
     },
 
-    roos: {
-        primary1: magenta[0],
-        primary2: magenta[1],
-        primary3: magenta[2],
-        primary4: magenta[3],
-        primary5: magenta[4],
-        primary6: magenta[5],
-        primary7: magenta[6],
-        primary8: magenta[7],
-        primary9: magenta[8],
-        primary10: magenta[9],
+    donker: {
+        primary1: greyDark[0],
+        primary2: greyDark[1],
+        primary3: greyDark[2],
+        primary4: greyDark[3],
+        primary5: greyDark[4],
+        primary6: greyDark[5],
+        primary7: greyDark[6],
+        primary8: greyDark[7],
+        primary9: greyDark[8],
+        primary10: greyDark[9],
     },
 
-    geel: {
-        primary1: yellow[0],
-        primary2: yellow[1],
-        primary3: yellow[2],
-        primary4: yellow[3],
-        primary5: yellow[4],
-        primary6: yellow[5],
-        primary7: yellow[6],
-        primary8: yellow[7],
-        primary9: yellow[8],
-        primary10: yellow[9],
+    groen: {
+        primary1: green[0],
+        primary2: green[1],
+        primary3: green[2],
+        primary4: green[3],
+        primary5: green[4],
+        primary6: green[5],
+        primary7: green[6],
+        primary8: green[7],
+        primary9: green[8],
+        primary10: green[9],
     },
 
-    orangje: {
+    oranje: {
         primary1: orange[0],
         primary2: orange[1],
         primary3: orange[2],
@@ -110,10 +83,10 @@ export const themes = {
         primary7: purple[6],
         primary8: purple[7],
         primary9: purple[8],
-        primary10: purple[9]
+        primary10: purple[9],
     },
 
-    rood:{
+    rood: {
         primary1: red[0],
         primary2: red[1],
         primary3: red[2],
@@ -126,18 +99,31 @@ export const themes = {
         primary10: red[9],
     },
 
-    groen: {
-        primary1: green[0],
-        primary2: green[1],
-        primary3: green[2],
-        primary4: green[3],
-        primary5: green[4],
-        primary6: green[5],
-        primary7: green[6],
-        primary8: green[7],
-        primary9: green[8],
-        primary10: green[9],
-    }
+    roos: {
+        primary1: magenta[0],
+        primary2: magenta[1],
+        primary3: magenta[2],
+        primary4: magenta[3],
+        primary5: magenta[4],
+        primary6: magenta[5],
+        primary7: magenta[6],
+        primary8: magenta[7],
+        primary9: magenta[8],
+        primary10: magenta[9],
+    },
+
+    default: {
+        primary1: blue[0],
+        primary2: blue[1],
+        primary3: blue[2],
+        primary4: blue[3],
+        primary5: blue[4],
+        primary6: blue[5],
+        primary7: blue[6],
+        primary8: blue[7],
+        primary9: blue[8],
+        primary10: blue[9],
+    },
 };
 
 export default themes;

@@ -1,4 +1,10 @@
+body, p {
+    font-size: 1rem; /* Default base font size */
+}
 
+h1 {
+    font-size: 2rem; /* Scales with base font size */
+}
 
 .ant-tag {
     border-radius: 10px;

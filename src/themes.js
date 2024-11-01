@@ -1,86 +1,77 @@
 // themes.js
+// theme.js
+import { blue, green, red, purple, orange,yellow, magenta, cyan, gray} from '@ant-design/colors'
 
-const themes = {
-    Donker_Thema: {
-        color5: '#121212',
-        color4: '#181818',
-        color3: '#404040',
-        color2: '#282828',
-        color1: '#ffffff',
-        textColorD: '#B3B3B3',
-        textColorL: '#000000'
-    },
+export const antThemeTokens = (colors) => ({
+    colorPrimary: colors.primary6,         // Main color
+    colorPrimaryHover: colors.primary5,    // Hover effect color
+    colorPrimaryActive: colors.primary7,   // Active state color
+    colorSecondary: colors.primary4,       // Secondary action color
+    colorBgBase: colors.primary2,          // Base background color
+    colorBgContainer: colors.primary2,     // Background for containers
+    colorBgLayout: colors.primary2,        // Background for layout
+    colorBorder: colors.primary3,          // Default border color
+    colorBorderSecondary: colors.primary4,  // Secondary border color
+    colorText: colors.primary10,           // Main text color
+    colorTextLight: colors.primary1,       // Light text color
+    colorTextSecondary: colors.primary8,   // Secondary text color
+    colorTextDescription: colors.primary6, // Text color for descriptions
+    colorTextPlaceholder: colors.primary6, // Placeholder text color
+    colorTextDisabled: colors.primary3,    // Disabled text color
+    colorTextHeading: colors.primary9,     // Text color for headings
+});
+
+export const themes = {
     default: {
-        color1: '#013A63',
-        color2: '#2A6F97',
-        color3: '#468FAF',
-        color4: '#61A5C2',
-        color5: '#89C2D9',
-        textColorL: '#e6ebef',
-        textColorD: '#00060a'
+        primary1: blue[0],
+        primary2: blue[1],
+        primary3: blue[2],
+        primary4: blue[3],
+        primary5: blue[4],
+        primary6: blue[5],
+        primary7: blue[6],
+        primary8: blue[7],
+        primary9: blue[8],
+        primary10: blue[9]
     },
-    Geel: {
-        color1: '#666600',
-        color2: '#8f8f00',
-        color3: '#cccc00',
-        color4: '#d6d633',
-        color5: '#e0e066',
-        textColorL: '#ffffe6',
-        textColorD: '#191900'
+
+    paars: {
+        primary1: purple[0],
+        primary2: purple[1],
+        primary3: purple[2],
+        primary4: purple[3],
+        primary5: purple[4],
+        primary6: purple[5],
+        primary7: purple[6],
+        primary8: purple[7],
+        primary9: purple[8],
+        primary10: purple[9]
     },
-    Paars: {
-        color1: '#42405c',
-        color2: '#8380b8',
-        color3: '#a4a0e6',
-        color4: '#b6b3eb',
-        color5: '#d2d0f3',
-        textColorL: '#f6f6fd',
-        textColorD: '#101017'
+
+    rood:{
+        primary1: red[0],
+        primary2: red[1],
+        primary3: red[2],
+        primary4: red[3],
+        primary5: red[4],
+        primary6: red[5],
+        primary7: red[6],
+        primary8: red[7],
+        primary9: red[8],
+        primary10: red[9],
     },
-    Roos: {
-        color1: '#b02e5f',
-        color2: '#fb4187',
-        color3: '#fc679f',
-        color4: '#fd8db7',
-        color5: '#fdb3cf',
-        textColorL: '#ffecf3',
-        textColorD: '#19060d'
-    },
-    Rood: {
-        color1: '#661618',
-        color2: '#a22326',
-        color3: '#cb2c30',
-        color4: '#d55659',
-        color5: '#e08083',
-        textColorL: '#faeaea',
-        textColorD: '#140405'
-    },
-    Cyaan: {
-        color1: '#024d4b',
-        color2: '#027b78',
-        color3: '#039a96',
-        color4: '#35aeab',
-        color5: '#81cdcb',
-        textColorL: '#e6f5f5',
-        textColorD: '#000f0f'
-    },
-    Groen: {
-        color1: '#233b2c',
-        color2: '#3d674d',
-        color3: '#4e8463',
-        color4: '#689e7d',
-        color5: '#9abea8',
-        textColorL: '#eef4f1',
-        textColorD: '#090f0b'
-    },
-    Oranje: {
-        color1: '#804100',
-        color2: '#e67400',
-        color3: '#ff8100',
-        color4: '#ff9a33',
-        color5: '#ffb366',
-        textColorL: '#fff2e6',
-        textColorD: '#190d00'
+
+    groen: {
+        primary1: green[0],
+        primary2: green[1],
+        primary3: green[2],
+        primary4: green[3],
+        primary5: green[4],
+        primary6: green[5],
+        primary7: green[6],
+        primary8: green[7],
+        primary9: green[8],
+        primary10: green[9],
     }
 };
 

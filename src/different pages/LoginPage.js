@@ -7,7 +7,7 @@ import { antThemeTokens, themes } from '../themes';
 
 const LoginPage = () => {
     const [theme, setTheme] = useState('default');
-    const themeColors = themes[theme] || themes.default;
+    const themeColors = themes[theme] || themes.blauw;
 
     return (
         <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>

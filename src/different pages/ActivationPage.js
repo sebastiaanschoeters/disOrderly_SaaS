@@ -9,8 +9,8 @@ const ActivationPage = () => {
     const { activationCode } = useParams(); // Get the activation code from URL
     const [loading, setLoading] = useState(false);
     const [form] = Form.useForm();
-    const [theme, setTheme] = useState('default');
-    const themeColors = themes[theme] || themes.default; // Get theme colors
+    const [theme, setTheme] = useState('blauw');
+    const themeColors = themes[theme] || themes.blauw; // Get theme colors
 
     useEffect(() => {
         if (activationCode) {

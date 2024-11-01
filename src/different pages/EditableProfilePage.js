@@ -6,8 +6,8 @@ import '../CSS/Ant design overide.css'
 import { antThemeTokens, themes } from '../themes';
 
 const ProfileCard = () => {
-    const [theme, setTheme] = useState('default');
-    const themeColors = themes[theme] || themes.default; // Get theme colors
+    const [theme, setTheme] = useState('blauw');
+    const themeColors = themes[theme] || themes.blauw; // Get theme colors
     const [images, setImages] = useState([]);
     const [profilePicture, setProfilePicture] = useState('https://example.com/photo.jpg'); // Initial profile picture URL
     const [location, setLocation] = useState(null);

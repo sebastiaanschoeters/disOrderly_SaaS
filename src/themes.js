@@ -1,5 +1,5 @@
 // theme.js
-import { blue, green, red, purple, orange, magenta, cyan, greyDark, lime, gold } from '@ant-design/colors';
+import { blue, cyan, gold, green, greyDark, lime, magenta, orange, purple, red } from '@ant-design/colors';
 
 export const antThemeTokens = (colors) => ({
     colorPrimary: colors.primary7,         // Main color
@@ -21,6 +21,19 @@ export const antThemeTokens = (colors) => ({
 });
 
 export const themes = {
+    blauw: {
+        primary1: blue[0],
+        primary2: blue[1],
+        primary3: blue[2],
+        primary4: blue[3],
+        primary5: blue[4],
+        primary6: blue[5],
+        primary7: blue[6],
+        primary8: blue[7],
+        primary9: blue[8],
+        primary10: blue[9],
+    },
+
     cyaan: {
         primary1: cyan[0],
         primary2: cyan[1],
@@ -47,17 +60,17 @@ export const themes = {
         primary10: gold[9],
     },
 
-    limoen: {
-        primary1: lime[0],
-        primary2: lime[1],
-        primary3: lime[2],
-        primary4: lime[3],
-        primary5: lime[4],
-        primary6: lime[5],
-        primary7: lime[6],
-        primary8: lime[7],
-        primary9: lime[8],
-        primary10: lime[9]
+    groen: {
+        primary1: green[0],
+        primary2: green[1],
+        primary3: green[2],
+        primary4: green[3],
+        primary5: green[4],
+        primary6: green[5],
+        primary7: green[6],
+        primary8: green[7],
+        primary9: green[8],
+        primary10: green[9],
     },
 
     donker: {
@@ -73,17 +86,17 @@ export const themes = {
         primary10: greyDark[9],
     },
 
-    groen: {
-        primary1: green[0],
-        primary2: green[1],
-        primary3: green[2],
-        primary4: green[3],
-        primary5: green[4],
-        primary6: green[5],
-        primary7: green[6],
-        primary8: green[7],
-        primary9: green[8],
-        primary10: green[9],
+    limoen: {
+        primary1: lime[0],
+        primary2: lime[1],
+        primary3: lime[2],
+        primary4: lime[3],
+        primary5: lime[4],
+        primary6: lime[5],
+        primary7: lime[6],
+        primary8: lime[7],
+        primary9: lime[8],
+        primary10: lime[9],
     },
 
     oranje: {
@@ -112,19 +125,6 @@ export const themes = {
         primary10: purple[9],
     },
 
-    rood: {
-        primary1: red[0],
-        primary2: red[1],
-        primary3: red[2],
-        primary4: red[3],
-        primary5: red[4],
-        primary6: red[5],
-        primary7: red[6],
-        primary8: red[7],
-        primary9: red[8],
-        primary10: red[9],
-    },
-
     roos: {
         primary1: magenta[0],
         primary2: magenta[1],
@@ -138,17 +138,17 @@ export const themes = {
         primary10: magenta[9],
     },
 
-    default: {
-        primary1: blue[0],
-        primary2: blue[1],
-        primary3: blue[2],
-        primary4: blue[3],
-        primary5: blue[4],
-        primary6: blue[5],
-        primary7: blue[6],
-        primary8: blue[7],
-        primary9: blue[8],
-        primary10: blue[9],
+    rood: {
+        primary1: red[0],
+        primary2: red[1],
+        primary3: red[2],
+        primary4: red[3],
+        primary5: red[4],
+        primary6: red[5],
+        primary7: red[6],
+        primary8: red[7],
+        primary9: red[8],
+        primary10: red[9],
     },
 };
 

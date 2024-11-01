@@ -8,8 +8,8 @@ import { antThemeTokens, themes } from '../themes';
 
 // The ProfileCard component
 const ProfileCard = () => {
-    const [theme, setTheme] = useState('default');
-    const themeColors = themes[theme] || themes.default;
+    const [theme, setTheme] = useState('blauw');
+    const themeColors = themes[theme] || themes.blauw;
     const [images, setImages] = useState([]); /* get images from database */
 
     return (

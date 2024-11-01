@@ -13,8 +13,8 @@ const initialCaretakers = [
 ];
 
 const ProfileCard = () => {
-    const [theme, setTheme] = useState('default');
-    const themeColors = themes[theme] || themes.default;
+    const [theme, setTheme] = useState('blauw');
+    const themeColors = themes[theme] || themes.blauw;
     const [images, setImages] = useState([]);
     const [profilePicture, setProfilePicture] = useState('https://example.com/photo.jpg');
     const [caretakers, setCaretakers] = useState(initialCaretakers);

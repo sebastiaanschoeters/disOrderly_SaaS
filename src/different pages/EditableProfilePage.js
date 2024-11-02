@@ -1,15 +1,35 @@
-import React, { useEffect, useState } from 'react';
-import { Card, Tag, Avatar, Button, Divider, Select, Checkbox, Input, Upload, ConfigProvider } from 'antd';
-import { CloseOutlined, SaveOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons';
+import React, { useState } from 'react';
+import {
+    Card,
+    Tag,
+    Avatar,
+    Button,
+    Divider,
+    Select,
+    Checkbox,
+    Upload,
+    ConfigProvider
+} from 'antd';
+import {
+    CloseOutlined,
+    SaveOutlined,
+    UploadOutlined,
+    EnvironmentOutlined,
+    UserOutlined,
+    HeartOutlined,
+    StarOutlined,
+    HomeOutlined,
+    CarOutlined
+} from '@ant-design/icons';
 import 'antd/dist/reset.css';
-import '../CSS/Ant design overide.css'
+import '../CSS/Ant design overide.css';
 import { antThemeTokens, themes } from '../themes';
 
 const ProfileCard = () => {
     const [theme, setTheme] = useState('blauw');
-    const themeColors = themes[theme] || themes.blauw; // Get theme colors
+    const themeColors = themes[theme] || themes.blauw;
     const [images, setImages] = useState([]);
-    const [profilePicture, setProfilePicture] = useState('https://example.com/photo.jpg'); // Initial profile picture URL
+    const [profilePicture, setProfilePicture] = useState('https://example.com/photo.jpg');
     const [location, setLocation] = useState(null);
     const [locationOptions, setLocationOptions] = useState([
         { value: 'Leuven', label: 'Leuven' },
@@ -19,8 +39,8 @@ const ProfileCard = () => {
     ]);
     const [inputValue, setInputValue] = useState('');
     const [interests, setInterests] = useState(['Voetbal', 'Wandelen', 'Gezelschapsspellen spelen', 'Iets gaan drinken met vrienden']);
-    const [selectedInterests, setSelectedInterests] = useState([]); // Tracks selected interests
-    const [newInterest, setNewInterest] = useState(''); // Tracks the new interest input
+    const [selectedInterests, setSelectedInterests] = useState([]);
+    const [newInterest, setNewInterest] = useState('');
 
     const handleLocationInputKeyDown = (e) => {
         if (e.key === 'Enter' && inputValue) {
@@ -42,13 +62,9 @@ const ProfileCard = () => {
         setSelectedInterests(value);
     };
 
-    const handleRemoveInterest = (interest) => {
-        setSelectedInterests(selectedInterests.filter(i => i !== interest));
-    };
-
     const handleProfilePictureChange = ({ file }) => {
         if (file.status === 'done') {
-            const imageUrl = URL.createObjectURL(file.originFileObj); // Create a temporary URL for the image
+            const imageUrl = URL.createObjectURL(file.originFileObj);
             setProfilePicture(imageUrl);
         }
     };
@@ -62,14 +78,14 @@ const ProfileCard = () => {
                 height: '100vh',
                 backgroundColor: themeColors.primary2
             }}>
-                <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                     {images.length > 0 ? (
                         images.map((image, index) => (
                             <img
                                 key={index}
                                 src={image}
                                 alt={`Uploaded ${index}`}
-                                style={{width: '100px', height: '100px', objectFit: 'cover', margin: '5px'}}
+                                style={{ width: '100px', height: '100px', objectFit: 'cover', margin: '5px' }}
                             />
                         ))
                     ) : (
@@ -77,11 +93,11 @@ const ProfileCard = () => {
                             src={profilePicture}
                             alt="Martin's Profile Picture"
                             size={100}
-                            style={{margin: '20px auto', display: 'block'}}
+                            style={{ margin: '20px auto', display: 'block' }}
                         />
                     )}
                     {/* Profile Picture Upload */}
-                    <div style={{ marginTop: '10px', marginBottom: '20px' }}> {/* Add marginBottom here */}
+                    <div style={{ marginTop: '10px', marginBottom: '20px' }}>
                         <Upload showUploadList={false} onChange={handleProfilePictureChange}>
                             <Button icon={<UploadOutlined />}>Kies nieuwe profiel foto</Button>
                         </Upload>
@@ -90,21 +106,21 @@ const ProfileCard = () => {
 
                 <Button
                     type="text"
-                    icon={<CloseOutlined/>}
-                    style={{position: 'absolute', top: '10px', right: '10px'}}
+                    icon={<CloseOutlined />}
+                    style={{ position: 'absolute', top: '10px', right: '10px' }}
                 />
 
-                <h2 style={{textAlign: 'center', margin: '0', fontSize: '24px'}}>Martin, 27</h2>
+                <h2 style={{ textAlign: 'center', margin: '0', fontSize: '24px' }}>Martin, 27</h2>
 
-                <Divider/>
+                <Divider />
 
-                <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
-                    <strong style={{width: '20%', minWidth: '150px'}}>Locatie: </strong>
+                <p style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '2%' }}>
+                    <strong style={{ width: '20%', minWidth: '150px' }}><EnvironmentOutlined /> Locatie: </strong>
                     <Select
                         showSearch
                         allowClear
                         placeholder="Selecteer locatie of voeg toe"
-                        style={{flex: 1, minWidth: '200px'}}
+                        style={{ flex: 1, minWidth: '200px' }}
                         value={location}
                         onChange={(value) => setLocation(value)}
                         options={locationOptions}
@@ -113,33 +129,33 @@ const ProfileCard = () => {
                     />
                 </p>
 
-                <Divider/>
+                <Divider />
 
-                <p style={{display: 'flex', alignItems: 'center', width: '100%', gap:'2%'}}>
-                    <strong style={{width: '20%', minWidth: '150px'}}>Geslacht: </strong>
+                <p style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '2%' }}>
+                    <strong style={{ width: '20%', minWidth: '150px' }}><UserOutlined /> Geslacht: </strong>
                     <Select
-                        style={{flex: 1, minWidth: '200px'}}
+                        style={{ flex: 1, minWidth: '200px' }}
                         placeholder="Selecteer geslacht"
                         options={[
-                            {value: 'Man', label: 'Man'},
-                            {value: 'Women', label: 'Vrouw'},
-                            {value: 'Non-binary', label: 'Non-binair'},
+                            { value: 'Man', label: 'Man' },
+                            { value: 'Vrouw', label: 'Vrouw' },
+                            { value: 'Non-binary', label: 'Non-binair' },
                         ]}
                     />
                 </p>
 
-                <Divider/>
+                <Divider />
 
-                <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
-                    <strong style={{width: '20%', minWidth: '150px'}}>Interesses:</strong>
+                <p style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '2%' }}>
+                    <strong style={{ width: '20%', minWidth: '150px' }}><StarOutlined /> Interesses:</strong>
                     <Select
                         mode="multiple"
                         allowClear
                         placeholder="Selecteer interesses of voeg toe"
-                        style={{flex: 1, minWidth: '200px', marginBottom: '10px'}}
+                        style={{ flex: 1, minWidth: '200px', marginBottom: '10px' }}
                         value={selectedInterests}
                         onChange={handleInterestSelectChange}
-                        options={interests.map(interest => ({value: interest, label: interest}))}
+                        options={interests.map(interest => ({ value: interest, label: interest }))}
                         onSearch={(value) => setNewInterest(value)}
                         onInputKeyDown={(e) => {
                             if (e.key === 'Enter') {
@@ -149,58 +165,57 @@ const ProfileCard = () => {
                     />
                 </p>
 
-                <Divider/>
+                <Divider />
 
-                <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
-                    <strong style={{width: '20%', minWidth: '150px'}}>Is op zoek naar:</strong>
+                <p style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '2%' }}>
+                    <strong style={{ width: '20%', minWidth: '150px' }}><HeartOutlined /> Is op zoek naar:</strong>
                     <div style={{
                         flex: 1,
                         display: 'flex',
                         flexDirection: 'column',
                         gap: '10px',
                         minWidth: '200px'
-                    }}> {/* Changed flexDirection to column */}
-                        <Checkbox style={{width: 'auto'}}>Vrienden</Checkbox>
-                        <Checkbox style={{width: 'auto'}}>Relatie</Checkbox>
-                        <Checkbox style={{width: 'auto'}}>Intieme ontmoeting</Checkbox>
+                    }}>
+                        <Checkbox>Vrienden</Checkbox>
+                        <Checkbox>Relatie</Checkbox>
+                        <Checkbox>Intieme ontmoeting</Checkbox>
                     </div>
                 </p>
 
+                <Divider />
 
-                <Divider/>
-
-                <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
-                    <strong style={{width: '20%', minWidth: '150px'}}>Woonsituatie:</strong>
+                <p style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '2%' }}>
+                    <strong style={{ width: '20%', minWidth: '150px' }}><HomeOutlined /> Woonsituatie:</strong>
                     <Select
                         placeholder="Selecteer jouw woonsituatie"
-                        style={{flex: 1, minWidth: '200px'}}
+                        style={{ flex: 1, minWidth: '200px' }}
                         options={[
-                            {value: 'Alone', label: 'Woont alleen'},
-                            {value: 'Guided', label: 'Begeleid wonen'},
-                            {value: 'Parents', label: 'Bij ouders'},
-                            {value: 'group', label: 'In groepsverband'},
-                            {value: 'instance', label: 'zorginstelling'},
+                            { value: 'Alone', label: 'Woont alleen' },
+                            { value: 'Guided', label: 'Begeleid wonen' },
+                            { value: 'Parents', label: 'Bij ouders' },
+                            { value: 'group', label: 'In groepsverband' },
+                            { value: 'instance', label: 'zorginstelling' },
                         ]}
                     />
                 </p>
 
-                <Divider/>
+                <Divider />
 
-                <p style={{display: 'flex', alignItems: 'center', width: '100%', gap:'2%'}}>
-                    <strong style={{width: '20%', minWidth: '150px'}}>Kan zich zelfstanding verplaatsen:</strong>
+                <p style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '2%' }}>
+                    <strong style={{ width: '20%', minWidth: '150px' }}><CarOutlined /> Kan zich zelfstanding verplaatsen:</strong>
                     <Select
-                        style={{flex: 1, minWidth: '200px'}}
+                        style={{ flex: 1, minWidth: '200px' }}
                         defaultValue="False"
                         options={[
-                            {value: 'True', label: 'ja'},
-                            {value: 'False', label: 'nee'},
+                            { value: 'True', label: 'ja' },
+                            { value: 'False', label: 'nee' },
                         ]}
                     />
                 </p>
 
                 <Button
                     type="primary"
-                    icon={<SaveOutlined/>}
+                    icon={<SaveOutlined />}
                     style={{
                         position: 'fixed',
                         bottom: '20px',
@@ -211,7 +226,7 @@ const ProfileCard = () => {
                     Veranderingen opslaan
                 </Button>
             </div>
-        </ ConfigProvider>
+        </ConfigProvider>
     );
 };
 

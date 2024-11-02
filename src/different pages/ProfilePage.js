@@ -1,9 +1,9 @@
 // Import necessary libraries
-import React, { useEffect, useState } from 'react';
-import {Card, Tag, Avatar, Button, Divider, ConfigProvider} from 'antd';
-import { MessageOutlined, CloseOutlined } from '@ant-design/icons';
+import React, { useState } from 'react';
+import { Card, Tag, Avatar, Button, Divider, ConfigProvider } from 'antd';
+import { MessageOutlined, CloseOutlined, EnvironmentOutlined, UserOutlined, HeartOutlined, StarOutlined, HomeOutlined, CarOutlined } from '@ant-design/icons';
 import 'antd/dist/reset.css';
-import '../CSS/Ant design overide.css'
+import '../CSS/Ant design overide.css';
 import { antThemeTokens, themes } from '../themes';
 
 // The ProfileCard component
@@ -23,14 +23,14 @@ const ProfileCard = () => {
                     backgroundColor: themeColors.primary2,
                     color: themeColors.primary10
                 }}>
-                <div style={{display: 'flex', justifyContent: 'center', flexWrap: 'wrap'}}>
+                <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap' }}>
                     {images.length > 0 ? (
                         images.map((image, index) => (
                             <img
                                 key={index}
                                 src={image}
                                 alt={`Uploaded ${index}`}
-                                style={{width: '100px', height: '100px', objectFit: 'cover', margin: '5px'}}
+                                style={{ width: '100px', height: '100px', objectFit: 'cover', margin: '5px' }}
                             />
                         ))
                     ) : (
@@ -38,7 +38,7 @@ const ProfileCard = () => {
                             src="https://example.com/photo.jpg"
                             alt="Martin's Profile Picture"
                             size={100}
-                            style={{margin: '20px auto', display: 'block'}}
+                            style={{ margin: '20px auto', display: 'block' }}
                         />
                     )}
                 </div>
@@ -46,31 +46,31 @@ const ProfileCard = () => {
                 {/* Exit button in the top right */}
                 <Button
                     type="text"
-                    icon={<CloseOutlined/>}
-                    style={{position: 'absolute', top: '10px', right: '10px'}}
+                    icon={<CloseOutlined />}
+                    style={{ position: 'absolute', top: '10px', right: '10px' }}
                 />
 
-                <h2 style={{textAlign: 'center', margin: '0', fontSize: '24px'}}>Martin, 27</h2>
+                <h2 style={{ textAlign: 'center', margin: '0', fontSize: '24px' }}>Martin, 27</h2>
 
-                <Divider/>
+                <Divider />
 
-                <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
-                    <strong style={{width: '20%', minWidth: '150px'}}>Locatie: </strong>
+                <p style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '2%' }}>
+                    <strong style={{ width: '20%', minWidth: '150px' }}><EnvironmentOutlined /> Locatie: </strong>
                     Leuven
                 </p>
 
-                <Divider/>
+                <Divider />
 
-                <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
-                    <strong style={{width: '20%', minWidth: '150px'}}>Geslacht: </strong>
+                <p style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '2%' }}>
+                    <strong style={{ width: '20%', minWidth: '150px' }}><UserOutlined /> Geslacht: </strong>
                     Man
                 </p>
 
-                <Divider/>
+                <Divider />
 
-                <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
-                    <strong style={{width: '20%', minWidth: '150px'}}>Interesses: </strong>
-                    <div style={{display:'flex', flexWrap: 'wrap', gap: '2px'}}>
+                <p style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '2%' }}>
+                    <strong style={{ width: '20%', minWidth: '150px' }}><StarOutlined /> Interesses: </strong>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2px' }}>
                         <Tag>Voetbal</Tag>
                         <Tag>Wandelen</Tag>
                         <Tag>Gezelschapsspellen spelen</Tag>
@@ -78,35 +78,34 @@ const ProfileCard = () => {
                     </div>
                 </p>
 
+                <Divider />
 
-                <Divider/>
-
-                <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
-                    <strong style={{width: '20%', minWidth: '150px'}}>Is op zoek naar: </strong>
-                    <div style={{display:'flex', flexWrap: 'wrap', gap: '2px'}}>
+                <p style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '2%' }}>
+                    <strong style={{ width: '20%', minWidth: '150px' }}><HeartOutlined /> Is op zoek naar: </strong>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2px' }}>
                         <Tag>Vrienden</Tag>
                         <Tag>Relatie</Tag>
                     </div>
                 </p>
 
-                <Divider/>
+                <Divider />
 
-                <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
-                    <strong style={{width: '20%', minWidth: '150px'}}>Woonsituatie: </strong>
+                <p style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '2%' }}>
+                    <strong style={{ width: '20%', minWidth: '150px' }}><HomeOutlined /> Woonsituatie: </strong>
                     Woont alleen
                 </p>
 
-                <Divider/>
+                <Divider />
 
-                <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
-                    <strong style={{width: '20%', minWidth: '150px'}}>Kan zich zelfstandig verplaatsen: </strong>
+                <p style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '2%' }}>
+                    <strong style={{ width: '20%', minWidth: '150px' }}><CarOutlined /> Kan zich zelfstandig verplaatsen: </strong>
                     Ja
                 </p>
 
                 {/* Chat button in the bottom right */}
                 <Button
                     type="primary"
-                    icon={<MessageOutlined/>}
+                    icon={<MessageOutlined />}
                     style={{
                         position: 'fixed',
                         bottom: '20px',

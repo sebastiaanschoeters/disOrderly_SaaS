@@ -1,6 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { Card, Tag, Avatar, Button, Divider, Select, Popconfirm, message, ConfigProvider, Switch } from 'antd';
-import { CloseOutlined, SaveOutlined, DeleteOutlined } from '@ant-design/icons';
+import {
+    CloseOutlined,
+    SaveOutlined,
+    DeleteOutlined,
+    CaretDownOutlined,
+    UserSwitchOutlined,
+    BgColorsOutlined,
+    HeartOutlined
+} from '@ant-design/icons';
 import 'antd/dist/reset.css';
 import '../CSS/Ant design overide.css';
 import { antThemeTokens, themes } from '../themes';
@@ -14,7 +22,7 @@ const initialCaretakers = [
 
 const ProfileCard = () => {
     const [theme, setTheme] = useState('blauw');
-    const [isDarkMode, setIsDarkMode] = useState(false); // State for light/dark toggle
+    const [isDarkMode, setIsDarkMode] = useState(false);
     const themeKey = isDarkMode ? `${theme}_donker` : theme;
     const themeColors = themes[themeKey] || themes.blauw;
     const [images, setImages] = useState([]);
@@ -88,7 +96,7 @@ const ProfileCard = () => {
                 </div>
 
                 <p style={{ display: 'flex', alignItems: 'center', gap: '2%' }}>
-                    <strong style={{ width: '20%', minWidth: '150px' }}>Kies een kleur:</strong>
+                    <strong style={{ width: '20%', minWidth: '150px' }}><BgColorsOutlined /> Kies een kleur:</strong>
                     <Select
                         style={{ width: '58%' }}
                         placeholder="Selecteer een kleur"
@@ -110,7 +118,7 @@ const ProfileCard = () => {
 
                 <Divider />
 
-                <p><strong>Begeleiding met toegang:</strong></p>
+                <p><strong><UserSwitchOutlined /> Begeleiding met toegang:</strong></p>
 
                 {caretakers.map(caretaker => (
                     <div
@@ -123,6 +131,7 @@ const ProfileCard = () => {
                             value={caretaker.accessLevel}
                             onChange={value => handleAccessLevelChange(value, caretaker.id)}
                             style={{ width: '50%' }}
+                            suffixIcon={<CaretDownOutlined />}
                         >
                             <Select.Option value="full">Volledige toegang</Select.Option>
                             <Select.Option value="chat">Gesprekken</Select.Option>
@@ -149,7 +158,7 @@ const ProfileCard = () => {
                 <Divider />
 
                 <p style={{ display: 'flex', alignItems: 'center', gap: '2%' }}>
-                    <strong style={{ width: '20%' }}>Seksualiteit:</strong>
+                    <strong style={{ width: '20%' }}><HeartOutlined /> Seksualiteit:</strong>
                     <Select
                         style={{ width: '78%' }}
                         placeholder="Selecteer seksualiteit"

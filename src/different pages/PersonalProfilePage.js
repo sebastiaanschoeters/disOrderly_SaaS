@@ -130,10 +130,10 @@ const ProfileCard = () => {
                             <Select.Option value="profile">Publiek profiel</Select.Option>
                         </Select>
                         <Popconfirm
-                            title="Are you sure to delete this caretaker?"
+                            title="Ben je zeker dat je deze begeleider wilt verwijderen?"
                             onConfirm={() => handleDelete(caretaker.id)}
-                            okText="Yes"
-                            cancelText="No"
+                            okText="Ja"
+                            cancelText="Nee"
                             disabled={caretakers.length <= 1}
                         >
                             <Button

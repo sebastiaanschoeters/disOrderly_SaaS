@@ -8,8 +8,8 @@ import { useNavigate } from 'react-router-dom';
 
 
 const HomePage = () => {
-    const [theme, setTheme] = useState('default');
-    const themeColors = themes[theme] || themes.default;
+    const [theme, setTheme] = useState('blauw');
+    const themeColors = themes[theme] || themes.blauw; // Get theme colors
     const navigate = useNavigate();
 
 

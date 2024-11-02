@@ -55,7 +55,7 @@ export const themes = {
         primary10: blue[9],
     },
 
-    Blauw_donker:{
+    blauw_donker:{
         primary1: blueDark[0],
         primary2: blueDark[1],
         primary3: blueDark[2],
@@ -289,7 +289,7 @@ export const themes = {
         primary10: red[9],
     },
 
-    Rood_donker: {
+    rood_donker: {
         primary1: redDark[0],
         primary2: redDark[1],
         primary3: redDark[2],

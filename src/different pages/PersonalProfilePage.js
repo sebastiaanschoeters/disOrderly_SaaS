@@ -86,7 +86,7 @@ const ProfileCard = () => {
                             style={{ margin: '20px auto', display: 'block', objectFit: 'cover' }}
                         />
                     )}
-                    <h2 style={{ textAlign: 'center', margin: '0', fontSize: '24px' }}>Martin, 27</h2>
+                    <h2 style={{ textAlign: 'center', margin: '0' }}>Martin, 27</h2>
                     <Divider />
                     <Button
                         type="text"
@@ -95,43 +95,45 @@ const ProfileCard = () => {
                     />
                 </div>
 
-                <p style={{ display: 'flex', alignItems: 'center', gap: '2%' }}>
-                    <strong style={{ width: '20%', minWidth: '150px' }}><BgColorsOutlined /> Kies een kleur:</strong>
-                    <Select
-                        style={{ width: '58%' }}
-                        placeholder="Selecteer een kleur"
-                        options={Object.keys(themes).filter(key => !key.endsWith('_donker')).map(themeKey => ({
-                            value: themeKey,
-                            label: themeKey.charAt(0).toUpperCase() + themeKey.slice(1),
-                        }))}
-                        value={theme}
-                        onChange={value => setTheme(value)}
-                    />
-                    <Switch
-                        checked={isDarkMode}
-                        onChange={handleThemeToggle}
-                        checkedChildren="Donker"
-                        unCheckedChildren="Licht"
-                        style={{ marginLeft: '10px' }}
-                    />
+                <p style={{display: 'flex', alignItems: 'center', gap: '2%'}}>
+                    <strong style={{width: '20%', minWidth: '150px'}}><BgColorsOutlined/> Kies een kleur:</strong>
+                    <div style={{display: 'flex', flexGrow: 1, alignItems: 'center'}}>
+                        <Select
+                            style={{flexGrow: 1, marginRight: '10px'}} // Allow Select to fill the remaining space
+                            placeholder="Selecteer een kleur"
+                            options={Object.keys(themes).filter(key => !key.endsWith('_donker')).map(themeKey => ({
+                                value: themeKey,
+                                label: themeKey.charAt(0).toUpperCase() + themeKey.slice(1),
+                            }))}
+                            value={theme}
+                            onChange={value => setTheme(value)}
+                        />
+                        <Switch
+                            checked={isDarkMode}
+                            onChange={handleThemeToggle}
+                            checkedChildren={<span>Donker</span>}
+                            unCheckedChildren={<span>Licht</span>}
+                            style={{marginLeft: 'auto'}}
+                        />
+                    </div>
                 </p>
 
-                <Divider />
 
-                <p><strong><UserSwitchOutlined /> Begeleiding met toegang:</strong></p>
+                <Divider/>
+
+                <p><strong><UserSwitchOutlined/> Begeleiding met toegang:</strong></p>
 
                 {caretakers.map(caretaker => (
                     <div
                         key={caretaker.id}
-                        style={{ display: 'flex', alignItems: 'center', gap: '2%', marginBottom: '20px' }}
+                        style={{display: 'flex', alignItems: 'center', gap: '2%', marginBottom: '20px'}}
                     >
-                        <Avatar src={caretaker.picture} style={{ width: '40px', height: '40px', objectFit: 'cover' }} />
-                        <span style={{ width: '18%' }}>{caretaker.name}</span>
+                        <Avatar src={caretaker.picture} style={{width: '40px', height: '40px', objectFit: 'cover'}}/>
+                        <span style={{width: '18%'}}>{caretaker.name}</span>
                         <Select
                             value={caretaker.accessLevel}
                             onChange={value => handleAccessLevelChange(value, caretaker.id)}
-                            style={{ width: '50%' }}
-                            suffixIcon={<CaretDownOutlined />}
+                            style={{width: '50%'}}
                         >
                             <Select.Option value="full">Volledige toegang</Select.Option>
                             <Select.Option value="chat">Gesprekken</Select.Option>
@@ -183,6 +185,8 @@ const ProfileCard = () => {
                     }}
                 >
                     Veranderingen opslaan
+
+
                 </Button>
             </div>
         </ConfigProvider>

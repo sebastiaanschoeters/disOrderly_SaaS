@@ -1,12 +1,33 @@
-body, p, .ant-typography, .ant-btn, .ant-select, .ant-checkbox-group {
+/* Default font size for various components */
+body, p, .ant-typography, .ant-btn, .ant-select,
+.ant-checkbox-wrapper, .ant-tag {
     font-size: 1rem; /* Default base font size */
 }
 
-h1 h2{
-    font-size: 2rem; /* Scales with base font size */
+/* Specific styles for Select component */
+.ant-select .ant-select-selector {
+    font-size: 1rem; /* Apply font size to the Select component */
+}
+
+/* Apply font size to dropdown items */
+.ant-select-dropdown .ant-select-item {
+    font-size: 1rem; /* Font size for dropdown options */
 }
 
 .ant-tag {
-    border-radius: 10px;
-    font-size: 1rem;
+    border-radius: 2rem;
+    padding: 1rem 1rem;
+}
+
+/* Styling for both checked and unchecked switch states */
+.ant-switch-inner span{
+    font-size: 1rem; /* Font size for switch inner text */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Other element styles */
+h1, h2 {
+    font-size: 2rem; /* Scales with base font size */
 }

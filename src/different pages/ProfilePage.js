@@ -50,7 +50,7 @@ const ProfileCard = () => {
                     style={{ position: 'absolute', top: '10px', right: '10px' }}
                 />
 
-                <h2 style={{ textAlign: 'center', margin: '0', fontSize: '24px' }}>Martin, 27</h2>
+                <h2 style={{ textAlign: 'center', margin: '0'}}>Martin, 27</h2>
 
                 <Divider />
 

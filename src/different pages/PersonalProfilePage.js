@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Card, Tag, Avatar, Button, Divider, Select, Popconfirm, message, ConfigProvider } from 'antd';
+import { Card, Tag, Avatar, Button, Divider, Select, Popconfirm, message, ConfigProvider, Switch } from 'antd';
 import { CloseOutlined, SaveOutlined, DeleteOutlined } from '@ant-design/icons';
 import 'antd/dist/reset.css';
 import '../CSS/Ant design overide.css';
@@ -14,7 +14,9 @@ const initialCaretakers = [
 
 const ProfileCard = () => {
     const [theme, setTheme] = useState('blauw');
-    const themeColors = themes[theme] || themes.blauw;
+    const [isDarkMode, setIsDarkMode] = useState(false); // State for light/dark toggle
+    const themeKey = isDarkMode ? `${theme}_donker` : theme;
+    const themeColors = themes[themeKey] || themes.blauw;
     const [images, setImages] = useState([]);
     const [profilePicture, setProfilePicture] = useState('https://example.com/photo.jpg');
     const [caretakers, setCaretakers] = useState(initialCaretakers);
@@ -35,6 +37,11 @@ const ProfileCard = () => {
             return;
         }
         setCaretakers(prevCaretakers => prevCaretakers.filter(caretaker => caretaker.id !== id));
+    };
+
+    // Toggle between light and dark themes
+    const handleThemeToggle = (checked) => {
+        setIsDarkMode(checked);
     };
 
     return (
@@ -83,14 +90,21 @@ const ProfileCard = () => {
                 <p style={{ display: 'flex', alignItems: 'center', gap: '2%' }}>
                     <strong style={{ width: '20%', minWidth: '150px' }}>Kies een kleur:</strong>
                     <Select
-                        style={{ width: '78%' }}
+                        style={{ width: '58%' }}
                         placeholder="Selecteer een kleur"
-                        options={Object.keys(themes).map(themeKey => ({
+                        options={Object.keys(themes).filter(key => !key.endsWith('_donker')).map(themeKey => ({
                             value: themeKey,
                             label: themeKey.charAt(0).toUpperCase() + themeKey.slice(1),
                         }))}
                         value={theme}
                         onChange={value => setTheme(value)}
+                    />
+                    <Switch
+                        checked={isDarkMode}
+                        onChange={handleThemeToggle}
+                        checkedChildren="Donker"
+                        unCheckedChildren="Licht"
+                        style={{ marginLeft: '10px' }}
                     />
                 </p>
 

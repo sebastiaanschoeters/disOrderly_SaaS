@@ -54,6 +54,7 @@ const HomePage = () => {
                     width: '240px',
                     height: '240px',
                 }}
+                onClick={() => navigate('/chatoverview')}
             >
                 <h2 style={{ margin: '0', fontSize: '24px' }}>Chats</h2>
             </Button>

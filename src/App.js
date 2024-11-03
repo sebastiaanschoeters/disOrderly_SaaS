@@ -8,6 +8,9 @@ import themes from './themes';
 import ProfilePage from "./different pages/ProfilePage";
 import EditableProfilePage from "./different pages/EditableProfilePage";
 import PersonalProfilePage from "./different pages/PersonalProfilePage"; // Import themes
+import ChatOverviewPage from './different pages/ChatOverviewPage'; // Import your Chat Overview Page
+import ChatPage from './different pages/ChatPage';
+import ChatSuggestionPage from './different pages/ChatSuggestionPage'; // Import your Chat Page
 
 const App = () => {
     return (
@@ -21,6 +24,9 @@ const App = () => {
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/profileEdit" element={<EditableProfilePage />} />
                 <Route path="/profilePersonal" element={<PersonalProfilePage />} />
+                <Route path="/chatOverview" element={<ChatOverviewPage />} />
+                <Route path="/chat/:name" element={<ChatPage />} />
+                <Route path="/chatSuggestion/:name" element={<ChatSuggestionPage />} />
             </Routes>
         </Router>
     );

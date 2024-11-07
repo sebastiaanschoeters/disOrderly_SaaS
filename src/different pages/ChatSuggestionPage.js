@@ -1,15 +1,16 @@
 import React from 'react';
 import { Avatar, Button, Typography, ConfigProvider } from 'antd';
 import {useNavigate, useParams} from 'react-router-dom';
+import { CloseOutlined } from '@ant-design/icons';
 import { themes, antThemeTokens } from '../themes';
 
 const { Title } = Typography;
 
 const ChatSuggestionPage = () => {
     const navigate = useNavigate();
+    const { name } = useParams();
     const theme = 'blauw';
     const themeColors = themes[theme] || themes.blauw;
-    const { name } = useParams();
 
     const styles = {
         container: {
@@ -29,9 +30,16 @@ const ChatSuggestionPage = () => {
             alignItems: 'center',
             borderRadius: '8px',
             marginBottom: '15px',
+            position: 'relative',
         },
         headerAvatar: {
             marginRight: '10px',
+        },
+        closeButton: {
+            position: 'absolute',
+            top: '10px',
+            right: '10px',
+            cursor: 'pointer',
         },
         messageContainer: {
             padding: '15px',
@@ -44,22 +52,17 @@ const ChatSuggestionPage = () => {
             display: 'flex',
             justifyContent: 'space-between',
         },
-        button: {
-            margin: '0 5px',
-        },
     };
 
     const handleAccept = () => {
-        navigate('/chat/${name}');
+        navigate(`/chat/${name}`);
     };
 
     const handleDecline = () => {
-        console.log('Message declined');
         navigate('/chatOverview');
     };
 
     const handleBlock = () => {
-        console.log('User blocked');
         navigate('/chatOverview');
     };
 
@@ -67,11 +70,9 @@ const ChatSuggestionPage = () => {
         <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
             <div style={styles.container}>
                 <div style={styles.header}>
-                    <Avatar style={styles.headerAvatar} size="large" src="https://example.com/images/user.jpg" />
+                    <Avatar style={styles.headerAvatar} size="large" src="https://example.com/images/user.jpg">U</Avatar>
                     <Title level={4} style={{ margin: 0, color: '#fff' }}>{name}</Title>
-                    <Button type="link" style={{ marginLeft: 'auto', color: '#fff' }} onClick={() => navigate('/chatOverview')}>
-                        Close
-                    </Button>
+                    <Button type='primary' shape='circle' style={styles.closeButton} icon={<CloseOutlined/>} onClick={() => navigate('/chatOverview')}/>
                 </div>
                 <div style={styles.messageContainer}>
                     <p>Hey! I'd love to chat with you. Are you available?</p>

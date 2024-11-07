@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Avatar, List, Input, Button, Typography, ConfigProvider } from 'antd';
+import React, { useState, useRef , useEffect } from 'react';
+import { Avatar, Input, Button, Typography, ConfigProvider } from 'antd';
 import { useNavigate, useParams } from 'react-router-dom';
 import { antThemeTokens, themes } from '../themes';
 import { CloseOutlined } from '@ant-design/icons';
@@ -8,17 +8,17 @@ import '../CSS/ChatPage.css';
 const { Title } = Typography;
 
 const sampleMessages = [
-    { text: "Hey! Alles goed?", sender: "Alice", timestamp: "10:15 AM" },
-    { text: "Ja hoor, met mij is alles goed en met jou?", sender: "Me", timestamp: "10:16 AM" },
-    { text: "Met mij ook goed?", sender: "Alice", timestamp: "10:17 AM" },
-    { text: "Hoe zit het met hobbies?", sender: "Alice", timestamp: "10:17 AM" },
-    { text: "Ik speel graag voetbal en kijk veel films, jij?", sender: "Me", timestamp: "10:18 AM" },
-    { text: "Ik kijk ook graag films, welk is jouw favoriet", sender: "Alice", timestamp: "10:19 AM" },
-    { text: "Harry Potter natuurlijk", sender: "Me", timestamp: "10:20 AM" },
-    { text: "Ah ja, Harry Potter is inderdaad erg goed, nog andere?", sender: "Alice", timestamp: "10:21 AM" },
-    { text: "Uhm, Spider-man en Forrest Gump", sender: "Me", timestamp: "10:22 AM" },
-    { text: "Beide zijn erg leuk ja", sender: "Alice", timestamp: "10:23 AM" },
-    { text: "En jij?", sender: "Me", timestamp: "10:24 AM" },
+    { text: "Hey! Alles goed?", sender: "Alice", timestamp: "10:15" },
+    { text: "Ja hoor, met mij is alles goed en met jou?", sender: "Me", timestamp: "10:16" },
+    { text: "Met mij ook goed?", sender: "Alice", timestamp: "10:17" },
+    { text: "Hoe zit het met hobbies?", sender: "Alice", timestamp: "10:17" },
+    { text: "Ik speel graag voetbal en kijk veel films, jij?", sender: "Me", timestamp: "10:18" },
+    { text: "Ik kijk ook graag films, welk is jouw favoriet", sender: "Alice", timestamp: "10:19" },
+    { text: "Harry Potter natuurlijk", sender: "Me", timestamp: "10:20" },
+    { text: "Ah ja, Harry Potter is inderdaad erg goed, nog andere?", sender: "Alice", timestamp: "10:21" },
+    { text: "Uhm, Spider-man en Forrest Gump", sender: "Me", timestamp: "10:22" },
+    { text: "Beide zijn erg leuk ja", sender: "Alice", timestamp: "10:23" },
+    { text: "En jij?", sender: "Me", timestamp: "10:24" },
 ];
 
 const ChatPage = () => {
@@ -29,11 +29,13 @@ const ChatPage = () => {
     const [messages, setMessages] = useState(sampleMessages);
     const [newMessage, setNewMessage] = useState('');
 
+    const dummyRef = useRef(null);
+
     const handleSendMessage = () => {
         if (newMessage.trim() !== '') {
             const newMessages = [
                 ...messages,
-                { text: newMessage, sender: 'Me', timestamp: new Date().toLocaleTimeString() },
+                { text: newMessage, sender: 'Me', timestamp: `${String(new Date().getHours()).padStart(2, '0')}:${String(new Date().getMinutes()).padStart(2, '0')}` },
             ];
             setMessages(newMessages);
             setNewMessage('');
@@ -43,6 +45,12 @@ const ChatPage = () => {
     const handleCloseChat = () => {
         navigate('/chatoverview');
     };
+
+    useEffect(() => {
+        if (dummyRef.current) {
+            dummyRef.current.scrollIntoView({behavior: 'smooth'});
+        }
+    }, [messages]);
 
     const styles = {
         chatContainer: {
@@ -85,7 +93,7 @@ const ChatPage = () => {
             alignItems: 'flex-start',
         },
         messageItem: {
-            marginBottom: '10px',
+            marginBottom: '15px',
             padding: '8px 12px',
             borderRadius: '15px',
             maxWidth: '50%',
@@ -125,8 +133,8 @@ const ChatPage = () => {
         <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
             <div style={styles.chatContainer}>
                 <div style={styles.header}>
-                    <Avatar style={styles.headerAvatar} size="large"/>
-                    <Title level={4} style={{ margin: 0, color: themeColors.primary10 }}>{name}</Title>
+                    <Avatar  size="large">U</Avatar>
+                    <Title level={4} style={{ margin: 0, color: themeColors.primary1 }}>{name}</Title>
                     <button style={styles.closeButton} onClick={handleCloseChat}>
                         <CloseOutlined />
                     </button>
@@ -142,6 +150,7 @@ const ChatPage = () => {
                             <div style={styles.timestamp}>{message.timestamp}</div>
                         </div>
                     ))}
+                    <div ref={dummyRef}/>
                 </div>
                 <div style={styles.inputContainer}>
                     <Input

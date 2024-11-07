@@ -3,6 +3,7 @@ import { Avatar, Button, Typography, ConfigProvider } from 'antd';
 import {useNavigate, useParams} from 'react-router-dom';
 import { CloseOutlined } from '@ant-design/icons';
 import { themes, antThemeTokens } from '../themes';
+import '../CSS/ChatSuggestionPage.css';
 
 const { Title } = Typography;
 
@@ -51,7 +52,12 @@ const ChatSuggestionPage = () => {
         buttonContainer: {
             display: 'flex',
             justifyContent: 'space-between',
+            width: '100%',
         },
+        button:{
+            margin: '0 5px',
+            flex: 1,
+        }
     };
 
     const handleAccept = () => {
@@ -78,9 +84,9 @@ const ChatSuggestionPage = () => {
                     <p>Hey! I'd love to chat with you. Are you available?</p>
                 </div>
                 <div style={styles.buttonContainer}>
-                    <Button type="primary" style={styles.button} onClick={handleAccept}>Accepteer</Button>
-                    <Button style={styles.button} onClick={handleDecline}>Weiger</Button>
-                    <Button type="danger" style={styles.button} onClick={handleBlock}>Blokkeer</Button>
+                    <Button className='ant-btn-accept' style={styles.button} onClick={handleAccept}>Accepteer</Button>
+                    <Button className='ant-btn-decline' style={styles.button} onClick={handleDecline}>Weiger</Button>
+                    <Button className='ant-btn-block' style={styles.button} onClick={handleBlock}>Blokkeer</Button>
                 </div>
             </div>
         </ConfigProvider>

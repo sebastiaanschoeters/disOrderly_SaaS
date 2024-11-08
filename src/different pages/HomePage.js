@@ -90,13 +90,32 @@ const HomePage = () => {
                     flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    width: '80px',
+                    width: '100px',
                     height: '80px',
                 }}
                 onClick={() => navigate('/profilePersonal')}
 
             >
-                <h2 style={{ margin: '0', fontSize: '1rem' }}>Settings</h2>
+                <h2 style={{ margin: '0', fontSize: '1rem' }}>Instellingen</h2>
+            </Button>
+
+            <Button
+                type="primary"
+                style={{
+                    position: 'absolute',
+                    top: '20px',
+                    right: '20px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '100px',
+                    height: '40px',
+                }}
+                onClick={() => navigate('/login')}
+
+            >
+                <h2 style={{ margin: '0', fontSize: '1rem' }}>Afmelden</h2>
             </Button>
 
         </div>

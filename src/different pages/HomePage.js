@@ -70,7 +70,7 @@ const HomePage = () => {
                     width: '240px',
                     height: '240px',
                 }}
-                onClick={() => navigate('/profile')}
+                onClick={() => navigate('/profileEdit')}
 
             >
                 <h2 style={{ margin: '0', fontSize: '24px' }}>Profiel</h2>

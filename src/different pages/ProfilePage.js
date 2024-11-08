@@ -5,12 +5,15 @@ import { MessageOutlined, CloseOutlined, EnvironmentOutlined, UserOutlined, Hear
 import 'antd/dist/reset.css';
 import '../CSS/Ant design overide.css';
 import { antThemeTokens, themes } from '../themes';
+import {useNavigate} from "react-router-dom";
 
 // The ProfileCard component
 const ProfileCard = () => {
     const [theme, setTheme] = useState('blauw');
     const themeColors = themes[theme] || themes.blauw;
     const [images, setImages] = useState([]); /* get images from database */
+    const navigate = useNavigate();
+
 
     return (
         <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
@@ -48,6 +51,8 @@ const ProfileCard = () => {
                     type="text"
                     icon={<CloseOutlined />}
                     style={{ position: 'absolute', top: '10px', right: '10px' }}
+                    onClick={() => navigate('/search')}
+
                 />
 
                 <h2 style={{ textAlign: 'center', margin: '0'}}>Martin, 27</h2>

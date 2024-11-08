@@ -29,21 +29,55 @@ const ProfileCard = () => {
         fetchProfileData();
     }, []);
 
-    // Fetch user profile data from Supabase
     const fetchProfileData = async () => {
-        const { data, error } = await supabase
-            .from('Profile')
-            .select('*')
-            .eq('ActCode', '5')
+        try {
+            // Fetch profile data
+            const { data: profileData, error: profileError } = await supabase
+                .from('Profile')
+                .select('*')
+                .eq('ActCode', '1234');  // Replace with actual ActCode condition if needed
 
+            if (profileError) throw profileError;
 
-        if (data) {
-            console.log('Fetched profile data:', data);
-            setProfileData(data[0]);
-        } else {
-            console.error('Error fetching data:', error);
+            if (profileData && profileData.length > 0) {
+                setProfileData(profileData[0]);
+
+                // Fetch the interests linked to the user
+                const { data: profileInterests, error: profileInterestsError } = await supabase
+                    .from('ProfileInterests')
+                    .select('interestId')
+                    .eq('ProfileId', profileData[0].ActCode);  // Assuming `id` is the primary key of Profile table
+
+                if (profileInterestsError) throw profileInterestsError;
+
+                if (profileInterests && profileInterests.length > 0) {
+                    // Extract interest_ids
+                    const interestIds = profileInterests.map(item => item.interestId);
+
+                    // Fetch the interests using the interest_ids
+                    const { data: interestsData, error: interestsError } = await supabase
+                        .from('Interests')
+                        .select('interest')  // Replace with the column name you want (e.g., 'name')
+                        .in('interestId', interestIds);  // `id` is the primary key of the Interests table
+
+                    if (interestsError) throw interestsError;
+
+                    if (interestsData) {
+                        setProfileData(prevState => ({
+                            ...prevState,
+                            interests: interestsData.map(interest => ({ interest_name: interest.interest })) // Assuming `interest` is the correct key
+                        }));
+                    }
+                }
+            }
+            console.log(profileData)
+        } catch (error) {
+            console.error('Error fetching profile data:', error);
         }
     };
+
+
+
 
     const calculateAge = (birthdate) => {
         const birthDate = new Date(birthdate);
@@ -58,6 +92,16 @@ const ProfileCard = () => {
         return age;
     };
 
+    let lookingForArray = profileData.lookingFor;
+
+    if (typeof profileData.lookingFor === 'string') {
+        try {
+            lookingForArray = JSON.parse(profileData.lookingFor);
+        } catch (error) {
+            console.error('Error parsing JSON:', error);
+            lookingForArray = [];
+        }
+    }
 
     return (
         <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
@@ -92,10 +136,10 @@ const ProfileCard = () => {
                         )}
                         <div>
                             <h2 style={{ margin: '0' }}>
-                                {profileData.name || 'Martin'}, {calculateAge(profileData.birthDate)}
+                                {profileData.name || 'Naam'}, {calculateAge(profileData.birthDate) || 'Leeftijd'}
                             </h2>
                             <p style={{margin: '5px 0', maxWidth: '550px'}}>
-                            {profileData.bio || 'Hey, ik eet graag pasta :)'}
+                            {profileData.bio || ''}
                         </p>
                         </div>
                     </div>
@@ -115,36 +159,47 @@ const ProfileCard = () => {
                 {/* Static fields */}
                 <p style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '2%' }}>
                     <strong style={{ width: '20%', minWidth: '150px' }}><EnvironmentOutlined /> Locatie: </strong>
-                    {profileData.location || 'Leuven'}
+                    {profileData.location || ''}
                 </p>
 
                 <Divider />
 
                 <p style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '2%' }}>
                     <strong style={{ width: '20%', minWidth: '150px' }}><UserOutlined /> Geslacht: </strong>
-                    {profileData.gender || 'Man'}
+                    {profileData.gender || ''}
                 </p>
 
                 <Divider />
 
-                <p style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '2%' }}>
-                    <strong style={{ width: '20%', minWidth: '150px' }}><StarOutlined /> Interesses: </strong>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2px' }}>
-                        {profileData.interests ? profileData.interests.map((interest, index) => (
-                            <Tag key={index}>{interest}</Tag>
-                        )) : <Tag>Voetbal</Tag>}
+                <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
+                    <strong style={{width: '20%', minWidth: '150px'}}><StarOutlined/> Interesses: </strong>
+                    <div style={{display: 'flex', flexWrap: 'wrap', gap: '2px'}}>
+                        {profileData.interests && profileData.interests.length > 0 ? (
+                            profileData.interests.map((interest, index) => (
+                                <Tag key={index}>{interest.interest_name}</Tag>
+                            ))
+                        ) : (
+                            <Tag>No interests available</Tag>
+                        )}
                     </div>
                 </p>
 
-                <Divider />
 
-                <p style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '2%' }}>
-                    <strong style={{ width: '20%', minWidth: '150px' }}><HeartOutlined /> Is op zoek naar: </strong>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2px' }}>
-                        {profileData.lookingFor ? profileData.lookingFor.map((option, index) => (
-                            <Tag key={index}>{option}</Tag>
-                        )) : <Tag>Vrienden</Tag>}
+                <Divider/>
+
+                <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
+                    <strong style={{width: '20%', minWidth: '150px'}}><HeartOutlined/> Is op zoek naar: </strong>
+
+                    <div style={{display: 'flex', flexWrap: 'wrap', gap: '2px'}}>
+                        {Array.isArray(lookingForArray) ? (
+                            lookingForArray.map((option, index) => (
+                                <Tag key={index}>{option}</Tag>
+                            ))
+                        ) : (
+                            <Tag>Vrienden</Tag>
+                        )}
                     </div>
+
                 </p>
 
                 <Divider />
@@ -156,15 +211,16 @@ const ProfileCard = () => {
 
                 <Divider />
 
-                <p style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '2%' }}>
-                    <strong style={{ width: '20%', minWidth: '150px' }}><CarOutlined /> Kan zich zelfstandig verplaatsen: </strong>
-                    {profileData.mobility || 'Ja'}
+                <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
+                    <strong style={{width: '20%', minWidth: '150px'}}><CarOutlined/> Kan zich zelfstandig verplaatsen:
+                    </strong>
+                    {profileData.mobility ? 'Ja' : 'Nee'}
                 </p>
 
                 {/* Chat button */}
                 <Button
                     type="primary"
-                    icon={<MessageOutlined />}
+                    icon={<MessageOutlined/>}
                     style={{
                         position: 'fixed',
                         bottom: '20px',

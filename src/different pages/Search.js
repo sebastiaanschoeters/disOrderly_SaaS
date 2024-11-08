@@ -14,15 +14,14 @@ const Search = () => {const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState('');
     const { Title } = Typography;
 
-
-    const chats = [
+    const users = [
         { id: 1, name: "Alice Johnson"},
         { id: 2, name: "Bob Smith"},
         { id: 3, name: "Carla Martin"},
         { id: 4, name: "David Lee"}
     ];
 
-    const filteredChats = chats.filter((chat) =>
+    const filteredChats = users.filter((chat) =>
         chat.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
@@ -80,7 +79,6 @@ const Search = () => {const navigate = useNavigate();
     return (
         <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
             <div style={styles.chatContainer}>
-
                 <div style={styles.titleButton}>
                     <Title level={2} style={styles.title}>Gebruikers</Title>
 

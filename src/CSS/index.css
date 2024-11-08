@@ -1,11 +1,11 @@
 :root {
-  --color1: #f0f2f5; /* Default light theme color */
-  --color2: #ffffff;
-  --color3: #ffffff;
-  --color4: #ffffff;
-  --color5: #ffffff;
-  --textColorL: #ffffff;
-  --textColorD: #000000;
+  --color1: '#013A63';
+  --color2: '#2A6F97';
+  --color3: '#468FAF';
+  --color4: '#61A5C2';
+  --color5: '#89C2D9';
+  --textColorL: '#e6ebef';
+  --textColorD: '#00060a';
 }
 
 body {

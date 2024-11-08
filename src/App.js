@@ -5,9 +5,10 @@ import ActivationPage from './different pages/ActivationPage';
 import LoginPage from './different pages/LoginPage';
 import HomePage from './different pages/HomePage';
 import themes from './themes';
-import ProfilePage from "./different pages/ProfilePage";
-import EditableProfilePage from "./different pages/EditableProfilePage";
-import PersonalProfilePage from "./different pages/PersonalProfilePage"; // Import themes
+import SupabaseTestPage from "./different pages/SupabaseTestPage";
+//import ProfilePage from "./different pages/ProfilePage";
+//import EditableProfilePage from "./different pages/EditableProfilePage";
+//import PersonalProfilePage from "./different pages/PersonalProfilePage"; // Import themes
 
 const App = () => {
     return (
@@ -18,9 +19,7 @@ const App = () => {
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/activate" element={<ActivationPage />} />
                 <Route path="/activate/:activationCode" element={<ActivationPage />} />
-                <Route path="/profile" element={<ProfilePage />} />
-                <Route path="/profileEdit" element={<EditableProfilePage />} />
-                <Route path="/profilePersonal" element={<PersonalProfilePage />} />
+                <Route path="/supabase" element={<SupabaseTestPage />} />
             </Routes>
         </Router>
     );

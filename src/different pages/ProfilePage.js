@@ -156,7 +156,6 @@ const ProfileCard = () => {
 
                 <Divider />
 
-                {/* Static fields */}
                 <p style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '2%' }}>
                     <strong style={{ width: '20%', minWidth: '150px' }}><EnvironmentOutlined /> Locatie: </strong>
                     {profileData.location || ''}
@@ -206,7 +205,7 @@ const ProfileCard = () => {
 
                 <p style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '2%' }}>
                     <strong style={{ width: '20%', minWidth: '150px' }}><HomeOutlined /> Woonsituatie: </strong>
-                    {profileData.livingSituation || 'Woont alleen'}
+                    {profileData.livingSituation || ''}
                 </p>
 
                 <Divider />
@@ -217,7 +216,7 @@ const ProfileCard = () => {
                     {profileData.mobility ? 'Ja' : 'Nee'}
                 </p>
 
-                {/* Chat button */}
+                {/* Chat button in the bottom right */}
                 <Button
                     type="primary"
                     icon={<MessageOutlined/>}

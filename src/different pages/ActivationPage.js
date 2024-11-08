@@ -17,7 +17,7 @@ const ActivationPage = () => {
     const [form] = Form.useForm();
     const [theme, setTheme] = useState('blauw');
     const themeColors = themes[theme] || themes.blauw;
-    const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co", "your_supabase_key");
+    const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q");
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -66,7 +66,7 @@ const ActivationPage = () => {
             ...prevData,
             gender: values.gender,
             sexuality: values.sexuality,
-            relationshipPreference: values.relationshipPreference,
+            relationshipPreference: JSON.stringify(values.relationshipPreference), // Store as JSON
         }));
         setStep(5);
     };
@@ -80,18 +80,42 @@ const ActivationPage = () => {
         //navigate("/login");
     };
 
+    const saveUserProfile = async () => {
+
+        const { data, error } = await supabase.from("Profile").insert({
+            ActCode: userData.activationKey,
+            name: userData.name,
+            livingSituation: userData.livingSituation,
+            birthDate: userData.birthDate,
+            location: userData.city,
+            mobility: userData.mobility,
+            gender: userData.gender,
+            sexuality: userData.sexuality,
+            lookingFor: userData.relationshipPreference,
+            //NiveauA: userData.niveau,
+            email: userData.email,
+            password: userData.password
+        });
+
+        if (error) {
+            console.error("Error saving profile data:", error.message);
+        }
+    };
+
+
     const EmailAndPassword = (values) => {
         // Hash the password
-        const hashedPassword = CryptoJS.SHA256(values.password).toString();
+        //const hashedPassword = CryptoJS.SHA256(values.password).toString();
 
         setUserData((prevData) => ({
             ...prevData,
             email: values.email,
-            password: hashedPassword, // Store the hashed password
+            password: values.password, // Store the hashed password
         }));
-        message.success("Account aangemaakt!" +
-            "Je kan een profiel foto toevoegen bij je profiel.");
-        navigate("/login"); // Or navigate to the next appropriate step or route
+        console.log("User Data to Submit:", {userData});
+        saveUserProfile();
+        message.success("Account aangemaakt! Je kan een profiel foto toevoegen bij je profiel.");
+        //navigate("/login"); // Or navigate to the next appropriate step or route
     };
 
     return (
@@ -153,10 +177,10 @@ const ActivationPage = () => {
                                 rules={[{ required: true, message: 'Selecteer een woonsituatie' }]}
                             >
                                 <Select placeholder="Selecteer uw woonsituatie">
-                                    <Select.Option value="bij_ouders">Bij ouders</Select.Option>
-                                    <Select.Option value="woont_alleen">Woont alleen</Select.Option>
-                                    <Select.Option value="begeleid_wonen">Begeleid wonen</Select.Option>
-                                    <Select.Option value="in_groepsverband">In groepsverband</Select.Option>
+                                    <Select.Option value="bij ouders">Bij ouders</Select.Option>
+                                    <Select.Option value="woont alleen">Woont alleen</Select.Option>
+                                    <Select.Option value="begeleid wonen">Begeleid wonen</Select.Option>
+                                    <Select.Option value="in groepsverband">In groepsverband</Select.Option>
                                     <Select.Option value="zorginstelling">Zorginstelling</Select.Option>
                                     <Select.Option value="andere">Andere</Select.Option>
                                 </Select>
@@ -199,7 +223,7 @@ const ActivationPage = () => {
                                 <Select placeholder="Selecteer uw geslacht">
                                     <Select.Option value="male">Man</Select.Option>
                                     <Select.Option value="female">Vrouw</Select.Option>
-                                    <Select.Option value="non_binary">Non-binair</Select.Option>
+                                    <Select.Option value="non binary">Non-binair</Select.Option>
                                 </Select>
                             </Form.Item>
                             <Form.Item label="Sexualiteit" name="sexuality" rules={[{ required: true, message: 'Selecteer uw seksualiteit' }]}>
@@ -209,12 +233,23 @@ const ActivationPage = () => {
                                     <Select.Option value="bi">Biseksueel</Select.Option>
                                 </Select>
                             </Form.Item>
-                            <Form.Item label="Wat zoekt u?" name="relationshipPreference" rules={[{ required: true, message: 'Selecteer wat u zoekt' }]}>
-                                <Select placeholder="Selecteer uw voorkeur">
-                                    <Select.Option value="love">Liefde</Select.Option>
+
+                            <Form.Item
+                                label="Wat zoekt u?"
+                                name="relationshipPreference"
+                                rules={[{ required: true, message: 'Selecteer wat u zoekt' }]}
+                            >
+                                <Select
+                                    mode="multiple"
+                                    placeholder="Selecteer uw voorkeur"
+                                    allowClear
+                                >
+                                    <Select.Option value="relatie">Relatie</Select.Option>
                                     <Select.Option value="friends">Vrienden</Select.Option>
+                                    <Select.Option value="intiem">Intieme ontmoetingen</Select.Option>
                                 </Select>
                             </Form.Item>
+
                             <Form.Item>
                                 <Button type="primary" htmlType="submit" style={{ width: '100%' }}>Volgende</Button>
                                 <Button onClick={goBack} style={{ marginTop: '8px', width: '100%' }}>Terug</Button>
@@ -227,10 +262,10 @@ const ActivationPage = () => {
                             <p>Selecteer de optie die het beste past bij jou en je begeleider</p>
                             <Form.Item name="niveau" rules={[{ required: true, message: 'Selecteer een optie' }]}>
                                 <Radio.Group>
-                                    <Radio value="Volledige_Toegang">Begeleiding heeft volledige toegang en kan alles mee volgen en profiel aanpassen.</Radio>
+                                    <Radio value="Volledige Toegang">Begeleiding heeft volledige toegang en kan alles mee volgen en profiel aanpassen.</Radio>
                                     <Radio value="Gesprekken">Begeleiding kan enkel gesprekken lezen</Radio>
                                     <Radio value="Contacten">Begeleiding kan zien met wie jij contact hebt</Radio>
-                                    <Radio value="Publiek_Profiel">Begeleiding kan zien wat jij op je profiel plaatst, net zoals andere gebruikers</Radio>
+                                    <Radio value="Publiek Profiel">Begeleiding kan zien wat jij op je profiel plaatst, net zoals andere gebruikers</Radio>
                                 </Radio.Group>
                             </Form.Item>
                             <Form.Item>
@@ -254,7 +289,7 @@ const ActivationPage = () => {
                             </Form.Item>
 
                             <Form.Item
-                                label="Password"
+                                label="Wachtwoord"
                                 name="password"
                                 rules={[{ required: true, message: 'Please enter your password' }]}
                             >

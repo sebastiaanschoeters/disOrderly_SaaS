@@ -12,6 +12,7 @@ import ChatOverviewPage from './different pages/ChatOverviewPage'; // Import you
 import ChatPage from './different pages/ChatPage';
 import ChatSuggestionPage from './different pages/ChatSuggestionPage'; // Import your Chat Page
 
+
 const App = () => {
     return (
         <Router>

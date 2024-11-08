@@ -13,6 +13,7 @@ import ChatPage from './different pages/ChatPage';
 import ChatSuggestionPage from './different pages/ChatSuggestionPage'; // Import your Chat Page
 
 import SupabaseTestPage from "./different pages/SupabaseTestPage";
+import CaretakerProfilePage from "./different pages/CaretakerProfilePage";
 
 const App = () => {
     return (
@@ -30,6 +31,7 @@ const App = () => {
                 <Route path="/chat/:name" element={<ChatPage />} />
                 <Route path="/chatSuggestion/:name" element={<ChatSuggestionPage />} />
                 <Route path="/supabase" element={<SupabaseTestPage />} />
+                <Route path="/profileCaretaker" element={<CaretakerProfilePage />} />
             </Routes>
         </Router>
     );

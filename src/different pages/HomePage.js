@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom';
 
 const HomePage = () => {
     const [theme, setTheme] = useState('blauw');
-    const themeColors = themes[theme] || themes.blauw; // Get theme colors
+    const themeColors = themes[theme] || themes.blauw;
     const navigate = useNavigate();
 
 
@@ -27,10 +27,11 @@ const HomePage = () => {
                 justifyContent: 'center',
                 alignItems: 'center',
             }}>
-            <div style={{ display: 'flex', gap: '144px' }}> {/* Gap between buttons */}
+            <div style={{ display: 'flex', gap: '144px', flexWrap: 'wrap', justifyContent: 'center'}}>
+
             <Button
                 type="primary"
-                icon={<SearchOutlined style={{ fontSize: '800%' }} />} // Set icon size here
+                icon={<SearchOutlined style={{ fontSize: '4rem' }} />}
                 style={{
                     display: 'flex',
                     flexDirection: 'column',
@@ -45,7 +46,7 @@ const HomePage = () => {
 
             <Button
                 type="primary"
-                icon={<MessageOutlined style={{ fontSize: '800%' }} />}
+                icon={<MessageOutlined style={{ fontSize: '4rem' }} />}
                 style={{
                     display: 'flex',
                     flexDirection: 'column',
@@ -54,13 +55,14 @@ const HomePage = () => {
                     width: '240px',
                     height: '240px',
                 }}
+                onClick={() => navigate('/chatoverview')}
             >
                 <h2 style={{ margin: '0', fontSize: '24px' }}>Chats</h2>
             </Button>
 
             <Button
                 type="primary"
-                icon={<UserOutlined style={{ fontSize: '800%' }} />}
+                icon={<UserOutlined style={{ fontSize: '4rem' }} />}
                 style={{
                     display: 'flex',
                     flexDirection: 'column',
@@ -69,7 +71,7 @@ const HomePage = () => {
                     width: '240px',
                     height: '240px',
                 }}
-                onClick={() => navigate('/profile')}
+                onClick={() => navigate('/profileEdit')}
 
             >
                 <h2 style={{ margin: '0', fontSize: '24px' }}>Profiel</h2>

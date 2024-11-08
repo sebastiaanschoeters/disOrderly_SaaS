@@ -40,7 +40,23 @@ const ProfileCard = () => {
             if (profileError) throw profileError;
 
             if (profileData && profileData.length > 0) {
-                setProfileData(profileData[0]);
+                const profile = profileData[0]
+                setProfileData(profile);
+                let parsedTheme = 'blauw';
+                let isDarkMode = false;
+                if (profile.theme){
+                    try{
+                        const [themeName, darkModeFlag] = JSON.parse(profile.theme);
+                        parsedTheme = themeName
+                        isDarkMode = darkModeFlag
+                    } catch (error){
+                        console.error('Error parsing theme', error)
+                    }
+                }
+                if (isDarkMode){
+                    parsedTheme = parsedTheme + '_donker'
+                }
+                setTheme(parsedTheme)
 
                 // Fetch the interests linked to the user
                 const { data: profileInterests, error: profileInterestsError } = await supabase

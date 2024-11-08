@@ -1,25 +1,27 @@
 // ActivationPage.js
-import React, { useState } from 'react';
-import { Form, Input, Button, Card, DatePicker, message } from 'antd';
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { Form, Input, Button, Card, message, ConfigProvider } from 'antd';
+import React, {useEffect, useState} from 'react';
+import '../CSS/Ant design overide.css'
+import 'antd/dist/reset.css';
+import { Form, Input, Button, Card, message, ConfigProvider, DatePicker } from 'antd';
 import '../CSS/Ant design overide.css'
 import { antThemeTokens, themes } from '../themes';
 
 const ActivationPage = () => {
-    const [step, setStep] = useState(1); // Track current form step
+    const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
-    const [userData, setUserData] = useState({}); // Store all user inputs
+    const [userData, setUserData] = useState({});
     const [form] = Form.useForm();
     const [theme, setTheme] = useState('blauw');
     const themeColors = themes[theme] || themes.blauw; // Get theme colors
+    // Apply the selected theme colors
 
     // Handle activation code submission
-    const handleActivation = (values) => {
+    const activationCode = (values) => {
+        //NEED EXPANDING WHEN DATABASE IS IMPLEMENTED? WE NEED ACTIVATION KEY LOOKUP IF VALID
+        //if valid do this if not valid write new code
         setLoading(true);
         setTimeout(() => {
-            message.success("Activation successful!");
+            //message.success("Activation successful!");
             setUserData((prevData) => ({
                 ...prevData,
                 activationKey: values.activationKey
@@ -29,18 +31,18 @@ const ActivationPage = () => {
         }, 1000);
     };
 
-    // Handle account creation submission with name and birthdate
-    const handleAccountCreation = (values) => {
+    const nameAndBD = (values) => {
         setUserData((prevData) => ({
             ...prevData,
-            name: values.name,
-            birthDate: values.birthDate.toISOString().split('T')[0] // Format to YYYY-MM-DD
+            name: values.Voornaam,
+            lastname: values.Achternaam,
+            birthDate: values.Geboortedatum ? values.Geboortedatum.format('YYYY-MM-DD') : null
         }));
-        setStep(3); // Move to next step
+        setStep(3);
     };
 
     // Handle submission of additional info (city and organization)
-    const handleAdditionalInfo = (values) => {
+    const Location = (values) => {
         setUserData((prevData) => ({
             ...prevData,
             city: values.city,
@@ -62,47 +64,25 @@ const ActivationPage = () => {
                     color : themeColors.primary10
                 }}
             >
-                <Card
-                    style={{
-                        width: 400,
-                        border: 'none',
-                    }}
-                    title="Account Activation"
-                >
-                    <Form form={form} name="activationForm" onFinish={onFinish}>
-                        <Form.Item
-                            label="Activation Key"
-                            name="activationKey"
-                            rules={[{ required: true, message: 'Please enter your activation key!' }]}
-                        >
-                            <Input />
-                        </Form.Item>
-        <div
-            style={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                height: '100vh',
-                backgroundColor: '#f0f2f5',
-            }}
-        >
             <Card
                 style={{ width: 400 }}
                 title={
                     step === 1
-                        ? "Account Activation"
+                        ? "Vul je V(l)inder activatie code in"
                         : step === 2
-                            ? "Complete Your Account"
-                            : "Additional Information"
+                            ? "stap2/4"
+                            : step === 3
+                                ? ""
+                                : "Additional Information"
                 }
             >
                 {step === 1 && (
                     // Activation form
-                    <Form form={form} name="activationForm" onFinish={handleActivation}>
+                    <Form form={form} name="activationForm" onFinish={activationCode}>
                         <Form.Item
                             label="Activation Key"
                             name="activationKey"
-                            rules={[{ required: true, message: 'Please enter your activation key!' }]}
+                            rules={[{ required: true, message: 'Dit is geen geldige activatie sleutel' }]}
                         >
                             <Input />
                         </Form.Item>
@@ -117,19 +97,27 @@ const ActivationPage = () => {
 
                 {step === 2 && (
                     // Account creation form with name and birthdate
-                    <Form name="accountCreationForm" onFinish={handleAccountCreation}>
+                    <Form name="accountCreationForm" onFinish={nameAndBD}>
                         <Form.Item
-                            label="Name"
-                            name="name"
-                            rules={[{ required: true, message: 'Please enter your name!' }]}
+                            label="Voornaam"
+                            name="Voornaam"
+                            rules={[{ required: true, message: 'Vul uw voornaam in' }]}
                         >
                             <Input />
                         </Form.Item>
 
                         <Form.Item
-                            label="Birth Date"
-                            name="birthDate"
-                            rules={[{ required: true, message: 'Please select your birth date!' }]}
+                            label="Achternaam"
+                            name="Achternaam"
+                            rules={[{ required: true, message: 'Vul uw achternaam in' }]}
+                        >
+                            <Input />
+                        </Form.Item>
+
+                        <Form.Item
+                            label="Geboortedatum"
+                            name="Geboortedatum"
+                            rules={[{ required: true, message: 'Selecteer uw geboortedatum' }]}
                         >
                             <DatePicker
                                 style={{ width: '100%' }}
@@ -148,19 +136,19 @@ const ActivationPage = () => {
 
                 {step === 3 && (
                     // Additional info form with city and organization
-                    <Form name="additionalInfoForm" onFinish={handleAdditionalInfo}>
+                    <Form name="additionalInfoForm" onFinish={Location}>
                         <Form.Item
-                            label="City"
-                            name="city"
-                            rules={[{ required: true, message: 'Please enter your city!' }]}
+                            label="Stad"
+                            name="stad"
+                            rules={[{ required: true, message: 'Voer uw stad in' }]}
                         >
                             <Input />
                         </Form.Item>
 
                         <Form.Item
-                            label="Organization"
-                            name="organization"
-                            rules={[{ required: true, message: 'Please enter your organization!' }]}
+                            label="Organisatie"
+                            name="Organisatie"
+                            rules={[{ required: true, message: 'Selecteer een organisatie' }]}
                         >
                             <Input />
                         </Form.Item>
@@ -174,14 +162,6 @@ const ActivationPage = () => {
                 )}
             </Card>
         </div>
-                        <Form.Item>
-                            <Button type="primary" htmlType="submit" loading={loading} style={{ width: '100%' }}>
-                                Activate Account
-                            </Button>
-                        </Form.Item>
-                    </Form>
-                </Card>
-            </div>
         </ConfigProvider>
     );
 };

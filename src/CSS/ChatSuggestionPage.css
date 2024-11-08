@@ -1,0 +1,15 @@
+.ant-btn-accept:hover {
+    background-color: green !important;
+    border-color: green !important;
+    color: white !important;
+}
+.ant-btn-decline:hover {
+    background-color: orange !important;
+    border-color: orange !important;
+    color: white !important;
+}
+.ant-btn-block:hover {
+    background-color: red !important;
+    border-color: red !important;
+    color: white !important;
+}

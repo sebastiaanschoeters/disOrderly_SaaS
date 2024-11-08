@@ -1,16 +1,23 @@
-// Import necessary libraries
 import React, { useState } from 'react';
 import { Card, Tag, Avatar, Button, Divider, ConfigProvider } from 'antd';
-import { MessageOutlined, CloseOutlined, EnvironmentOutlined, UserOutlined, HeartOutlined, StarOutlined, HomeOutlined, CarOutlined } from '@ant-design/icons';
+import {
+    MessageOutlined,
+    CloseOutlined,
+    EnvironmentOutlined,
+    UserOutlined,
+    HeartOutlined,
+    StarOutlined,
+    HomeOutlined,
+    CarOutlined, BookOutlined
+} from '@ant-design/icons';
 import 'antd/dist/reset.css';
 import '../CSS/Ant design overide.css';
 import { antThemeTokens, themes } from '../themes';
 
-// The ProfileCard component
 const ProfileCard = () => {
     const [theme, setTheme] = useState('blauw');
     const themeColors = themes[theme] || themes.blauw;
-    const [images, setImages] = useState([]); /* get images from database */
+    const [images, setImages] = useState([]);
 
     return (
         <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
@@ -22,25 +29,34 @@ const ProfileCard = () => {
                     height: '100vh',
                     backgroundColor: themeColors.primary2,
                     color: themeColors.primary10
-                }}>
-                <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap' }}>
-                    {images.length > 0 ? (
-                        images.map((image, index) => (
-                            <img
-                                key={index}
-                                src={image}
-                                alt={`Uploaded ${index}`}
-                                style={{ width: '100px', height: '100px', objectFit: 'cover', margin: '5px' }}
+                }}
+            >
+                {/* Header section with profile picture, name, age, and biography */}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingBottom: '20px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '10px'}}>
+                        {images.length > 0 ? (
+                            images.map((image, index) => (
+                                <img
+                                    key={index}
+                                    src={image}
+                                    alt={`Uploaded ${index}`}
+                                    style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '50%' }}
+                                />
+                            ))
+                        ) : (
+                            <Avatar
+                                src="https://example.com/photo.jpg"
+                                alt="Martin's Profile Picture"
+                                size={100}
                             />
-                        ))
-                    ) : (
-                        <Avatar
-                            src="https://example.com/photo.jpg"
-                            alt="Martin's Profile Picture"
-                            size={100}
-                            style={{ margin: '20px auto', display: 'block' }}
-                        />
-                    )}
+                        )}
+                        <div>
+                            <h2 style={{ margin: '0' }}>Martin, 27</h2>
+                            <p style={{ margin: '5px 0' , maxWidth: '550px' }}>
+                                Hey, ik eet graag pasta :), maar echt heel graag he, kan wel echt niet koken eigenlijk
+                            </p>
+                        </div>
+                    </div>
                 </div>
 
                 {/* Exit button in the top right */}
@@ -50,10 +66,9 @@ const ProfileCard = () => {
                     style={{ position: 'absolute', top: '10px', right: '10px' }}
                 />
 
-                <h2 style={{ textAlign: 'center', margin: '0'}}>Martin, 27</h2>
-
                 <Divider />
 
+                {/* Static fields below */}
                 <p style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '2%' }}>
                     <strong style={{ width: '20%', minWidth: '150px' }}><EnvironmentOutlined /> Locatie: </strong>
                     Leuven
@@ -110,7 +125,7 @@ const ProfileCard = () => {
                         position: 'fixed',
                         bottom: '20px',
                         right: '20px',
-                        zIndex: 1000 // Ensures it stays on top
+                        zIndex: 1000
                     }}
                 >
                     Chat met Martin

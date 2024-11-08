@@ -11,6 +11,7 @@ import {
     ConfigProvider
 } from 'antd';
 import {
+    BookOutlined,
     CloseOutlined,
     SaveOutlined,
     UploadOutlined,
@@ -24,6 +25,7 @@ import {
 import 'antd/dist/reset.css';
 import '../CSS/Ant design overide.css';
 import { antThemeTokens, themes } from '../themes';
+import TextArea from "antd/es/input/TextArea";
 
 const ProfileCard = () => {
     const [theme, setTheme] = useState('blauw');
@@ -41,6 +43,8 @@ const ProfileCard = () => {
     const [interests, setInterests] = useState(['Voetbal', 'Wandelen', 'Gezelschapsspellen spelen', 'Iets gaan drinken met vrienden']);
     const [selectedInterests, setSelectedInterests] = useState([]);
     const [newInterest, setNewInterest] = useState('');
+    const [biography, setBiography] = useState(''); // State for managing biography content
+
 
     const handleLocationInputKeyDown = (e) => {
         if (e.key === 'Enter' && inputValue) {
@@ -111,6 +115,36 @@ const ProfileCard = () => {
                 />
 
                 <h2 style={{textAlign: 'center', margin: '0'}}>Martin, 27</h2>
+
+                <Divider />
+
+                <p style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '2%' }}>
+                    <strong style={{ width: '20%', minWidth: '150px' }}>
+                        <BookOutlined /> Biografie:
+                    </strong>
+
+                    <div style={{ position: 'relative', flex: 1, minWidth: '200px' }}>
+                        <TextArea
+                            style={{ width: '100%', paddingBottom: '20px' }}
+                            rows={4}
+                            placeholder="Vertel iets over jezelf"
+                            value={biography}
+                            onChange={(e) => setBiography(e.target.value)}
+                            maxLength={200}
+                        />
+                        <div
+                            style={{
+                                position: 'absolute',
+                                bottom: '5px',
+                                right: '10px',
+                                fontSize: '12px',
+                                background: 'transparent',
+                            }}
+                        >
+                            {biography.length}/200
+                        </div>
+                    </div>
+                </p>
 
                 <Divider/>
 

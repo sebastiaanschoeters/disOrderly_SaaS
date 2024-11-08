@@ -5,6 +5,6 @@ import App from './App';
 
 test('renders learn react link', () => {
   render(<App />);
-  const linkElement = screen.getByTestId('HomePage');
+  const linkElement = screen.getByText('Activate Account');
   expect(linkElement).toBeInTheDocument();
 });

@@ -12,6 +12,7 @@ import ChatOverviewPage from './different pages/ChatOverviewPage'; // Import you
 import ChatPage from './different pages/ChatPage';
 import ChatSuggestionPage from './different pages/ChatSuggestionPage'; // Import your Chat Page
 
+import SupabaseTestPage from "./different pages/SupabaseTestPage";
 
 const App = () => {
     return (
@@ -19,6 +20,7 @@ const App = () => {
             {/* Route definitions */}
             <Routes>
                 <Route path="/" element={<ActivationPage />} />
+                <Route path="/home" element={<HomePage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/activate" element={<ActivationPage />} />
                 <Route path="/activate/:activationCode" element={<ActivationPage />} />
@@ -28,6 +30,7 @@ const App = () => {
                 <Route path="/chatOverview" element={<ChatOverviewPage />} />
                 <Route path="/chat/:name" element={<ChatPage />} />
                 <Route path="/chatSuggestion/:name" element={<ChatSuggestionPage />} />
+                <Route path="/supabase" element={<SupabaseTestPage />} />
             </Routes>
         </Router>
     );

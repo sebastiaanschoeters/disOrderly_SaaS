@@ -3,9 +3,10 @@ import '../CSS/Ant design overide.css'
 import { antThemeTokens, themes } from '../themes';
 import {Avatar, Button, Card, ConfigProvider, Input, List, Typography} from 'antd';
 import {CloseOutlined} from "@ant-design/icons";
-import React, {useState} from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
 import Title from "antd/es/skeleton/Title";
+import { createClient } from "@supabase/supabase-js";
 
 
 const Search = () => {const navigate = useNavigate();
@@ -13,13 +14,24 @@ const Search = () => {const navigate = useNavigate();
     const themeColors = themes[theme] || themes.blauw;
     const [searchQuery, setSearchQuery] = useState('');
     const { Title } = Typography;
+    const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
 
-    const users = [
-        { id: 1, name: "Alice Johnson"},
-        { id: 2, name: "Bob Smith"},
-        { id: 3, name: "Carla Martin"},
-        { id: 4, name: "David Lee"}
-    ];
+    const [users, setUsers] = useState([]);
+    useEffect(() => {
+        const fetchUsers = async () => {
+            const { data, error } = await supabase
+                .from('Profile')  // Table name
+                .select('ActCode, name');  // Select the fields you need
+
+            if (error) {
+                console.error('Error fetching users:', error);
+            } else {
+                setUsers(data);
+            }
+        };
+
+        fetchUsers();
+    }, []);
 
     const filteredChats = users.filter((chat) =>
         chat.name.toLowerCase().includes(searchQuery.toLowerCase())

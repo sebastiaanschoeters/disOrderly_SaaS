@@ -1,82 +1,33 @@
-:root {
-    --color1: '#013A63';
-    --color2: '#2A6F97';
-    --color3: '#468FAF';
-    --color4: '#61A5C2';
-    --color5: '#89C2D9';
-    --textColorL: '#e6ebef';
-    --textColorD: '#00060a';
-}
-body, html{
-    background-color: var(--color5);
+/* Default font size for various components */
+body, p, .ant-typography, .ant-btn, .ant-select,
+.ant-checkbox-wrapper, .ant-tag {
+    font-size: 1rem; /* Default base font size */
 }
 
-.ant-btn-primary {
-    background-color: var(--color1);
-    border-color: var(--color1);
-    color: var(--textColorL);
+/* Specific styles for Select component */
+.ant-select .ant-select-selector {
+    font-size: 1rem; /* Apply font size to the Select component */
 }
 
-.ant-btn-secondary:hover,
-.ant-btn-primary:focus {
-    background-color: var(--color2);
-    border-color: var(--color2);
-    color: var(--textColorL);
+/* Apply font size to dropdown items */
+.ant-select-dropdown .ant-select-item {
+    font-size: 1rem; /* Font size for dropdown options */
 }
 
-.ant-btn-primary:active{
-    background-color: var(--color3);
-    border-color: var(--color3);
-    color: var(--textColorL)
+.ant-tag {
+    border-radius: 2rem;
+    padding: 1rem 1rem;
 }
 
-/* Card title background */
-.ant-card-head {
-    background-color: var(--color5);
-    color: var(--textColorD);
+/* Styling for both checked and unchecked switch states */
+.ant-switch-inner span{
+    font-size: 1rem; /* Font size for switch inner text */
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-/* Form item label color */
-.ant-form-item-label > label {  /* does not seem to do anything */
-    color: var(--color3);
-}
-
-/* Input field styles */
-.ant-input {
-    border-color: var(--color1);
-}
-
-.ant-input:focus,
-.ant-input:hover {
-    border-color: var(--color2);
-    box-shadow: var(--color4); /* Adjust the color to match your theme */
-}
-
-/* Card container styles */
-.ant-card {
-    background-color: var(--color5); /* Card background color */
-    border: 1px solid var(--color5); /* Card border color */
-    color: var(--textColorD); /* Text color inside the card */
-}
-
-/* Card title area */
-.ant-card-head {
-    background-color: var(--color2); /* Title background color */
-    color: var(--textColorD); /* Title text color */
-}
-
-/* Card content area */
-.ant-card-body {
-    color: var(--textColorD); /* Body text color */
-}
-
-.ant-tag{
-    background-color: var(--color4);
-    border-color: var(--color4);
-    color: var(--textColorD);
-    border-radius: 10px;
-}
-
-.ant-divider {
-    border-top: 1px solid var(--textColorL);
+/* Other element styles */
+h1, h2 {
+    font-size: 2rem; /* Scales with base font size */
 }

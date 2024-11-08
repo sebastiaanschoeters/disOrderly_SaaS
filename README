@@ -1,0 +1,22 @@
+Database needs:
+    Profile Page:
+        Profile ID (1)
+        Profile Name (1)
+        Profile Birthday for age (1)
+        Profile Location (1)
+            Should be from list of possible locations with coordinates
+        Profile Sex (1)
+            Should be from list of possible options
+        Profile Interests (n)
+            Also have a starter set to choose from, but should be able to extend this set
+        Profile Looking for (n)
+            Set list of things
+        Profile living situation (1)
+            Set list of things
+        Profile mobility (1) --> boolean
+        Profile Caretakers
+            List of caretakers and their access levels
+        Profile color settings
+            which color and light vs dark mode
+        Profile sexuality
+            list of possible to choose from

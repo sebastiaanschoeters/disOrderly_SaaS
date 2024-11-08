@@ -1,12 +1,19 @@
 // ActivationPage.js
 import React, { useState } from 'react';
 import { Form, Input, Button, Card, DatePicker, message } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import { Form, Input, Button, Card, message, ConfigProvider } from 'antd';
+import '../CSS/Ant design overide.css'
+import { antThemeTokens, themes } from '../themes';
 
 const ActivationPage = () => {
     const [step, setStep] = useState(1); // Track current form step
     const [loading, setLoading] = useState(false);
     const [userData, setUserData] = useState({}); // Store all user inputs
     const [form] = Form.useForm();
+    const [theme, setTheme] = useState('blauw');
+    const themeColors = themes[theme] || themes.blauw; // Get theme colors
 
     // Handle activation code submission
     const handleActivation = (values) => {
@@ -44,6 +51,32 @@ const ActivationPage = () => {
     };
 
     return (
+        <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
+            <div
+                style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    height: '100vh',
+                    backgroundColor: themeColors.primary2,
+                    color : themeColors.primary10
+                }}
+            >
+                <Card
+                    style={{
+                        width: 400,
+                        border: 'none',
+                    }}
+                    title="Account Activation"
+                >
+                    <Form form={form} name="activationForm" onFinish={onFinish}>
+                        <Form.Item
+                            label="Activation Key"
+                            name="activationKey"
+                            rules={[{ required: true, message: 'Please enter your activation key!' }]}
+                        >
+                            <Input />
+                        </Form.Item>
         <div
             style={{
                 display: 'flex',
@@ -141,6 +174,15 @@ const ActivationPage = () => {
                 )}
             </Card>
         </div>
+                        <Form.Item>
+                            <Button type="primary" htmlType="submit" loading={loading} style={{ width: '100%' }}>
+                                Activate Account
+                            </Button>
+                        </Form.Item>
+                    </Form>
+                </Card>
+            </div>
+        </ConfigProvider>
     );
 };
 

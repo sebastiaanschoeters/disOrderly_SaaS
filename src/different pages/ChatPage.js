@@ -24,7 +24,7 @@ const sampleMessages = [
 const ChatPage = () => {
     const { name } = useParams();
     const navigate = useNavigate();
-    const [theme, setTheme] = useState('blauw');
+    const [theme, setTheme] = useState('blue');
     const themeColors = themes[theme] || themes.blauw;
     const [messages, setMessages] = useState(sampleMessages);
     const [newMessage, setNewMessage] = useState('');
@@ -45,6 +45,11 @@ const ChatPage = () => {
     const handleCloseChat = () => {
         navigate('/chatoverview');
     };
+
+    const handleProfile = () => {
+        navigate('/profile');
+    };
+
 
     useEffect(() => {
         if (dummyRef.current) {
@@ -75,6 +80,7 @@ const ChatPage = () => {
         headerAvatar: {
             marginRight: '10px',
             color: '#fff',
+            cursor: 'pointer',
         },
         closeButton: {
             position: 'absolute',
@@ -133,7 +139,7 @@ const ChatPage = () => {
         <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
             <div style={styles.chatContainer}>
                 <div style={styles.header}>
-                    <Avatar  size="large">U</Avatar>
+                    <Avatar  size="large" onClick={handleProfile}>U</Avatar>
                     <Title level={4} style={{ margin: 0, color: themeColors.primary1 }}>{name}</Title>
                     <button style={styles.closeButton} onClick={handleCloseChat}>
                         <CloseOutlined />

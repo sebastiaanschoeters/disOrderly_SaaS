@@ -26,6 +26,7 @@ const ChatSuggestionPage = () => {
         },
         header: {
             backgroundColor: themeColors.primary6,
+            width: '100%',
             padding: '10px',
             display: 'flex',
             alignItems: 'center',
@@ -35,6 +36,7 @@ const ChatSuggestionPage = () => {
         },
         headerAvatar: {
             marginRight: '10px',
+            cursor: 'pointer',
         },
         closeButton: {
             position: 'absolute',
@@ -60,6 +62,10 @@ const ChatSuggestionPage = () => {
         }
     };
 
+    const handleProfile = () => {
+        navigate('/profile');
+    };
+
     const handleAccept = () => {
         navigate(`/chat/${name}`);
     };
@@ -76,12 +82,12 @@ const ChatSuggestionPage = () => {
         <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
             <div style={styles.container}>
                 <div style={styles.header}>
-                    <Avatar style={styles.headerAvatar} size="large" src="https://example.com/images/user.jpg">U</Avatar>
+                    <Avatar style={styles.headerAvatar} size="large" src="https://example.com/images/user.jpg" onClick={handleProfile}>U</Avatar>
                     <Title level={4} style={{ margin: 0, color: '#fff' }}>{name}</Title>
                     <Button type='primary' shape='circle' style={styles.closeButton} icon={<CloseOutlined/>} onClick={() => navigate('/chatOverview')}/>
                 </div>
                 <div style={styles.messageContainer}>
-                    <p>Hey! I'd love to chat with you. Are you available?</p>
+                    <p>Hey, ik zag je profiel en ik hou oo van honden. Heb je zelf een hond?</p>
                 </div>
                 <div style={styles.buttonContainer}>
                     <Button className='ant-btn-accept' style={styles.button} onClick={handleAccept}>Accepteer</Button>

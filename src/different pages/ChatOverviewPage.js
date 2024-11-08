@@ -26,6 +26,9 @@ const ChatOverviewPage = () => {
     const handleSearch = (value) => {
         setSearchQuery(value);
     };
+    const handleClose = () => {
+        navigate('/');
+    };
 
     const styles = {
         chatContainer: {
@@ -90,7 +93,7 @@ const ChatOverviewPage = () => {
             <div style={styles.chatContainer}>
                 <div style={styles.titleButton}>
                     <Title level={2} style={styles.title}>Chat Overzicht</Title>
-                    <Button type='primary' shape='circle' style={styles.button} icon={<CloseOutlined/>}/>
+                    <Button type='primary' shape='circle' style={styles.button} icon={<CloseOutlined/>} onClick={handleClose}/>
                     </div>
                     <Input.Search
                         placeholder="Zoek in chats..."

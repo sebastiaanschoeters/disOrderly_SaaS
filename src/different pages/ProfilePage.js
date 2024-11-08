@@ -14,6 +14,7 @@ import { createClient } from "@supabase/supabase-js";
 import 'antd/dist/reset.css';
 import '../CSS/Ant design overide.css';
 import { antThemeTokens, themes } from '../themes';
+import {useNavigate} from "react-router-dom";
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
 
@@ -55,6 +56,9 @@ const ProfileCard = () => {
         }
         return age;
     };
+    const [images, setImages] = useState([]); /* get images from database */
+    const navigate = useNavigate();
+
 
     return (
         <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
@@ -98,11 +102,13 @@ const ProfileCard = () => {
                     </div>
                 </div>
 
-                {/* Exit button */}
+                {/* Exit button in the top right */}
                 <Button
                     type="text"
                     icon={<CloseOutlined />}
                     style={{ position: 'absolute', top: '10px', right: '10px' }}
+                    onClick={() => navigate('/search')}
+
                 />
 
                 <Divider />

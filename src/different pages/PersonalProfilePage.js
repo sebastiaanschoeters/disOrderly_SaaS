@@ -12,6 +12,7 @@ import {
 import 'antd/dist/reset.css';
 import '../CSS/Ant design overide.css';
 import { antThemeTokens, themes } from '../themes';
+import { useNavigate } from 'react-router-dom';
 
 // Initial list of caretakers
 const initialCaretakers = [
@@ -51,6 +52,8 @@ const ProfileCard = () => {
     const handleThemeToggle = (checked) => {
         setIsDarkMode(checked);
     };
+
+    const navigate = useNavigate();
 
     return (
         <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
@@ -92,6 +95,7 @@ const ProfileCard = () => {
                         type="text"
                         icon={<CloseOutlined />}
                         style={{ position: 'absolute', top: '10px', right: '10px' }}
+                        onClick={() => navigate('/home')}
                     />
                 </div>
 

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     Card,
     Tag,
@@ -69,6 +70,8 @@ const ProfileCard = () => {
         }
     };
 
+    const navigate = useNavigate();
+
     return (
         <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
             <div style={{
@@ -108,6 +111,8 @@ const ProfileCard = () => {
                     type="text"
                     icon={<CloseOutlined/>}
                     style={{position: 'absolute', top: '10px', right: '10px'}}
+                    onClick={() => navigate('/home')}
+
                 />
 
                 <h2 style={{textAlign: 'center', margin: '0'}}>Martin, 27</h2>

@@ -4,10 +4,14 @@ import {Form, Input, Button, Checkbox, Card, ConfigProvider} from 'antd';
 import 'antd/dist/reset.css';
 import '../CSS/Ant design overide.css'
 import { antThemeTokens, themes } from '../themes';
+import { useNavigate } from 'react-router-dom';
+
 
 const LoginPage = () => {
     const [theme, setTheme] = useState('default');
     const themeColors = themes[theme] || themes.blauw;
+    const navigate = useNavigate();
+
 
     return (
         <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
@@ -60,7 +64,9 @@ const LoginPage = () => {
                     </Form.Item>
 
                     <Form.Item>
-                        <Button type="primary" htmlType="submit" style={{ width: '100%' }}>
+                        <Button type="primary" htmlType="submit" style={{ width: '100%' }}
+                                onClick={() => navigate('/home')}
+                        >
                             Login
                         </Button>
                     </Form.Item>

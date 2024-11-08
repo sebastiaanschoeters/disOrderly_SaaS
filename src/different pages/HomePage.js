@@ -40,6 +40,8 @@ const HomePage = () => {
                     width: '240px',
                     height: '240px',
                 }}
+                onClick={() => navigate('/search')}
+
             >
                 <h2 style={{ margin: '0', fontSize: '24px' }}>Zoeken</h2>
             </Button>

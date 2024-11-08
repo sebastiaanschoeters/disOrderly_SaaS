@@ -27,7 +27,7 @@ const ChatOverviewPage = () => {
         setSearchQuery(value);
     };
     const handleClose = () => {
-        navigate('/');
+        navigate('/home');
     };
 
     const styles = {

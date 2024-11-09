@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Tag, Avatar, Button, Divider, ConfigProvider } from 'antd';
+import {Tag, Avatar, Button, Divider, ConfigProvider, Spin} from 'antd';
 import {
     MessageOutlined,
     CloseOutlined,
@@ -11,97 +11,102 @@ import {
     CarOutlined
 } from '@ant-design/icons';
 import { createClient } from "@supabase/supabase-js";
-import 'antd/dist/reset.css';
-import '../CSS/Ant design overide.css';
-import { antThemeTokens, themes } from '../themes';
 import {useNavigate} from "react-router-dom";
+import 'antd/dist/reset.css';
+import '../CSS/AntDesignOverride.css';
+import { antThemeTokens, themes } from '../themes';
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
 
-const ProfileCard = () => {
-    const [theme, setTheme] = useState('blauw');
-    const themeColors = themes[theme] || themes.blauw;
+const useFetchProfileData = (actCode) => {
     const [profileData, setProfileData] = useState({});
-    const [images, setImages] = useState([]); /* get images from database */
-    const navigate = useNavigate();
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
-        fetchProfileData();
-    }, []);
+        const fetchData = async () => {
+            try {
+                const { data: profileData, error: profileError } = await supabase
+                    .from('Profile')
+                    .select('*')
+                    .eq('ActCode', actCode);
 
-    const fetchProfileData = async () => {
-        try {
-            // Fetch profile data
-            const { data: profileData, error: profileError } = await supabase
-                .from('Profile')
-                .select('*')
-                .eq('ActCode', '1234');  // Replace with actual ActCode condition if needed
+                if (profileError) throw profileError;
+                if (profileData.length > 0) {
+                    const profile = profileData[0];
 
-            if (profileError) throw profileError;
+                    let parsedTheme = 'blauw';
+                    let isDarkMode = false;
 
-            if (profileData && profileData.length > 0) {
-                const profile = profileData[0]
-                setProfileData(profile);
-                let parsedTheme = 'blauw';
-                let isDarkMode = false;
-                if (profile.theme){
-                    try{
-                        const [themeName, darkModeFlag] = JSON.parse(profile.theme);
-                        parsedTheme = themeName
-                        isDarkMode = darkModeFlag
-                    } catch (error){
-                        console.error('Error parsing theme', error)
+                    if (profile.theme) {
+                        try {
+                            const [themeName, darkModeFlag] = JSON.parse(profile.theme);
+                            parsedTheme = themeName;
+                            isDarkMode = darkModeFlag;
+                        } catch (error) {
+                            console.error('Error parsing theme', error);
+                        }
                     }
-                }
-                if (isDarkMode){
-                    parsedTheme = parsedTheme + '_donker'
-                }
-                setTheme(parsedTheme)
 
-                // Fetch the interests linked to the user
-                const { data: profileInterests, error: profileInterestsError } = await supabase
-                    .from('ProfileInterests')
-                    .select('interestId')
-                    .eq('ProfileId', profileData[0].ActCode);  // Assuming `id` is the primary key of Profile table
-
-                if (profileInterestsError) throw profileInterestsError;
-
-                if (profileInterests && profileInterests.length > 0) {
-                    // Extract interest_ids
-                    const interestIds = profileInterests.map(item => item.interestId);
-
-                    // Fetch the interests using the interest_ids
-                    const { data: interestsData, error: interestsError } = await supabase
-                        .from('Interests')
-                        .select('interest')  // Replace with the column name you want (e.g., 'name')
-                        .in('interestId', interestIds);  // `id` is the primary key of the Interests table
+                    const { data: profileInterests, error: interestsError } = await supabase
+                        .from('ProfileInterests')
+                        .select('interestId')
+                        .eq('ProfileId', profile.ActCode);
 
                     if (interestsError) throw interestsError;
 
-                    if (interestsData) {
-                        setProfileData(prevState => ({
-                            ...prevState,
-                            interests: interestsData.map(interest => ({ interest_name: interest.interest })) // Assuming `interest` is the correct key
-                        }));
+                    if (profileInterests && profileInterests.length > 0) {
+                        const interestIds = profileInterests.map(item => item.interestId);
+                        const { data: interestsData, error: fetchInterestsError } = await supabase
+                            .from('Interests')
+                            .select('interest')
+                            .in('interestId', interestIds);
+
+                        if (fetchInterestsError) throw fetchInterestsError;
+                        profile.interests = interestsData.map(interest => ({ interest_name: interest.interest }));
                     }
+
+                    setProfileData({ ...profile, theme: isDarkMode ? `${parsedTheme}_donker` : parsedTheme });
                 }
+            } catch (error) {
+                setError(error.message);
+            } finally {
+                setIsLoading(false);
             }
-            console.log(profileData)
-        } catch (error) {
-            console.error('Error fetching profile data:', error);
+        };
+
+        fetchData();
+    }, [actCode]);
+
+    return { profileData, isLoading, error };
+};
+
+const ProfileDetail = ({ label, value, icon }) => (
+    <p style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '2%' }}>
+        <strong style={{ width: '20%', minWidth: '150px' }}>{icon} {label}: </strong>
+        {value || 'Niet beschikbaar'}
+    </p>
+);
+
+const ProfileCard = () => {
+    const [theme, setTheme] = useState('blauw');
+    const [images, setImages] = useState([]); /* get images from database */
+    const { profileData, isLoading, error } = useFetchProfileData('1234'); // Replace with dynamic ActCode as needed
+    const navigate = useNavigate();
+    const themeColors = themes[theme] || themes.blauw;
+
+    useEffect(() => {
+        if (profileData.theme){
+            setTheme(profileData.theme);
         }
-    };
-
-
-
+    }, [profileData.theme]);
 
     const calculateAge = (birthdate) => {
+        if (!birthdate) return 'Onbekend';
         const birthDate = new Date(birthdate);
         const today = new Date();
         let age = today.getFullYear() - birthDate.getFullYear();
         const monthDifference = today.getMonth() - birthDate.getMonth();
-
-        // Adjust age if the birthday has not occurred yet this year
         if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
             age--;
         }
@@ -118,6 +123,9 @@ const ProfileCard = () => {
             lookingForArray = [];
         }
     }
+
+    if (isLoading) return <Spin tip="Profiel laden..." />;
+    if (error) return <p>Failed to load profile: {error}</p>;
 
     return (
         <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
@@ -172,67 +180,44 @@ const ProfileCard = () => {
 
                 <Divider />
 
-                <p style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '2%' }}>
-                    <strong style={{ width: '20%', minWidth: '150px' }}><EnvironmentOutlined /> Locatie: </strong>
-                    {profileData.location || ''}
-                </p>
-
+                <ProfileDetail label="Locatie" value={profileData.location} icon={<EnvironmentOutlined />} />
                 <Divider />
-
-                <p style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '2%' }}>
-                    <strong style={{ width: '20%', minWidth: '150px' }}><UserOutlined /> Geslacht: </strong>
-                    {profileData.gender || ''}
-                </p>
-
+                <ProfileDetail label="Geslacht" value={profileData.gender} icon={<UserOutlined />} />
                 <Divider />
-
-                <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
-                    <strong style={{width: '20%', minWidth: '150px'}}><StarOutlined/> Interesses: </strong>
-                    <div style={{display: 'flex', flexWrap: 'wrap', gap: '2px'}}>
-                        {profileData.interests && profileData.interests.length > 0 ? (
-                            profileData.interests.map((interest, index) => (
+                <ProfileDetail
+                    label="Interesses"
+                    value={
+                        profileData.interests && profileData.interests.length > 0
+                            ? profileData.interests.map((interest, index) => (
                                 <Tag key={index}>{interest.interest_name}</Tag>
                             ))
-                        ) : (
-                            <Tag>No interests available</Tag>
-                        )}
-                    </div>
-                </p>
-
-
-                <Divider/>
-
-                <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
-                    <strong style={{width: '20%', minWidth: '150px'}}><HeartOutlined/> Is op zoek naar: </strong>
-
-                    <div style={{display: 'flex', flexWrap: 'wrap', gap: '2px'}}>
-                        {Array.isArray(lookingForArray) ? (
-                            lookingForArray.map((option, index) => (
-                                <Tag key={index}>{option}</Tag>
-                            ))
-                        ) : (
-                            <Tag>Vrienden</Tag>
-                        )}
-                    </div>
-
-                </p>
-
+                            : 'Geen interesses beschikbaar'
+                    }
+                    icon={<StarOutlined />}
+                />
                 <Divider />
-
-                <p style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '2%' }}>
-                    <strong style={{ width: '20%', minWidth: '150px' }}><HomeOutlined /> Woonsituatie: </strong>
-                    {profileData.livingSituation || ''}
-                </p>
-
+                <ProfileDetail
+                    label="Is op zoek naar"
+                    value={
+                        Array.isArray(lookingForArray)
+                            ? lookingForArray.map((option, index) => <Tag key={index}>{option}</Tag>)
+                            : 'Vrienden'
+                    }
+                    icon={<HeartOutlined />}
+                />
                 <Divider />
+                <ProfileDetail
+                    label="Woonsituatie"
+                    value={profileData.livingSituation}
+                    icon={<HomeOutlined />}
+                />
+                <Divider />
+                <ProfileDetail
+                    label="Kan zich zelfstandig verplaatsen"
+                    value={profileData.mobility ? 'Ja' : 'Nee'}
+                    icon={<CarOutlined />}
+                />
 
-                <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
-                    <strong style={{width: '20%', minWidth: '150px'}}><CarOutlined/> Kan zich zelfstandig verplaatsen:
-                    </strong>
-                    {profileData.mobility ? 'Ja' : 'Nee'}
-                </p>
-
-                {/* Chat button in the bottom right */}
                 <Button
                     type="primary"
                     icon={<MessageOutlined/>}

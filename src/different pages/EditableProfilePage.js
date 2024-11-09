@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Card,
@@ -9,7 +9,7 @@ import {
     Select,
     Checkbox,
     Upload,
-    ConfigProvider
+    ConfigProvider, Spin
 } from 'antd';
 import {
     BookOutlined,
@@ -24,14 +24,95 @@ import {
     CarOutlined
 } from '@ant-design/icons';
 import 'antd/dist/reset.css';
-import '../CSS/Ant design overide.css';
+import '../CSS/AntDesignOverride.css';
 import { antThemeTokens, themes } from '../themes';
 import TextArea from "antd/es/input/TextArea";
+import {createClient} from "@supabase/supabase-js";
+
+const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
+
+const useFetchProfileData = (actCode) => {
+    const [profileData, setProfileData] = useState({});
+    const [interests, setInterests] = useState([])
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(()=> {
+        const fetchInterests = async () => {
+            try{
+                const {data, error} = await supabase.from('Interests').select('interest');
+                if (error) throw error;
+
+                setInterests(data.map(interest => interest.interest));
+            } catch (error) {
+                console.error('Error fetching interests:', error);
+            }
+        };
+        fetchInterests();
+    }, []);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const { data: profileData, error: profileError } = await supabase
+                    .from('Profile')
+                    .select('*')
+                    .eq('ActCode', actCode);
+
+                if (profileError) throw profileError;
+                if (profileData.length > 0) {
+                    const profile = profileData[0];
+
+                    let parsedTheme = 'blauw';
+                    let isDarkMode = false;
+
+                    if (profile.theme) {
+                        try {
+                            const [themeName, darkModeFlag] = JSON.parse(profile.theme);
+                            parsedTheme = themeName;
+                            isDarkMode = darkModeFlag;
+                        } catch (error) {
+                            console.error('Error parsing theme', error);
+                        }
+                    }
+
+                    const { data: profileInterests, error: interestsError } = await supabase
+                        .from('ProfileInterests')
+                        .select('interestId')
+                        .eq('ProfileId', profile.ActCode);
+
+                    if (interestsError) throw interestsError;
+
+                    if (profileInterests && profileInterests.length > 0) {
+                        const interestIds = profileInterests.map(item => item.interestId);
+                        const { data: interestsData, error: fetchInterestsError } = await supabase
+                            .from('Interests')
+                            .select('interest')
+                            .in('interestId', interestIds);
+
+                        if (fetchInterestsError) throw fetchInterestsError;
+                        profile.interests = interestsData.map(interest => ({ interest_name: interest.interest }));
+                    }
+
+                    setProfileData({ ...profile, theme: isDarkMode ? `${parsedTheme}_donker` : parsedTheme });
+                    console.log(profileData)
+                }
+            } catch (error) {
+                setError(error.message);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [actCode]);
+
+    return { profileData, isLoading, error };
+};
 
 const ProfileCard = () => {
     const [theme, setTheme] = useState('blauw');
     const themeColors = themes[theme] || themes.blauw;
-    const [images, setImages] = useState([]);
     const [profilePicture, setProfilePicture] = useState('https://example.com/photo.jpg');
     const [location, setLocation] = useState(null);
     const [locationOptions, setLocationOptions] = useState([
@@ -40,12 +121,44 @@ const ProfileCard = () => {
         { value: 'Gent', label: 'Gent' },
         { value: 'Antwerpen', label: 'Antwerpen' },
     ]);
-    const [inputValue, setInputValue] = useState('');
-    const [interests, setInterests] = useState(['Voetbal', 'Wandelen', 'Gezelschapsspellen spelen', 'Iets gaan drinken met vrienden']);
+    const [gender, setGender] = useState('')
+    const [biography, setBiography] = useState('');
+    const [livingSituation, setLivingSituation] = useState('');
+    const [mobility, setMobility]= useState('')
     const [selectedInterests, setSelectedInterests] = useState([]);
+    const [images, setImages] = useState([]);
+    const [inputValue, setInputValue] = useState('');
+    const [interests, setInterests] = useState([]);
     const [newInterest, setNewInterest] = useState('');
-    const [biography, setBiography] = useState(''); // State for managing biography content
+    const navigate = useNavigate();
+    const { profileData, isLoading, error} = useFetchProfileData('1547');
 
+    useEffect(() => {
+        if (profileData.theme){
+            setTheme(profileData.theme);
+        }
+        if (profileData.picture){
+            setProfilePicture(profileData.picture)
+        }
+        if (profileData.location) {
+            setLocation(profileData.location);
+        }
+        if (profileData.gender) {
+            setGender(profileData.gender)
+        }
+        if (profileData.interests) {
+            setSelectedInterests(profileData.interests.map(interest => interest.interest_name));
+        }
+        if (profileData.bio) {
+            setBiography(profileData.bio);
+        }
+        if (profileData.livingSituation){
+            setLivingSituation(profileData.livingSituation)
+        }
+        if (profileData.hasOwnProperty('mobility')) {
+            setMobility(profileData.mobility ? 'ja' : 'nee');
+        }
+    }, [profileData]);
 
     const handleLocationInputKeyDown = (e) => {
         if (e.key === 'Enter' && inputValue) {
@@ -74,7 +187,31 @@ const ProfileCard = () => {
         }
     };
 
-    const navigate = useNavigate();
+    const calculateAge = (birthdate) => {
+        if (!birthdate) return 'Onbekend';
+        const birthDate = new Date(birthdate);
+        const today = new Date();
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const monthDifference = today.getMonth() - birthDate.getMonth();
+        if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+        }
+        return age;
+    };
+
+    let lookingForArray = profileData.lookingFor;
+
+    if (typeof profileData.lookingFor === 'string') {
+        try {
+            lookingForArray = JSON.parse(profileData.lookingFor);
+        } catch (error) {
+            console.error('Error parsing JSON:', error);
+            lookingForArray = [];
+        }
+    }
+
+    if (isLoading) return <Spin tip="Profiel laden..." />;
+    if (error) return <p>Failed to load profile: {error}</p>;
 
     return (
         <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
@@ -83,7 +220,8 @@ const ProfileCard = () => {
                 position: 'relative',
                 width: '100%',
                 height: '100vh',
-                backgroundColor: themeColors.primary2
+                backgroundColor: themeColors.primary2,
+                color: themeColors.primary10
             }}>
                 <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
                     {images.length > 0 ? (
@@ -97,8 +235,8 @@ const ProfileCard = () => {
                         ))
                     ) : (
                         <Avatar
-                            src={profilePicture}
-                            alt="Martin's Profile Picture"
+                            src={profileData.picture || "https://example.com/photo.jpg"} // Fallback to default avatar
+                            alt={profileData.name || "No Name"}
                             size={100}
                             style={{margin: '20px auto', display: 'block'}}
                         />
@@ -119,12 +257,14 @@ const ProfileCard = () => {
 
                 />
 
-                <h2 style={{textAlign: 'center', margin: '0'}}>Martin, 27</h2>
+                <h2 style={{margin: '0', textAlign: 'center'}}>
+                    {profileData.name || 'Naam'}, {calculateAge(profileData.birthDate) || 'Leeftijd'}
+                </h2>
 
-                <Divider />
+                <Divider/>
 
-                <p style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '2%' }}>
-                    <strong style={{ width: '20%', minWidth: '150px' }}>
+                <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
+                    <strong style={{width: '20%', minWidth: '150px' }}>
                         <BookOutlined /> Biografie:
                     </strong>
 
@@ -175,6 +315,8 @@ const ProfileCard = () => {
                     <Select
                         style={{flex: 1, minWidth: '200px'}}
                         placeholder="Selecteer geslacht"
+                        value={gender}
+                        onChange={(value)=>setGender(value)}
                         options={[
                             {value: 'Man', label: 'Man'},
                             {value: 'Vrouw', label: 'Vrouw'},
@@ -194,7 +336,7 @@ const ProfileCard = () => {
                         style={{flex: 1, minWidth: '200px'}}
                         value={selectedInterests}
                         onChange={handleInterestSelectChange}
-                        options={interests.map(interest => ({value: interest, label: interest}))}
+                        options={interests.map(interest => ({ value: interest, label: interest }))}
                         onSearch={(value) => setNewInterest(value)}
                         onInputKeyDown={(e) => {
                             if (e.key === 'Enter') {
@@ -215,9 +357,9 @@ const ProfileCard = () => {
                         gap: '10px',
                         minWidth: '200px'
                     }}>
-                        <Checkbox>Vrienden</Checkbox>
-                        <Checkbox>Relatie</Checkbox>
-                        <Checkbox>Intieme ontmoeting</Checkbox>
+                        <Checkbox checked={lookingForArray.includes('vrienden')}>Vrienden</Checkbox>
+                        <Checkbox checked={lookingForArray.includes('relatie')}>Relatie</Checkbox>
+                        <Checkbox checked={lookingForArray.includes('Intieme ontmoeting')}>Intieme ontmoeting</Checkbox>
                     </div>
                 </p>
 
@@ -227,6 +369,7 @@ const ProfileCard = () => {
                     <strong style={{width: '20%', minWidth: '150px'}}><HomeOutlined/> Woonsituatie:</strong>
                     <Select
                         placeholder="Selecteer jouw woonsituatie"
+                        value = {livingSituation}
                         style={{flex: 1, minWidth: '200px'}}
                         options={[
                             {value: 'Alone', label: 'Woont alleen'},
@@ -243,8 +386,8 @@ const ProfileCard = () => {
                 <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
                     <strong style={{width: '20%', minWidth: '150px'}}><CarOutlined/> Kan zich zelfstanding verplaatsen:</strong>
                     <Select
+                        value = {mobility}
                         style={{flex: 1, minWidth: '200px'}}
-                        defaultValue="False"
                         options={[
                             {value: 'True', label: 'ja'},
                             {value: 'False', label: 'nee'},

@@ -1,9 +1,9 @@
 // ActivationPage.js
 import React, {useEffect, useState} from 'react';
-import '../CSS/Ant design overide.css'
+import '../CSS/AntDesignOverride.css'
 import 'antd/dist/reset.css';
 import { Form, Input, Button, Card, message, ConfigProvider, DatePicker } from 'antd';
-import '../CSS/Ant design overide.css'
+import '../CSS/AntDesignOverride.css'
 import { antThemeTokens, themes } from '../themes';
 
 const ActivationPage = () => {

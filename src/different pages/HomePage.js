@@ -1,5 +1,5 @@
 import 'antd/dist/reset.css'; // Import Ant Design styles
-import '../CSS/Ant design overide.css'
+import '../CSS/AntDesignOverride.css'
 import { antThemeTokens, themes } from '../themes';
 import { Button, ConfigProvider} from 'antd';
 import {MessageOutlined, UserOutlined, SearchOutlined, SettingOutlined } from "@ant-design/icons";

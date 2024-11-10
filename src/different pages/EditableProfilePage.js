@@ -31,19 +31,27 @@ import {createClient} from "@supabase/supabase-js";
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
 
+// Debounce utility function
+const debounce = (func, delay) => {
+    let timer;
+    return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => func(...args), delay);
+    };
+};
+
 const useFetchProfileData = (actCode) => {
     const [profileData, setProfileData] = useState({});
-    const [interests, setInterests] = useState([])
+    const [interest, setInterests] = useState([])
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(()=> {
         const fetchInterests = async () => {
             try{
-                const {data, error} = await supabase.from('Interests').select('interest');
+                const {data: interest, error} = await supabase.from('Interests').select('interest');
                 if (error) throw error;
-
-                setInterests(data.map(interest => interest.interest));
+                setInterests(interest)
             } catch (error) {
                 console.error('Error fetching interests:', error);
             }
@@ -62,7 +70,6 @@ const useFetchProfileData = (actCode) => {
                 if (profileError) throw profileError;
                 if (profileData.length > 0) {
                     const profile = profileData[0];
-
                     let parsedTheme = 'blauw';
                     let isDarkMode = false;
 
@@ -95,7 +102,7 @@ const useFetchProfileData = (actCode) => {
                     }
 
                     setProfileData({ ...profile, theme: isDarkMode ? `${parsedTheme}_donker` : parsedTheme });
-                    console.log(profileData)
+                    console.log("profile data: ", profileData)
                 }
             } catch (error) {
                 setError(error.message);
@@ -107,7 +114,7 @@ const useFetchProfileData = (actCode) => {
         fetchData();
     }, [actCode]);
 
-    return { profileData, isLoading, error };
+    return { profileData, isLoading, error, interest };
 };
 
 const ProfileCard = () => {
@@ -130,8 +137,9 @@ const ProfileCard = () => {
     const [inputValue, setInputValue] = useState('');
     const [interests, setInterests] = useState([]);
     const [newInterest, setNewInterest] = useState('');
+    const [interestOptions, setInterestOptions] = useState([])
     const navigate = useNavigate();
-    const { profileData, isLoading, error} = useFetchProfileData('1547');
+    const { profileData, isLoading, error, interest} = useFetchProfileData('1547');
 
     useEffect(() => {
         if (profileData.theme){
@@ -158,7 +166,33 @@ const ProfileCard = () => {
         if (profileData.hasOwnProperty('mobility')) {
             setMobility(profileData.mobility ? 'ja' : 'nee');
         }
+        if (interest && interest.length > 0) {
+            setInterestOptions(interest.map(interest => ({ value: interest.interest, label: interest.interest })));
+        }
+
+        console.log("Interest options: ",interest)
     }, [profileData]);
+
+    // Define async save functions
+    const saveField = async (field, value) => {
+        try {
+            const { error } = await supabase
+                .from('Profile')
+                .update({ [field]: value })
+                .eq('ActCode', profileData.ActCode);
+            if (error) throw error;
+            console.log(`${field} saved successfully`);
+        } catch (error) {
+            console.error(`Error saving ${field}:`, error);
+        }
+    };
+
+    // Debounced save functions
+    const debouncedSaveBiography = debounce((value) => saveField('bio', value), 1000);
+    const debouncedSaveLocation = debounce((value) => saveField('location', value), 1000);
+    const debouncedSaveGender = debounce((value) => saveField('gender', value), 1000);
+    const debouncedSaveLivingSituation = debounce((value) => saveField('livingSituation', value), 1000)
+    const debouncedSaveMobility = debounce((value) => saveField('mobility', value), 1000)
 
     const handleLocationInputKeyDown = (e) => {
         if (e.key === 'Enter' && inputValue) {
@@ -179,6 +213,32 @@ const ProfileCard = () => {
     const handleInterestSelectChange = (value) => {
         setSelectedInterests(value);
     };
+
+    const handleBiographyChange = (e) => {
+        const newValue = e.target.value;
+        setBiography(newValue);
+        debouncedSaveBiography(newValue);
+    };
+
+    const handleLocationChange = (value) => {
+        setLocation(value);
+        debouncedSaveLocation(value);
+    };
+
+    const handleGenderChange = (value) => {
+        setGender(value);
+        debouncedSaveGender(value);
+    };
+
+    const handleLivingChange = (value) => {
+        setLivingSituation(value);
+        debouncedSaveLivingSituation(value);
+    }
+
+    const handleMobilityChange = (value)=>{
+        setMobility(value);
+        debouncedSaveMobility(value);
+    }
 
     const handleProfilePictureChange = ({ file }) => {
         if (file.status === 'done') {
@@ -249,14 +309,6 @@ const ProfileCard = () => {
                     </div>
                 </div>
 
-                <Button
-                    type="text"
-                    icon={<CloseOutlined/>}
-                    style={{position: 'absolute', top: '10px', right: '10px'}}
-                    onClick={() => navigate('/home')}
-
-                />
-
                 <h2 style={{margin: '0', textAlign: 'center'}}>
                     {profileData.name || 'Naam'}, {calculateAge(profileData.birthDate) || 'Leeftijd'}
                 </h2>
@@ -274,7 +326,7 @@ const ProfileCard = () => {
                             rows={4}
                             placeholder="Vertel iets over jezelf"
                             value={biography}
-                            onChange={(e) => setBiography(e.target.value)}
+                            onChange={handleBiographyChange}
                             maxLength={200}
                         />
                         <div
@@ -301,7 +353,7 @@ const ProfileCard = () => {
                         placeholder="Selecteer locatie of voeg toe"
                         style={{flex: 1, minWidth: '200px'}}
                         value={location}
-                        onChange={(value) => setLocation(value)}
+                        onChange={handleLocationChange}
                         options={locationOptions}
                         onSearch={(value) => setInputValue(value)}
                         onInputKeyDown={handleLocationInputKeyDown}
@@ -316,7 +368,7 @@ const ProfileCard = () => {
                         style={{flex: 1, minWidth: '200px'}}
                         placeholder="Selecteer geslacht"
                         value={gender}
-                        onChange={(value)=>setGender(value)}
+                        onChange={handleGenderChange}
                         options={[
                             {value: 'Man', label: 'Man'},
                             {value: 'Vrouw', label: 'Vrouw'},
@@ -334,9 +386,9 @@ const ProfileCard = () => {
                         allowClear
                         placeholder="Selecteer interesses of voeg toe"
                         style={{flex: 1, minWidth: '200px'}}
+                        options={interestOptions}
                         value={selectedInterests}
                         onChange={handleInterestSelectChange}
-                        options={interests.map(interest => ({ value: interest, label: interest }))}
                         onSearch={(value) => setNewInterest(value)}
                         onInputKeyDown={(e) => {
                             if (e.key === 'Enter') {
@@ -371,6 +423,7 @@ const ProfileCard = () => {
                         placeholder="Selecteer jouw woonsituatie"
                         value = {livingSituation}
                         style={{flex: 1, minWidth: '200px'}}
+                        onChange = {handleLivingChange}
                         options={[
                             {value: 'Alone', label: 'Woont alleen'},
                             {value: 'Guided', label: 'Begeleid wonen'},
@@ -388,6 +441,7 @@ const ProfileCard = () => {
                     <Select
                         value = {mobility}
                         style={{flex: 1, minWidth: '200px'}}
+                        onChange={handleMobilityChange}
                         options={[
                             {value: 'True', label: 'ja'},
                             {value: 'False', label: 'nee'},

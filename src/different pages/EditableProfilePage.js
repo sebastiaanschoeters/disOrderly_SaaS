@@ -1,8 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
-    Card,
-    Tag,
     Avatar,
     Button,
     Divider,
@@ -13,8 +10,6 @@ import {
 } from 'antd';
 import {
     BookOutlined,
-    CloseOutlined,
-    SaveOutlined,
     UploadOutlined,
     EnvironmentOutlined,
     UserOutlined,
@@ -102,7 +97,6 @@ const useFetchProfileData = (actCode) => {
                     }
 
                     setProfileData({ ...profile, theme: isDarkMode ? `${parsedTheme}_donker` : parsedTheme });
-                    console.log("profile data: ", profileData)
                 }
             } catch (error) {
                 setError(error.message);
@@ -163,7 +157,7 @@ const ProfileCard = () => {
         if (profileData.livingSituation){
             setLivingSituation(profileData.livingSituation)
         }
-        if (profileData.hasOwnProperty('mobility')) {
+        if (profileData.mobility) {
             setMobility(profileData.mobility ? 'ja' : 'nee');
         }
         if (interest && interest.length > 0) {

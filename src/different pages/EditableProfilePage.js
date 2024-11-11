@@ -138,8 +138,8 @@ const ProfileCard = () => {
     const [interests, setInterests] = useState([]);
     const [newInterest, setNewInterest] = useState('');
     const [interestOptions, setInterestOptions] = useState([])
-    const navigate = useNavigate();
-    const { profileData, isLoading, error, interest} = useFetchProfileData('1234');
+    const [lookingForArray, setLookingForArray] = useState([])
+    const { profileData, isLoading, error, interest} = useFetchProfileData('1547');
 
     useEffect(() => {
         if (profileData.theme){
@@ -169,6 +169,16 @@ const ProfileCard = () => {
         if (interest && interest.length > 0) {
             setInterestOptions(interest.map(interest => ({ value: interest.interest, label: interest.interest })));
         }
+        if (profileData.lookingFor && Array.isArray(profileData.lookingFor)) {
+            setLookingForArray(profileData.lookingFor);
+        } else if (typeof profileData.lookingFor === 'string') {
+            try {
+                const parsedLookingFor = JSON.parse(profileData.lookingFor);
+                setLookingForArray(parsedLookingFor);
+            } catch (error) {
+                console.error('Error parsing lookingFor:', error);
+            }
+        }
     }, [profileData]);
 
     // Define async save functions
@@ -192,38 +202,145 @@ const ProfileCard = () => {
     const debouncedSaveGender = debounce((value) => saveField('gender', value), 1000);
     const debouncedSaveLivingSituation = debounce((value) => saveField('livingSituation', value), 1000)
     const debouncedSaveMobility = debounce((value) => saveField('mobility', value), 1000)
+    const debouncedSaveLookingFor = debounce(async (updatedLookingFor) => {
+        try {
+            const { data, error } = await supabase
+                .from('Profile')
+                .update({ lookingFor: updatedLookingFor })
+                .eq('ActCode', profileData.ActCode);
+            if (error) throw error;
 
-    const handleLocationInputKeyDown = (e) => {
+            console.log('Looking for updated successfully');
+        } catch (error) {
+            console.error('Error saving looking for:', error);
+        }
+    }, 1000);
+
+    const handleLocationInputKeyDown = async (e) => {
         if (e.key === 'Enter' && inputValue) {
             const newOption = { value: inputValue, label: inputValue };
             setLocationOptions([...locationOptions, newOption]);
             setLocation(inputValue);
+
+            // Save the new location to the database
+            try {
+                const { data, error } = await supabase
+                    .from('Locations')
+                    .insert({ location: inputValue });
+
+                if (error) {
+                    throw error;
+                }
+
+                console.log(`New location added: ${inputValue}`);
+            } catch (error) {
+                console.error('Error adding new location:', error);
+            }
+
             setInputValue('');
         }
     };
 
-    const handleAddInterest = () => {
+    const handleAddInterest = async () => {
         if (newInterest && !interests.includes(newInterest)) {
-            setInterests([...interests, newInterest]);
-            setNewInterest('');
+            // Step 1: Save new interest to database
+            try {
+                // Check if the interest already exists in the database to prevent duplicates
+                const { data: existingInterest, error: fetchError } = await supabase
+                    .from('Interests')
+                    .select('interestId')
+                    .eq('interest', newInterest)
+                    .single();
+
+                let interestId;
+
+                if (fetchError) {
+                    // Handle any fetching errors or insert if interest does not exist
+                    const { data: insertedInterest, error: insertError } = await supabase
+                        .from('Interests')
+                        .insert({ interest: newInterest })
+                        .select('interestId')
+                        .single();
+
+                    if (insertError) throw insertError;
+                    interestId = insertedInterest.interestId;
+                    console.log(`inserted interest: ${insertedInterest}`)
+                } else {
+                    // Interest already exists, get its ID
+                    interestId = existingInterest.interestId;
+
+                    console.log(`existing interest: ${existingInterest}`)
+                }
+
+                // Step 2: Associate the interest with the current profile
+                await supabase.from('ProfileInterests').insert({
+                    ProfileId: profileData.ActCode,
+                    interestId: interestId
+                });
+
+                // Update state to reflect new interest
+                setInterests([...interests, newInterest]);
+                setSelectedInterests([...selectedInterests, newInterest]);
+                setNewInterest('');
+            } catch (error) {
+                console.error('Error adding new interest:', error);
+            }
         }
     };
+
 
     const handleInterestSelectChange = async (value) => {
-        setSelectedInterests(value);
-        try {
-            // Example Supabase update logic (assuming profileData.ActCode is available)
-            await supabase
-                .from('ProfileInterests')
-                .delete()
-                .eq('ProfileId', profileData.ActCode); // Delete existing interests
+        const selectedInterestNames = value;
+        setSelectedInterests(selectedInterestNames);
 
-            const newInterests = value.map(interest => ({ ProfileId: profileData.ActCode, interestId: interest }));
-            await supabase.from('ProfileInterests').insert(newInterests); // Insert new interests
+        try {
+            // Retrieve existing interests linked to this profile
+            const { data: existingInterests, error: existingError } = await supabase
+                .from('ProfileInterests')
+                .select('interestId')
+                .eq('ProfileId', profileData.ActCode);
+
+            if (existingError) throw existingError;
+
+            // Create a set of existing interest IDs for efficient lookup
+            const existingInterestIds = new Set(existingInterests.map((item) => item.interestId));
+
+            // Retrieve IDs for newly selected interests from the `Interests` table
+            const { data: allInterests, error: fetchError } = await supabase
+                .from('Interests')
+                .select('interestId, interest')
+                .in('interest', selectedInterestNames);
+
+            if (fetchError) throw fetchError;
+
+            const newInterestIds = allInterests.map((interest) => interest.interestId);
+
+            // Determine interests to add and remove
+            const interestsToAdd = newInterestIds.filter((id) => !existingInterestIds.has(id));
+            const interestsToRemove = Array.from(existingInterestIds).filter((id) => !newInterestIds.includes(id));
+
+            // Insert new interests if any
+            if (interestsToAdd.length > 0) {
+                await supabase
+                    .from('ProfileInterests')
+                    .insert(interestsToAdd.map((id) => ({ ProfileId: profileData.ActCode, interestId: id })));
+            }
+
+            // Remove deselected interests if any
+            if (interestsToRemove.length > 0) {
+                await supabase
+                    .from('ProfileInterests')
+                    .delete()
+                    .eq('ProfileId', profileData.ActCode)
+                    .in('interestId', interestsToRemove);
+            }
+
+            console.log('Updated interests successfully');
         } catch (error) {
-            console.error("Error updating interests:", error);
+            console.error('Error updating interests:', error);
         }
     };
+
 
     const handleBiographyChange = (e) => {
         const newValue = e.target.value;
@@ -239,6 +356,21 @@ const ProfileCard = () => {
     const handleGenderChange = (value) => {
         setGender(value);
         debouncedSaveGender(value);
+    };
+
+    const handleCheckboxChange = (value) => {
+        const updatedLookingFor = [...lookingForArray];
+        if (updatedLookingFor.includes(value)) {
+            // If the value is already in the array, remove it (unchecked)
+            const index = updatedLookingFor.indexOf(value);
+            updatedLookingFor.splice(index, 1);
+        } else {
+            // Otherwise, add it (checked)
+            updatedLookingFor.push(value);
+        }
+
+        setLookingForArray(updatedLookingFor);
+        debouncedSaveLookingFor(updatedLookingFor); // Save updated value to the database
     };
 
     const handleLivingChange = (value) => {
@@ -269,17 +401,6 @@ const ProfileCard = () => {
         }
         return age;
     };
-
-    let lookingForArray = profileData.lookingFor;
-
-    if (typeof profileData.lookingFor === 'string') {
-        try {
-            lookingForArray = JSON.parse(profileData.lookingFor);
-        } catch (error) {
-            console.error('Error parsing JSON:', error);
-            lookingForArray = [];
-        }
-    }
 
     if (isLoading) return <Spin tip="Profiel laden..." />;
     if (error) return <p>Failed to load profile: {error}</p>;
@@ -327,13 +448,13 @@ const ProfileCard = () => {
                 <Divider/>
 
                 <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
-                    <strong style={{width: '20%', minWidth: '150px' }}>
-                        <BookOutlined /> Biografie:
+                    <strong style={{width: '20%', minWidth: '150px'}}>
+                        <BookOutlined/> Biografie:
                     </strong>
 
-                    <div style={{ position: 'relative', flex: 1, minWidth: '200px' }}>
+                    <div style={{position: 'relative', flex: 1, minWidth: '200px'}}>
                         <TextArea
-                            style={{ width: '100%', paddingBottom: '20px' }}
+                            style={{width: '100%', paddingBottom: '20px'}}
                             rows={4}
                             placeholder="Vertel iets over jezelf"
                             value={biography}
@@ -420,11 +541,27 @@ const ProfileCard = () => {
                         gap: '10px',
                         minWidth: '200px'
                     }}>
-                        <Checkbox checked={lookingForArray.includes('vrienden')}>Vrienden</Checkbox>
-                        <Checkbox checked={lookingForArray.includes('relatie')}>Relatie</Checkbox>
-                        <Checkbox checked={lookingForArray.includes('Intieme ontmoeting')}>Intieme ontmoeting</Checkbox>
+                        <Checkbox
+                            checked={lookingForArray.includes('vrienden')}
+                            onChange={() => handleCheckboxChange('vrienden')}
+                        >
+                            Vrienden
+                        </Checkbox>
+                        <Checkbox
+                            checked={lookingForArray.includes('relatie')}
+                            onChange={() => handleCheckboxChange('relatie')}
+                        >
+                            Relatie
+                        </Checkbox>
+                        <Checkbox
+                            checked={lookingForArray.includes('Intieme ontmoeting')}
+                            onChange={() => handleCheckboxChange('Intieme ontmoeting')}
+                        >
+                            Intieme ontmoeting
+                        </Checkbox>
                     </div>
                 </p>
+
 
                 <Divider/>
 
@@ -432,9 +569,9 @@ const ProfileCard = () => {
                     <strong style={{width: '20%', minWidth: '150px'}}><HomeOutlined/> Woonsituatie:</strong>
                     <Select
                         placeholder="Selecteer jouw woonsituatie"
-                        value = {livingSituation}
+                        value={livingSituation}
                         style={{flex: 1, minWidth: '200px'}}
-                        onChange = {handleLivingChange}
+                        onChange={handleLivingChange}
                         options={[
                             {value: 'Alone', label: 'Woont alleen'},
                             {value: 'Guided', label: 'Begeleid wonen'},
@@ -450,7 +587,7 @@ const ProfileCard = () => {
                 <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
                     <strong style={{width: '20%', minWidth: '150px'}}><CarOutlined/> Kan zich zelfstanding verplaatsen:</strong>
                     <Select
-                        value = {mobility}
+                        value={mobility}
                         style={{flex: 1, minWidth: '200px'}}
                         onChange={handleMobilityChange}
                         options={[

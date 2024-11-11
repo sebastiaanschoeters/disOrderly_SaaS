@@ -139,7 +139,7 @@ const ProfileCard = () => {
     const [newInterest, setNewInterest] = useState('');
     const [interestOptions, setInterestOptions] = useState([])
     const navigate = useNavigate();
-    const { profileData, isLoading, error, interest} = useFetchProfileData('1547');
+    const { profileData, isLoading, error, interest} = useFetchProfileData('1234');
 
     useEffect(() => {
         if (profileData.theme){
@@ -169,19 +169,18 @@ const ProfileCard = () => {
         if (interest && interest.length > 0) {
             setInterestOptions(interest.map(interest => ({ value: interest.interest, label: interest.interest })));
         }
-
-        console.log("Interest options: ",interest)
     }, [profileData]);
 
     // Define async save functions
     const saveField = async (field, value) => {
         try {
-            const { error } = await supabase
+            const { data, error } = await supabase
                 .from('Profile')
                 .update({ [field]: value })
                 .eq('ActCode', profileData.ActCode);
             if (error) throw error;
-            console.log(`${field} saved successfully`);
+
+            console.log(`${field} saved successfully with value ${value}`);
         } catch (error) {
             console.error(`Error saving ${field}:`, error);
         }

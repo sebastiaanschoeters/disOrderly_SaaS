@@ -210,8 +210,20 @@ const ProfileCard = () => {
         }
     };
 
-    const handleInterestSelectChange = (value) => {
+    const handleInterestSelectChange = async (value) => {
         setSelectedInterests(value);
+        try {
+            // Example Supabase update logic (assuming profileData.ActCode is available)
+            await supabase
+                .from('ProfileInterests')
+                .delete()
+                .eq('ProfileId', profileData.ActCode); // Delete existing interests
+
+            const newInterests = value.map(interest => ({ ProfileId: profileData.ActCode, interestId: interest }));
+            await supabase.from('ProfileInterests').insert(newInterests); // Insert new interests
+        } catch (error) {
+            console.error("Error updating interests:", error);
+        }
     };
 
     const handleBiographyChange = (e) => {
@@ -448,19 +460,6 @@ const ProfileCard = () => {
                         ]}
                     />
                 </p>
-
-                <Button
-                    type="primary"
-                    icon={<SaveOutlined/>}
-                    style={{
-                        position: 'fixed',
-                        bottom: '20px',
-                        right: '20px',
-                        zIndex: 1000
-                    }}
-                >
-                    Veranderingen opslaan
-                </Button>
             </div>
         </ConfigProvider>
     );

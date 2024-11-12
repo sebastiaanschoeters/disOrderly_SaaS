@@ -186,7 +186,7 @@ const ProfileCard = () => {
                 style={{
                     padding: '20px',
                     position: 'relative',
-                    width: '100%',
+                    minWidth: '100%',
                     minHeight: '100vh',
                     backgroundColor: themeColors.primary2,
                     color: themeColors.primary10,
@@ -292,16 +292,16 @@ const ProfileCard = () => {
 
                 <p style={{ display: 'flex', alignItems: 'center', gap: '2%' }}>
                     <strong style={{ width: '20%' }}>
-                        <HeartOutlined /> Seksualiteit:
+                        <HeartOutlined /> Ik ben geïntereseerd in:
                     </strong>
                     <Select
                         style={{ width: '78%' }}
                         placeholder="Selecteer seksualiteit"
                         value={sexuality}
                         options={[
-                            { value: 'Hetero', label: 'Heteroseksueel' },
-                            { value: 'Bi', label: 'Biseksueel' },
-                            { value: 'Homo', label: 'Homoseksueel' },
+                            { value: 'Mannen', label: 'Mannen' },
+                            { value: 'Vrouwen', label: 'Vrouwen' },
+                            { value: 'Beide', label: 'Beide' },
                         ]}
                         onChange={handleSexualityChange}
                     />

@@ -16,7 +16,7 @@ import {
     HeartOutlined,
     StarOutlined,
     HomeOutlined,
-    CarOutlined
+    CarOutlined, PlusCircleOutlined
 } from '@ant-design/icons';
 import 'antd/dist/reset.css';
 import '../CSS/AntDesignOverride.css';
@@ -158,7 +158,7 @@ const ProfileCard = () => {
             setLivingSituation(profileData.livingSituation)
         }
         if (profileData.mobility) {
-            setMobility(profileData.mobility ? 'ja' : 'nee');
+            setMobility(profileData.mobility ? 'Ja' : 'Nee');
         }
         if (interest && interest.length > 0) {
             setInterestOptions(interest.map(interest => ({ value: interest.interest, label: interest.interest })));
@@ -235,35 +235,42 @@ const ProfileCard = () => {
         }
     };
 
+    const capitalizeFirstLetter = (str) => {
+        return str
+            .split(' ')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+            .join(' ');
+    };
+
+
     const handleAddInterest = async () => {
-        if (newInterest && !interests.includes(newInterest)) {
-            // Step 1: Save new interest to database
+        const capitalizedInterest = capitalizeFirstLetter(newInterest);
+        if (capitalizedInterest && !interests.includes(capitalizedInterest)) {
             try {
-                // Check if the interest already exists in the database to prevent duplicates
+                // Step 1: Save new interest to database
                 const { data: existingInterest, error: fetchError } = await supabase
                     .from('Interests')
                     .select('interestId')
-                    .eq('interest', newInterest)
+                    .eq('interest', capitalizedInterest)
                     .single();
 
                 let interestId;
 
                 if (fetchError) {
-                    // Handle any fetching errors or insert if interest does not exist
+                    // Handle fetching error or insert if interest does not exist
                     const { data: insertedInterest, error: insertError } = await supabase
                         .from('Interests')
-                        .insert({ interest: newInterest })
+                        .insert({ interest: capitalizedInterest })
                         .select('interestId')
                         .single();
 
                     if (insertError) throw insertError;
                     interestId = insertedInterest.interestId;
-                    console.log(`inserted interest: ${insertedInterest}`)
+                    console.log(`Inserted interest: ${insertedInterest}`);
                 } else {
                     // Interest already exists, get its ID
                     interestId = existingInterest.interestId;
-
-                    console.log(`existing interest: ${existingInterest}`)
+                    console.log(`Existing interest: ${existingInterest}`);
                 }
 
                 // Step 2: Associate the interest with the current profile
@@ -273,14 +280,17 @@ const ProfileCard = () => {
                 });
 
                 // Update state to reflect new interest
-                setInterests([...interests, newInterest]);
-                setSelectedInterests([...selectedInterests, newInterest]);
+                const newInterestOption = { value: capitalizedInterest, label: capitalizedInterest };
+                setInterestOptions([...interestOptions, newInterestOption]);
+                setInterests([...interests, capitalizedInterest]);
+                setSelectedInterests([...selectedInterests, capitalizedInterest]);
                 setNewInterest('');
             } catch (error) {
                 console.error('Error adding new interest:', error);
             }
         }
     };
+
 
 
     const handleInterestSelectChange = async (value) => {
@@ -404,8 +414,8 @@ const ProfileCard = () => {
             <div style={{
                 padding: '20px',
                 position: 'relative',
-                width: '100%',
-                height: '100vh',
+                minWidth: '100%',
+                minHeight: '100vh',
                 backgroundColor: themeColors.primary2,
                 color: themeColors.primary10
             }}>
@@ -498,7 +508,7 @@ const ProfileCard = () => {
                         options={[
                             {value: 'Man', label: 'Man'},
                             {value: 'Vrouw', label: 'Vrouw'},
-                            {value: 'Non-binary', label: 'Non-binair'},
+                            {value: 'Non-binair', label: 'Non-binair'},
                         ]}
                     />
                 </p>
@@ -521,6 +531,12 @@ const ProfileCard = () => {
                                 handleAddInterest();
                             }
                         }}
+                        notFoundContent={
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <span role="img" aria-label="no data" style={{ fontSize: '2rem' }}><PlusCircleOutlined/></span>
+                                <span>Druk op enter om deze nieuwe interesse toe te voegen</span>
+                            </div>
+                        }
                     />
                 </p>
 
@@ -536,14 +552,14 @@ const ProfileCard = () => {
                         minWidth: '200px'
                     }}>
                         <Checkbox
-                            checked={lookingForArray.includes('vrienden')}
-                            onChange={() => handleCheckboxChange('vrienden')}
+                            checked={lookingForArray.includes('Vrienden')}
+                            onChange={() => handleCheckboxChange('Vrienden')}
                         >
                             Vrienden
                         </Checkbox>
                         <Checkbox
-                            checked={lookingForArray.includes('relatie')}
-                            onChange={() => handleCheckboxChange('relatie')}
+                            checked={lookingForArray.includes('Relatie')}
+                            onChange={() => handleCheckboxChange('Relatie')}
                         >
                             Relatie
                         </Checkbox>
@@ -567,11 +583,11 @@ const ProfileCard = () => {
                         style={{flex: 1, minWidth: '200px'}}
                         onChange={handleLivingChange}
                         options={[
-                            {value: 'Alone', label: 'Woont alleen'},
-                            {value: 'Guided', label: 'Begeleid wonen'},
-                            {value: 'Parents', label: 'Bij ouders'},
-                            {value: 'group', label: 'In groepsverband'},
-                            {value: 'instance', label: 'zorginstelling'},
+                            {value: 'Woont alleen', label: 'Woont alleen'},
+                            {value: 'Begeleid wonen', label: 'Begeleid wonen'},
+                            {value: 'Woont in bij ouders', label: 'Woont in bij ouders'},
+                            {value: 'Woont in groepsverband', label: 'Woont in groepsverband'},
+                            {value: 'Woont in zorginstelling', label: 'Woont in zorginstelling'},
                         ]}
                     />
                 </p>
@@ -585,8 +601,8 @@ const ProfileCard = () => {
                         style={{flex: 1, minWidth: '200px'}}
                         onChange={handleMobilityChange}
                         options={[
-                            {value: 'True', label: 'ja'},
-                            {value: 'False', label: 'nee'},
+                            {value: 'True', label: 'Ja'},
+                            {value: 'False', label: 'Nee'},
                         ]}
                     />
                 </p>

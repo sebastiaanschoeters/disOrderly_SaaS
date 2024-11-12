@@ -82,7 +82,7 @@ const useFetchProfileData = (actCode) => {
 };
 
 const ProfileDetail = ({ label, value, icon }) => (
-    <p style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '2%' }}>
+    <p style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '5px' }}>
         <strong style={{ width: '20%', minWidth: '150px' }}>{icon} {label}: </strong>
         {value || 'Niet beschikbaar'}
     </p>
@@ -91,8 +91,7 @@ const ProfileDetail = ({ label, value, icon }) => (
 const ProfileCard = () => {
     const [theme, setTheme] = useState('blauw');
     const [images, setImages] = useState([]); /* get images from database */
-    const { profileData, isLoading, error } = useFetchProfileData('1234'); // Replace with dynamic ActCode as needed
-    const navigate = useNavigate();
+    const { profileData, isLoading, error } = useFetchProfileData('1547'); // Replace with dynamic ActCode as needed
     const themeColors = themes[theme] || themes.blauw;
 
     useEffect(() => {
@@ -133,8 +132,8 @@ const ProfileCard = () => {
                 style={{
                     padding: '20px',
                     position: 'relative',
-                    width: '100%',
-                    height: '100vh',
+                    minWidth: '100%',
+                    minHeight: '100vh',
                     backgroundColor: themeColors.primary2,
                     color: themeColors.primary10
                 }}
@@ -168,15 +167,6 @@ const ProfileCard = () => {
                         </div>
                     </div>
                 </div>
-
-                {/* Exit button in the top right */}
-                <Button
-                    type="text"
-                    icon={<CloseOutlined />}
-                    style={{ position: 'absolute', top: '10px', right: '10px' }}
-                    onClick={() => navigate('/search')}
-
-                />
 
                 <Divider />
 

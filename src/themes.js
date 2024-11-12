@@ -37,7 +37,7 @@ export const antThemeTokens = (colors) => ({
     colorTextSecondary: colors.primary8,   // Secondary text color
     colorTextDescription: colors.primary6, // Text color for descriptions
     colorTextPlaceholder: colors.primary6, // Placeholder text color
-    colorTextDisabled: colors.primary3,    // Disabled text color
+    colorTextDisabled: colors.primary7,    // Disabled text color
     colorTextHeading: colors.primary9,     // Text color for headings
 });
 

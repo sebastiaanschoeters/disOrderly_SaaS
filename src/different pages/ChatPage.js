@@ -1,45 +1,70 @@
 import React, { useState, useRef , useEffect } from 'react';
-import { Avatar, Input, Button, Typography, ConfigProvider } from 'antd';
+import {Avatar, Input, Button, ConfigProvider, message} from 'antd';
 import { useNavigate, useParams } from 'react-router-dom';
 import { antThemeTokens, themes } from '../themes';
 import { CloseOutlined } from '@ant-design/icons';
+import { createClient } from "@supabase/supabase-js";
 import '../CSS/ChatPage.css';
 
-const { Title } = Typography;
 
-const sampleMessages = [
-    { text: "Hey! Alles goed?", sender: "Alice", timestamp: "10:15" },
-    { text: "Ja hoor, met mij is alles goed en met jou?", sender: "Me", timestamp: "10:16" },
-    { text: "Met mij ook goed?", sender: "Alice", timestamp: "10:17" },
-    { text: "Hoe zit het met hobbies?", sender: "Alice", timestamp: "10:17" },
-    { text: "Ik speel graag voetbal en kijk veel films, jij?", sender: "Me", timestamp: "10:18" },
-    { text: "Ik kijk ook graag films, welk is jouw favoriet", sender: "Alice", timestamp: "10:19" },
-    { text: "Harry Potter natuurlijk", sender: "Me", timestamp: "10:20" },
-    { text: "Ah ja, Harry Potter is inderdaad erg goed, nog andere?", sender: "Alice", timestamp: "10:21" },
-    { text: "Uhm, Spider-man en Forrest Gump", sender: "Me", timestamp: "10:22" },
-    { text: "Beide zijn erg leuk ja", sender: "Alice", timestamp: "10:23" },
-    { text: "En jij?", sender: "Me", timestamp: "10:24" },
-];
+const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
 
 const ChatPage = () => {
     const { name } = useParams();
     const navigate = useNavigate();
     const [theme, setTheme] = useState('blue');
     const themeColors = themes[theme] || themes.blauw;
-    const [messages, setMessages] = useState(sampleMessages);
-    const [newMessage, setNewMessage] = useState('');
+    const [messages, setMessages] = useState([]);
+    const [newMessage, setNewMessage] = useState("");
+    const chatroomId = 4;
+    const senderId = 1234;
+    const receiverId = 1547;
 
     const dummyRef = useRef(null);
 
-    const handleSendMessage = () => {
-        if (newMessage.trim() !== '') {
-            const newMessages = [
-                ...messages,
-                { text: newMessage, sender: 'Me', timestamp: `${String(new Date().getHours()).padStart(2, '0')}:${String(new Date().getMinutes()).padStart(2, '0')}` },
-            ];
-            setMessages(newMessages);
-            setNewMessage('');
+    const fetchMessages = async () => {
+        const { data, error } = await supabase
+            .from('messages')
+            .select('id, sender, created_at, messageContent')
+            .eq('chatroom', chatroomId)
+            .order('created_at', { ascending: true });
+
+        if (error) {
+            console.error("Error fetching messages:", error);
+            return;
         }
+
+        setMessages(data || []);
+    }
+
+    useEffect(() => {
+        fetchMessages();
+    }, []);
+
+    useEffect(() => {
+        if (dummyRef.current) {
+            dummyRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+    }, [messages]);
+
+    const handleSendMessage = async () => {
+        if (newMessage.trim() === "") return;
+
+        const { error } = await supabase
+            .from("messages")
+            .insert([{ chatroom: chatroomId, sender: senderId, messageContent: newMessage }]);
+
+        if (error) {
+            console.error("Error sending message:", error);
+            return;
+        }
+
+        setNewMessage("");
+        setMessages(prevMessages => [
+            ...prevMessages,
+            { id: Date.now(), sender: senderId, messageContent: newMessage, created_at: new Date() }
+        ]);
+        fetchMessages();
     };
 
     const handleCloseChat = () => {
@@ -49,13 +74,6 @@ const ChatPage = () => {
     const handleProfile = () => {
         navigate('/profile');
     };
-
-
-    useEffect(() => {
-        if (dummyRef.current) {
-            dummyRef.current.scrollIntoView({behavior: 'smooth'});
-        }
-    }, [messages]);
 
     const styles = {
         chatContainer: {
@@ -77,17 +95,11 @@ const ChatPage = () => {
             marginBottom: '15px',
             position: 'relative',
         },
-        headerAvatar: {
-            marginRight: '10px',
-            color: '#fff',
-            cursor: 'pointer',
-        },
         closeButton: {
             position: 'absolute',
             right: '10px',
             background: 'transparent',
             border: 'none',
-            color: '#fff',
             cursor: 'pointer',
         },
         messageList: {
@@ -96,14 +108,12 @@ const ChatPage = () => {
             marginBottom: '15px',
             display: 'flex',
             flexDirection: 'column',
-            alignItems: 'flex-start',
         },
         messageItem: {
             marginBottom: '15px',
             padding: '8px 12px',
             borderRadius: '15px',
             maxWidth: '50%',
-            display: 'inline-block',
             wordBreak: 'break-word',
             position: 'relative',
         },
@@ -111,27 +121,20 @@ const ChatPage = () => {
             backgroundColor: themeColors.primary1,
             alignSelf: 'flex-end',
             borderTopRightRadius: '0',
-            marginLeft: 'auto',
+            color: themeColors.primary10,
         },
         messageReceiver: {
             backgroundColor: themeColors.primary4,
             alignSelf: 'flex-start',
             borderTopLeftRadius: '0',
-        },
-        inputContainer: {
-            display: 'flex',
-            alignItems: 'center',
-        },
-        input: {
-            flexGrow: 1,
-            marginRight: '10px',
+            color: themeColors.primary10,
         },
         timestamp: {
             fontSize: '12px',
-            color: themeColors.primary6,
             position: 'absolute',
             bottom: '-15px',
             right: '10px',
+            color: themeColors.primary8,
         }
     };
 
@@ -139,24 +142,28 @@ const ChatPage = () => {
         <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
             <div style={styles.chatContainer}>
                 <div style={styles.header}>
-                    <Avatar  size="large" onClick={handleProfile}>U</Avatar>
-                    <Title level={4} style={{ margin: 0, color: themeColors.primary1 }}>{name}</Title>
+                    <Avatar size="large" onClick={handleProfile}>U</Avatar>
+                    <h2 style={{ margin: 0, fontSize: '2rem', color: themeColors.primary1 }}>{name}</h2>
                     <button style={styles.closeButton} onClick={handleCloseChat}>
                         <CloseOutlined />
                     </button>
                 </div>
                 <div style={styles.messageList}>
-                    {messages.map((message, index) => (
-                        <div key={index} style={{
-                            ...styles.messageItem,
-                            ...(message.sender === 'Me' ? styles.messageSender : styles.messageReceiver),
-                            alignSelf: message.sender === 'Me' ? 'flex-end' : 'flex-start',
-                        }}>
-                            {message.text}
-                            <div style={styles.timestamp}>{message.timestamp}</div>
+                    {messages.map((message) => (
+                        <div
+                            key={message.id}
+                            style={{
+                                ...styles.messageItem,
+                                ...(message.sender === senderId ? styles.messageSender : styles.messageReceiver)
+                            }}
+                        >
+                            <p>{message.messageContent}</p>
+                            <span style={styles.timestamp}>
+                                {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </span>
                         </div>
                     ))}
-                    <div ref={dummyRef}/>
+                    <div ref={dummyRef} />
                 </div>
                 <div style={styles.inputContainer}>
                     <Input

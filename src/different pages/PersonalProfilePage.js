@@ -10,7 +10,7 @@ import {
 } from '@ant-design/icons';
 import 'antd/dist/reset.css';
 import '../CSS/AntDesignOverride.css';
-import { antThemeTokens, themes } from '../themes';
+import {antThemeTokens, ButterflyIcon, themes} from '../themes';
 import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
@@ -83,7 +83,6 @@ const ProfileCard = () => {
     const [isDarkMode, setIsDarkMode] = useState(false);
     const themeKey = isDarkMode ? `${theme}_donker` : theme;
     const themeColors = themes[themeKey] || themes.blauw;
-    const [images, setImages] = useState([]);
     const [profilePicture, setProfilePicture] = useState('https://example.com/photo.jpg');
     const [caretakers, setCaretakers] = useState(initialCaretakers);
     const [sexuality, setSexuality] = useState('');
@@ -191,8 +190,11 @@ const ProfileCard = () => {
                     minHeight: '100vh',
                     backgroundColor: themeColors.primary2,
                     color: themeColors.primary10,
+                    zIndex: '0'
                 }}
             >
+                <ButterflyIcon color={themeColors.primary3} />
+
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                     <Avatar
                         src={profilePicture || 'https://example.com/photo.jpg'} // Fallback to default avatar

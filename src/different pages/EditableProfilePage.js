@@ -517,7 +517,7 @@ const ProfileCard = () => {
                     <div style={{position: 'relative', flex: 1, minWidth: '200px'}}>
                         <TextArea
                             style={{width: '100%', paddingBottom: '20px'}}
-                            rows={4}
+                            rows={3}
                             placeholder="Vertel iets over jezelf"
                             value={biography}
                             onChange={handleBiographyChange}

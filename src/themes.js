@@ -22,6 +22,8 @@ import {
     redDark
 } from '@ant-design/colors';
 
+import tinycolor from 'tinycolor2';
+
 import React from 'react';
 import './App.css'; // Import the CSS file
 
@@ -87,12 +89,16 @@ export const antThemeTokens = (colors) => ({
     colorBorderSecondary: colors.primary4,  // Secondary border color
     colorText: colors.primary10,           // Main text color
     colorTextLight: colors.primary1,       // Light text color
-    colorTextSecondary: colors.primary8,   // Secondary text color
+    colorTextSecondary: colors.primary10,   // Secondary text color
     colorTextDescription: colors.primary6, // Text color for descriptions
     colorTextPlaceholder: colors.primary6, // Placeholder text color
     colorTextDisabled: colors.primary7,    // Disabled text color
     colorTextHeading: colors.primary9,     // Text color for headings
 });
+
+const lightenColor = (color, amount) => {
+    return tinycolor(color).lighten(amount).toHexString(); // Lightens by specified percentage
+};
 
 export const themes = {
     blauw: {
@@ -118,7 +124,7 @@ export const themes = {
         primary7: blueDark[6],
         primary8: blueDark[7],
         primary9: blueDark[8],
-        primary10: blueDark[9],
+        primary10: lightenColor(blueDark[9],10)
     },
 
     cyaan: {
@@ -144,7 +150,7 @@ export const themes = {
         primary7: cyanDark[6],
         primary8: cyanDark[7],
         primary9: cyanDark[8],
-        primary10: cyanDark[9],
+        primary10: lightenColor(cyanDark[9],10)
     },
 
     goud: {
@@ -170,7 +176,7 @@ export const themes = {
         primary7: goldDark[6],
         primary8: goldDark[7],
         primary9: goldDark[8],
-        primary10: goldDark[9],
+        primary10: lightenColor(goldDark[9],10)
     },
 
     groen: {
@@ -196,7 +202,7 @@ export const themes = {
         primary7: greenDark[6],
         primary8: greenDark[7],
         primary9: greenDark[8],
-        primary10: greenDark[9],
+        primary10: lightenColor(greenDark[9], 10)
     },
 
     grijs: {
@@ -222,7 +228,7 @@ export const themes = {
         primary7: greyDark[6],
         primary8: greyDark[7],
         primary9: greyDark[8],
-        primary10: greyDark[9],
+        primary10: lightenColor(greyDark[9], 10)
     },
 
     limoen: {
@@ -248,7 +254,7 @@ export const themes = {
         primary7: limeDark[6],
         primary8: limeDark[7],
         primary9: limeDark[8],
-        primary10: limeDark[9],
+        primary10: lightenColor(limeDark[9], 10)
     },
 
     oranje: {
@@ -274,7 +280,7 @@ export const themes = {
         primary7: orangeDark[6],
         primary8: orangeDark[7],
         primary9: orangeDark[8],
-        primary10: orangeDark[9],
+        primary10: lightenColor(orangeDark[9], 10)
     },
 
     paars: {
@@ -300,7 +306,7 @@ export const themes = {
         primary7: purpleDark[6],
         primary8: purpleDark[7],
         primary9: purpleDark[8],
-        primary10: purpleDark[9],
+        primary10: lightenColor(purpleDark[9], 10)
     },
 
     roos: {
@@ -326,7 +332,7 @@ export const themes = {
         primary7: magentaDark[6],
         primary8: magentaDark[7],
         primary9: magentaDark[8],
-        primary10: magentaDark[9],
+        primary10: lightenColor(magentaDark[9], 10)
     },
 
     rood: {
@@ -352,7 +358,7 @@ export const themes = {
         primary7: redDark[6],
         primary8: redDark[7],
         primary9: redDark[8],
-        primary10: redDark[9],
+        primary10: lightenColor(redDark[9], 10)
     },
 };
 

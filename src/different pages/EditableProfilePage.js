@@ -490,10 +490,13 @@ const ProfileCard = () => {
 
                 <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
                     <Avatar
-                        src={profilePicture}
-                        alt={profileData.name || 'No Name'}
-                        size={200}
-                        style={{ margin: '20px auto', display: 'block' }}
+                        src={profilePicture || "https://example.com/photo.jpg"} // Fallback to default avatar
+                        alt={profileData.name || "No Name"}
+                        style ={{
+                            minWidth: '200px',
+                            minHeight: '200px',
+                            borderRadius: '50%'
+                        }}
                     />
                     {/* Profile Picture Upload */}
                     <div style={{ marginTop: '10px', marginBottom: '20px' }}>

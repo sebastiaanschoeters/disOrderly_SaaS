@@ -82,9 +82,9 @@ const useFetchProfileData = (actCode) => {
 };
 
 const ProfileDetail = ({ label, value, icon }) => (
-    <p style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '5px' }}>
-        <strong style={{ width: '20%', minWidth: '150px' }}>{icon} {label}: </strong>
-        {value || 'Niet beschikbaar'}
+    <p style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '5px'}}>
+        <strong style={{ width: '20%', minWidth: '150px', flexShrink: 0 }}>{icon} {label}: </strong>
+        <span style={{ flexWrap: 'wrap' }}>{value || 'Niet beschikbaar'}</span>
     </p>
 );
 
@@ -151,7 +151,11 @@ const ProfileCard = () => {
                         <Avatar
                             src={profilePicture || "https://example.com/photo.jpg"} // Fallback to default avatar
                             alt={profileData.name || "No Name"}
-                            size={200}
+                            style ={{
+                                minWidth: '200px',
+                                minHeight: '200px',
+                                borderRadius: '50%'
+                            }}
                         />
                         <div>
                             <h2 style={{ margin: '0' }}>

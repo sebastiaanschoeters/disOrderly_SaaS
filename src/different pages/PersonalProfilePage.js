@@ -197,10 +197,13 @@ const ProfileCard = () => {
 
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                     <Avatar
-                        src={profilePicture || 'https://example.com/photo.jpg'} // Fallback to default avatar
-                        alt={profileData.name || 'No Name'}
-                        size={200}
-                        style={{ margin: '20px auto', display: 'block' }}
+                        src={profilePicture || "https://example.com/photo.jpg"} // Fallback to default avatar
+                        alt={profileData.name || "No Name"}
+                        style ={{
+                            minWidth: '200px',
+                            minHeight: '200px',
+                            borderRadius: '50%'
+                        }}
                     />
                     <h2 style={{ margin: '0', textAlign: 'center' }}>
                         {profileData.name || 'Naam'}, {calculateAge(profileData.birthDate) || 'Leeftijd'}

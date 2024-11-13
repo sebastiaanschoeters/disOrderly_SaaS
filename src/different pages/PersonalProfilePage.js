@@ -100,8 +100,9 @@ const ProfileCard = () => {
             }
         }
 
-        if (profileData.picture) {
-            setProfilePicture(profileData.picture);
+        if (profileData.profilePicture) {
+            const imageUrlWithCacheBuster = `${profileData.profilePicture}?t=${new Date().getTime()}`;
+            setProfilePicture(imageUrlWithCacheBuster);
         }
         if (profileData.sexuality) {
             setSexuality(profileData.sexuality);
@@ -193,29 +194,12 @@ const ProfileCard = () => {
                 }}
             >
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    {images.length > 0 ? (
-                        images.map((image, index) => (
-                            <img
-                                key={index}
-                                src={image}
-                                alt={`Uploaded ${index}`}
-                                style={{
-                                    width: '100px',
-                                    height: '100px',
-                                    objectFit: 'cover',
-                                    borderRadius: '50%',
-                                    margin: '5px',
-                                }}
-                            />
-                        ))
-                    ) : (
-                        <Avatar
-                            src={profileData.picture || 'https://example.com/photo.jpg'} // Fallback to default avatar
-                            alt={profileData.name || 'No Name'}
-                            size={100}
-                            style={{ margin: '20px auto', display: 'block' }}
-                        />
-                    )}
+                    <Avatar
+                        src={profilePicture || 'https://example.com/photo.jpg'} // Fallback to default avatar
+                        alt={profileData.name || 'No Name'}
+                        size={100}
+                        style={{ margin: '20px auto', display: 'block' }}
+                    />
                     <h2 style={{ margin: '0', textAlign: 'center' }}>
                         {profileData.name || 'Naam'}, {calculateAge(profileData.birthDate) || 'Leeftijd'}
                     </h2>

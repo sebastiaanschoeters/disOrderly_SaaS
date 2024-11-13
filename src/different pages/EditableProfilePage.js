@@ -6,7 +6,8 @@ import {
     Select,
     Checkbox,
     Upload,
-    ConfigProvider, Spin
+    ConfigProvider,
+    Spin
 } from 'antd';
 import {
     BookOutlined,
@@ -16,7 +17,8 @@ import {
     HeartOutlined,
     StarOutlined,
     HomeOutlined,
-    CarOutlined, PlusCircleOutlined
+    CarOutlined,
+    PlusCircleOutlined
 } from '@ant-design/icons';
 import 'antd/dist/reset.css';
 import '../CSS/AntDesignOverride.css';
@@ -115,6 +117,7 @@ const ProfileCard = () => {
     const [theme, setTheme] = useState('blauw');
     const themeColors = themes[theme] || themes.blauw;
     const [profilePicture, setProfilePicture] = useState('https://example.com/photo.jpg');
+    const [uploading, setUploading] = useState(false);
     const [location, setLocation] = useState(null);
     const [locationOptions, setLocationOptions] = useState([
         { value: 'Leuven', label: 'Leuven' },
@@ -127,7 +130,6 @@ const ProfileCard = () => {
     const [livingSituation, setLivingSituation] = useState('');
     const [mobility, setMobility]= useState('')
     const [selectedInterests, setSelectedInterests] = useState([]);
-    const [images, setImages] = useState([]);
     const [inputValue, setInputValue] = useState('');
     const [interests, setInterests] = useState([]);
     const [newInterest, setNewInterest] = useState('');
@@ -136,17 +138,18 @@ const ProfileCard = () => {
     const { profileData, isLoading, error, interest} = useFetchProfileData('1547');
 
     useEffect(() => {
-        if (profileData.theme){
+        if (profileData.theme) {
             setTheme(profileData.theme);
         }
-        if (profileData.picture){
-            setProfilePicture(profileData.picture)
+        if (profileData.profilePicture) {
+            const imageUrlWithCacheBuster = `${profileData.profilePicture}?t=${new Date().getTime()}`;
+            setProfilePicture(imageUrlWithCacheBuster);
         }
         if (profileData.location) {
             setLocation(profileData.location);
         }
         if (profileData.gender) {
-            setGender(profileData.gender)
+            setGender(profileData.gender);
         }
         if (profileData.interests) {
             setSelectedInterests(profileData.interests.map(interest => interest.interest_name));
@@ -154,8 +157,8 @@ const ProfileCard = () => {
         if (profileData.bio) {
             setBiography(profileData.bio);
         }
-        if (profileData.livingSituation){
-            setLivingSituation(profileData.livingSituation)
+        if (profileData.livingSituation) {
+            setLivingSituation(profileData.livingSituation);
         }
         if (profileData.mobility) {
             setMobility(profileData.mobility ? 'Ja' : 'Nee');
@@ -174,6 +177,7 @@ const ProfileCard = () => {
             }
         }
     }, [profileData]);
+
 
     // Define async save functions
     const saveField = async (field, value) => {
@@ -387,12 +391,73 @@ const ProfileCard = () => {
         debouncedSaveMobility(value);
     }
 
-    const handleProfilePictureChange = ({ file }) => {
-        if (file.status === 'done') {
-            const imageUrl = URL.createObjectURL(file.originFileObj);
-            setProfilePicture(imageUrl);
+    const handleProfilePictureUpload = async ({ file }) => {
+        try {
+            setUploading(true);
+            const fileName = `${profileData.ActCode}-profilePicture`;
+
+            // Check if the file already exists and remove it before upload
+            const { data: existingFiles, error: listError } = await supabase.storage
+                .from('profile-pictures')
+                .list('', { search: profileData.ActCode });
+
+            if (listError) {
+                console.error('Error checking existing files:', listError);
+            } else {
+                console.log("deleting previous instance")
+                const existingFile = existingFiles.find(item => item.name.startsWith(profileData.ActCode));
+                if (existingFile) {
+                    // Remove the existing file if it exists
+                    const { error: deleteError } = await supabase.storage
+                        .from('profile-pictures')
+                        .remove([existingFile.name]);
+                    if (deleteError) {
+                        throw deleteError;
+                    }
+                }
+            }
+
+            // Upload the new file
+            const { data, error: uploadError } = await supabase.storage
+                .from('profile-pictures')
+                .upload(fileName, file, { upsert: true }); // upsert ensures replacement if file exists
+            if (uploadError) {
+                throw uploadError;
+            }
+
+            console.log("data upload: ", data)
+
+            // Get the public URL for the uploaded image
+            const { data: fileData, error: urlError } = supabase.storage
+                .from('profile-pictures')
+                .getPublicUrl(fileName);
+            if (urlError) {
+                throw urlError;
+            }
+
+            console.log('file data: ', fileData)
+
+            const imageUrl = fileData.publicUrl;
+            console.log(imageUrl)
+
+            const imageUrlWithCacheBuster = `${imageUrl}?t=${new Date().getTime()}`;
+            setProfilePicture(imageUrlWithCacheBuster);
+
+
+            // Save the new image URL to the user's profile
+            await supabase
+                .from('Profile')
+                .update({ profilePicture: imageUrl })
+                .eq('ActCode', profileData.ActCode);
+
+            console.log('Profile picture uploaded successfully');
+        } catch (error) {
+            console.error('Error uploading profile picture:', error);
+        } finally {
+            setUploading(false);
         }
     };
+
 
     const calculateAge = (birthdate) => {
         if (!birthdate) return 'Onbekend';
@@ -420,27 +485,16 @@ const ProfileCard = () => {
                 color: themeColors.primary10
             }}>
                 <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
-                    {images.length > 0 ? (
-                        images.map((image, index) => (
-                            <img
-                                key={index}
-                                src={image}
-                                alt={`Uploaded ${index}`}
-                                style={{width: '100px', height: '100px', objectFit: 'cover', margin: '5px'}}
-                            />
-                        ))
-                    ) : (
-                        <Avatar
-                            src={profileData.picture || "https://example.com/photo.jpg"} // Fallback to default avatar
-                            alt={profileData.name || "No Name"}
-                            size={100}
-                            style={{margin: '20px auto', display: 'block'}}
-                        />
-                    )}
+                    <Avatar
+                        src={profilePicture}
+                        alt={profileData.name || 'No Name'}
+                        size={100}
+                        style={{ margin: '20px auto', display: 'block' }}
+                    />
                     {/* Profile Picture Upload */}
-                    <div style={{marginTop: '10px', marginBottom: '20px'}}>
-                        <Upload showUploadList={false} onChange={handleProfilePictureChange}>
-                            <Button icon={<UploadOutlined/>}>Kies nieuwe profiel foto</Button>
+                    <div style={{ marginTop: '10px', marginBottom: '20px' }}>
+                        <Upload showUploadList={false} beforeUpload={() => false} onChange={handleProfilePictureUpload}>
+                            <Button icon={<UploadOutlined />} loading={uploading}>Kies nieuwe profielfoto</Button>
                         </Upload>
                     </div>
                 </div>

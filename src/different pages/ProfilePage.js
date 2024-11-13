@@ -90,13 +90,17 @@ const ProfileDetail = ({ label, value, icon }) => (
 
 const ProfileCard = () => {
     const [theme, setTheme] = useState('blauw');
-    const [images, setImages] = useState([]); /* get images from database */
+    const [profilePicture, setProfilePicture] = useState(''); /* get images from database */
     const { profileData, isLoading, error } = useFetchProfileData('1547'); // Replace with dynamic ActCode as needed
     const themeColors = themes[theme] || themes.blauw;
 
     useEffect(() => {
         if (profileData.theme){
             setTheme(profileData.theme);
+        }
+        if (profileData.profilePicture){
+            const imageUrlWithCacheBuster = `${profileData.profilePicture}?t=${new Date().getTime()}`;
+            setProfilePicture(imageUrlWithCacheBuster);
         }
     }, [profileData.theme]);
 
@@ -141,22 +145,11 @@ const ProfileCard = () => {
                 {/* Header section with profile picture, name, age, and biography */}
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingBottom: '20px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '10px' }}>
-                        {images.length > 0 ? (
-                            images.map((image, index) => (
-                                <img
-                                    key={index}
-                                    src={image}
-                                    alt={`Uploaded ${index}`}
-                                    style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '50%' }}
-                                />
-                            ))
-                        ) : (
-                            <Avatar
-                                src={profileData.picture || "https://example.com/photo.jpg"} // Fallback to default avatar
-                                alt={profileData.name || "No Name"}
-                                size={100}
-                            />
-                        )}
+                        <Avatar
+                            src={profilePicture || "https://example.com/photo.jpg"} // Fallback to default avatar
+                            alt={profileData.name || "No Name"}
+                            size={100}
+                        />
                         <div>
                             <h2 style={{ margin: '0' }}>
                                 {profileData.name || 'Naam'}, {calculateAge(profileData.birthDate) || 'Leeftijd'}

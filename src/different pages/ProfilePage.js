@@ -148,7 +148,7 @@ const ProfileCard = () => {
                         <Avatar
                             src={profilePicture || "https://example.com/photo.jpg"} // Fallback to default avatar
                             alt={profileData.name || "No Name"}
-                            size={100}
+                            size={200}
                         />
                         <div>
                             <h2 style={{ margin: '0' }}>

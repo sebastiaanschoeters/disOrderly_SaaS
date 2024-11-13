@@ -488,7 +488,7 @@ const ProfileCard = () => {
                     <Avatar
                         src={profilePicture}
                         alt={profileData.name || 'No Name'}
-                        size={100}
+                        size={200}
                         style={{ margin: '20px auto', display: 'block' }}
                     />
                     {/* Profile Picture Upload */}

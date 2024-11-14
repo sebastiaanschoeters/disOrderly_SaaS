@@ -30,8 +30,8 @@ const App = () => {
                 <Route path="/profileEdit" element={<EditableProfilePage />} />
                 <Route path="/profilePersonal" element={<PersonalProfilePage />} />
                 <Route path="/chatOverview" element={<ChatOverviewPage />} />
-                <Route path="/chat/:name" element={<ChatPage />} />
-                <Route path="/chatSuggestion/:name" element={<ChatSuggestionPage />} />
+                <Route path="/chat/:chatroomId" element={<ChatPage />} />
+                <Route path="/chatSuggestion/:chatroomId" element={<ChatSuggestionPage />} />
                 <Route path="/supabase" element={<SupabaseTestPage />} />
             </Routes>
         </Router>

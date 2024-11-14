@@ -1,6 +1,6 @@
 import React, { useState, useRef , useEffect } from 'react';
 import {Avatar, Input, Button, ConfigProvider, message} from 'antd';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams,useLocation} from 'react-router-dom';
 import { antThemeTokens, themes } from '../themes';
 import { CloseOutlined } from '@ant-design/icons';
 import { createClient } from "@supabase/supabase-js";
@@ -10,23 +10,24 @@ import '../CSS/ChatPage.css';
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
 
 const ChatPage = () => {
-    const { name } = useParams();
+    const location = useLocation();
+    const { profileData} = location.state || {};
+    const { name, profilePicture } = profileData || {};
     const navigate = useNavigate();
     const [theme, setTheme] = useState('blue');
     const themeColors = themes[theme] || themes.blauw;
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState("");
-    const chatroomId = 4;
+    const { chatroomId } = useParams();
     const senderId = 1234;
-    const receiverId = 1547;
 
     const dummyRef = useRef(null);
 
-    const fetchMessages = async () => {
+    const fetchMessages = async (chatroomId) => {
         const { data, error } = await supabase
             .from('messages')
-            .select('id, sender, created_at, messageContent')
-            .eq('chatroom', chatroomId)
+            .select('id, senderID, created_at, messageContent')
+            .eq('chatroomID', chatroomId)
             .order('created_at', { ascending: true });
 
         if (error) {
@@ -38,7 +39,7 @@ const ChatPage = () => {
     }
 
     useEffect(() => {
-        fetchMessages();
+        fetchMessages(chatroomId);
     }, []);
 
     useEffect(() => {
@@ -52,7 +53,7 @@ const ChatPage = () => {
 
         const { error } = await supabase
             .from("messages")
-            .insert([{ chatroom: chatroomId, sender: senderId, messageContent: newMessage }]);
+            .insert([{ chatroomID: chatroomId, senderID: senderId, messageContent: newMessage }]);
 
         if (error) {
             console.error("Error sending message:", error);
@@ -60,11 +61,7 @@ const ChatPage = () => {
         }
 
         setNewMessage("");
-        setMessages(prevMessages => [
-            ...prevMessages,
-            { id: Date.now(), sender: senderId, messageContent: newMessage, created_at: new Date() }
-        ]);
-        fetchMessages();
+        fetchMessages(chatroomId);
     };
 
     const handleCloseChat = () => {
@@ -94,6 +91,9 @@ const ChatPage = () => {
             borderRadius: '8px',
             marginBottom: '15px',
             position: 'relative',
+        },
+        avatar: {
+            marginRight: '20px',
         },
         closeButton: {
             position: 'absolute',
@@ -135,6 +135,20 @@ const ChatPage = () => {
             bottom: '-15px',
             right: '10px',
             color: themeColors.primary8,
+        },
+        inputContainer: {
+            display: 'flex',
+            alignItems: 'center',
+            marginTop: '10px',
+        },
+        input: {
+            flex: 1,
+            marginRight: '10px',
+            height: '40px',
+        },
+        sendButton: {
+            height: '40px',
+            padding: '0 15px'
         }
     };
 
@@ -142,8 +156,8 @@ const ChatPage = () => {
         <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
             <div style={styles.chatContainer}>
                 <div style={styles.header}>
-                    <Avatar size="large" onClick={handleProfile}>U</Avatar>
-                    <h2 style={{ margin: 0, fontSize: '2rem', color: themeColors.primary1 }}>{name}</h2>
+                    <Avatar src={profilePicture || 'default-avatar.png'} onClick={handleProfile} style={styles.avatar}>U</Avatar>
+                    <h2 style={{ margin: 0, fontSize: '2rem', color: themeColors.primary1 }}>{`${name}`}</h2>
                     <button style={styles.closeButton} onClick={handleCloseChat}>
                         <CloseOutlined />
                     </button>
@@ -154,7 +168,7 @@ const ChatPage = () => {
                             key={message.id}
                             style={{
                                 ...styles.messageItem,
-                                ...(message.sender === senderId ? styles.messageSender : styles.messageReceiver)
+                                ...(message.senderID === senderId ? styles.messageSender : styles.messageReceiver)
                             }}
                         >
                             <p>{message.messageContent}</p>
@@ -173,7 +187,7 @@ const ChatPage = () => {
                         onChange={(e) => setNewMessage(e.target.value)}
                         onPressEnter={handleSendMessage}
                     />
-                    <Button type="primary" onClick={handleSendMessage}>Send</Button>
+                    <Button type="primary" style={styles.sendButton} onClick={handleSendMessage}>Send</Button>
                 </div>
             </div>
         </ConfigProvider>

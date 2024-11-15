@@ -15,6 +15,7 @@ import Search from "./different pages/Search";
 
 import SupabaseTestPage from "./different pages/SupabaseTestPage";
 import CaretakerProfilePage from "./different pages/CaretakerProfilePage";
+import AdminPage from "./different pages/AdminPage";
 
 const App = () => {
     return (
@@ -36,6 +37,7 @@ const App = () => {
                 <Route path="/chatSuggestion/:name" element={<ChatSuggestionPage />} />
                 <Route path="/supabase" element={<SupabaseTestPage />} />
                 <Route path="/profileCaretaker" element={<CaretakerProfilePage />} />
+                <Route path="/admin" element={<AdminPage />} />
             </Routes>
         </Router>
     );

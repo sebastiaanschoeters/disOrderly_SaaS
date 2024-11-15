@@ -13,7 +13,7 @@ import {
     TeamOutlined
 } from '@ant-design/icons';
 import 'antd/dist/reset.css';
-import '../CSS/Ant design overide.css';
+import '../CSS/AntDesignOverride.css';
 import { antThemeTokens, themes } from '../themes';
 
 // The ProfileCard component

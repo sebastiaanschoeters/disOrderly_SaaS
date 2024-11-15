@@ -24,7 +24,8 @@ Database needs:
             list of possible to choose from
         Profile picture
 
-Database restructure
+Database restructure (done)
+Nieuwe database implementen
 story board
 homepage spice-up
 	media querries
@@ -47,5 +48,5 @@ melding systeem voor beide
 new messages noti
 chat suggestion page
 chat lazy loading
-meerdere fotos per profiel + manier om te displayen
-
+meerdere fotos per profiel + manier om te displayen (done)
+User metrics

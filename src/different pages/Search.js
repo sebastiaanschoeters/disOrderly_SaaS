@@ -62,7 +62,7 @@ const Search = () => {
     }, []);
 
     // Filter users by name, age, gender, lookingFor, and mobility
-    const filteredChats = users.filter((Users) => {
+    const filteredUsers = users.filter((Users) => {
         const isInAgeRange = Users.age >= ageRange[0] && Users.age <= ageRange[1];
         const isGenderMatch = gender ? Users.gender === gender : true;
         const isLookingForMatch = lookingFor.length > 0 ? lookingFor.every(option => Users.lookingFor.includes(option)) : true;  // Match all selected options
@@ -164,13 +164,6 @@ const Search = () => {
             <div style={styles.chatContainer}>
                 <div style={styles.titleButton}>
                     <Title level={2} style={styles.title}>Gebruikers</Title>
-
-                    <Button
-                        type="text"
-                        icon={<CloseOutlined />}
-                        style={{ position: 'absolute', top: '10px', right: '10px' }}
-                        onClick={() => navigate('/home')}
-                    />
                 </div>
 
                 <div style={styles.searchBarContainer}>
@@ -192,7 +185,7 @@ const Search = () => {
                 <List
                     itemLayout="horizontal"
                     style={styles.list}
-                    dataSource={filteredChats}
+                    dataSource={filteredUsers}
                     renderItem={(chat) => (
                         <Card
                             style={styles.card}
@@ -211,13 +204,13 @@ const Search = () => {
 
                 {/* Modal with Age, Gender, LookingFor, and Mobility Filters */}
                 <Modal
-                    title="Filter Options"
+                    title="Ik zoek iemand die ..."
                     visible={isModalVisible}
                     onCancel={handleModalClose}
                     footer={null}
                 >
                     <div style={styles.modalContent}>
-                        <Typography.Text>Age Range: {ageRange[0]} - {ageRange[1]}</Typography.Text>
+                        <Typography.Text>Leeftijd: {ageRange[0]} - {ageRange[1]} jaar</Typography.Text>
                         <Slider
                             range
                             min={18}
@@ -225,20 +218,27 @@ const Search = () => {
                             defaultValue={ageRange}
                             onChange={handleAgeChange}
                         />
-                        <div style={{ marginTop: '20px' }}>
-                            <Typography.Text>Gender:</Typography.Text>
+                        <div style={{marginTop: '20px'}}>
+                            <Typography.Text>Ik zoek een:</Typography.Text>
                             <Radio.Group
                                 onChange={handleGenderChange}
                                 value={gender}
-                                style={{ marginLeft: '10px' }}
+                                style={{marginLeft: '10px', display: 'flex', gap: '10px'}}
                             >
-                                <Radio value="">All</Radio>
-                                <Radio value="Man">Man</Radio>
-                                <Radio value="Vrouw">Vrouw</Radio>
+                                <Radio value="Man">
+                                    <Typography.Text>Man</Typography.Text>
+                                </Radio>
+                                <Radio value="Vrouw">
+                                    <Typography.Text>Vrouw</Typography.Text>
+                                </Radio>
+                                <Radio value="">
+                                    <Typography.Text>Maakt niet uit</Typography.Text>
+                                </Radio>
                             </Radio.Group>
                         </div>
-                        <div style={{ marginTop: '20px' }}>
-                            <Typography.Text>Looking For:</Typography.Text>
+
+                        <div style={{marginTop: '20px'}}>
+                            <Typography.Text>Ik ben opzoek naar:</Typography.Text>
                             <Checkbox.Group
                                 onChange={handleLookingForChange}
                                 value={lookingFor}
@@ -248,18 +248,27 @@ const Search = () => {
                                 <Checkbox value="Intieme ontmoeting">Intieme ontmoeting</Checkbox>
                             </Checkbox.Group>
                         </div>
-                        <div style={{ marginTop: '20px' }}>
+                        <div style={{marginTop: '20px'}}>
                             <Typography.Text>Mobility:</Typography.Text>
                             <Radio.Group
                                 onChange={handleMobilityChange}
                                 value={mobility}
-                                style={{ marginLeft: '10px' }}
+                                style={{
+                                    marginLeft: '10px',
+                                    display: 'flex',
+                                    gap: '10px'
+                                }}  // Added styles for horizontal alignment
                             >
-                                <Radio value={null}>All</Radio>
-                                <Radio value={true}>Ja</Radio>
-                                <Radio value={false}>Nee</Radio>
+                                <Radio value={true}>
+                                    <Typography.Text>Ja</Typography.Text>
+                                </Radio>
+                                <Radio value={null}>
+                                    <Typography.Text>Maakt niet uit</Typography.Text>
+                                </Radio>
                             </Radio.Group>
                         </div>
+
+
                     </div>
                 </Modal>
             </div>

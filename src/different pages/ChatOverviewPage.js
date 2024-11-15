@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import {List, Avatar, Typography, Input, ConfigProvider, Card, Button} from 'antd';
 import { CloseOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { antThemeTokens, themes } from '../themes';
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
 
 const { Title } = Typography;
 
@@ -11,17 +14,42 @@ const ChatOverviewPage = () => {
     const [theme, setTheme] = useState('blauw');
     const themeColors = themes[theme] || themes.blauw;
     const [searchQuery, setSearchQuery] = useState('');
+    const [chatrooms, setChatrooms] = useState([]);
+    const userID = 1234;
 
-    const chats = [
-        { id: 1, name: "Alice Johnson", hasNewMessage: true},
-        { id: 2, name: "Bob Smith", hasNewMessage: true },
-        { id: 3, name: "Carla Martin", hasNewMessage: false },
-        { id: 4, name: "David Lee", hasNewMessage: false}
-    ];
+    const fetchChatrooms = async () => {
+        const {data, error} = await supabase
+            .from('Chatroom')
+            .select('id,sender_id,receiver_id,acceptance,senderProfile: sender_id(name),receiverProfile: receiver_id(name)')
+            .or(`sender_id.eq.${userID},receiver_id.eq.${userID}`);
 
-    const filteredChats = chats.filter((chat) =>
-        chat.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+        if (error) {
+            console.error("Error fetching chatrooms:", error);
+        } else {
+            const formattedChatrooms = data.map((chat) => {
+                const senderProfile = chat.senderProfile;
+                const receiverProfile = chat.receiverProfile;
+                const profile = chat.sender_id === userID ? receiverProfile : senderProfile;
+
+                return {
+                    ...chat,
+                    profileName: profile.name,
+                    profilePicture: profile.profilePicture
+                };
+            });
+            setChatrooms(formattedChatrooms);
+        }
+    };
+
+    useEffect(() => {
+        fetchChatrooms();
+    }, []);
+
+    const filteredChats = chatrooms.filter((chat) => {
+        const chatName = chat.sender_id === userID
+            ? `${chat.receiverProfile.name}`
+            : `${chat.senderProfile.name}`;        return chatName.toLowerCase().includes(searchQuery.toLowerCase());
+    });
 
     const handleSearch = (value) => {
         setSearchQuery(value);
@@ -113,19 +141,24 @@ const ChatOverviewPage = () => {
                                 style={styles.card}
                                 hoverable={true}
                                 onClick={() => {
-                                    if (chat.hasNewMessage) {
-                                        navigate(`/chatsuggestion/${chat.name}`);
+                                    const profileData = {
+                                        name: chat.profileName,
+                                        profilePicture: chat.profilePicture,
+                                        user_id: userID
+                                    };
+                                    if (chat.acceptance === true) {
+                                        navigate(`/chat/${chat.id}`, { state: { profileData} });
                                     } else {
-                                        navigate(`/chat/${chat.name}`);
+                                        navigate(`/chatsuggestion/${chat.id}`, { state: { profileData } });
                                     }
                                 }}
                             >
                                 <Card.Meta
-                                    avatar={<Avatar>U</Avatar>}
-                                    title={<span style={styles.name}>{chat.name}</span>}
+                                    avatar={<Avatar src={chat.profilePicture || 'default-avatar.png'} />}
+                                    title={<span style={styles.name}>{`${chat.profileName}`}</span>}
                                 />
 
-                                {chat.hasNewMessage && (
+                                {!chat.acceptance && (
                                     <div style={styles.newMessageIndicator}>
                                         Nieuwe Berichten
                                     </div>

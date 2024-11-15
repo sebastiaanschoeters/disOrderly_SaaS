@@ -1,6 +1,6 @@
-import React, { useState, useRef , useEffect } from 'react';
-import {Avatar, Input, Button, ConfigProvider, message} from 'antd';
-import { useNavigate, useParams,useLocation} from 'react-router-dom';
+import React, { useState, useRef, useEffect } from 'react';
+import { Avatar, Input, Button, ConfigProvider, Card } from 'antd';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { antThemeTokens, themes } from '../themes';
 import { CloseOutlined } from '@ant-design/icons';
 import { createClient } from "@supabase/supabase-js";
@@ -11,23 +11,22 @@ const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbG
 
 const ChatPage = () => {
     const location = useLocation();
-    const { profileData} = location.state || {};
-    const { name, profilePicture } = profileData || {};
+    const { profileData } = location.state || {};
+    const { name, profilePicture, user_id } = profileData || {};
     const navigate = useNavigate();
     const [theme, setTheme] = useState('blue');
     const themeColors = themes[theme] || themes.blauw;
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState("");
     const { chatroomId } = useParams();
-    const senderId = 1234;
 
     const dummyRef = useRef(null);
 
     const fetchMessages = async (chatroomId) => {
         const { data, error } = await supabase
-            .from('messages')
-            .select('id, senderID, created_at, messageContent')
-            .eq('chatroomID', chatroomId)
+            .from('Messages')
+            .select('id,sender_id, created_at, message_content')
+            .eq('chatroom_id', chatroomId)
             .order('created_at', { ascending: true });
 
         if (error) {
@@ -36,11 +35,11 @@ const ChatPage = () => {
         }
 
         setMessages(data || []);
-    }
+    };
 
     useEffect(() => {
         fetchMessages(chatroomId);
-    }, []);
+    }, [chatroomId]);
 
     useEffect(() => {
         if (dummyRef.current) {
@@ -52,8 +51,8 @@ const ChatPage = () => {
         if (newMessage.trim() === "") return;
 
         const { error } = await supabase
-            .from("messages")
-            .insert([{ chatroomID: chatroomId, senderID: senderId, messageContent: newMessage }]);
+            .from("Messages")
+            .insert([{ chatroom_id: chatroomId, sender_id: user_id, message_content: newMessage }]);
 
         if (error) {
             console.error("Error sending message:", error);
@@ -73,15 +72,30 @@ const ChatPage = () => {
     };
 
     const styles = {
+        background: {
+            width: '100vw',
+            height: '100vh',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: themeColors.primary2, // Background color for the entire screen
+        },
+        card: {
+            width: '90%',
+            maxWidth: '650px',
+            borderRadius: '10px',
+            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+            backgroundColor: themeColors.primary3, // Chatbox color
+            display: 'flex',
+            flexDirection: 'column',
+        },
         chatContainer: {
             padding: '20px',
-            width: '100%',
-            height: '100vh',
-            backgroundColor: themeColors.primary2,
-            color: themeColors.primary10,
+            height: '80vh',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'flex-start',
+            alignItems: 'center',
         },
         header: {
             backgroundColor: themeColors.primary6,
@@ -90,6 +104,7 @@ const ChatPage = () => {
             alignItems: 'center',
             borderRadius: '8px',
             marginBottom: '15px',
+            width: '100%',
             position: 'relative',
         },
         avatar: {
@@ -105,90 +120,129 @@ const ChatPage = () => {
         messageList: {
             flexGrow: 1,
             overflowY: 'auto',
+            width: '100%',
             marginBottom: '15px',
             display: 'flex',
             flexDirection: 'column',
         },
-        messageItem: {
-            marginBottom: '15px',
-            padding: '8px 12px',
-            borderRadius: '15px',
-            maxWidth: '50%',
+        bubble: {
+            maxWidth: '70%',
+            padding: '10px 15px',
+            borderRadius: '20px',
             wordBreak: 'break-word',
-            position: 'relative',
+            marginBottom: '5px',
+            display: 'flex',
+            alignItems: 'center',
         },
-        messageSender: {
+        senderBubble: {
             backgroundColor: themeColors.primary1,
+            color: themeColors.primary10,
             alignSelf: 'flex-end',
-            borderTopRightRadius: '0',
-            color: themeColors.primary10,
+            display: 'flex',
+            alignItems: 'center',
         },
-        messageReceiver: {
+        receiverBubble: {
             backgroundColor: themeColors.primary4,
-            alignSelf: 'flex-start',
-            borderTopLeftRadius: '0',
             color: themeColors.primary10,
+            alignSelf: 'flex-start',
         },
         timestamp: {
             fontSize: '12px',
-            position: 'absolute',
-            bottom: '-15px',
-            right: '10px',
+            marginTop: '3px',
+            alignSelf: 'flex-end',
             color: themeColors.primary8,
         },
         inputContainer: {
             display: 'flex',
             alignItems: 'center',
             marginTop: '10px',
+            width: '100%',
         },
         input: {
             flex: 1,
             marginRight: '10px',
             height: '40px',
+            borderRadius: '5px',
         },
         sendButton: {
             height: '40px',
-            padding: '0 15px'
-        }
+            padding: '0 15px',
+            borderRadius: '5px',
+        },
     };
 
     return (
         <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
-            <div style={styles.chatContainer}>
-                <div style={styles.header}>
-                    <Avatar src={profilePicture || 'default-avatar.png'} onClick={handleProfile} style={styles.avatar}>U</Avatar>
-                    <h2 style={{ margin: 0, fontSize: '2rem', color: themeColors.primary1 }}>{`${name}`}</h2>
-                    <button style={styles.closeButton} onClick={handleCloseChat}>
-                        <CloseOutlined />
-                    </button>
-                </div>
-                <div style={styles.messageList}>
-                    {messages.map((message) => (
-                        <div
-                            key={message.id}
-                            style={{
-                                ...styles.messageItem,
-                                ...(message.senderID === senderId ? styles.messageSender : styles.messageReceiver)
-                            }}
-                        >
-                            <p>{message.messageContent}</p>
-                            <span style={styles.timestamp}>
-                                {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </span>
+            <div style={styles.background}>
+                <Card style={styles.card} bordered>
+                    <div style={styles.chatContainer}>
+                        <div style={styles.header}>
+                            <Avatar
+                                src={profilePicture || 'default-avatar.png'}
+                                onClick={handleProfile}
+                                style={styles.avatar}
+                            >
+                                U
+                            </Avatar>
+                            <h2 style={{margin: 0, fontSize: '1.5rem', color: themeColors.primary1}}>
+                                {`${name}`}
+                            </h2>
+                            <button style={styles.closeButton} onClick={handleCloseChat}>
+                                <CloseOutlined/>
+                            </button>
                         </div>
-                    ))}
-                    <div ref={dummyRef} />
-                </div>
-                <div style={styles.inputContainer}>
-                    <Input
-                        style={styles.input}
-                        placeholder="Type your message..."
-                        value={newMessage}
-                        onChange={(e) => setNewMessage(e.target.value)}
-                        onPressEnter={handleSendMessage}
-                    />
-                    <Button type="primary" style={styles.sendButton} onClick={handleSendMessage}>Send</Button>
-                </div>
+                        <div style={styles.messageList}>
+                            {messages.map((message) => {
+                                const isSender = message.sender_id === user_id;
+                                return (
+                                    <div
+                                        key={message.id}
+                                        style={{
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            alignItems: isSender ? 'flex-end' : 'flex-start', // Align bubble and timestamp dynamically
+                                        }}
+                                    >
+                                        {/* Message Bubble */}
+                                        <div
+                                            style={{
+                                                ...styles.bubble,
+                                                ...(isSender ? styles.senderBubble : styles.receiverBubble),
+                                            }}
+                                        >
+                                            <p style={{margin: 0}}>{message.message_content}</p>
+                                        </div>
+                                        {/* Timestamp */}
+                                        <span
+                                            style={{
+                                                ...styles.timestamp,
+                                                alignSelf: isSender ? 'flex-end' : 'flex-start', // Align timestamp below bubble
+                                            }}
+                                        >
+        {new Date(message.created_at).toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+        })}
+    </span>
+                                    </div>
+                                );
+                            })}
+                            <div ref={dummyRef}/>
+                        </div>
+                        <div style={styles.inputContainer}>
+                            <Input
+                                style={styles.input}
+                                placeholder="Type hier..."
+                                value={newMessage}
+                                onChange={(e) => setNewMessage(e.target.value)}
+                                onPressEnter={handleSendMessage}
+                            />
+                            <Button type="primary" style={styles.sendButton} onClick={handleSendMessage}>
+                                Verstuur
+                            </Button>
+                        </div>
+                    </div>
+                </Card>
             </div>
         </ConfigProvider>
     );

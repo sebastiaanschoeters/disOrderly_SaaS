@@ -17,18 +17,11 @@ const ChatOverviewPage = () => {
     const [chatrooms, setChatrooms] = useState([]);
     const userID = 1234;
 
-    // const chats = [
-    //     { id: 1, name: "Alice Johnson", hasNewMessage: true},
-    //     { id: 2, name: "Bob Smith", hasNewMessage: true },
-    //     { id: 3, name: "Carla Martin", hasNewMessage: false },
-    //     { id: 4, name: "David Lee", hasNewMessage: false}
-    // ];
-
     const fetchChatrooms = async () => {
         const {data, error} = await supabase
-            .from('chatRoom')
-            .select('roomid,senderID,receiverID,acceptance,senderProfile: senderID(name, profilePicture),receiverProfile: receiverID(name, profilePicture)')
-            .or(`senderID.eq.${userID},receiverID.eq.${userID}`);
+            .from('Chatroom')
+            .select('id,sender_id,receiver_id,acceptance,senderProfile: sender_id(name),receiverProfile: receiver_id(name)')
+            .or(`sender_id.eq.${userID},receiver_id.eq.${userID}`);
 
         if (error) {
             console.error("Error fetching chatrooms:", error);
@@ -36,7 +29,7 @@ const ChatOverviewPage = () => {
             const formattedChatrooms = data.map((chat) => {
                 const senderProfile = chat.senderProfile;
                 const receiverProfile = chat.receiverProfile;
-                const profile = chat.senderID === userID ? receiverProfile : senderProfile;
+                const profile = chat.sender_id === userID ? receiverProfile : senderProfile;
 
                 return {
                     ...chat,
@@ -53,7 +46,7 @@ const ChatOverviewPage = () => {
     }, []);
 
     const filteredChats = chatrooms.filter((chat) => {
-        const chatName = chat.senderID === userID
+        const chatName = chat.sender_id === userID
             ? `${chat.receiverProfile.name}`
             : `${chat.senderProfile.name}`;        return chatName.toLowerCase().includes(searchQuery.toLowerCase());
     });
@@ -150,12 +143,13 @@ const ChatOverviewPage = () => {
                                 onClick={() => {
                                     const profileData = {
                                         name: chat.profileName,
-                                        profilePicture: chat.profilePicture
+                                        profilePicture: chat.profilePicture,
+                                        user_id: userID
                                     };
                                     if (chat.acceptance === true) {
-                                        navigate(`/chat/${chat.roomid}`, { state: { profileData} });
+                                        navigate(`/chat/${chat.id}`, { state: { profileData} });
                                     } else {
-                                        navigate(`/chatsuggestion/${chat.roomid}`, { state: { profileData } });
+                                        navigate(`/chatsuggestion/${chat.id}`, { state: { profileData } });
                                     }
                                 }}
                             >

@@ -219,7 +219,7 @@ const ProfileCard = () => {
                         zIndex: 1000
                     }}
                 >
-                    Chat met Martin
+                    Chat met {profileData?.name || 'de gebruiker'}
                 </Button>
             </div>
         </ConfigProvider>

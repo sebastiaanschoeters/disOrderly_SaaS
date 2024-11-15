@@ -21,9 +21,7 @@ const supabase = createClient(
 // Initial list of caretakers
 const initialCaretakers = [
     { id: 1, name: 'John Doe', accessLevel: 'full', picture: 'https://i.pravatar.cc/150?img=1' },
-    { id: 2, name: 'Jane Smith', accessLevel: 'contact', picture: 'https://i.pravatar.cc/150?img=2' },
-    { id: 3, name: 'Sam Brown', accessLevel: 'chat', picture: 'https://i.pravatar.cc/150?img=3' },
-];
+    ];
 
 const debounce = (func, delay) => {
     let timer;
@@ -142,14 +140,6 @@ const ProfileCard = () => {
         );
     };
 
-    const handleDelete = (id) => {
-        if (caretakers.length <= 1) {
-            message.warning('You must have at least one caretaker.');
-            return;
-        }
-        setCaretakers((prevCaretakers) => prevCaretakers.filter((caretaker) => caretaker.id !== id));
-    };
-
     const handleThemeChange = (value) => {
         setTheme(value);
         debouncedSaveTheme(value, isDarkMode); // Save theme with dark mode flag
@@ -249,31 +239,18 @@ const ProfileCard = () => {
                 {caretakers.map((caretaker) => (
                     <div key={caretaker.id} style={{ display: 'flex', alignItems: 'center', gap: '2%', marginBottom: '20px' }}>
                         <Avatar src={caretaker.picture} style={{ width: '40px', height: '40px', objectFit: 'cover' }} />
-                        <span style={{ width: '18%' }}>{caretaker.name}</span>
+                        <span style={{ width: '15%' }}>{caretaker.name}</span>
                         <Select
                             value={caretaker.accessLevel}
                             onChange={(value) => handleAccessLevelChange(value, caretaker.id)}
-                            style={{ width: '50%' }}
+                            style={{ width: '78%' }}
                         >
-                            <Select.Option value="full">Volledige toegang</Select.Option>
-                            <Select.Option value="chat">Gesprekken</Select.Option>
-                            <Select.Option value="contact">Contacten</Select.Option>
-                            <Select.Option value="profile">Publiek profiel</Select.Option>
+                            <Select.Option value="Volledige toegang">Volledige toegang</Select.Option>
+                            <Select.Option value="Gesprekken">Gesprekken</Select.Option>
+                            <Select.Option value="Contacten">Contacten</Select.Option>
+                            <Select.Option value="Publiek profiel">Publiek profiel</Select.Option>
                         </Select>
-                        <Popconfirm
-                            title="Ben je zeker dat je deze begeleider wilt verwijderen?"
-                            onConfirm={() => handleDelete(caretaker.id)}
-                            okText="Ja"
-                            cancelText="Nee"
-                            disabled={caretakers.length <= 1}
-                        >
-                            <Button
-                                type="text"
-                                icon={<DeleteOutlined />}
-                                disabled={caretakers.length <= 1}
-                                style={{ marginLeft: '10px' }}
-                            />
-                        </Popconfirm>
+
                     </div>
                 ))}
 

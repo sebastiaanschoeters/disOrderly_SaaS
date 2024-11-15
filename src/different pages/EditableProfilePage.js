@@ -47,7 +47,7 @@ const useFetchProfileData = (actCode) => {
     useEffect(()=> {
         const fetchInterests = async () => {
             try{
-                const {data: interest, error} = await supabase.from('Interests').select('interest');
+                const {data: interest, error} = await supabase.from('Interests').select('Interest');
                 if (error) throw error;
                 setInterests(interest)
             } catch (error) {
@@ -60,46 +60,92 @@ const useFetchProfileData = (actCode) => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const { data: profileData, error: profileError } = await supabase
-                    .from('Profile')
+                const { data: userData, error: userError } = await supabase
+                    .from('User')
                     .select('*')
-                    .eq('ActCode', actCode);
+                    .eq('id', actCode);
 
-                if (profileError) throw profileError;
-                if (profileData.length > 0) {
-                    const profile = profileData[0];
+                if (userError) throw userError;
+                if (userData.length > 0) {
+                    const user = userData[0];
+
+                    // Fetch user information
+                    const { data: userInfoData, error: userInfoError } = await supabase
+                        .from('User information')
+                        .select('*')
+                        .eq('user_id', user.id);
+
+                    if (userInfoError) throw userInfoError;
+
                     let parsedTheme = 'blauw';
                     let isDarkMode = false;
 
-                    if (profile.theme) {
-                        try {
-                            const [themeName, darkModeFlag] = JSON.parse(profile.theme);
-                            parsedTheme = themeName;
-                            isDarkMode = darkModeFlag;
-                        } catch (error) {
-                            console.error('Error parsing theme', error);
+                    if (userInfoData && userInfoData.length > 0) {
+                        const userInfo = userInfoData[0];
+                        user.bio = userInfo.bio;
+                        user.location = userInfo.location;
+                        user.looking_for = userInfo.looking_for;
+                        user.living_situation = userInfo.living_situation;
+                        user.mobility = userInfo.mobility;
+                        user.theme = userInfo.theme;
+                        user.sexuality = userInfo.sexuality;
+                        user.gender = userInfo.gender;
+
+                        if (userInfo.theme) {
+                            try {
+                                const [themeName, darkModeFlag] = JSON.parse(userInfo.theme);
+                                parsedTheme = themeName;
+                                isDarkMode = darkModeFlag;
+                            } catch (error) {
+                                console.error('Error parsing theme', error);
+                            }
+                        }
+
+                        // Fetch location details using location ID
+                        if (userInfo.location) {
+                            const { data: locationData, error: locationError } = await supabase
+                                .from('Location')
+                                .select('Gemeente, Longitude, Latitude')
+                                .eq('id', userInfo.location);
+
+                            if (locationError) throw locationError;
+
+                            // If locationData is fetched, add it to user
+                            if (locationData && locationData.length > 0) {
+                                const location = locationData[0];
+                                user.locationData = {
+                                    gemeente: location.Gemeente,
+                                    latitude: location.Latitude,
+                                    longitude: location.Longitude,
+                                };
+                            }
                         }
                     }
 
-                    const { data: profileInterests, error: interestsError } = await supabase
-                        .from('ProfileInterests')
-                        .select('interestId')
-                        .eq('ProfileId', profile.ActCode);
+                    // Fetch interests related to the user
+                    const { data: interestedInData, error: interestedInError } = await supabase
+                        .from('Interested in')
+                        .select('interest_id')
+                        .eq('user_id', user.id);
 
-                    if (interestsError) throw interestsError;
+                    if (interestedInError) throw interestedInError;
 
-                    if (profileInterests && profileInterests.length > 0) {
-                        const interestIds = profileInterests.map(item => item.interestId);
+                    if (interestedInData && interestedInData.length > 0) {
+                        const interestIds = interestedInData.map(item => item.interest_id);
                         const { data: interestsData, error: fetchInterestsError } = await supabase
                             .from('Interests')
                             .select('interest')
-                            .in('interestId', interestIds);
+                            .in('id', interestIds);
 
                         if (fetchInterestsError) throw fetchInterestsError;
-                        profile.interests = interestsData.map(interest => ({ interest_name: interest.interest }));
+                        user.interests = interestsData.map(interest => ({ interest_name: interest.interest }));
                     }
 
-                    setProfileData({ ...profile, theme: isDarkMode ? `${parsedTheme}_donker` : parsedTheme });
+                    // Set the user profile data with the theme
+                    setProfileData({
+                        ...user,
+                        theme: isDarkMode ? `${parsedTheme}_donker` : parsedTheme
+                    });
                 }
             } catch (error) {
                 setError(error.message);
@@ -136,18 +182,20 @@ const ProfileCard = () => {
     const [newInterest, setNewInterest] = useState('');
     const [interestOptions, setInterestOptions] = useState([])
     const [lookingForArray, setLookingForArray] = useState([])
-    const { profileData, isLoading, error, interest} = useFetchProfileData('1547');
+    const { profileData, isLoading, error, interest} = useFetchProfileData('1519');
+
+    console.log(profileData)
 
     useEffect(() => {
         if (profileData.theme) {
             setTheme(profileData.theme);
         }
-        if (profileData.profilePicture) {
-            const imageUrlWithCacheBuster = `${profileData.profilePicture}?t=${new Date().getTime()}`;
+        if (profileData.profile_picture) {
+            const imageUrlWithCacheBuster = `${profileData.profile_picture}?t=${new Date().getTime()}`;
             setProfilePicture(imageUrlWithCacheBuster);
         }
-        if (profileData.location) {
-            setLocation(profileData.location);
+        if (profileData.locationData) {
+            setLocation(profileData.locationData.gemeente);
         }
         if (profileData.gender) {
             setGender(profileData.gender);
@@ -158,20 +206,20 @@ const ProfileCard = () => {
         if (profileData.bio) {
             setBiography(profileData.bio);
         }
-        if (profileData.livingSituation) {
-            setLivingSituation(profileData.livingSituation);
+        if (profileData.living_situation) {
+            setLivingSituation(profileData.living_situation);
         }
         if (profileData.mobility) {
             setMobility(profileData.mobility ? 'Ja' : 'Nee');
         }
         if (interest && interest.length > 0) {
-            setInterestOptions(interest.map(interest => ({ value: interest.interest, label: interest.interest })));
+            setInterestOptions(interest.map(interest => ({ value: interest.Interest, label: interest.Interest })));
         }
-        if (profileData.lookingFor && Array.isArray(profileData.lookingFor)) {
-            setLookingForArray(profileData.lookingFor);
-        } else if (typeof profileData.lookingFor === 'string') {
+        if (profileData.looking_for && Array.isArray(profileData.looking_for)) {
+            setLookingForArray(profileData.looking_for);
+        } else if (typeof profileData.looking_for === 'string') {
             try {
-                const parsedLookingFor = JSON.parse(profileData.lookingFor);
+                const parsedLookingFor = JSON.parse(profileData.looking_for);
                 setLookingForArray(parsedLookingFor);
             } catch (error) {
                 console.error('Error parsing lookingFor:', error);
@@ -184,9 +232,9 @@ const ProfileCard = () => {
     const saveField = async (field, value) => {
         try {
             const { data, error } = await supabase
-                .from('Profile')
+                .from('User information')
                 .update({ [field]: value })
-                .eq('ActCode', profileData.ActCode);
+                .eq('user_id', profileData.id);
             if (error) throw error;
 
             console.log(`${field} saved successfully with value ${value}`);
@@ -199,14 +247,14 @@ const ProfileCard = () => {
     const debouncedSaveBiography = debounce((value) => saveField('bio', value), 1000);
     const debouncedSaveLocation = debounce((value) => saveField('location', value), 1000);
     const debouncedSaveGender = debounce((value) => saveField('gender', value), 1000);
-    const debouncedSaveLivingSituation = debounce((value) => saveField('livingSituation', value), 1000)
+    const debouncedSaveLivingSituation = debounce((value) => saveField('living_situation', value), 1000)
     const debouncedSaveMobility = debounce((value) => saveField('mobility', value), 1000)
     const debouncedSaveLookingFor = debounce(async (updatedLookingFor) => {
         try {
             const { data, error } = await supabase
-                .from('Profile')
-                .update({ lookingFor: updatedLookingFor })
-                .eq('ActCode', profileData.ActCode);
+                .from('User information')
+                .update({ looking_for: updatedLookingFor })
+                .eq('user_id', profileData.id);
             if (error) throw error;
 
             console.log('Looking for updated successfully');
@@ -255,8 +303,8 @@ const ProfileCard = () => {
                 // Step 1: Save new interest to database
                 const { data: existingInterest, error: fetchError } = await supabase
                     .from('Interests')
-                    .select('interestId')
-                    .eq('interest', capitalizedInterest)
+                    .select('id')
+                    .eq('Interest', capitalizedInterest)
                     .single();
 
                 let interestId;
@@ -265,12 +313,12 @@ const ProfileCard = () => {
                     // Handle fetching error or insert if interest does not exist
                     const { data: insertedInterest, error: insertError } = await supabase
                         .from('Interests')
-                        .insert({ interest: capitalizedInterest })
-                        .select('interestId')
+                        .insert({ Interest: capitalizedInterest })
+                        .select('id')
                         .single();
 
                     if (insertError) throw insertError;
-                    interestId = insertedInterest.interestId;
+                    interestId = insertedInterest.id;
                     console.log(`Inserted interest: ${insertedInterest}`);
                 } else {
                     // Interest already exists, get its ID
@@ -279,8 +327,8 @@ const ProfileCard = () => {
                 }
 
                 // Step 2: Associate the interest with the current profile
-                await supabase.from('ProfileInterests').insert({
-                    ProfileId: profileData.ActCode,
+                await supabase.from('Interested in ').insert({
+                    ProfileId: profileData.id,
                     interestId: interestId
                 });
 
@@ -305,9 +353,9 @@ const ProfileCard = () => {
         try {
             // Retrieve existing interests linked to this profile
             const { data: existingInterests, error: existingError } = await supabase
-                .from('ProfileInterests')
+                .from('Interested in')
                 .select('interestId')
-                .eq('ProfileId', profileData.ActCode);
+                .eq('ProfileId', profileData.id);
 
             if (existingError) throw existingError;
 
@@ -331,8 +379,8 @@ const ProfileCard = () => {
             // Insert new interests if any
             if (interestsToAdd.length > 0) {
                 await supabase
-                    .from('ProfileInterests')
-                    .insert(interestsToAdd.map((id) => ({ ProfileId: profileData.ActCode, interestId: id })));
+                    .from('Interested in')
+                    .insert(interestsToAdd.map((id) => ({ ProfileId: profileData.id, interestId: id })));
             }
 
             // Remove deselected interests if any
@@ -340,7 +388,7 @@ const ProfileCard = () => {
                 await supabase
                     .from('ProfileInterests')
                     .delete()
-                    .eq('ProfileId', profileData.ActCode)
+                    .eq('ProfileId', profileData.id)
                     .in('interestId', interestsToRemove);
             }
 
@@ -395,18 +443,18 @@ const ProfileCard = () => {
     const handleProfilePictureUpload = async ({ file }) => {
         try {
             setUploading(true);
-            const fileName = `${profileData.ActCode}-profilePicture`;
+            const fileName = `${profileData.id}-profilePicture`;
 
             // Check if the file already exists and remove it before upload
             const { data: existingFiles, error: listError } = await supabase.storage
                 .from('profile-pictures')
-                .list('', { search: profileData.ActCode });
+                .list('', { search: profileData.id });
 
             if (listError) {
                 console.error('Error checking existing files:', listError);
             } else {
                 console.log("deleting previous instance")
-                const existingFile = existingFiles.find(item => item.name.startsWith(profileData.ActCode));
+                const existingFile = existingFiles.find(item => item.name.startsWith(profileData.id));
                 if (existingFile) {
                     // Remove the existing file if it exists
                     const { error: deleteError } = await supabase.storage
@@ -449,7 +497,7 @@ const ProfileCard = () => {
             await supabase
                 .from('Profile')
                 .update({ profilePicture: imageUrl })
-                .eq('ActCode', profileData.ActCode);
+                .eq('ActCode', profileData.id);
 
             console.log('Profile picture uploaded successfully');
         } catch (error) {
@@ -507,7 +555,7 @@ const ProfileCard = () => {
                 </div>
 
                 <h2 style={{margin: '0', textAlign: 'center'}}>
-                    {profileData.name || 'Naam'}, {calculateAge(profileData.birthDate) || 'Leeftijd'}
+                    {profileData.name || 'Naam'}, {calculateAge(profileData.birthdate) || 'Leeftijd'}
                 </h2>
 
                 <Divider/>

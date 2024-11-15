@@ -145,6 +145,8 @@ const ProfileCard = () => {
     const themeColors = themes[theme] || themes.blauw;
     const [slidesToShow, setSlidesToShow] = useState(3);
 
+    console.log("profiledata: ",profileData)
+
     const currentUserLocation = { latitude: 50.8, longitude: 4.3333333 }; // Use real location data
 
     const updateSlidesToShow = () => {
@@ -217,11 +219,11 @@ const ProfileCard = () => {
         profileData.locationData?.latitude, profileData.locationData?.longitude
     );
 
-    let lookingForArray = profileData.lookingFor;
+    let lookingForArray = profileData.looking_for;
 
-    if (typeof profileData.lookingFor === 'string') {
+    if (typeof profileData.looking_for === 'string') {
         try {
-            lookingForArray = JSON.parse(profileData.lookingFor);
+            lookingForArray = JSON.parse(profileData.looking_for);
         } catch (error) {
             console.error('Error parsing JSON:', error);
             lookingForArray = [];
@@ -260,7 +262,7 @@ const ProfileCard = () => {
                         />
                         <div>
                             <h2 style={{ margin: '0' }}>
-                                {profileData.name || 'Naam'}, {calculateAge(profileData.birthDate) || 'Leeftijd'}
+                                {profileData.name || 'Naam'}, {calculateAge(profileData.birthdate) || 'Leeftijd'}
                             </h2>
                             <p style={{margin: '5px 0', maxWidth: '550px'}}>
                                 {profileData.bio || ''}
@@ -299,7 +301,7 @@ const ProfileCard = () => {
                 <Divider />
                 <ProfileDetail
                     label="Woonsituatie"
-                    value={profileData.livingSituation}
+                    value={profileData.living_situation}
                     icon={<HomeOutlined />}
                 />
                 <Divider />

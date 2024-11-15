@@ -1,8 +1,8 @@
 import 'antd/dist/reset.css'; // Import Ant Design styles
 import '../CSS/AntDesignOverride.css'
-import {antThemeTokens, ButterflyIcon, themes} from '../themes';
-import { Button, ConfigProvider } from 'antd';
-import { MessageOutlined, UserOutlined, SearchOutlined, SettingOutlined } from "@ant-design/icons";
+import { antThemeTokens, ButterflyIcon, themes } from '../themes';
+import { Button, ConfigProvider, Avatar } from 'antd';
+import { MessageOutlined, SearchOutlined, SettingOutlined } from "@ant-design/icons";
 import React, { useState } from "react";
 import { useNavigate } from 'react-router-dom';
 
@@ -73,26 +73,39 @@ const HomePage = () => {
                     </Button>
                 </div>
 
-                <Button
-                    type="primary"
-                    icon={<UserOutlined style={{ fontSize: '3vw' }} />}
+                <div
                     style={{
                         position: 'absolute',
                         top: '2%',
                         right: '2%',
                         display: 'flex',
-                        flexDirection: 'column',
                         alignItems: 'center',
-                        justifyContent: 'center',
-                        width: '15vw',
-                        height: '15vw',
-                        minWidth: '80px',
-                        minHeight: '80px',
+                        gap: '15px',
+                        cursor: 'pointer',
+                        padding: '10px',
                     }}
                     onClick={() => navigate('/profileEdit')}
                 >
-                    <h2 style={{ margin: '0', fontSize: '1.2vw', minWidth: '10px' }}>Profiel</h2>
-                </Button>
+                    <span
+                        style={{
+                            fontSize: '1.5vw',
+                            color: themeColors.primary10,
+                            whiteSpace: 'nowrap',
+                        }}
+                    >
+                        Martin
+                    </span>
+                    <Avatar
+                        size={60}
+                        style={{
+                            backgroundColor: themeColors.primary4,
+                            color: themeColors.primary10,
+                            fontSize: '1.5vw',
+                        }}
+                    >
+                        M
+                    </Avatar>
+                </div>
 
                 <Button
                     type="primary"

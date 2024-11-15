@@ -2,7 +2,7 @@ import 'antd/dist/reset.css'; // Import Ant Design styles
 import '../CSS/AntDesignOverride.css'
 import { antThemeTokens, ButterflyIcon, themes } from '../themes';
 import { Button, ConfigProvider, Avatar } from 'antd';
-import { MessageOutlined, SearchOutlined, SettingOutlined } from "@ant-design/icons";
+import { MessageOutlined, SearchOutlined, SettingOutlined, PoweroffOutlined } from "@ant-design/icons";
 import React, { useState } from "react";
 import { useNavigate } from 'react-router-dom';
 
@@ -77,7 +77,7 @@ const HomePage = () => {
                     style={{
                         position: 'absolute',
                         top: '2%',
-                        right: '2%',
+                        left: '2%',
                         display: 'flex',
                         alignItems: 'center',
                         gap: '15px',
@@ -86,15 +86,6 @@ const HomePage = () => {
                     }}
                     onClick={() => navigate('/profileEdit')}
                 >
-                    <span
-                        style={{
-                            fontSize: '1.5vw',
-                            color: themeColors.primary10,
-                            whiteSpace: 'nowrap',
-                        }}
-                    >
-                        Martin
-                    </span>
                     <Avatar
                         size={60}
                         style={{
@@ -105,15 +96,24 @@ const HomePage = () => {
                     >
                         M
                     </Avatar>
+                    <span
+                        style={{
+                            fontSize: '1.5vw',
+                            color: themeColors.primary10,
+                            whiteSpace: 'nowrap',
+                        }}
+                    >
+                        Martin
+                    </span>
                 </div>
 
                 <Button
-                    type="primary"
-                    icon={<SettingOutlined style={{ fontSize: '2vw' }} />}
+                    type="secondary"
+                    icon={<SettingOutlined style={{fontSize: '2vw'}}/>}
                     style={{
                         position: 'absolute',
-                        bottom: '2%',
-                        left: '2%',
+                        bottom: '1%',
+                        left: '1%',
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
@@ -129,19 +129,20 @@ const HomePage = () => {
                 </Button>
 
                 <Button
-                    type="primary"
+                    type="secondary"
+                    icon={<PoweroffOutlined style={{fontSize: '2vw'}}/>}
                     style={{
                         position: 'absolute',
-                        bottom: '2%',
-                        right: '2%',
+                        bottom: '1%',
+                        right: '1%',
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
                         justifyContent: 'center',
                         width: '10vw',
-                        height: '5vw',
+                        height: '8vw',
                         minWidth: '60px',
-                        minHeight: '30px',
+                        minHeight: '40px',
                     }}
                     onClick={() => navigate('/login')}
                 >

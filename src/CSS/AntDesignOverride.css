@@ -32,6 +32,12 @@ h1, h2 {
     font-size: 2rem; /* Scales with base font size */
 }
 
+/* spacing voor radio forms */
+.ant-radio-wrapper {
+    display: block;
+    margin-bottom: 16px; /* Adjust this value for more or less space */
+}
+
 .butterfly-icon{
     position: fixed;
     top: 50%;

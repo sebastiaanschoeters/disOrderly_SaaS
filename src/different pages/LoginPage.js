@@ -55,15 +55,6 @@ const LoginPage = () => {
                     </Form.Item>
 
                     <Form.Item>
-                        <Checkbox>
-                            I accept the{' '}
-                            <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab_channel=RickAstley" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'underline' }}>
-                                Terms and Services
-                            </a>.
-                        </Checkbox>
-                    </Form.Item>
-
-                    <Form.Item>
                         <Button type="primary" htmlType="submit" style={{ width: '100%' }}
                                 onClick={() => navigate('/home')}
                         >

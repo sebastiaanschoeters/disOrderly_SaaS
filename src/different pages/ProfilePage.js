@@ -75,8 +75,14 @@ const useFetchProfileData = (actCode) => {
 
                             if (locationError) throw locationError;
 
+                            // If locationData is fetched, add it to user
                             if (locationData && locationData.length > 0) {
-                                const locationInfo = locationData[0];
+                                const location = locationData[0];
+                                user.locationData = {
+                                    gemeente: location.Gemeente,
+                                    latitude: location.Latitude,
+                                    longitude: location.Longitude,
+                                };
                             }
                         }
                     }
@@ -138,6 +144,8 @@ const ProfileCard = () => {
     const { profileData, isLoading, error } = useFetchProfileData('1519'); // Replace with dynamic ActCode as needed
     const themeColors = themes[theme] || themes.blauw;
     const [slidesToShow, setSlidesToShow] = useState(3);
+
+    const currentUserLocation = { latitude: 50.8, longitude: 4.3333333 }; // Use real location data
 
     const updateSlidesToShow = () => {
         const width = window.innerWidth;
@@ -201,9 +209,13 @@ const ProfileCard = () => {
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         const distance = R * c; // Distance in kilometers
 
-        return distance;
+        return Math.round(distance);
     }
 
+    const distanceToProfileUser = calculateDistance(
+        currentUserLocation.latitude, currentUserLocation.longitude,
+        profileData.locationData?.latitude, profileData.locationData?.longitude
+    );
 
     let lookingForArray = profileData.lookingFor;
 
@@ -259,7 +271,7 @@ const ProfileCard = () => {
 
                 <Divider />
 
-                <ProfileDetail label="Locatie" value={profileData.location} icon={<EnvironmentOutlined />} />
+                <ProfileDetail label="Locatie" value={`${profileData.locationData.gemeente} (${distanceToProfileUser} km van jou verwijdert)`} icon={<EnvironmentOutlined />} />
                 <Divider />
                 <ProfileDetail label="Geslacht" value={profileData.gender} icon={<UserOutlined />} />
                 <Divider />

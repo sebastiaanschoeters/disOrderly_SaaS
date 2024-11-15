@@ -1,5 +1,5 @@
 import 'antd/dist/reset.css'; // Import Ant Design styles
-import '../CSS/Ant design overide.css'
+import '../CSS/AntDesignOverride.css'
 import { antThemeTokens, themes } from '../themes';
 import { Button, ConfigProvider} from 'antd';
 import {MessageOutlined, UserOutlined, SearchOutlined, SettingOutlined } from "@ant-design/icons";
@@ -40,8 +40,10 @@ const HomePage = () => {
                     width: '240px',
                     height: '240px',
                 }}
+                onClick={() => navigate('/search')}
+
             >
-                <h2 style={{ margin: '0', fontSize: '24px' }}>Zoeken</h2>
+                <h2 style={{ margin: '0', fontSize: '24px' }}>Mensen vinden</h2>
             </Button>
 
             <Button
@@ -60,32 +62,34 @@ const HomePage = () => {
                 <h2 style={{ margin: '0', fontSize: '24px' }}>Chats</h2>
             </Button>
 
+            </div>
+
             <Button
                 type="primary"
                 icon={<UserOutlined style={{ fontSize: '4rem' }} />}
                 style={{
+                    position: 'absolute',
+                    top: '20px',
+                    right: '20px',
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    width: '240px',
-                    height: '240px',
+                    width: '120px',
+                    height: '120px',
                 }}
                 onClick={() => navigate('/profileEdit')}
 
             >
                 <h2 style={{ margin: '0', fontSize: '24px' }}>Profiel</h2>
             </Button>
-
-            </div>
-
             <Button
                 type="primary"
                 icon={<SettingOutlined style={{ fontSize: '1.5rem' }} />}
                 style={{
                     position: 'absolute',
                     bottom: '20px',
-                    right: '20px',
+                    left: '20px',
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
@@ -103,7 +107,7 @@ const HomePage = () => {
                 type="primary"
                 style={{
                     position: 'absolute',
-                    top: '20px',
+                    bottom: '20px',
                     right: '20px',
                     display: 'flex',
                     flexDirection: 'column',

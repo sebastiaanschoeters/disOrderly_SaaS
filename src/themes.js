@@ -22,6 +22,61 @@ import {
     redDark
 } from '@ant-design/colors';
 
+import tinycolor from 'tinycolor2';
+
+import React from 'react';
+import './App.css'; // Import the CSS file
+
+// Your custom SVG icon component
+export const ButterflyIcon = ({ color }) => (
+    <svg className="butterfly-icon" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+        <g id="SVGRepo_iconCarrier">
+            <path
+                d="M179.222 296.039C171.929 321.836 117.118 349.829 100.868 317.327C83.9601 283.513 128.707 258.291 155.272 253.461"
+                stroke={color || "#000000"}
+                stroke-opacity="0.9"
+                stroke-width="16"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+            />
+            <path
+                d="M154.089 255.235C140.063 256.692 126.178 245.826 114.468 239.268C74.9513 217.139 49.2305 174.06 54.7419 127.208C60.5666 77.6967 120.975 104.935 142.262 123.068C160.693 138.769 174.617 160.101 184.839 181.908C193.152 199.64 200.112 214.666 205.536 233.651"
+                stroke={color || "#000000"}
+                stroke-opacity="0.9"
+                stroke-width="16"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+            />
+            <path
+                d="M211.746 221.528C216.22 203.929 220.6 185.643 227.417 168.602C234.927 149.827 243.612 130.546 256.097 114.494C267.281 100.115 309.676 53.8821 331.79 73.9865C338.609 80.1856 341.437 92.7089 343.321 101.189C355.43 155.676 303.486 234.412 246.044 240.156"
+                stroke={color || "#000000"}
+                stroke-opacity="0.9"
+                stroke-width="16"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+            />
+            <path
+                d="M249.001 238.972C282.8 227.116 321.478 272.606 305.179 305.204C286.258 343.046 248.409 334.476 215.589 283.62"
+                stroke={color || "#000000"}
+                stroke-opacity="0.9"
+                stroke-width="16"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+            />
+            <path
+                d="M205.537 171.56C213.34 215.845 203.3 268.936 199.919 312.892"
+                stroke={color || "#000000"}
+                stroke-opacity="0.9"
+                stroke-width="16"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+            />
+        </g>
+    </svg>
+);
+
 export const antThemeTokens = (colors) => ({
     colorPrimary: colors.primary7,         // Main color
     colorPrimaryHover: colors.primary5,    // Hover effect color
@@ -30,16 +85,20 @@ export const antThemeTokens = (colors) => ({
     colorBgBase: colors.primary2,          // Base background color
     colorBgContainer: colors.primary1,     // Background for containers
     colorBgLayout: colors.primary2,        // Background for layout
-    colorBorder: colors.primary3,          // Default border color
+    colorBorder: colors.primary4,          // Default border color
     colorBorderSecondary: colors.primary4,  // Secondary border color
     colorText: colors.primary10,           // Main text color
     colorTextLight: colors.primary1,       // Light text color
-    colorTextSecondary: colors.primary8,   // Secondary text color
+    colorTextSecondary: colors.primary10,   // Secondary text color
     colorTextDescription: colors.primary6, // Text color for descriptions
     colorTextPlaceholder: colors.primary6, // Placeholder text color
-    colorTextDisabled: colors.primary3,    // Disabled text color
+    colorTextDisabled: colors.primary7,    // Disabled text color
     colorTextHeading: colors.primary9,     // Text color for headings
 });
+
+const lightenColor = (color, amount) => {
+    return tinycolor(color).lighten(amount).toHexString(); // Lightens by specified percentage
+};
 
 export const themes = {
     blauw: {
@@ -65,7 +124,7 @@ export const themes = {
         primary7: blueDark[6],
         primary8: blueDark[7],
         primary9: blueDark[8],
-        primary10: blueDark[9],
+        primary10: lightenColor(blueDark[9],10)
     },
 
     cyaan: {
@@ -91,7 +150,7 @@ export const themes = {
         primary7: cyanDark[6],
         primary8: cyanDark[7],
         primary9: cyanDark[8],
-        primary10: cyanDark[9],
+        primary10: lightenColor(cyanDark[9],10)
     },
 
     goud: {
@@ -117,7 +176,7 @@ export const themes = {
         primary7: goldDark[6],
         primary8: goldDark[7],
         primary9: goldDark[8],
-        primary10: goldDark[9],
+        primary10: lightenColor(goldDark[9],10)
     },
 
     groen: {
@@ -143,7 +202,7 @@ export const themes = {
         primary7: greenDark[6],
         primary8: greenDark[7],
         primary9: greenDark[8],
-        primary10: greenDark[9],
+        primary10: lightenColor(greenDark[9], 10)
     },
 
     grijs: {
@@ -169,7 +228,7 @@ export const themes = {
         primary7: greyDark[6],
         primary8: greyDark[7],
         primary9: greyDark[8],
-        primary10: greyDark[9],
+        primary10: lightenColor(greyDark[9], 10)
     },
 
     limoen: {
@@ -195,7 +254,7 @@ export const themes = {
         primary7: limeDark[6],
         primary8: limeDark[7],
         primary9: limeDark[8],
-        primary10: limeDark[9],
+        primary10: lightenColor(limeDark[9], 10)
     },
 
     oranje: {
@@ -221,7 +280,7 @@ export const themes = {
         primary7: orangeDark[6],
         primary8: orangeDark[7],
         primary9: orangeDark[8],
-        primary10: orangeDark[9],
+        primary10: lightenColor(orangeDark[9], 10)
     },
 
     paars: {
@@ -247,7 +306,7 @@ export const themes = {
         primary7: purpleDark[6],
         primary8: purpleDark[7],
         primary9: purpleDark[8],
-        primary10: purpleDark[9],
+        primary10: lightenColor(purpleDark[9], 10)
     },
 
     roos: {
@@ -273,7 +332,7 @@ export const themes = {
         primary7: magentaDark[6],
         primary8: magentaDark[7],
         primary9: magentaDark[8],
-        primary10: magentaDark[9],
+        primary10: lightenColor(magentaDark[9], 10)
     },
 
     rood: {
@@ -299,7 +358,7 @@ export const themes = {
         primary7: redDark[6],
         primary8: redDark[7],
         primary9: redDark[8],
-        primary10: redDark[9],
+        primary10: lightenColor(redDark[9], 10)
     },
 };
 

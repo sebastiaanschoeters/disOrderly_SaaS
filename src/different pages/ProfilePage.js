@@ -1,16 +1,134 @@
-// Import necessary libraries
-import React, { useState } from 'react';
-import { Card, Tag, Avatar, Button, Divider, ConfigProvider } from 'antd';
-import { MessageOutlined, CloseOutlined, EnvironmentOutlined, UserOutlined, HeartOutlined, StarOutlined, HomeOutlined, CarOutlined } from '@ant-design/icons';
+import React, { useState, useEffect } from 'react';
+import {Tag, Avatar, Button, Divider, ConfigProvider, Spin} from 'antd';
+import {
+    MessageOutlined,
+    CloseOutlined,
+    EnvironmentOutlined,
+    UserOutlined,
+    HeartOutlined,
+    StarOutlined,
+    HomeOutlined,
+    CarOutlined
+} from '@ant-design/icons';
+import { createClient } from "@supabase/supabase-js";
 import 'antd/dist/reset.css';
-import '../CSS/Ant design overide.css';
-import { antThemeTokens, themes } from '../themes';
+import '../CSS/AntDesignOverride.css';
+import { ButterflyIcon, antThemeTokens, themes } from '../themes';
+import {useNavigate} from "react-router-dom";
 
-// The ProfileCard component
+const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
+
+const useFetchProfileData = (actCode) => {
+    const [profileData, setProfileData] = useState({});
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const { data: profileData, error: profileError } = await supabase
+                    .from('Profile')
+                    .select('*')
+                    .eq('ActCode', actCode);
+
+                if (profileError) throw profileError;
+                if (profileData.length > 0) {
+                    const profile = profileData[0];
+
+                    let parsedTheme = 'blauw';
+                    let isDarkMode = false;
+
+                    if (profile.theme) {
+                        try {
+                            const [themeName, darkModeFlag] = JSON.parse(profile.theme);
+                            parsedTheme = themeName;
+                            isDarkMode = darkModeFlag;
+                        } catch (error) {
+                            console.error('Error parsing theme', error);
+                        }
+                    }
+
+                    const { data: profileInterests, error: interestsError } = await supabase
+                        .from('ProfileInterests')
+                        .select('interestId')
+                        .eq('ProfileId', profile.ActCode);
+
+                    if (interestsError) throw interestsError;
+
+                    if (profileInterests && profileInterests.length > 0) {
+                        const interestIds = profileInterests.map(item => item.interestId);
+                        const { data: interestsData, error: fetchInterestsError } = await supabase
+                            .from('Interests')
+                            .select('interest')
+                            .in('interestId', interestIds);
+
+                        if (fetchInterestsError) throw fetchInterestsError;
+                        profile.interests = interestsData.map(interest => ({ interest_name: interest.interest }));
+                    }
+
+                    setProfileData({ ...profile, theme: isDarkMode ? `${parsedTheme}_donker` : parsedTheme });
+                }
+            } catch (error) {
+                setError(error.message);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [actCode]);
+
+    return { profileData, isLoading, error };
+};
+
+const ProfileDetail = ({ label, value, icon }) => (
+    <p style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '5px'}}>
+        <strong style={{ width: '20%', minWidth: '150px', flexShrink: 0 }}>{icon} {label}: </strong>
+        <span style={{ flexWrap: 'wrap' }}>{value || 'Niet beschikbaar'}</span>
+    </p>
+);
+
 const ProfileCard = () => {
     const [theme, setTheme] = useState('blauw');
+    const [profilePicture, setProfilePicture] = useState(''); /* get images from database */
+    const { profileData, isLoading, error } = useFetchProfileData('1547'); // Replace with dynamic ActCode as needed
     const themeColors = themes[theme] || themes.blauw;
-    const [images, setImages] = useState([]); /* get images from database */
+
+    useEffect(() => {
+        if (profileData.theme){
+            setTheme(profileData.theme);
+        }
+        if (profileData.profilePicture){
+            const imageUrlWithCacheBuster = `${profileData.profilePicture}?t=${new Date().getTime()}`;
+            setProfilePicture(imageUrlWithCacheBuster);
+        }
+    }, [profileData.theme]);
+
+    const calculateAge = (birthdate) => {
+        if (!birthdate) return 'Onbekend';
+        const birthDate = new Date(birthdate);
+        const today = new Date();
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const monthDifference = today.getMonth() - birthDate.getMonth();
+        if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+        }
+        return age;
+    };
+
+    let lookingForArray = profileData.lookingFor;
+
+    if (typeof profileData.lookingFor === 'string') {
+        try {
+            lookingForArray = JSON.parse(profileData.lookingFor);
+        } catch (error) {
+            console.error('Error parsing JSON:', error);
+            lookingForArray = [];
+        }
+    }
+
+    if (isLoading) return <Spin tip="Profiel laden..." />;
+    if (error) return <p>Failed to load profile: {error}</p>;
 
     return (
         <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
@@ -18,89 +136,77 @@ const ProfileCard = () => {
                 style={{
                     padding: '20px',
                     position: 'relative',
-                    width: '100%',
-                    height: '100vh',
+                    minWidth: '100%',
+                    minHeight: '100vh',
                     backgroundColor: themeColors.primary2,
-                    color: themeColors.primary10
-                }}>
-                <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap' }}>
-                    {images.length > 0 ? (
-                        images.map((image, index) => (
-                            <img
-                                key={index}
-                                src={image}
-                                alt={`Uploaded ${index}`}
-                                style={{ width: '100px', height: '100px', objectFit: 'cover', margin: '5px' }}
-                            />
-                        ))
-                    ) : (
+                    color: themeColors.primary10,
+                    zIndex: '0'
+                }}
+            >
+                <ButterflyIcon color={themeColors.primary3} />
+
+                {/* Header section with profile picture, name, age, and biography */}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingBottom: '20px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '10px' }}>
                         <Avatar
-                            src="https://example.com/photo.jpg"
-                            alt="Martin's Profile Picture"
-                            size={100}
-                            style={{ margin: '20px auto', display: 'block' }}
+                            src={profilePicture || "https://example.com/photo.jpg"} // Fallback to default avatar
+                            alt={profileData.name || "No Name"}
+                            style ={{
+                                minWidth: '200px',
+                                minHeight: '200px',
+                                borderRadius: '50%'
+                            }}
                         />
-                    )}
+                        <div>
+                            <h2 style={{ margin: '0' }}>
+                                {profileData.name || 'Naam'}, {calculateAge(profileData.birthDate) || 'Leeftijd'}
+                            </h2>
+                            <p style={{margin: '5px 0', maxWidth: '550px'}}>
+                            {profileData.bio || ''}
+                        </p>
+                        </div>
+                    </div>
                 </div>
 
-                {/* Exit button in the top right */}
-                <Button
-                    type="text"
-                    icon={<CloseOutlined />}
-                    style={{ position: 'absolute', top: '10px', right: '10px' }}
+                <Divider />
+
+                <ProfileDetail label="Locatie" value={profileData.location} icon={<EnvironmentOutlined />} />
+                <Divider />
+                <ProfileDetail label="Geslacht" value={profileData.gender} icon={<UserOutlined />} />
+                <Divider />
+                <ProfileDetail
+                    label="Interesses"
+                    value={
+                        profileData.interests && profileData.interests.length > 0
+                            ? profileData.interests.map((interest, index) => (
+                                <Tag key={index}>{interest.interest_name}</Tag>
+                            ))
+                            : 'Geen interesses beschikbaar'
+                    }
+                    icon={<StarOutlined />}
                 />
-
-                <h2 style={{ textAlign: 'center', margin: '0'}}>Martin, 27</h2>
-
                 <Divider />
-
-                <p style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '2%' }}>
-                    <strong style={{ width: '20%', minWidth: '150px' }}><EnvironmentOutlined /> Locatie: </strong>
-                    Leuven
-                </p>
-
+                <ProfileDetail
+                    label="Is op zoek naar"
+                    value={
+                        Array.isArray(lookingForArray)
+                            ? lookingForArray.map((option, index) => <Tag key={index}>{option}</Tag>)
+                            : 'Vrienden'
+                    }
+                    icon={<HeartOutlined />}
+                />
                 <Divider />
-
-                <p style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '2%' }}>
-                    <strong style={{ width: '20%', minWidth: '150px' }}><UserOutlined /> Geslacht: </strong>
-                    Man
-                </p>
-
+                <ProfileDetail
+                    label="Woonsituatie"
+                    value={profileData.livingSituation}
+                    icon={<HomeOutlined />}
+                />
                 <Divider />
-
-                <p style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '2%' }}>
-                    <strong style={{ width: '20%', minWidth: '150px' }}><StarOutlined /> Interesses: </strong>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2px' }}>
-                        <Tag>Voetbal</Tag>
-                        <Tag>Wandelen</Tag>
-                        <Tag>Gezelschapsspellen spelen</Tag>
-                        <Tag>Iets gaan drinken met vrienden</Tag>
-                    </div>
-                </p>
-
-                <Divider />
-
-                <p style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '2%' }}>
-                    <strong style={{ width: '20%', minWidth: '150px' }}><HeartOutlined /> Is op zoek naar: </strong>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2px' }}>
-                        <Tag>Vrienden</Tag>
-                        <Tag>Relatie</Tag>
-                    </div>
-                </p>
-
-                <Divider />
-
-                <p style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '2%' }}>
-                    <strong style={{ width: '20%', minWidth: '150px' }}><HomeOutlined /> Woonsituatie: </strong>
-                    Woont alleen
-                </p>
-
-                <Divider />
-
-                <p style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '2%' }}>
-                    <strong style={{ width: '20%', minWidth: '150px' }}><CarOutlined /> Kan zich zelfstandig verplaatsen: </strong>
-                    Ja
-                </p>
+                <ProfileDetail
+                    label="Kan zich zelfstandig verplaatsen"
+                    value={profileData.mobility ? 'Ja' : 'Nee'}
+                    icon={<CarOutlined />}
+                />
 
                 {/* Chat button in the bottom right */}
                 <Button
@@ -110,10 +216,10 @@ const ProfileCard = () => {
                         position: 'fixed',
                         bottom: '20px',
                         right: '20px',
-                        zIndex: 1000 // Ensures it stays on top
+                        zIndex: 1000
                     }}
                 >
-                    Chat met Martin
+                    Chat met {profileData?.name || 'de gebruiker'}
                 </Button>
             </div>
         </ConfigProvider>

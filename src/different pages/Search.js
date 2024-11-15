@@ -62,18 +62,18 @@ const Search = () => {
     }, []);
 
     // Filter users by name, age, gender, lookingFor, and mobility
-    const filteredChats = users.filter((chat) => {
-        const isInAgeRange = chat.age >= ageRange[0] && chat.age <= ageRange[1];
-        const isGenderMatch = gender ? chat.gender === gender : true;
-        const isLookingForMatch = lookingFor.length > 0 ? lookingFor.every(option => chat.lookingFor.includes(option)) : true;  // Match all selected options
-        const isMobilityMatch = mobility !== null ? chat.mobility === mobility : true;  // Add mobility filter check
+    const filteredChats = users.filter((Users) => {
+        const isInAgeRange = Users.age >= ageRange[0] && Users.age <= ageRange[1];
+        const isGenderMatch = gender ? Users.gender === gender : true;
+        const isLookingForMatch = lookingFor.length > 0 ? lookingFor.every(option => Users.lookingFor.includes(option)) : true;  // Match all selected options
+        const isMobilityMatch = mobility !== null ? Users.mobility === mobility : true;  // Add mobility filter check
 
         return (
-            chat.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
+            Users.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
             isInAgeRange &&
             isGenderMatch &&
             isLookingForMatch &&
-            isMobilityMatch  // Include mobility in the filter
+            isMobilityMatch
         );
     });
 

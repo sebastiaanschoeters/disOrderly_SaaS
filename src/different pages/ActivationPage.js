@@ -2,9 +2,13 @@
 import React, { useState, useEffect } from 'react';
 import '../CSS/Ant design overide.css';
 import { useNavigate, useParams } from 'react-router-dom';
+import React, {useEffect, useState} from 'react';
+import '../CSS/AntDesignOverride.css'
 import 'antd/dist/reset.css';
 import {Form, Input, Button, Card, message, ConfigProvider, DatePicker, Radio, Select, Checkbox} from 'antd';
 import '../CSS/Ant design overide.css';
+import { Form, Input, Button, Card, message, ConfigProvider, DatePicker } from 'antd';
+import '../CSS/AntDesignOverride.css'
 import { antThemeTokens, themes } from '../themes';
 import { createClient } from "@supabase/supabase-js";
 import CryptoJS from 'crypto-js';
@@ -31,8 +35,11 @@ const ActivationPage = () => {
     };
 
     const activationCode = (values) => {
+        //NEED EXPANDING WHEN DATABASE IS IMPLEMENTED? WE NEED ACTIVATION KEY LOOKUP IF VALID
+        //if valid do this if not valid write new code
         setLoading(true);
         setTimeout(() => {
+            //message.success("Activation successful!");
             setUserData((prevData) => ({
                 ...prevData,
                 activationKey: values.activationKey
@@ -52,6 +59,7 @@ const ActivationPage = () => {
         setStep(3);
     };
 
+    // Handle submission of additional info (city and organization)
     const Location = (values) => {
         setUserData((prevData) => ({
             ...prevData,

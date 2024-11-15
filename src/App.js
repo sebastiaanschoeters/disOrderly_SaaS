@@ -11,6 +11,7 @@ import PersonalProfilePage from "./different pages/PersonalProfilePage"; // Impo
 import ChatOverviewPage from './different pages/ChatOverviewPage'; // Import your Chat Overview Page
 import ChatPage from './different pages/ChatPage';
 import ChatSuggestionPage from './different pages/ChatSuggestionPage'; // Import your Chat Page
+import Search from "./different pages/Search";
 
 import SupabaseTestPage from "./different pages/SupabaseTestPage";
 
@@ -19,11 +20,12 @@ const App = () => {
         <Router>
             {/* Route definitions */}
             <Routes>
-                <Route path="/" element={<LoginPage />} />
+                <Route path="/" element={<ActivationPage />} />
+                <Route path="/search" element={<Search />} />
                 <Route path="/home" element={<HomePage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/activate" element={<ActivationPage />} />
-                <Route path="/activate/:activationCodeLink" element={<ActivationPage />} />
+                <Route path="/activate/:activationCode" element={<ActivationPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/profileEdit" element={<EditableProfilePage />} />
                 <Route path="/profilePersonal" element={<PersonalProfilePage />} />

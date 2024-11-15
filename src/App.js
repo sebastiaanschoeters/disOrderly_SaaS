@@ -20,12 +20,13 @@ const App = () => {
         <Router>
             {/* Route definitions */}
             <Routes>
+                <Route path="/" element={<LoginPage />} />
                 <Route path="/" element={<ActivationPage />} />
                 <Route path="/search" element={<Search />} />
                 <Route path="/home" element={<HomePage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/activate" element={<ActivationPage />} />
-                <Route path="/activate/:activationCode" element={<ActivationPage />} />
+                <Route path="/activate/:activationCodeLink" element={<ActivationPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/profileEdit" element={<EditableProfilePage />} />
                 <Route path="/profilePersonal" element={<PersonalProfilePage />} />

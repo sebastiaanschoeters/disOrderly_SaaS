@@ -14,8 +14,14 @@
     transition: opacity 0.3s ease;
 }
 
-/* Ensure the container background is transitioned */
+
 .login-container {
     position: relative;
-    transition: opacity 0.5s ease/* Transition both opacity and background-color */
+    //transition: opacity 0.5s ease
+}
+
+/* Keep non-fading elements on top */
+.non-fading-elements {
+    position: relative;
+    z-index: 10; /* Ensure form and button stay visible */
 }

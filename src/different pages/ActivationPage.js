@@ -1,14 +1,9 @@
 // ActivationPage.js
-import React, { useState, useEffect } from 'react';
-import '../CSS/Ant design overide.css';
 import { useNavigate, useParams } from 'react-router-dom';
 import React, {useEffect, useState} from 'react';
 import '../CSS/AntDesignOverride.css'
 import 'antd/dist/reset.css';
 import {Form, Input, Button, Card, message, ConfigProvider, DatePicker, Radio, Select, Checkbox} from 'antd';
-import '../CSS/Ant design overide.css';
-import { Form, Input, Button, Card, message, ConfigProvider, DatePicker } from 'antd';
-import '../CSS/AntDesignOverride.css'
 import { antThemeTokens, themes } from '../themes';
 import { createClient } from "@supabase/supabase-js";
 import CryptoJS from 'crypto-js';

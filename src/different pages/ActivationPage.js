@@ -10,6 +10,8 @@ import CryptoJS from 'crypto-js';
 
 const ActivationPage = () => {
     const { activationCodeLink } = useParams();
+    const [locations, setLocations] = useState([]); // For location dropdown
+    const [searchValue, setSearchValue] = useState(""); // For search functionality
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
     const [userData, setUserData] = useState({});
@@ -24,6 +26,28 @@ const ActivationPage = () => {
             form.setFieldsValue({ activationKey: activationCodeLink });
         }
     }, [activationCodeLink, form]);
+
+    useEffect(() => {
+        const fetchLocations = async (searchTerm = "") => {
+            const { data, error } = await supabase
+                .from("Location")
+                .select("id, Gemeente")
+                .ilike("Gemeente", `%${searchTerm}%`) // Match search term
+                .limit(10); // Limit results for performance
+
+            if (error) {
+                console.error("Error fetching locations:", error.message);
+            } else {
+                setLocations(data || []);
+            }
+        };
+
+        fetchLocations(searchValue);
+    }, [searchValue]);
+
+    const handleSearch = (value) => {
+        setSearchValue(value); // Trigger new fetch based on search
+    };
 
     const goBack = () => {
         if (step > 1) setStep(step - 1);
@@ -55,8 +79,8 @@ const ActivationPage = () => {
     const Location = (values) => {
         setUserData((prevData) => ({
             ...prevData,
-            city: values.city,
-            mobility: values.mobility
+            city: values.city, // Save city ID, not name
+            mobility: values.mobility,
         }));
         setStep(4);
     };
@@ -231,18 +255,39 @@ const ActivationPage = () => {
 
                     {step === 3 && (
                         <Form name="additionalInfoForm" onFinish={Location}>
-                            <Form.Item label="Stad" name="city" rules={[{ required: true, message: 'Voer uw stad in' }]}>
-                                <Input />
+                            <Form.Item
+                                label="Stad"
+                                name="city"
+                                rules={[{ required: true, message: 'Selecteer uw stad' }]}
+                            >
+                                <Select
+                                    showSearch
+                                    placeholder="Zoek en selecteer uw stad"
+                                    onSearch={handleSearch} // Trigger search
+                                    filterOption={false} // Disable client-side filtering
+                                    options={locations.map((location) => ({
+                                        value: location.id, // Use ID as the value
+                                        label: location.Gemeente, // Display gemeente
+                                    }))}
+                                />
                             </Form.Item>
-                            <Form.Item label="Kan zelfstandig verplaatsen" name="mobility" rules={[{ required: true, message: 'Selecteer uw mobiliteits optie' }]}>
+                            <Form.Item
+                                label="Kan zelfstandig verplaatsen"
+                                name="mobility"
+                                rules={[{ required: true, message: 'Selecteer uw mobiliteitsoptie' }]}
+                            >
                                 <Select>
                                     <Select.Option value="True">Ja</Select.Option>
                                     <Select.Option value="False">Nee</Select.Option>
                                 </Select>
                             </Form.Item>
                             <Form.Item>
-                                <Button type="primary" htmlType="submit" style={{ width: '100%' }}>Volgende</Button>
-                                <Button onClick={goBack} style={{ marginTop: '8px', width: '100%' }}>Terug</Button>
+                                <Button type="primary" htmlType="submit" style={{ width: '100%' }}>
+                                    Volgende
+                                </Button>
+                                <Button onClick={goBack} style={{ marginTop: '8px', width: '100%' }}>
+                                    Terug
+                                </Button>
                             </Form.Item>
                         </Form>
                     )}
@@ -274,9 +319,9 @@ const ActivationPage = () => {
                                     placeholder="Selecteer uw voorkeur"
                                     allowClear
                                 >
-                                    <Select.Option value="relatie">Relatie</Select.Option>
-                                    <Select.Option value="friends">Vrienden</Select.Option>
-                                    <Select.Option value="intiem">Intieme ontmoetingen</Select.Option>
+                                    <Select.Option value="Relatie">Relatie</Select.Option>
+                                    <Select.Option value="Vrienden">Vrienden</Select.Option>
+                                    <Select.Option value="Intieme ontmoetingen">Intieme ontmoetingen</Select.Option>
                                 </Select>
                             </Form.Item>
 

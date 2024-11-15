@@ -1,20 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import {Tag, Avatar, Button, Divider, ConfigProvider, Spin} from 'antd';
+import {Tag, Avatar, Button, Divider, ConfigProvider, Spin, Carousel} from 'antd';
 import {
     MessageOutlined,
-    CloseOutlined,
     EnvironmentOutlined,
     UserOutlined,
     HeartOutlined,
     StarOutlined,
     HomeOutlined,
-    CarOutlined
+    CarOutlined, LeftOutlined, RightOutlined, PictureOutlined
 } from '@ant-design/icons';
 import { createClient } from "@supabase/supabase-js";
 import 'antd/dist/reset.css';
 import '../CSS/AntDesignOverride.css';
 import { ButterflyIcon, antThemeTokens, themes } from '../themes';
-import {useNavigate} from "react-router-dom";
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
 
@@ -26,47 +24,87 @@ const useFetchProfileData = (actCode) => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const { data: profileData, error: profileError } = await supabase
-                    .from('Profile')
+                // Fetch user data
+                const { data: userData, error: userError } = await supabase
+                    .from('User')
                     .select('*')
-                    .eq('ActCode', actCode);
+                    .eq('id', actCode);
 
-                if (profileError) throw profileError;
-                if (profileData.length > 0) {
-                    const profile = profileData[0];
+                if (userError) throw userError;
+                if (userData.length > 0) {
+                    const user = userData[0];
+
+                    // Fetch user information
+                    const { data: userInfoData, error: userInfoError } = await supabase
+                        .from('User information')
+                        .select('*')
+                        .eq('user_id', user.id);
+
+                    if (userInfoError) throw userInfoError;
 
                     let parsedTheme = 'blauw';
                     let isDarkMode = false;
 
-                    if (profile.theme) {
-                        try {
-                            const [themeName, darkModeFlag] = JSON.parse(profile.theme);
-                            parsedTheme = themeName;
-                            isDarkMode = darkModeFlag;
-                        } catch (error) {
-                            console.error('Error parsing theme', error);
+                    if (userInfoData && userInfoData.length > 0) {
+                        const userInfo = userInfoData[0];
+                        user.bio = userInfo.bio;
+                        user.location = userInfo.location;
+                        user.looking_for = userInfo.looking_for;
+                        user.living_situation = userInfo.living_situation;
+                        user.mobility = userInfo.mobility;
+                        user.theme = userInfo.theme;
+                        user.sexuality = userInfo.sexuality;
+                        user.gender = userInfo.gender;
+
+                        if (userInfo.theme) {
+                            try {
+                                const [themeName, darkModeFlag] = JSON.parse(userInfo.theme);
+                                parsedTheme = themeName;
+                                isDarkMode = darkModeFlag;
+                            } catch (error) {
+                                console.error('Error parsing theme', error);
+                            }
+                        }
+
+                        // Fetch location details using location ID
+                        if (userInfo.location) {
+                            const { data: locationData, error: locationError } = await supabase
+                                .from('Location')
+                                .select('Gemeente, Longitude, Latitude')
+                                .eq('id', userInfo.location);
+
+                            if (locationError) throw locationError;
+
+                            if (locationData && locationData.length > 0) {
+                                const locationInfo = locationData[0];
+                            }
                         }
                     }
 
-                    const { data: profileInterests, error: interestsError } = await supabase
-                        .from('ProfileInterests')
-                        .select('interestId')
-                        .eq('ProfileId', profile.ActCode);
+                    // Fetch interests related to the user
+                    const { data: interestedInData, error: interestedInError } = await supabase
+                        .from('Interested in')
+                        .select('interest_id')
+                        .eq('user_id', user.id);
 
-                    if (interestsError) throw interestsError;
+                    if (interestedInError) throw interestedInError;
 
-                    if (profileInterests && profileInterests.length > 0) {
-                        const interestIds = profileInterests.map(item => item.interestId);
+                    if (interestedInData && interestedInData.length > 0) {
+                        const interestIds = interestedInData.map(item => item.interest_id);
                         const { data: interestsData, error: fetchInterestsError } = await supabase
                             .from('Interests')
                             .select('interest')
-                            .in('interestId', interestIds);
+                            .in('id', interestIds);
 
                         if (fetchInterestsError) throw fetchInterestsError;
-                        profile.interests = interestsData.map(interest => ({ interest_name: interest.interest }));
+                        user.interests = interestsData.map(interest => ({ interest_name: interest.interest }));
                     }
 
-                    setProfileData({ ...profile, theme: isDarkMode ? `${parsedTheme}_donker` : parsedTheme });
+                    // Set the user profile data with the theme
+                    setProfileData({
+                        ...user,
+                        theme: isDarkMode ? `${parsedTheme}_donker` : parsedTheme
+                    });
                 }
             } catch (error) {
                 setError(error.message);
@@ -91,8 +129,32 @@ const ProfileDetail = ({ label, value, icon }) => (
 const ProfileCard = () => {
     const [theme, setTheme] = useState('blauw');
     const [profilePicture, setProfilePicture] = useState(''); /* get images from database */
-    const { profileData, isLoading, error } = useFetchProfileData('1547'); // Replace with dynamic ActCode as needed
+    const [images, setImages] = useState([
+        'https://i.pravatar.cc/150?img=1',
+        'https://i.pravatar.cc/150?img=2',
+        'https://i.pravatar.cc/150?img=3',
+        'https://i.pravatar.cc/150?img=4'
+    ]);
+    const { profileData, isLoading, error } = useFetchProfileData('1519'); // Replace with dynamic ActCode as needed
     const themeColors = themes[theme] || themes.blauw;
+    const [slidesToShow, setSlidesToShow] = useState(3);
+
+    const updateSlidesToShow = () => {
+        const width = window.innerWidth;
+
+        if (width < 700){
+            setSlidesToShow(1);
+        }
+        else if (width < 1000) {
+            setSlidesToShow(2);
+        } else if (width < 2000) {
+            setSlidesToShow(3);
+        } else if (width < 3000){
+            setSlidesToShow(4)
+        } else {
+            setSlidesToShow(5);
+        }
+    };
 
     useEffect(() => {
         if (profileData.theme){
@@ -103,6 +165,15 @@ const ProfileCard = () => {
             setProfilePicture(imageUrlWithCacheBuster);
         }
     }, [profileData.theme]);
+
+    useEffect(() => {
+        updateSlidesToShow();  // Update on initial render
+        window.addEventListener('resize', updateSlidesToShow); // Listen for window resize
+
+        return () => {
+            window.removeEventListener('resize', updateSlidesToShow); // Clean up the listener
+        };
+    }, []);
 
     const calculateAge = (birthdate) => {
         if (!birthdate) return 'Onbekend';
@@ -115,6 +186,24 @@ const ProfileCard = () => {
         }
         return age;
     };
+
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371;
+        const φ1 = lat1 * Math.PI / 180;
+        const φ2 = lat2 * Math.PI / 180;
+        const Δφ = (lat2 - lat1) * Math.PI / 180;
+        const Δλ = (lon2 - lon1) * Math.PI / 180;
+
+        // Haversine formula
+        const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+            Math.cos(φ1) * Math.cos(φ2) *
+            Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        const distance = R * c; // Distance in kilometers
+
+        return distance;
+    }
+
 
     let lookingForArray = profileData.lookingFor;
 
@@ -162,8 +251,8 @@ const ProfileCard = () => {
                                 {profileData.name || 'Naam'}, {calculateAge(profileData.birthDate) || 'Leeftijd'}
                             </h2>
                             <p style={{margin: '5px 0', maxWidth: '550px'}}>
-                            {profileData.bio || ''}
-                        </p>
+                                {profileData.bio || ''}
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -191,7 +280,7 @@ const ProfileCard = () => {
                     value={
                         Array.isArray(lookingForArray)
                             ? lookingForArray.map((option, index) => <Tag key={index}>{option}</Tag>)
-                            : 'Vrienden'
+                            : "Niet beschikbaar"
                     }
                     icon={<HeartOutlined />}
                 />
@@ -214,13 +303,47 @@ const ProfileCard = () => {
                     icon={<MessageOutlined />}
                     style={{
                         position: 'fixed',
-                        bottom: '20px',
+                        top: '20px',
                         right: '20px',
                         zIndex: 1000
                     }}
                 >
                     Chat met {profileData?.name || 'de gebruiker'}
                 </Button>
+                <Divider/>
+                {images.length > 0 && (
+                    <>
+                        <p>
+                            <strong style={{width: '40%', minWidth: '150px', flexShrink: 0}}><PictureOutlined/> Meer fotos van {profileData?.name || 'de gebruiker'}: </strong>
+                        </p>
+                        <Carousel
+                            arrows
+                            slidesToShow={slidesToShow}
+                            draggable
+                            infinite={false}
+                            style={{
+                                maxWidth: '80%',
+                                margin: '0 auto'
+                            }}
+                        >
+                            {images.map((imageUrl, index) => (
+                                <div key={index}>
+                                    <img
+                                        src={imageUrl}
+                                        alt={`carousel-image-${index}`}
+                                        style={{
+                                            height: '250px', // Image height is set to fill the container's height
+                                            width: 'auto', // This maintains the aspect ratio
+                                            objectFit: 'cover', // Ensure the image covers the space without distortion
+                                            borderRadius: '10px',
+                                            margin: '0 auto'
+                                        }}
+                                    />
+                                </div>
+                            ))}
+                        </Carousel>
+                    </>
+                )}
             </div>
         </ConfigProvider>
     );

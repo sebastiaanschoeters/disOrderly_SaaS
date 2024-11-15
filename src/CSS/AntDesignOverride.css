@@ -4,6 +4,10 @@ body, p, .ant-typography, .ant-btn, .ant-select,
     font-size: 1rem; /* Default base font size */
 }
 
+.ant-btn-primary{
+    font-size: 1.5rem;
+}
+
 /* Specific styles for Select component */
 .ant-select .ant-select-selector {
     font-size: 1rem; /* Apply font size to the Select component */

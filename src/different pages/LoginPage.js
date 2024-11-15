@@ -44,8 +44,7 @@ const LoginPage = () => {
                 ></div>
 
                 <ButterflyIcon color="rgba(255, 255, 255, 0.2)" />
-
-                    {/* Activate Button */}
+                {/* Activate Button */}
                 <Button
                     type="link"
                     style={{

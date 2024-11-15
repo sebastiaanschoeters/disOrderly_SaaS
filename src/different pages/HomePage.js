@@ -1,6 +1,6 @@
 import 'antd/dist/reset.css'; // Import Ant Design styles
 import '../CSS/AntDesignOverride.css'
-import { antThemeTokens, themes } from '../themes';
+import {antThemeTokens, ButterflyIcon, themes} from '../themes';
 import { Button, ConfigProvider} from 'antd';
 import {MessageOutlined, UserOutlined, SearchOutlined, SettingOutlined } from "@ant-design/icons";
 import React, {useState} from "react";
@@ -26,7 +26,9 @@ const HomePage = () => {
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
+                zIndex: '0'
             }}>
+            <ButterflyIcon color={themeColors.primary3} />
             <div style={{ display: 'flex', gap: '144px', flexWrap: 'wrap', justifyContent: 'center'}}>
 
             <Button

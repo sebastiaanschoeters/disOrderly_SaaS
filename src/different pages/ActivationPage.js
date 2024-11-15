@@ -81,24 +81,54 @@ const ActivationPage = () => {
     };
 
     const saveUserProfile = async () => {
+        try {
+            // Insert data into the "User" table
+            const { data: userDataResponse, error: userError } = await supabase
+                .from("User")
+                .insert({
+                    id: userData.activationKey,
+                    name: userData.name,
+                    birthdate: userData.birthDate,
+                });
 
-        const { data, error } = await supabase.from("Profile").insert({
-            ActCode: userData.activationKey,
-            name: userData.name,
-            livingSituation: userData.livingSituation,
-            birthDate: userData.birthDate,
-            location: userData.city,
-            mobility: userData.mobility,
-            gender: userData.gender,
-            sexuality: userData.sexuality,
-            lookingFor: userData.relationshipPreference,
-            //NiveauA: userData.niveau,
-            email: userData.email,
-            password: userData.password
-        });
+            if (userError) {
+                throw new Error(`Error saving user data: ${userError.message}`);
+            }
 
-        if (error) {
-            console.error("Error saving profile data:", error.message);
+            // Insert data into the "Profile" table
+            const { data: profileData, error: profileError } = await supabase
+                .from("User information")
+                .insert({
+                    user_id: userData.activationKey,
+                    living_situation: userData.livingSituation,
+                    location: userData.city,
+                    mobility: userData.mobility,
+                    gender: userData.gender,
+                    sexuality: userData.sexuality,
+                    looking_for: userData.relationshipPreference,
+                });
+
+            // Insert data into the "Credential" table
+            const { data: credentialData, error: credentialError } = await supabase
+                .from("Credentials")
+                .insert({
+                    user_id: userData.activationKey,
+                    email: userData.email,
+                    password: userData.password
+                });
+
+            if (credentialError) {
+                throw new Error(`Error saving credentials: ${credentialError.message}`);
+            }
+
+            if (profileError) {
+                throw new Error(`Error saving profile data: ${profileError.message}`);
+            }
+
+            console.log("Profile saved successfully", { credentialData, userDataResponse, profileData });
+
+        } catch (error) {
+            console.error("Error saving user profile:", error.message);
         }
     };
 

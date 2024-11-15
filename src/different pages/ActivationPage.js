@@ -53,17 +53,50 @@ const ActivationPage = () => {
         if (step > 1) setStep(step - 1);
     };
 
-    const activationCode = (values) => {
+    const activationCode = async (values) => {
         setLoading(true);
-        setTimeout(() => {
+        try {
+            // Query the "Activation" table to validate the code
+            const { data, error } = await supabase
+                .from("Activation")
+                .select("usable")
+                .eq("code", values.activationKey)
+                .single(); // Expect a single result
+
+            if (error) {
+                console.error("Error checking activation code:", error.message);
+                message.error("Er is een probleem met het valideren van de activatiecode.");
+                setLoading(false);
+                return;
+            }
+
+            if (!data) {
+                message.error("De activatiecode bestaat niet");
+                setLoading(false);
+                return;
+            }
+
+            if (!data.usable) {
+                message.error("Deze activatiecode is al in gebruik.");
+                setLoading(false);
+                return;
+            }
+
+            // Activation code is valid and usable
             setUserData((prevData) => ({
                 ...prevData,
-                activationKey: values.activationKey
+                activationKey: values.activationKey,
             }));
             setStep(2);
+            message.success("Activatiecode geaccepteerd!");
+        } catch (err) {
+            console.error("Unexpected error during activation code validation:", err);
+            message.error("Er is iets misgegaan. Probeer het later opnieuw.");
+        } finally {
             setLoading(false);
-        }, 1000);
+        }
     };
+
 
     const nameAndBD = (values) => {
         setUserData((prevData) => ({
@@ -157,20 +190,54 @@ const ActivationPage = () => {
     };
 
 
-    const EmailAndPassword = (values) => {
-        // Hash the password
-        //const hashedPassword = CryptoJS.SHA256(values.password).toString();
+    const EmailAndPassword = async (values) => {
+        setLoading(true); // Show a loading state during validation
+        try {
+            // Check if the email already exists in the "Credentials" table
+            const { data, error } = await supabase
+                .from("Credentials")
+                .select("email")
+                .eq("email", values.email)
+                .single(); // Expect a single result if the email exists
 
-        setUserData((prevData) => ({
-            ...prevData,
-            email: values.email,
-            password: values.password, // Store the hashed password
-        }));
-        console.log("User Data to Submit:", {userData});
-        saveUserProfile();
-        message.success("Account aangemaakt! Je kan een profiel foto toevoegen bij je profiel.");
-        //navigate("/login"); // Or navigate to the next appropriate step or route
+            if (error && error.code !== "PGRST116") {
+                // PGRST116 occurs when no row is found, which is acceptable here
+                console.error("Error checking email existence:", error.message);
+                message.error("Er is iets misgegaan tijdens de validatie van uw e-mailadres.");
+                setLoading(false);
+                return;
+            }
+
+            if (data) {
+                // Email already exists in the database
+                message.error("Dit e-mailadres is al geregistreerd. Probeer een ander e-mailadres.");
+                setLoading(false);
+                return;
+            }
+
+            // Hash the password
+            const hashedPassword = CryptoJS.SHA256(values.password).toString();
+
+            // Save the email and hashed password to userData
+            setUserData((prevData) => ({
+                ...prevData,
+                email: values.email,
+                password: hashedPassword, // Store the hashed password
+            }));
+
+            console.log("User Data to Submit:", { ...userData, email: values.email });
+            saveUserProfile();
+            message.success("Account aangemaakt! Je kan een profielfoto toevoegen bij je profiel.");
+            // Optionally navigate to the login page or next step
+            // navigate("/login");
+        } catch (err) {
+            console.error("Unexpected error during email validation:", err);
+            message.error("Er is iets misgegaan. Probeer het later opnieuw.");
+        } finally {
+            setLoading(false); // Hide the loading state
+        }
     };
+
 
     return (
         <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
@@ -296,9 +363,9 @@ const ActivationPage = () => {
                         <Form name="additionalInfoForm" onFinish={Sexuality}>
                             <Form.Item label="Geslacht" name="gender" rules={[{ required: true, message: 'Selecteer uw geslacht' }]}>
                                 <Select placeholder="Selecteer uw geslacht">
-                                    <Select.Option value="male">Man</Select.Option>
-                                    <Select.Option value="female">Vrouw</Select.Option>
-                                    <Select.Option value="non binary">Non-binair</Select.Option>
+                                    <Select.Option value="Man">Man</Select.Option>
+                                    <Select.Option value="Vrouw">Vrouw</Select.Option>
+                                    <Select.Option value="Non-binair">Non-binair</Select.Option>
                                 </Select>
                             </Form.Item>
                             <Form.Item label="Sexualiteit" name="sexuality" rules={[{ required: true, message: 'Selecteer uw seksualiteit' }]}>

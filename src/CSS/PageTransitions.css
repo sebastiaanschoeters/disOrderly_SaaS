@@ -1,0 +1,21 @@
+/* Ensure smooth transition for opacity */
+.fade-enter {
+    opacity: 0;
+}
+.fade-enter-active {
+    opacity: 1;
+    transition: opacity 0.5s ease;
+}
+.fade-exit {
+    opacity: 1;
+}
+.fade-exit-active {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* Ensure the container background is transitioned */
+.login-container {
+    position: relative;
+    transition: opacity 0.5s ease/* Transition both opacity and background-color */
+}

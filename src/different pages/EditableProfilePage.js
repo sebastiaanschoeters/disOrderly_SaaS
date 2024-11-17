@@ -182,6 +182,8 @@ const ProfileCard = () => {
     const [newInterest, setNewInterest] = useState('');
     const [interestOptions, setInterestOptions] = useState([])
     const [lookingForArray, setLookingForArray] = useState([])
+    const [locations, setLocations] = useState([])
+    const [searchValue, setSearchValue] = useState(""); // For search functionality
     const { profileData, isLoading, error, interest} = useFetchProfileData('1519');
 
     console.log(profileData)
@@ -227,6 +229,27 @@ const ProfileCard = () => {
         }
     }, [profileData]);
 
+    useEffect(() => {
+        const fetchLocations = async (searchTerm = "") => {
+            const { data, error } = await supabase
+                .from("Location")
+                .select("id, Gemeente")
+                .ilike("Gemeente", `%${searchTerm}%`) // Match search term
+                .limit(10); // Limit results for performance
+
+            if (error) {
+                console.error("Error fetching locations:", error.message);
+            } else {
+                setLocations(data || []);
+            }
+        };
+
+        fetchLocations(searchValue);
+    }, [searchValue]);
+
+    const handleSearch = (value) => {
+        setSearchValue(value); // Trigger new fetch based on search
+    };
 
     // Define async save functions
     const saveField = async (field, value) => {
@@ -594,14 +617,16 @@ const ProfileCard = () => {
                     <strong style={{width: '20%', minWidth: '150px'}}><EnvironmentOutlined/> Locatie: </strong>
                     <Select
                         showSearch
-                        allowClear
-                        placeholder="Selecteer locatie of voeg toe"
                         style={{flex: 1, minWidth: '200px'}}
+                        placeholder="Zoek en selecteer uw locatie"
                         value={location}
                         onChange={handleLocationChange}
-                        options={locationOptions}
-                        onSearch={(value) => setInputValue(value)}
-                        onInputKeyDown={handleLocationInputKeyDown}
+                        onSearch={handleSearch} // Trigger search
+                        filterOption={false} // Disable client-side filtering
+                        options={locations.map((location) => ({
+                            value: location.id, // Use ID as the value
+                            label: location.Gemeente, // Display gemeente
+                        }))}
                     />
                 </p>
 

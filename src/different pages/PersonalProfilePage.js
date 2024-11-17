@@ -123,8 +123,8 @@ const ProfileCard = () => {
             }
         }
 
-        if (profileData.profilePicture) {
-            const imageUrlWithCacheBuster = `${profileData.profilePicture}?t=${new Date().getTime()}`;
+        if (profileData.profile_picture) {
+            const imageUrlWithCacheBuster = `${profileData.profile_picture}?t=${new Date().getTime()}`;
             setProfilePicture(imageUrlWithCacheBuster);
         }
         if (profileData.sexuality) {

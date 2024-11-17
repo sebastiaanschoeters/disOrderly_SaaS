@@ -1,6 +1,7 @@
 // ActivationPage.js
 import { useNavigate, useParams } from 'react-router-dom';
 import React, {useEffect, useState} from 'react';
+import * as dayjs from 'dayjs'
 import '../CSS/AntDesignOverride.css'
 import 'antd/dist/reset.css';
 import {Form, Input, Button, Card, message, ConfigProvider, DatePicker, Radio, Select, Checkbox} from 'antd';
@@ -143,8 +144,8 @@ const ActivationPage = () => {
             const { data: userDataResponse, error: userError } = await supabase
                 .from("User")
                 .insert({
-                    id: userData.activationKey,
                     name: userData.name,
+                    id: userData.activationKey,
                     birthdate: userData.birthDate,
                 });
 
@@ -311,7 +312,24 @@ const ActivationPage = () => {
                                 name="Geboortedatum"
                                 rules={[{ required: true, message: 'Selecteer uw geboortedatum' }]}
                             >
-                                <DatePicker style={{ width: '100%' }} format="YYYY-MM-DD" disabledDate={(current) => current && current > new Date()} />
+                                <DatePicker
+                                    style={{ width: '100%' }}
+                                    format="YYYY-MM-DD"
+                                    disabledDate={(current) => {
+                                        // Get today's date
+                                        const today = new Date();
+                                        // Calculate the minimum allowed birthdate (18 years ago)
+                                        const minimumBirthdate = new Date(
+                                            today.getFullYear() - 18,
+                                            today.getMonth(),
+                                            today.getDate()
+                                        );
+                                        // Disable future dates and dates after the minimum allowed birthdate
+                                        return current && (current > today || current > minimumBirthdate);
+                                    }}
+                                    // Default picker view set to 18 years ago
+                                    defaultPickerValue={dayjs().subtract(18, 'year')}
+                                />
                             </Form.Item>
                             <Form.Item>
                                 <Button type="primary" htmlType="submit" style={{ width: '100%' }}>Volgende</Button>

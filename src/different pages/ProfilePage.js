@@ -99,11 +99,11 @@ const useFetchProfileData = (actCode) => {
                         const interestIds = interestedInData.map(item => item.interest_id);
                         const { data: interestsData, error: fetchInterestsError } = await supabase
                             .from('Interests')
-                            .select('interest')
+                            .select('Interest')
                             .in('id', interestIds);
 
                         if (fetchInterestsError) throw fetchInterestsError;
-                        user.interests = interestsData.map(interest => ({ interest_name: interest.interest }));
+                        user.interests = interestsData.map(interest => ({ interest_name: interest.Interest }));
                     }
 
                     // Set the user profile data with the theme

@@ -345,7 +345,7 @@ const ProfileCard = () => {
                     console.log(`Inserted interest: ${insertedInterest}`);
                 } else {
                     // Interest already exists, get its ID
-                    interestId = existingInterest.interestId;
+                    interestId = existingInterest.id; // Corrected from existingInterest.interestId
                     console.log(`Existing interest: ${existingInterest}`);
                 }
 
@@ -355,9 +355,13 @@ const ProfileCard = () => {
                     interestId: interestId
                 });
 
-                // Update state to reflect new interest
-                const newInterestOption = { value: capitalizedInterest, label: capitalizedInterest };
-                setInterestOptions([...interestOptions, newInterestOption]);
+                // Check if the interest is already in the options list before adding
+                if (!interestOptions.some(option => option.value === capitalizedInterest)) {
+                    const newInterestOption = { value: capitalizedInterest, label: capitalizedInterest };
+                    setInterestOptions([...interestOptions, newInterestOption]);
+                }
+
+                // Update state to reflect new interest, ensuring it's not a duplicate
                 setInterests([...interests, capitalizedInterest]);
                 setSelectedInterests([...selectedInterests, capitalizedInterest]);
                 setNewInterest('');
@@ -366,6 +370,7 @@ const ProfileCard = () => {
             }
         }
     };
+
 
 
     const handleInterestSelectChange = async (value) => {

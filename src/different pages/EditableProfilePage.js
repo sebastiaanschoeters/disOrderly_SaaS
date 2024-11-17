@@ -134,11 +134,11 @@ const useFetchProfileData = (actCode) => {
                         const interestIds = interestedInData.map(item => item.interest_id);
                         const { data: interestsData, error: fetchInterestsError } = await supabase
                             .from('Interests')
-                            .select('interest')
+                            .select('Interest')
                             .in('id', interestIds);
 
                         if (fetchInterestsError) throw fetchInterestsError;
-                        user.interests = interestsData.map(interest => ({ interest_name: interest.interest }));
+                        user.interests = interestsData.map(interest => ({ interest_name: interest.Interest }));
                     }
 
                     // Set the user profile data with the theme
@@ -345,7 +345,6 @@ const ProfileCard = () => {
     };
 
 
-
     const handleInterestSelectChange = async (value) => {
         const selectedInterestNames = value;
         setSelectedInterests(selectedInterestNames);
@@ -354,45 +353,46 @@ const ProfileCard = () => {
             // Retrieve existing interests linked to this profile
             const { data: existingInterests, error: existingError } = await supabase
                 .from('Interested in')
-                .select('interestId')
-                .eq('ProfileId', profileData.id);
+                .select('interest_id')
+                .eq('user_id', profileData.id);
 
             if (existingError) throw existingError;
 
+            console.log(existingInterests)
+
             // Create a set of existing interest IDs for efficient lookup
-            const existingInterestIds = new Set(existingInterests.map((item) => item.interestId));
+            const existingInterestIds = new Set(existingInterests.map((item) => item.interest_id));
 
             // Retrieve IDs for newly selected interests from the `Interests` table
             const { data: allInterests, error: fetchError } = await supabase
                 .from('Interests')
-                .select('interestId, interest')
-                .in('interest', selectedInterestNames);
+                .select('id, Interest')
+                .in('Interest', selectedInterestNames);
 
             if (fetchError) throw fetchError;
-
-            const newInterestIds = allInterests.map((interest) => interest.interestId);
+            console.log(allInterests)
+            const newInterestIds = allInterests.map((interest) => interest.id);
 
             // Determine interests to add and remove
             const interestsToAdd = newInterestIds.filter((id) => !existingInterestIds.has(id));
             const interestsToRemove = Array.from(existingInterestIds).filter((id) => !newInterestIds.includes(id));
 
+            console.log("To add", interestsToAdd.map((id) => ({ user_id: profileData.id, interest_id: id })))
             // Insert new interests if any
             if (interestsToAdd.length > 0) {
                 await supabase
                     .from('Interested in')
-                    .insert(interestsToAdd.map((id) => ({ ProfileId: profileData.id, interestId: id })));
+                    .insert(interestsToAdd.map((id) => ({ user_id: profileData.id, interest_id: id })));
             }
 
             // Remove deselected interests if any
             if (interestsToRemove.length > 0) {
                 await supabase
-                    .from('ProfileInterests')
+                    .from('Interested in')
                     .delete()
-                    .eq('ProfileId', profileData.id)
-                    .in('interestId', interestsToRemove);
+                    .eq('user_id', profileData.id)
+                    .in('interest_id', interestsToRemove);
             }
-
-            console.log('Updated interests successfully');
         } catch (error) {
             console.error('Error updating interests:', error);
         }
@@ -495,9 +495,9 @@ const ProfileCard = () => {
 
             // Save the new image URL to the user's profile
             await supabase
-                .from('Profile')
-                .update({ profilePicture: imageUrl })
-                .eq('ActCode', profileData.id);
+                .from('User')
+                .update({ profile_picture: imageUrl })
+                .eq('id', profileData.id);
 
             console.log('Profile picture uploaded successfully');
         } catch (error) {

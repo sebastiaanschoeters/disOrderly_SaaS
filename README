@@ -23,3 +23,30 @@ Database needs:
         Profile sexuality
             list of possible to choose from
         Profile picture
+
+Database restructure (done)
+Nieuwe database implementen
+story board
+homepage spice-up       "As a user i want a platform that has a modern style and look"
+	media querries      "As a user i want a platform that works on many different screen sizes"
+activation 18+          "As a user i want to be ensured that all interactions i have on a dating platform are only with other adults"
+session logic           "As a user i want a good performing website"
+northstar metric        "As an administrative user i want an overview for my clients"
+company overview        "As an administrative user i want an overview for my clients"
+vertalen nederlands
+lazy loading            "As a user i want a good performing website"
+kruisjes weghalen       "As a user i want a platform that has a modern style and look"
+galgje
+locatie?
+caretake:                   "As a caretaker i want to be able to have an overview of my clients and interact with them if needed"
+	profiel                 "As a caretaker i want to be able to have an overview of my clients and interact with them if needed"
+	link tussen user        "As a caretaker i want to be able to have an overview of my clients and interact with them if needed"
+	activation              "As a caretaker i want to be able to have an overview of my clients and interact with them if needed"
+	toegangs niveau         "As a caretaker i want to be able to have an overview of my clients and interact with them if needed"
+admin profiel               "As an administrative user i want an overview for my clients"
+melding systeem voor beide  "As a user i want a platform that has a modern style and look"
+new messages noti           "As a user i want a platform that has a modern style and look"
+chat suggestion page
+chat lazy loading           "As a user i want a good performing website"
+meerdere fotos per profiel + manier om te displayen (done) "As a user i want a platform that has a modern style and look"
+User metrics                "As an administrative user i want an overview for my clients"

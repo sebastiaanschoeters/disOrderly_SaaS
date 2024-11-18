@@ -596,8 +596,8 @@ const ProfileCard = () => {
 
             console.log('Profile picture uploaded successfully:', fileName);
 
-            // Set the image URL to the state for rendering
-            setImages([imageUrlWithCacheBuster]);
+            // Append the new image URL to the state for rendering multiple images
+            setImages((prevImages) => [...prevImages, imageUrlWithCacheBuster]);
 
         } catch (error) {
             console.error('Error uploading profile picture:', error);
@@ -893,7 +893,6 @@ const ProfileCard = () => {
 
                 <Divider/>
 
-                {/* Editable Carousel */}
                 <div style={{marginTop: '20px', marginBottom: '20px'}}>
                     <p>
                         <strong style={{width: '40%', minWidth: '150px', flexShrink: 0}}><PictureOutlined/> Meer fotos
@@ -925,7 +924,6 @@ const ProfileCard = () => {
                                     />
                                     <Button
                                         type="primary"
-                                        shape="circle"
                                         icon={<DeleteOutlined/>}
                                         style={{
                                             position: 'absolute',
@@ -940,11 +938,10 @@ const ProfileCard = () => {
                             ))}
                         </Carousel>
                     ) : (
-                        <p>No images uploaded yet.</p>
+                        <p>Je hebt nog geen extra fotos toegevoegd.</p>
                     )}
                     <Upload showUploadList={false} beforeUpload={() => false} onChange={handlePictureUpload} multiple>
-                        <Button icon={<UploadOutlined/>} loading={uploadingPicture}>Voeg nieuwe foto toe aan
-                            profiel</Button>
+                        <Button icon={<UploadOutlined/>} loading={uploadingPicture}>Voeg nieuwe foto toe aan profiel</Button>
                     </Upload>
                 </div>
 

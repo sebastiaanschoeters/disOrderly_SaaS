@@ -125,6 +125,38 @@ const useFetchProfileData = (actCode) => {
     return { profileData, isLoading, error };
 };
 
+const useFetchPicturesData = (actCode) => {
+    const [pictures, setPictures] = useState({});
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                // Fetch user data
+                const { data: pictures, error: userError } = await supabase
+                    .from('Pictures')
+                    .select('*')
+                    .eq('User_id', actCode);
+
+                if (userError) throw userError;
+                if (pictures.length > 0) {
+                    const user = pictures[0];
+                }
+                setPictures(pictures)
+            } catch (error) {
+                setError(error.message);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [actCode]);
+
+    return { pictures };
+};
+
 const ProfileDetail = ({ label, value, icon }) => (
     <p style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '5px'}}>
         <strong style={{ width: '20%', minWidth: '150px', flexShrink: 0 }}>{icon} {label}: </strong>
@@ -135,34 +167,35 @@ const ProfileDetail = ({ label, value, icon }) => (
 const ProfileCard = () => {
     const [theme, setTheme] = useState('blauw');
     const [profilePicture, setProfilePicture] = useState(''); /* get images from database */
-    const [images, setImages] = useState([
-        'https://i.pravatar.cc/150?img=1',
-        'https://i.pravatar.cc/150?img=2',
-        'https://i.pravatar.cc/150?img=3',
-        'https://i.pravatar.cc/150?img=4'
-    ]);
+    const [images, setImages] = useState([]);
     const { profileData, isLoading, error } = useFetchProfileData('1519'); // Replace with dynamic ActCode as needed
+    const { pictures} = useFetchPicturesData('1519');
     const themeColors = themes[theme] || themes.blauw;
     const [slidesToShow, setSlidesToShow] = useState(3);
-
-    console.log("profiledata: ",profileData)
 
     const currentUserLocation = { latitude: 50.8, longitude: 4.3333333 }; // Use real location data
 
     const updateSlidesToShow = () => {
         const width = window.innerWidth;
+        const totalImages = images.length;
 
-        if (width < 700){
-            setSlidesToShow(1);
-        }
-        else if (width < 1000) {
-            setSlidesToShow(2);
+        let slides = 5;
+
+        if (width < 700) {
+            slides = 1;
+        } else if (width < 1000) {
+            slides = 2;
         } else if (width < 2000) {
-            setSlidesToShow(3);
-        } else if (width < 3000){
-            setSlidesToShow(4)
-        } else {
-            setSlidesToShow(5);
+            slides = 3;
+        } else if (width < 3000) {
+            slides = 4;
+        }
+
+        if (totalImages < slides){
+            setSlidesToShow(totalImages);
+        }
+        else {
+            setSlidesToShow(slides);
         }
     };
 
@@ -170,9 +203,20 @@ const ProfileCard = () => {
         if (profileData.theme){
             setTheme(profileData.theme);
         }
-        if (profileData.profilePicture){
-            const imageUrlWithCacheBuster = `${profileData.profilePicture}?t=${new Date().getTime()}`;
+        if (profileData.profile_picture){
+            const imageUrlWithCacheBuster = `${profileData.profile_picture}?t=${new Date().getTime()}`;
             setProfilePicture(imageUrlWithCacheBuster);
+        }
+        if (pictures.length > 0){
+            let list_of_images = []
+
+            for (let i = 0; i < pictures.length; i++) {
+                const picture = pictures[i];
+                if (picture.picture_url){
+                    list_of_images.push(picture.picture_url);
+                }
+            }
+            setImages(list_of_images)
         }
     }, [profileData.theme]);
 
@@ -232,7 +276,6 @@ const ProfileCard = () => {
 
     if (isLoading) return <Spin tip="Profiel laden..." />;
     if (error) return <p>Failed to load profile: {error}</p>;
-
     return (
         <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
             <div

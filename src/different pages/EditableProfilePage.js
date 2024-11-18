@@ -7,7 +7,7 @@ import {
     Checkbox,
     Upload,
     ConfigProvider,
-    Spin
+    Spin, Carousel
 } from 'antd';
 import {
     BookOutlined,
@@ -18,7 +18,7 @@ import {
     StarOutlined,
     HomeOutlined,
     CarOutlined,
-    PlusCircleOutlined
+    PlusCircleOutlined, DeleteOutlined, PictureOutlined
 } from '@ant-design/icons';
 import 'antd/dist/reset.css';
 import '../CSS/AntDesignOverride.css';
@@ -160,18 +160,51 @@ const useFetchProfileData = (actCode) => {
     return { profileData, isLoading, error, interest };
 };
 
+const useFetchPicturesData = (actCode) => {
+    const [pictures, setPictures] = useState({});
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                // Fetch user data
+                const { data: pictures, error: userError } = await supabase
+                    .from('Pictures')
+                    .select('*')
+                    .eq('User_id', actCode);
+
+                if (userError) throw userError;
+                if (pictures.length > 0) {
+                    const user = pictures[0];
+                }
+                setPictures(pictures)
+            } catch (error) {
+                setError(error.message);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [actCode]);
+
+    return { pictures };
+};
+
 const ProfileCard = () => {
     const [theme, setTheme] = useState('blauw');
     const themeColors = themes[theme] || themes.blauw;
     const [profilePicture, setProfilePicture] = useState('https://example.com/photo.jpg');
     const [uploading, setUploading] = useState(false);
-    const [location, setLocation] = useState(null);
-    const [locationOptions, setLocationOptions] = useState([
-        { value: 'Leuven', label: 'Leuven' },
-        { value: 'Brussel', label: 'Brussel' },
-        { value: 'Gent', label: 'Gent' },
-        { value: 'Antwerpen', label: 'Antwerpen' },
+    const [images, setImages] = useState([
+        'https://i.pravatar.cc/150?img=1',
+        'https://i.pravatar.cc/150?img=2',
+        'https://i.pravatar.cc/150?img=3',
+        'https://i.pravatar.cc/150?img=4'
     ]);
+    const [uploadingPicture, setUploadingPicture] = useState(false);
+    const [location, setLocation] = useState(null);
     const [gender, setGender] = useState('')
     const [biography, setBiography] = useState('');
     const [livingSituation, setLivingSituation] = useState('');
@@ -184,6 +217,8 @@ const ProfileCard = () => {
     const [lookingForArray, setLookingForArray] = useState([])
     const [locations, setLocations] = useState([])
     const [searchValue, setSearchValue] = useState(""); // For search functionality
+    const [slidesToShow, setSlidesToShow] = useState(5);
+    const { pictures} = useFetchPicturesData('1519');
     const { profileData, isLoading, error, interest} = useFetchProfileData('1519');
 
     console.log(profileData)
@@ -227,7 +262,50 @@ const ProfileCard = () => {
                 console.error('Error parsing lookingFor:', error);
             }
         }
+        if (pictures.length > 0){
+            let list_of_images = []
+
+            for (let i = 0; i < pictures.length; i++) {
+                const picture = pictures[i];
+                if (picture.picture_url){
+                    list_of_images.push(picture.picture_url);
+                }
+            }
+            setImages(list_of_images)
+        }
     }, [profileData]);
+
+    useEffect(() => {
+        updateSlidesToShow();  // Update on initial render
+        window.addEventListener('resize', updateSlidesToShow); // Listen for window resize
+
+        return () => {
+            window.removeEventListener('resize', updateSlidesToShow); // Clean up the listener
+        };
+    }, []);
+
+    const updateSlidesToShow = () => {
+        const width = window.innerWidth;
+        const totalImages = images.length;
+
+        let slides = 5;
+
+        if (width < 700) {
+            slides = 1;
+        } else if (width < 1000) {
+            slides = 2;
+        } else if (width < 2000) {
+            slides = 3;
+        } else if (width < 3000) {
+            slides = 4;
+        }
+        if (totalImages < slides){
+            setSlidesToShow(totalImages);
+        }
+        else {
+            setSlidesToShow(slides);
+        }
+    };
 
     useEffect(() => {
         const fetchLocations = async (searchTerm = "") => {
@@ -286,30 +364,6 @@ const ProfileCard = () => {
         }
     }, 1000);
 
-    const handleLocationInputKeyDown = async (e) => {
-        if (e.key === 'Enter' && inputValue) {
-            const newOption = { value: inputValue, label: inputValue };
-            setLocationOptions([...locationOptions, newOption]);
-            setLocation(inputValue);
-
-            // Save the new location to the database
-            try {
-                const { data, error } = await supabase
-                    .from('Locations')
-                    .insert({ location: inputValue });
-
-                if (error) {
-                    throw error;
-                }
-
-                console.log(`New location added: ${inputValue}`);
-            } catch (error) {
-                console.error('Error adding new location:', error);
-            }
-
-            setInputValue('');
-        }
-    };
 
     const capitalizeFirstLetter = (str) => {
         return str
@@ -468,6 +522,91 @@ const ProfileCard = () => {
         debouncedSaveMobility(value);
     }
 
+    const handlePictureUpload = async ({ file }) => {
+        try {
+            setUploadingPicture(true);
+
+            // Create a unique file name using user profile ID and timestamp
+            const uniqueSuffix = `${new Date().getTime()}-${Math.random().toString(36).substring(2, 9)}`;
+            const fileName = `${profileData.id}-${uniqueSuffix}-${file.name}`;
+
+            // First, check if there are any existing files to delete
+            const { data: existingFiles, error: listError } = await supabase.storage
+                .from('extra-pictures')
+                .list('', { search: profileData.id });
+
+            if (listError) {
+                console.error('Error checking existing files:', listError);
+            } else {
+                // If there is an existing file, delete it from storage
+                const filesToDelete = existingFiles.filter(item => item.name.startsWith(profileData.id));
+                if (filesToDelete.length > 0) {
+                    const fileNamesToDelete = filesToDelete.map(file => file.name);
+
+                    // Delete files from storage
+                    const { error: deleteError } = await supabase.storage
+                        .from('extra-pictures')
+                        .remove(fileNamesToDelete);
+
+                    if (deleteError) {
+                        throw deleteError;
+                    }
+
+                    // Delete corresponding database entries
+                    const { error: dbDeleteError } = await supabase
+                        .from('Pictures')
+                        .delete()
+                        .eq('User_id', profileData.id);
+
+                    if (dbDeleteError) {
+                        throw dbDeleteError;
+                    }
+                }
+            }
+
+            // Upload the new file
+            const { data, error: uploadError } = await supabase.storage
+                .from('extra-pictures')
+                .upload(fileName, file, { upsert: true });
+
+            if (uploadError) {
+                throw uploadError;
+            }
+
+            // Get the public URL for the uploaded image
+            const { data: fileData, error: urlError } = supabase.storage
+                .from('extra-pictures')
+                .getPublicUrl(fileName);
+
+            if (urlError) {
+                throw urlError;
+            }
+
+            const imageUrl = fileData.publicUrl;
+            const imageUrlWithCacheBuster = `${imageUrl}?t=${new Date().getTime()}`;
+
+            // Save the new image URL to the user's profile in the database
+            const { error: dbInsertError } = await supabase
+                .from('Pictures')
+                .insert({ User_id: profileData.id, picture_url: imageUrl });
+
+            if (dbInsertError) {
+                throw dbInsertError;
+            }
+
+            console.log('Profile picture uploaded successfully:', fileName);
+
+            // Set the image URL to the state for rendering
+            setImages([imageUrlWithCacheBuster]);
+
+        } catch (error) {
+            console.error('Error uploading profile picture:', error);
+        } finally {
+            setUploadingPicture(false);
+        }
+    };
+
+
     const handleProfilePictureUpload = async ({ file }) => {
         try {
             setUploading(true);
@@ -548,11 +687,16 @@ const ProfileCard = () => {
         return age;
     };
 
+    // Delete picture handler
+    const handleDeletePicture = (pictureUrl) => {
+        setImages(images.filter(image => image !== pictureUrl));
+    };
+
     if (isLoading) return <Spin tip="Profiel laden..." />;
     if (error) return <p>Failed to load profile: {error}</p>;
 
     return (
-        <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
+        <ConfigProvider theme={{token: antThemeTokens(themeColors)}}>
             <div style={{
                 padding: '20px',
                 position: 'relative',
@@ -562,22 +706,22 @@ const ProfileCard = () => {
                 color: themeColors.primary10,
                 zIndex: '0'
             }}>
-                <ButterflyIcon color={themeColors.primary3} />
+                <ButterflyIcon color={themeColors.primary3}/>
 
                 <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
                     <Avatar
                         src={profilePicture || "https://example.com/photo.jpg"} // Fallback to default avatar
                         alt={profileData.name || "No Name"}
-                        style ={{
+                        style={{
                             minWidth: '200px',
                             minHeight: '200px',
                             borderRadius: '50%'
                         }}
                     />
                     {/* Profile Picture Upload */}
-                    <div style={{ marginTop: '10px', marginBottom: '20px' }}>
+                    <div style={{marginTop: '10px', marginBottom: '20px'}}>
                         <Upload showUploadList={false} beforeUpload={() => false} onChange={handleProfilePictureUpload}>
-                            <Button icon={<UploadOutlined />} loading={uploading}>Kies nieuwe profielfoto</Button>
+                            <Button icon={<UploadOutlined/>} loading={uploading}>Kies nieuwe profielfoto</Button>
                         </Upload>
                     </div>
                 </div>
@@ -671,8 +815,9 @@ const ProfileCard = () => {
                             }
                         }}
                         notFoundContent={
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <span role="img" aria-label="no data" style={{ fontSize: '2rem' }}><PlusCircleOutlined/></span>
+                            <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+                                <span role="img" aria-label="no data"
+                                      style={{fontSize: '2rem'}}><PlusCircleOutlined/></span>
                                 <span>Druk op enter om deze nieuwe interesse toe te voegen</span>
                             </div>
                         }
@@ -745,6 +890,64 @@ const ProfileCard = () => {
                         ]}
                     />
                 </p>
+
+                <Divider/>
+
+                {/* Editable Carousel */}
+                <div style={{marginTop: '20px', marginBottom: '20px'}}>
+                    <p>
+                        <strong style={{width: '40%', minWidth: '150px', flexShrink: 0}}><PictureOutlined/> Meer fotos
+                            van jezelf tonen: </strong>
+                    </p>
+                    {images.length > 0 ? (
+                        <Carousel
+                            arrows
+                            slidesToShow={slidesToShow}
+                            draggable
+                            infinite={false}
+                            style={{
+                                maxWidth: '80%',
+                                margin: '0 auto'
+                            }}
+                        >
+                            {images.map((imageUrl, index) => (
+                                <div key={index} style={{position: 'relative'}}>
+                                    <img
+                                        src={imageUrl}
+                                        alt={`carousel-image-${index}`}
+                                        style={{
+                                            height: '250px', // Image height is set to fill the container's height
+                                            width: 'auto', // This maintains the aspect ratio
+                                            objectFit: 'cover', // Ensure the image covers the space without distortion
+                                            borderRadius: '10px',
+                                            margin: '0 auto'
+                                        }}
+                                    />
+                                    <Button
+                                        type="primary"
+                                        shape="circle"
+                                        icon={<DeleteOutlined/>}
+                                        style={{
+                                            position: 'absolute',
+                                            top: 10,
+                                            right: 10,
+                                            zIndex: 10,
+                                            backgroundColor: 'rgba(255, 255, 255, 0.7)'
+                                        }}
+                                        onClick={() => handleDeletePicture(imageUrl)}
+                                    />
+                                </div>
+                            ))}
+                        </Carousel>
+                    ) : (
+                        <p>No images uploaded yet.</p>
+                    )}
+                    <Upload showUploadList={false} beforeUpload={() => false} onChange={handlePictureUpload} multiple>
+                        <Button icon={<UploadOutlined/>} loading={uploadingPicture}>Voeg nieuwe foto toe aan
+                            profiel</Button>
+                    </Upload>
+                </div>
+
             </div>
         </ConfigProvider>
     );

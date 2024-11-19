@@ -136,39 +136,43 @@ const ChatOverviewPage = () => {
                         itemLayout="horizontal"
                         style={styles.list}
                         dataSource={filteredChats}
-                        renderItem={(chat) => (
-                            <Card
-                                style={styles.card}
-                                hoverable={true}
-                                onClick={() => {
-                                    const profileData = {
-                                        name: chat.profileName,
-                                        profilePicture: chat.profilePicture,
-                                        user_id: userID
-                                    };
-                                    if (chat.acceptance === true) {
-                                        navigate(`/chat/${chat.id}`, { state: { profileData} });
-                                    } else {
-                                        navigate(`/chatsuggestion/${chat.id}`, { state: { profileData } });
-                                    }
-                                }}
-                            >
-                                <Card.Meta
-                                    avatar={<Avatar src={chat.profilePicture || 'default-avatar.png'} />}
-                                    title={<span style={styles.name}>{`${chat.profileName}`}</span>}
-                                />
+                        renderItem={(chat) => {
+                            const otherUserId = chat.sender_id === userID ? chat.receiver_id : chat.sender_id;
+                            return (
+                                <Card
+                                    style={styles.card}
+                                    hoverable={true}
+                                    onClick={() => {
+                                        const profileData = {
+                                            name: chat.profileName,
+                                            profilePicture: chat.profilePicture,
+                                            user_id: userID,
+                                            otherUserId: otherUserId
+                                        };
+                                        if (chat.acceptance === true) {
+                                            navigate(`/chat/${chat.id}`, { state: { profileData} });
+                                        } else {
+                                            navigate(`/chatsuggestion/${chat.id}`, { state: { profileData } });
+                                        }
+                                    }}
+                                >
+                                    <Card.Meta
+                                        avatar={<Avatar src={chat.profilePicture || 'default-avatar.png'} />}
+                                        title={<span style={styles.name}>{`${chat.profileName}`}</span>}
+                                    />
 
-                                {!chat.acceptance && (
-                                    <div style={styles.newMessageIndicator}>
-                                        Nieuwe Berichten
-                                    </div>
-                                )}
-                            </Card>
-                        )}
+                                    {!chat.acceptance && (
+                                        <div style={styles.newMessageIndicator}>
+                                            Nieuwe Berichten
+                                        </div>
+                                    )}
+                                </Card>
+                            );
+                        }}
                     />
-                </div>
+            </div>
         </ConfigProvider>
-);
+    );
 };
 
 

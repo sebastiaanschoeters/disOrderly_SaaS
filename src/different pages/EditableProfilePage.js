@@ -199,7 +199,7 @@ const ProfileCard = () => {
     const [lookingForArray, setLookingForArray] = useState([])
     const [locations, setLocations] = useState([])
     const [searchValue, setSearchValue] = useState(""); // For search functionality
-    const [slidesToShow, setSlidesToShow] = useState(5);
+    const [slidesToShow, setSlidesToShow] = useState(3);
     const { pictures} = useFetchPicturesData('1519');
     const { profileData, isLoading, error, interest} = useFetchProfileData('1519');
 
@@ -274,14 +274,16 @@ const ProfileCard = () => {
         const width = window.innerWidth;
         const totalImages = images.length;
 
-        let slides = 4;
+        let slides = 5;
 
-        if (width < 1000) {
+        if (width < 900){
             slides = 1;
-        } else if (width < 2000) {
+        }else if (width < 1250) {
             slides = 2;
-        } else if (width < 3000) {
+        } else if (width < 2000) {
             slides = 3;
+        } else if (width < 3000) {
+            slides = 4;
         }
         if (totalImages < slides){
             setSlidesToShow(totalImages);
@@ -542,7 +544,7 @@ const ProfileCard = () => {
             console.log("imgRefs: ", imgRefs);
 
             setImages((prevImages) => {
-                const updatedImages = [...prevImages, imageUrlWithCacheBuster];
+                const updatedImages = [imageUrlWithCacheBuster, ...prevImages];
                 console.log(updatedImages);  // Check if updated images is correct
                 return updatedImages;
             });
@@ -894,7 +896,7 @@ const ProfileCard = () => {
                             <Upload showUploadList={false} beforeUpload={() => false} onChange={handlePictureUpload} multiple>
                                 <Button icon={<UploadOutlined />} loading={uploadingPicture} style={{
                                     position: 'relative',
-                                    height: '250px',
+                                    height: '200px',
                                 }}>
                                     Voeg nieuwe foto toe aan profiel
                                 </Button>
@@ -905,7 +907,7 @@ const ProfileCard = () => {
                                     key={index}
                                     style={{
                                         position: 'relative',
-                                        height: '250px',
+                                        height: '200px',
                                     }}
                                 >
                                     <img
@@ -913,7 +915,7 @@ const ProfileCard = () => {
                                         src={imageUrl}
                                         alt={`carousel-image-${index}`}
                                         style={{
-                                            height: '250px',
+                                            height: '200px',
                                             width: 'auto',
                                             objectFit: 'cover',
                                             borderRadius: '10px',
@@ -923,11 +925,10 @@ const ProfileCard = () => {
                                     {imgRefs.current[index] && (
                                         <Button
                                             type="primary"
-                                            icon={<DeleteOutlined />}
                                             onClick={() => handlePictureRemove(imageUrl)}
                                             style={{
                                                 position: 'relative',
-                                                top: '-240px',
+                                                top: `calc(10px - ${imgRefs.current[index]?.offsetHeight}px)`,
                                                 left: `calc(50% - ${imgRefs.current[index]?.offsetWidth / 2}px + 10px)`,
                                                 zIndex: 10,
                                                 padding: '5px 10px',
@@ -936,7 +937,7 @@ const ProfileCard = () => {
                                             }}
                                             loading={removingPicture}
                                         >
-                                            {/* The button content goes here */}
+                                            <DeleteOutlined />
                                         </Button>
                                     )}
                                 </div>

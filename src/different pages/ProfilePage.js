@@ -167,34 +167,18 @@ const ProfileDetail = ({ label, value, icon }) => (
 const ProfileCard = () => {
     const [theme, setTheme] = useState('blauw');
     const [profilePicture, setProfilePicture] = useState(''); /* get images from database */
-    const [images, setImages] = useState([]);
+    const [images, setImages] = useState([
+        'https://i.pravatar.cc/150?img=1',
+        'https://i.pravatar.cc/150?img=2',
+        'https://i.pravatar.cc/150?img=3',
+        'https://i.pravatar.cc/150?img=4'
+    ]);
     const { profileData, isLoading, error } = useFetchProfileData('1519'); // Replace with dynamic ActCode as needed
     const { pictures} = useFetchPicturesData('1519');
     const themeColors = themes[theme] || themes.blauw;
     const [slidesToShow, setSlidesToShow] = useState(3);
 
     const currentUserLocation = { latitude: 50.8, longitude: 4.3333333 }; // Use real location data
-
-    const updateSlidesToShow = () => {
-        const width = window.innerWidth;
-        const totalImages = images.length;
-
-        let slides = 4;
-
-        if (width < 1000) {
-            slides = 1;
-        } else if (width < 2000) {
-            slides = 2;
-        } else if (width < 3000) {
-            slides = 3;
-        }
-        if (totalImages < slides){
-            setSlidesToShow(totalImages);
-        }
-        else {
-            setSlidesToShow(slides);
-        }
-    };
 
     useEffect(() => {
         if (profileData.theme){
@@ -225,6 +209,29 @@ const ProfileCard = () => {
             window.removeEventListener('resize', updateSlidesToShow); // Clean up the listener
         };
     }, []);
+
+    const updateSlidesToShow = () => {
+        const width = window.innerWidth;
+        const totalImages = images.length;
+
+        let slides = 5;
+
+        if (width < 900){
+            slides = 1;
+        }else if (width < 1250) {
+            slides = 2;
+        } else if (width < 2000) {
+            slides = 3;
+        } else if (width < 3000) {
+            slides = 4;
+        }
+        if (totalImages < slides){
+            setSlidesToShow(totalImages);
+        }
+        else {
+            setSlidesToShow(slides);
+        }
+    };
 
     const calculateAge = (birthdate) => {
         if (!birthdate) return 'Onbekend';
@@ -273,6 +280,9 @@ const ProfileCard = () => {
 
     if (isLoading) return <Spin tip="Profiel laden..." />;
     if (error) return <p>Failed to load profile: {error}</p>;
+
+    console.log(images)
+
     return (
         <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
             <div
@@ -368,7 +378,9 @@ const ProfileCard = () => {
                 {images.length > 0 && (
                     <>
                         <p>
-                            <strong style={{width: '40%', minWidth: '150px', flexShrink: 0}}><PictureOutlined/> Meer fotos van {profileData?.name || 'de gebruiker'}: </strong>
+                            <strong style={{width: '40%', minWidth: '150px', flexShrink: 0}}>
+                                <PictureOutlined/> Meer fotos van {profileData?.name || 'de gebruiker'}:
+                            </strong>
                         </p>
                         <Carousel
                             arrows
@@ -381,12 +393,18 @@ const ProfileCard = () => {
                             }}
                         >
                             {images.map((imageUrl, index) => (
-                                <div key={index}>
+                                <div
+                                    key={index}
+                                    style={{
+                                        position: 'relative',
+                                        height: '200px',
+                                    }}
+                                >
                                     <img
                                         src={imageUrl}
                                         alt={`carousel-image-${index}`}
                                         style={{
-                                            height: '250px', // Image height is set to fill the container's height
+                                            height: '200px', // Image height is set to fill the container's height
                                             width: 'auto', // This maintains the aspect ratio
                                             objectFit: 'cover', // Ensure the image covers the space without distortion
                                             borderRadius: '10px',

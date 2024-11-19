@@ -1,25 +1,6 @@
-import React, {useEffect, useState} from 'react';
-import {
-    Avatar,
-    Button,
-    Divider,
-    Select,
-    Checkbox,
-    Upload,
-    ConfigProvider,
-    Spin, Carousel
-} from 'antd';
-import {
-    BookOutlined,
-    UploadOutlined,
-    EnvironmentOutlined,
-    UserOutlined,
-    HeartOutlined,
-    StarOutlined,
-    HomeOutlined,
-    CarOutlined,
-    PlusCircleOutlined, DeleteOutlined, PictureOutlined
-} from '@ant-design/icons';
+import React, {useEffect, useRef, useState} from 'react';
+import {Avatar, Button, Divider, Select, Checkbox, Upload, ConfigProvider, Spin, Carousel} from 'antd';
+import { BookOutlined, UploadOutlined, EnvironmentOutlined, UserOutlined, HeartOutlined, StarOutlined, HomeOutlined, CarOutlined, PlusCircleOutlined, DeleteOutlined, PictureOutlined} from '@ant-design/icons';
 import 'antd/dist/reset.css';
 import '../CSS/AntDesignOverride.css';
 import {antThemeTokens, ButterflyIcon, themes} from '../themes';
@@ -204,13 +185,14 @@ const ProfileCard = () => {
         'https://i.pravatar.cc/150?img=4'
     ]);
     const [uploadingPicture, setUploadingPicture] = useState(false);
+    const [removingPicture, setRemovingPicture] = useState(false);
+    const imgRefs= useRef([]);
     const [location, setLocation] = useState(null);
     const [gender, setGender] = useState('')
     const [biography, setBiography] = useState('');
     const [livingSituation, setLivingSituation] = useState('');
     const [mobility, setMobility]= useState('')
     const [selectedInterests, setSelectedInterests] = useState([]);
-    const [inputValue, setInputValue] = useState('');
     const [interests, setInterests] = useState([]);
     const [newInterest, setNewInterest] = useState('');
     const [interestOptions, setInterestOptions] = useState([])
@@ -220,8 +202,6 @@ const ProfileCard = () => {
     const [slidesToShow, setSlidesToShow] = useState(5);
     const { pictures} = useFetchPicturesData('1519');
     const { profileData, isLoading, error, interest} = useFetchProfileData('1519');
-
-    console.log(profileData)
 
     useEffect(() => {
         if (profileData.theme) {
@@ -262,18 +242,24 @@ const ProfileCard = () => {
                 console.error('Error parsing lookingFor:', error);
             }
         }
-        if (pictures.length > 0){
-            let list_of_images = []
+    }, [profileData]);
 
+    useEffect(() => {
+        let list_of_images = []
+        if (pictures.length > 0){
             for (let i = 0; i < pictures.length; i++) {
                 const picture = pictures[i];
                 if (picture.picture_url){
                     list_of_images.push(picture.picture_url);
                 }
             }
-            setImages(list_of_images)
         }
-    }, [profileData]);
+        setImages(list_of_images)
+    }, [pictures]);
+
+    useEffect(() => {
+        imgRefs.current = imgRefs.current.slice(0, images.length);
+    }, [images]);
 
     useEffect(() => {
         updateSlidesToShow();  // Update on initial render
@@ -288,16 +274,14 @@ const ProfileCard = () => {
         const width = window.innerWidth;
         const totalImages = images.length;
 
-        let slides = 5;
+        let slides = 4;
 
-        if (width < 700) {
+        if (width < 1000) {
             slides = 1;
-        } else if (width < 1000) {
-            slides = 2;
         } else if (width < 2000) {
-            slides = 3;
+            slides = 2;
         } else if (width < 3000) {
-            slides = 4;
+            slides = 3;
         }
         if (totalImages < slides){
             setSlidesToShow(totalImages);
@@ -425,8 +409,6 @@ const ProfileCard = () => {
         }
     };
 
-
-
     const handleInterestSelectChange = async (value) => {
         const selectedInterestNames = value;
         setSelectedInterests(selectedInterestNames);
@@ -526,45 +508,9 @@ const ProfileCard = () => {
         try {
             setUploadingPicture(true);
 
-            // Create a unique file name using user profile ID and timestamp
             const uniqueSuffix = `${new Date().getTime()}-${Math.random().toString(36).substring(2, 9)}`;
             const fileName = `${profileData.id}-${uniqueSuffix}-${file.name}`;
 
-            // First, check if there are any existing files to delete
-            const { data: existingFiles, error: listError } = await supabase.storage
-                .from('extra-pictures')
-                .list('', { search: profileData.id });
-
-            if (listError) {
-                console.error('Error checking existing files:', listError);
-            } else {
-                // If there is an existing file, delete it from storage
-                const filesToDelete = existingFiles.filter(item => item.name.startsWith(profileData.id));
-                if (filesToDelete.length > 0) {
-                    const fileNamesToDelete = filesToDelete.map(file => file.name);
-
-                    // Delete files from storage
-                    const { error: deleteError } = await supabase.storage
-                        .from('extra-pictures')
-                        .remove(fileNamesToDelete);
-
-                    if (deleteError) {
-                        throw deleteError;
-                    }
-
-                    // Delete corresponding database entries
-                    const { error: dbDeleteError } = await supabase
-                        .from('Pictures')
-                        .delete()
-                        .eq('User_id', profileData.id);
-
-                    if (dbDeleteError) {
-                        throw dbDeleteError;
-                    }
-                }
-            }
-
-            // Upload the new file
             const { data, error: uploadError } = await supabase.storage
                 .from('extra-pictures')
                 .upload(fileName, file, { upsert: true });
@@ -573,7 +519,6 @@ const ProfileCard = () => {
                 throw uploadError;
             }
 
-            // Get the public URL for the uploaded image
             const { data: fileData, error: urlError } = supabase.storage
                 .from('extra-pictures')
                 .getPublicUrl(fileName);
@@ -585,7 +530,6 @@ const ProfileCard = () => {
             const imageUrl = fileData.publicUrl;
             const imageUrlWithCacheBuster = `${imageUrl}?t=${new Date().getTime()}`;
 
-            // Save the new image URL to the user's profile in the database
             const { error: dbInsertError } = await supabase
                 .from('Pictures')
                 .insert({ User_id: profileData.id, picture_url: imageUrl });
@@ -595,10 +539,13 @@ const ProfileCard = () => {
             }
 
             console.log('Profile picture uploaded successfully:', fileName);
+            console.log("imgRefs: ", imgRefs);
 
-            // Append the new image URL to the state for rendering multiple images
-            setImages((prevImages) => [...prevImages, imageUrlWithCacheBuster]);
-
+            setImages((prevImages) => {
+                const updatedImages = [...prevImages, imageUrlWithCacheBuster];
+                console.log(updatedImages);  // Check if updated images is correct
+                return updatedImages;
+            });
         } catch (error) {
             console.error('Error uploading profile picture:', error);
         } finally {
@@ -606,6 +553,46 @@ const ProfileCard = () => {
         }
     };
 
+    const handlePictureRemove = async (imageUrlToRemove) => {
+        try {
+            setRemovingPicture(true);
+
+            const fileName = imageUrlToRemove.split('/').pop().split('?')[0];
+
+            const { error: storageDeleteError } = await supabase
+                .storage
+                .from('extra-pictures')
+                .remove([fileName]);
+
+            if (storageDeleteError) {
+                throw storageDeleteError;
+            }
+
+            const { error: dbDeleteError } = await supabase
+                .from('Pictures')
+                .delete()
+                .eq('picture_url', imageUrlToRemove);
+
+            if (dbDeleteError) {
+                throw dbDeleteError;
+            }
+
+            setImages((prevImages) => prevImages.filter((url) => url !== imageUrlToRemove));
+
+            // Update imgRefs to match the updated list of images
+            imgRefs.current = imgRefs.current.filter((ref, index) => {
+                // Keep references for images that are still present in the images list
+                return !images.includes(ref.src);  // Compare ref.src with images
+            });
+
+            console.log("imgRefs: ", imgRefs);
+            console.log('Profile picture removed successfully:', imageUrlToRemove);
+        } catch (error) {
+            console.error('Error removing profile picture:', error);
+        } finally {
+            setRemovingPicture(false);
+        }
+    };
 
     const handleProfilePictureUpload = async ({ file }) => {
         try {
@@ -685,11 +672,6 @@ const ProfileCard = () => {
             age--;
         }
         return age;
-    };
-
-    // Delete picture handler
-    const handleDeletePicture = (pictureUrl) => {
-        setImages(images.filter(image => image !== pictureUrl));
     };
 
     if (isLoading) return <Spin tip="Profiel laden..." />;
@@ -893,12 +875,12 @@ const ProfileCard = () => {
 
                 <Divider/>
 
-                <div style={{marginTop: '20px', marginBottom: '20px'}}>
+                <div style={{ marginTop: '20px', marginBottom: '20px' }}>
                     <p>
-                        <strong style={{width: '40%', minWidth: '150px', flexShrink: 0}}><PictureOutlined/> Meer fotos
-                            van jezelf tonen: </strong>
+                        <strong style={{ width: '40%', minWidth: '150px', flexShrink: 0 }}>
+                            <PictureOutlined /> Meer fotos van jezelf tonen:
+                        </strong>
                     </p>
-                    {images.length > 0 ? (
                         <Carousel
                             arrows
                             slidesToShow={slidesToShow}
@@ -909,42 +891,58 @@ const ProfileCard = () => {
                                 margin: '0 auto'
                             }}
                         >
+                            <Upload showUploadList={false} beforeUpload={() => false} onChange={handlePictureUpload} multiple>
+                                <Button icon={<UploadOutlined />} loading={uploadingPicture} style={{
+                                    position: 'relative',
+                                    height: '250px',
+                                }}>
+                                    Voeg nieuwe foto toe aan profiel
+                                </Button>
+                            </Upload>
+
                             {images.map((imageUrl, index) => (
-                                <div key={index} style={{position: 'relative'}}>
+                                <div
+                                    key={index}
+                                    style={{
+                                        position: 'relative',
+                                        height: '250px',
+                                    }}
+                                >
                                     <img
+                                        ref={(el) => (imgRefs.current[index] = el)} // Set the ref for each image
                                         src={imageUrl}
                                         alt={`carousel-image-${index}`}
                                         style={{
-                                            height: '250px', // Image height is set to fill the container's height
-                                            width: 'auto', // This maintains the aspect ratio
-                                            objectFit: 'cover', // Ensure the image covers the space without distortion
+                                            height: '250px',
+                                            width: 'auto',
+                                            objectFit: 'cover',
                                             borderRadius: '10px',
                                             margin: '0 auto'
                                         }}
                                     />
-                                    <Button
-                                        type="primary"
-                                        icon={<DeleteOutlined/>}
-                                        style={{
-                                            position: 'absolute',
-                                            top: 10,
-                                            right: 10,
-                                            zIndex: 10,
-                                            backgroundColor: 'rgba(255, 255, 255, 0.7)'
-                                        }}
-                                        onClick={() => handleDeletePicture(imageUrl)}
-                                    />
+                                    {imgRefs.current[index] && (
+                                        <Button
+                                            type="primary"
+                                            icon={<DeleteOutlined />}
+                                            onClick={() => handlePictureRemove(imageUrl)}
+                                            style={{
+                                                position: 'relative',
+                                                top: '-240px',
+                                                left: `calc(50% - ${imgRefs.current[index]?.offsetWidth / 2}px + 10px)`,
+                                                zIndex: 10,
+                                                padding: '5px 10px',
+                                                cursor: 'pointer',
+                                                borderRadius: '5px'
+                                            }}
+                                            loading={removingPicture}
+                                        >
+                                            {/* The button content goes here */}
+                                        </Button>
+                                    )}
                                 </div>
                             ))}
                         </Carousel>
-                    ) : (
-                        <p>Je hebt nog geen extra fotos toegevoegd.</p>
-                    )}
-                    <Upload showUploadList={false} beforeUpload={() => false} onChange={handlePictureUpload} multiple>
-                        <Button icon={<UploadOutlined/>} loading={uploadingPicture}>Voeg nieuwe foto toe aan profiel</Button>
-                    </Upload>
                 </div>
-
             </div>
         </ConfigProvider>
     );

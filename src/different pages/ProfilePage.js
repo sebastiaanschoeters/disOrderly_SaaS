@@ -179,18 +179,15 @@ const ProfileCard = () => {
         const width = window.innerWidth;
         const totalImages = images.length;
 
-        let slides = 5;
+        let slides = 4;
 
-        if (width < 700) {
+        if (width < 1000) {
             slides = 1;
-        } else if (width < 1000) {
-            slides = 2;
         } else if (width < 2000) {
-            slides = 3;
+            slides = 2;
         } else if (width < 3000) {
-            slides = 4;
+            slides = 3;
         }
-
         if (totalImages < slides){
             setSlidesToShow(totalImages);
         }

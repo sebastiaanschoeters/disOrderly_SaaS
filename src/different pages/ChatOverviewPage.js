@@ -138,6 +138,7 @@ const ChatOverviewPage = () => {
                         dataSource={filteredChats}
                         renderItem={(chat) => {
                             const otherUserId = chat.sender_id === userID ? chat.receiver_id : chat.sender_id;
+                            const isSender = chat.sender_id === userID;
                             return (
                                 <Card
                                     style={styles.card}
@@ -147,7 +148,8 @@ const ChatOverviewPage = () => {
                                             name: chat.profileName,
                                             profilePicture: chat.profilePicture,
                                             user_id: userID,
-                                            otherUserId: otherUserId
+                                            otherUserId: otherUserId,
+                                            isSender: isSender,
                                         };
                                         if (chat.acceptance === true) {
                                             navigate(`/chat/${chat.id}`, { state: { profileData} });
@@ -161,7 +163,13 @@ const ChatOverviewPage = () => {
                                         title={<span style={styles.name}>{`${chat.profileName}`}</span>}
                                     />
 
-                                    {!chat.acceptance && (
+                                    {isSender && !chat.acceptance && (
+                                        <div style={styles.newMessageIndicator}>
+                                            Bericht in behandeling
+                                        </div>
+                                    )}
+
+                                    {!isSender && !chat.acceptance && (
                                         <div style={styles.newMessageIndicator}>
                                             Nieuwe Berichten
                                         </div>

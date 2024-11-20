@@ -15,7 +15,7 @@ const { Title } = Typography;
 const ChatSuggestionPage = () => {
     const location = useLocation();
     const { profileData} = location.state || {};
-    const { name, profilePicture, user_id, otherUserId } = profileData || {};
+    const { name, profilePicture, user_id, otherUserId, isSender } = profileData || {};
     const { chatroomId } = useParams();
     const navigate = useNavigate();
     const theme = 'blue';
@@ -187,9 +187,14 @@ const ChatSuggestionPage = () => {
                     <p>{Message}</p>
                 </div>
                 <div style={styles.buttonContainer}>
-                    <Button className='ant-btn-accept' style={styles.button} onClick={handleAccept}>Accepteer</Button>
-                    <Button className='ant-btn-decline' style={styles.button} onClick={handleDecline}>Weiger</Button>
-                    <Button className='ant-btn-block' style={styles.button} onClick={handleBlock}>Blokkeer</Button>
+                    {!isSender && (
+                        <>
+                            <Button className="ant-btn-accept" style={styles.button} onClick={handleAccept}>Accepteer</Button>
+                            <Button className="ant-btn-decline" style={styles.button} onClick={handleDecline}>Weiger</Button>
+                            <Button className="ant-btn-block" style={styles.button} onClick={handleBlock}>Blokkeer</Button>
+
+                        </>
+                    )}
                 </div>
             </div>
         </ConfigProvider>

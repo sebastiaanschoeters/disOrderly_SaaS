@@ -214,19 +214,21 @@ const ProfileCard = () => {
         const width = window.innerWidth;
         const totalImages = images.length;
 
-        let slides = 5;
+        let slides = 5.5;
 
-        if (width < 900){
+        if (width < 700){
             slides = 1;
-        }else if (width < 1250) {
-            slides = 2;
+        }else if (width < 1100){
+            slides = 1.5;
+        }else if (width < 1500) {
+            slides = 2.5;
         } else if (width < 2000) {
-            slides = 3;
+            slides = 3.5;
         } else if (width < 3000) {
-            slides = 4;
+            slides = 4.5;
         }
         if (totalImages < slides){
-            setSlidesToShow(totalImages);
+            setSlidesToShow(totalImages+0.5);
         }
         else {
             setSlidesToShow(slides);
@@ -277,6 +279,38 @@ const ProfileCard = () => {
             lookingForArray = [];
         }
     }
+
+    const CustomPrevArrow = ({ onClick }) => (
+        <Button
+            type="default"
+            shape="circle"
+            icon={<LeftOutlined />}
+            onClick={onClick}
+            style={{
+                position: 'absolute',
+                top: '50%',
+                left: '-40px',
+                transform: 'translateY(-50%)',
+                zIndex: 10,
+            }}
+        />
+    );
+
+    const CustomNextArrow = ({ onClick }) => (
+        <Button
+            type="default"
+            shape="circle"
+            icon={<RightOutlined />}
+            onClick={onClick}
+            style={{
+                position: 'absolute',
+                top: '50%',
+                right: '-40px',
+                transform: 'translateY(-50%)',
+                zIndex: 10,
+            }}
+        />
+    );
 
     if (isLoading) return <Spin tip="Profiel laden..." />;
     if (error) return <p>Failed to load profile: {error}</p>;
@@ -383,6 +417,8 @@ const ProfileCard = () => {
                             </strong>
                         </p>
                         <Carousel
+                            prevArrow={<CustomPrevArrow />}
+                            nextArrow={<CustomNextArrow />}
                             arrows
                             slidesToShow={slidesToShow}
                             draggable

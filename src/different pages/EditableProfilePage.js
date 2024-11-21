@@ -938,6 +938,7 @@ const ProfileCard = () => {
                             {value: 'Woont in bij ouders', label: 'Woont in bij ouders'},
                             {value: 'Woont in groepsverband', label: 'Woont in groepsverband'},
                             {value: 'Woont in zorginstelling', label: 'Woont in zorginstelling'},
+                            {value: 'Andere', label: 'Andere'},
                         ]}
                     />
                 </p>

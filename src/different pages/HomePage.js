@@ -11,6 +11,13 @@ const HomePage = () => {
     const themeColors = themes[theme] || themes.blauw;
     const navigate = useNavigate();
 
+    const handleLogout = () => {
+        localStorage.removeItem('sessionToken');
+        localStorage.removeItem('userEmail');
+        navigate('/login');
+    };
+
+
     return (
         <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
             <div
@@ -144,7 +151,7 @@ const HomePage = () => {
                         minWidth: '60px',
                         minHeight: '40px',
                     }}
-                    onClick={() => navigate('/login')}
+                    onClick={() => handleLogout()}
                 >
                     <h2 style={{ margin: '0', fontSize: '1vw', minWidth: '10px' }}>Afmelden</h2>
                 </Button>

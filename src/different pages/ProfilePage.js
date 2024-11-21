@@ -75,8 +75,14 @@ const useFetchProfileData = (actCode) => {
 
                             if (locationError) throw locationError;
 
+                            // If locationData is fetched, add it to user
                             if (locationData && locationData.length > 0) {
-                                const locationInfo = locationData[0];
+                                const location = locationData[0];
+                                user.locationData = {
+                                    gemeente: location.Gemeente,
+                                    latitude: location.Latitude,
+                                    longitude: location.Longitude,
+                                };
                             }
                         }
                     }
@@ -93,11 +99,11 @@ const useFetchProfileData = (actCode) => {
                         const interestIds = interestedInData.map(item => item.interest_id);
                         const { data: interestsData, error: fetchInterestsError } = await supabase
                             .from('Interests')
-                            .select('interest')
+                            .select('Interest')
                             .in('id', interestIds);
 
                         if (fetchInterestsError) throw fetchInterestsError;
-                        user.interests = interestsData.map(interest => ({ interest_name: interest.interest }));
+                        user.interests = interestsData.map(interest => ({ interest_name: interest.Interest }));
                     }
 
                     // Set the user profile data with the theme
@@ -119,6 +125,38 @@ const useFetchProfileData = (actCode) => {
     return { profileData, isLoading, error };
 };
 
+const useFetchPicturesData = (actCode) => {
+    const [pictures, setPictures] = useState({});
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                // Fetch user data
+                const { data: pictures, error: userError } = await supabase
+                    .from('Pictures')
+                    .select('*')
+                    .eq('User_id', actCode);
+
+                if (userError) throw userError;
+                if (pictures.length > 0) {
+                    const user = pictures[0];
+                }
+                setPictures(pictures)
+            } catch (error) {
+                setError(error.message);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [actCode]);
+
+    return { pictures };
+};
+
 const ProfileDetail = ({ label, value, icon }) => (
     <p style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '5px'}}>
         <strong style={{ width: '20%', minWidth: '150px', flexShrink: 0 }}>{icon} {label}: </strong>
@@ -136,33 +174,30 @@ const ProfileCard = () => {
         'https://i.pravatar.cc/150?img=4'
     ]);
     const { profileData, isLoading, error } = useFetchProfileData('1519'); // Replace with dynamic ActCode as needed
+    const { pictures} = useFetchPicturesData('1519');
     const themeColors = themes[theme] || themes.blauw;
     const [slidesToShow, setSlidesToShow] = useState(3);
 
-    const updateSlidesToShow = () => {
-        const width = window.innerWidth;
-
-        if (width < 700){
-            setSlidesToShow(1);
-        }
-        else if (width < 1000) {
-            setSlidesToShow(2);
-        } else if (width < 2000) {
-            setSlidesToShow(3);
-        } else if (width < 3000){
-            setSlidesToShow(4)
-        } else {
-            setSlidesToShow(5);
-        }
-    };
+    const currentUserLocation = { latitude: 50.8, longitude: 4.3333333 }; // Use real location data
 
     useEffect(() => {
         if (profileData.theme){
             setTheme(profileData.theme);
         }
-        if (profileData.profilePicture){
-            const imageUrlWithCacheBuster = `${profileData.profilePicture}?t=${new Date().getTime()}`;
+        if (profileData.profile_picture){
+            const imageUrlWithCacheBuster = `${profileData.profile_picture}?t=${new Date().getTime()}`;
             setProfilePicture(imageUrlWithCacheBuster);
+        }
+        if (pictures.length > 0){
+            let list_of_images = []
+
+            for (let i = 0; i < pictures.length; i++) {
+                const picture = pictures[i];
+                if (picture.picture_url){
+                    list_of_images.push(picture.picture_url);
+                }
+            }
+            setImages(list_of_images)
         }
     }, [profileData.theme]);
 
@@ -174,6 +209,31 @@ const ProfileCard = () => {
             window.removeEventListener('resize', updateSlidesToShow); // Clean up the listener
         };
     }, []);
+
+    const updateSlidesToShow = () => {
+        const width = window.innerWidth;
+        const totalImages = images.length;
+
+        let slides = 5.5;
+
+        if (width < 700){
+            slides = 1;
+        }else if (width < 1100){
+            slides = 1.5;
+        }else if (width < 1500) {
+            slides = 2.5;
+        } else if (width < 2000) {
+            slides = 3.5;
+        } else if (width < 3000) {
+            slides = 4.5;
+        }
+        if (totalImages < slides){
+            setSlidesToShow(totalImages+0.5);
+        }
+        else {
+            setSlidesToShow(slides);
+        }
+    };
 
     const calculateAge = (birthdate) => {
         if (!birthdate) return 'Onbekend';
@@ -201,23 +261,61 @@ const ProfileCard = () => {
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         const distance = R * c; // Distance in kilometers
 
-        return distance;
+        return Math.round(distance);
     }
 
+    const distanceToProfileUser = calculateDistance(
+        currentUserLocation.latitude, currentUserLocation.longitude,
+        profileData.locationData?.latitude, profileData.locationData?.longitude
+    );
 
-    let lookingForArray = profileData.lookingFor;
+    let lookingForArray = profileData.looking_for;
 
-    if (typeof profileData.lookingFor === 'string') {
+    if (typeof profileData.looking_for === 'string') {
         try {
-            lookingForArray = JSON.parse(profileData.lookingFor);
+            lookingForArray = JSON.parse(profileData.looking_for);
         } catch (error) {
             console.error('Error parsing JSON:', error);
             lookingForArray = [];
         }
     }
 
+    const CustomPrevArrow = ({ onClick }) => (
+        <Button
+            type="default"
+            shape="circle"
+            icon={<LeftOutlined />}
+            onClick={onClick}
+            style={{
+                position: 'absolute',
+                top: '50%',
+                left: '-40px',
+                transform: 'translateY(-50%)',
+                zIndex: 10,
+            }}
+        />
+    );
+
+    const CustomNextArrow = ({ onClick }) => (
+        <Button
+            type="default"
+            shape="circle"
+            icon={<RightOutlined />}
+            onClick={onClick}
+            style={{
+                position: 'absolute',
+                top: '50%',
+                right: '-40px',
+                transform: 'translateY(-50%)',
+                zIndex: 10,
+            }}
+        />
+    );
+
     if (isLoading) return <Spin tip="Profiel laden..." />;
     if (error) return <p>Failed to load profile: {error}</p>;
+
+    console.log(images)
 
     return (
         <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
@@ -248,7 +346,7 @@ const ProfileCard = () => {
                         />
                         <div>
                             <h2 style={{ margin: '0' }}>
-                                {profileData.name || 'Naam'}, {calculateAge(profileData.birthDate) || 'Leeftijd'}
+                                {profileData.name || 'Naam'}, {calculateAge(profileData.birthdate) || 'Leeftijd'}
                             </h2>
                             <p style={{margin: '5px 0', maxWidth: '550px'}}>
                                 {profileData.bio || ''}
@@ -259,7 +357,7 @@ const ProfileCard = () => {
 
                 <Divider />
 
-                <ProfileDetail label="Locatie" value={profileData.location} icon={<EnvironmentOutlined />} />
+                <ProfileDetail label="Locatie" value={`${profileData.locationData.gemeente} (${distanceToProfileUser} km van jou verwijdert)`} icon={<EnvironmentOutlined />} />
                 <Divider />
                 <ProfileDetail label="Geslacht" value={profileData.gender} icon={<UserOutlined />} />
                 <Divider />
@@ -287,7 +385,7 @@ const ProfileCard = () => {
                 <Divider />
                 <ProfileDetail
                     label="Woonsituatie"
-                    value={profileData.livingSituation}
+                    value={profileData.living_situation}
                     icon={<HomeOutlined />}
                 />
                 <Divider />
@@ -314,9 +412,13 @@ const ProfileCard = () => {
                 {images.length > 0 && (
                     <>
                         <p>
-                            <strong style={{width: '40%', minWidth: '150px', flexShrink: 0}}><PictureOutlined/> Meer fotos van {profileData?.name || 'de gebruiker'}: </strong>
+                            <strong style={{width: '40%', minWidth: '150px', flexShrink: 0}}>
+                                <PictureOutlined/> Meer fotos van {profileData?.name || 'de gebruiker'}:
+                            </strong>
                         </p>
                         <Carousel
+                            prevArrow={<CustomPrevArrow />}
+                            nextArrow={<CustomNextArrow />}
                             arrows
                             slidesToShow={slidesToShow}
                             draggable
@@ -327,12 +429,18 @@ const ProfileCard = () => {
                             }}
                         >
                             {images.map((imageUrl, index) => (
-                                <div key={index}>
+                                <div
+                                    key={index}
+                                    style={{
+                                        position: 'relative',
+                                        height: '200px',
+                                    }}
+                                >
                                     <img
                                         src={imageUrl}
                                         alt={`carousel-image-${index}`}
                                         style={{
-                                            height: '250px', // Image height is set to fill the container's height
+                                            height: '200px', // Image height is set to fill the container's height
                                             width: 'auto', // This maintains the aspect ratio
                                             objectFit: 'cover', // Ensure the image covers the space without distortion
                                             borderRadius: '10px',

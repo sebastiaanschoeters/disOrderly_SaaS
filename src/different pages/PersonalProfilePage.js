@@ -39,28 +39,54 @@ const useFetchProfileData = (actCode) => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const { data: profileData, error: profileError } = await supabase
-                    .from('Profile')
+                // Fetch user data
+                const { data: userData, error: userError } = await supabase
+                    .from('User')
                     .select('*')
-                    .eq('ActCode', actCode);
+                    .eq('id', actCode);
 
-                if (profileError) throw profileError;
-                if (profileData.length > 0) {
-                    const profile = profileData[0];
+                if (userError) throw userError;
+                if (userData.length > 0) {
+                    const user = userData[0];
+
+                    // Fetch user information
+                    const { data: userInfoData, error: userInfoError } = await supabase
+                        .from('User information')
+                        .select('*')
+                        .eq('user_id', user.id);
+
+                    if (userInfoError) throw userInfoError;
+
                     let parsedTheme = 'blauw';
                     let isDarkMode = false;
 
-                    if (profile.theme) {
-                        try {
-                            const [themeName, darkModeFlag] = JSON.parse(profile.theme);
-                            parsedTheme = themeName;
-                            isDarkMode = darkModeFlag;
-                        } catch (error) {
-                            console.error('Error parsing theme', error);
+                    if (userInfoData && userInfoData.length > 0) {
+                        const userInfo = userInfoData[0];
+                        user.bio = userInfo.bio;
+                        user.location = userInfo.location;
+                        user.looking_for = userInfo.looking_for;
+                        user.living_situation = userInfo.living_situation;
+                        user.mobility = userInfo.mobility;
+                        user.theme = userInfo.theme;
+                        user.sexuality = userInfo.sexuality;
+                        user.gender = userInfo.gender;
+
+                        if (userInfo.theme) {
+                            try {
+                                const [themeName, darkModeFlag] = JSON.parse(userInfo.theme);
+                                parsedTheme = themeName;
+                                isDarkMode = darkModeFlag;
+                            } catch (error) {
+                                console.error('Error parsing theme', error);
+                            }
                         }
                     }
 
-                    setProfileData({ ...profile, theme: [parsedTheme, isDarkMode] });
+                    // Set the user profile data with the theme
+                    setProfileData({
+                       ...user,
+                        theme: [parsedTheme, isDarkMode]
+                    });
                 }
             } catch (error) {
                 setError(error.message);
@@ -76,7 +102,7 @@ const useFetchProfileData = (actCode) => {
 };
 
 const ProfileCard = () => {
-    const { profileData, isLoading, error } = useFetchProfileData('1547');
+    const { profileData, isLoading, error } = useFetchProfileData('1519');
     const [theme, setTheme] = useState('blauw');
     const [isDarkMode, setIsDarkMode] = useState(false);
     const themeKey = isDarkMode ? `${theme}_donker` : theme;
@@ -97,8 +123,8 @@ const ProfileCard = () => {
             }
         }
 
-        if (profileData.profilePicture) {
-            const imageUrlWithCacheBuster = `${profileData.profilePicture}?t=${new Date().getTime()}`;
+        if (profileData.profile_picture) {
+            const imageUrlWithCacheBuster = `${profileData.profile_picture}?t=${new Date().getTime()}`;
             setProfilePicture(imageUrlWithCacheBuster);
         }
         if (profileData.sexuality) {
@@ -106,13 +132,15 @@ const ProfileCard = () => {
         }
     }, [profileData]);
 
+    console.log(profileData)
+
     // Define async save functions
     const saveField = async (field, value) => {
         try {
             const { data, error } = await supabase
-                .from('Profile')
+                .from('User information')
                 .update({ [field]: value })
-                .eq('ActCode', profileData.ActCode);
+                .eq('user_id', profileData.id);
             if (error) throw error;
 
             console.log(`${field} saved successfully with value ${value}`);
@@ -196,7 +224,7 @@ const ProfileCard = () => {
                         }}
                     />
                     <h2 style={{ margin: '0', textAlign: 'center' }}>
-                        {profileData.name || 'Naam'}, {calculateAge(profileData.birthDate) || 'Leeftijd'}
+                        {profileData.name || 'Naam'}, {calculateAge(profileData.birthdate) || 'Leeftijd'}
                     </h2>
                     <Divider />
                 </div>

@@ -13,7 +13,6 @@ const SupabaseTestPage = () => {
     const fetchData = async () => {
         const {data, error} = await supabase.from("Test Table").select("test_column")
             setTestData(data)
-            console.log(data)
     }
 
     return (

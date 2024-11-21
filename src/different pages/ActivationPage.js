@@ -1,6 +1,7 @@
 // ActivationPage.js
 import { useNavigate, useParams } from 'react-router-dom';
 import React, {useEffect, useState} from 'react';
+import * as dayjs from 'dayjs'
 import '../CSS/AntDesignOverride.css'
 import 'antd/dist/reset.css';
 import {Form, Input, Button, Card, message, ConfigProvider, DatePicker, Radio, Select, Checkbox} from 'antd';
@@ -10,6 +11,8 @@ import CryptoJS from 'crypto-js';
 
 const ActivationPage = () => {
     const { activationCodeLink } = useParams();
+    const [locations, setLocations] = useState([]); // For location dropdown
+    const [searchValue, setSearchValue] = useState(""); // For search functionality
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
     const [userData, setUserData] = useState({});
@@ -25,21 +28,76 @@ const ActivationPage = () => {
         }
     }, [activationCodeLink, form]);
 
+    useEffect(() => {
+        const fetchLocations = async (searchTerm = "") => {
+            const { data, error } = await supabase
+                .from("Location")
+                .select("id, Gemeente")
+                .ilike("Gemeente", `%${searchTerm}%`) // Match search term
+                .limit(10); // Limit results for performance
+
+            if (error) {
+                console.error("Error fetching locations:", error.message);
+            } else {
+                setLocations(data || []);
+            }
+        };
+
+        fetchLocations(searchValue);
+    }, [searchValue]);
+
+    const handleSearch = (value) => {
+        setSearchValue(value); // Trigger new fetch based on search
+    };
+
     const goBack = () => {
         if (step > 1) setStep(step - 1);
     };
 
-    const activationCode = (values) => {
+    const activationCode = async (values) => {
         setLoading(true);
-        setTimeout(() => {
+        try {
+            // Query the "Activation" table to validate the code
+            const { data, error } = await supabase
+                .from("Activation")
+                .select("usable")
+                .eq("code", values.activationKey)
+                .single(); // Expect a single result
+
+            if (error) {
+                console.error("Error checking activation code:", error.message);
+                message.error("Er is een probleem met het valideren van de activatiecode.");
+                setLoading(false);
+                return;
+            }
+
+            if (!data) {
+                message.error("De activatiecode bestaat niet");
+                setLoading(false);
+                return;
+            }
+
+            if (!data.usable) {
+                message.error("Deze activatiecode is al in gebruik.");
+                setLoading(false);
+                return;
+            }
+
+            // Activation code is valid and usable
             setUserData((prevData) => ({
                 ...prevData,
-                activationKey: values.activationKey
+                activationKey: values.activationKey,
             }));
             setStep(2);
+            message.success("Activatiecode geaccepteerd!");
+        } catch (err) {
+            console.error("Unexpected error during activation code validation:", err);
+            message.error("Er is iets misgegaan. Probeer het later opnieuw.");
+        } finally {
             setLoading(false);
-        }, 1000);
+        }
     };
+
 
     const nameAndBD = (values) => {
         setUserData((prevData) => ({
@@ -55,8 +113,8 @@ const ActivationPage = () => {
     const Location = (values) => {
         setUserData((prevData) => ({
             ...prevData,
-            city: values.city,
-            mobility: values.mobility
+            city: values.city, // Save city ID, not name
+            mobility: values.mobility,
         }));
         setStep(4);
     };
@@ -81,42 +139,106 @@ const ActivationPage = () => {
     };
 
     const saveUserProfile = async () => {
+        try {
+            // Insert data into the "User" table
+            const { data: userDataResponse, error: userError } = await supabase
+                .from("User")
+                .insert({
+                    name: userData.name,
+                    id: userData.activationKey,
+                    birthdate: userData.birthDate,
+                });
 
-        const { data, error } = await supabase.from("Profile").insert({
-            ActCode: userData.activationKey,
-            name: userData.name,
-            livingSituation: userData.livingSituation,
-            birthDate: userData.birthDate,
-            location: userData.city,
-            mobility: userData.mobility,
-            gender: userData.gender,
-            sexuality: userData.sexuality,
-            lookingFor: userData.relationshipPreference,
-            //NiveauA: userData.niveau,
-            email: userData.email,
-            password: userData.password
-        });
+            if (userError) {
+                throw new Error(`Error saving user data: ${userError.message}`);
+            }
 
-        if (error) {
-            console.error("Error saving profile data:", error.message);
+            // Insert data into the "Profile" table
+            const { data: profileData, error: profileError } = await supabase
+                .from("User information")
+                .insert({
+                    user_id: userData.activationKey,
+                    living_situation: userData.livingSituation,
+                    location: userData.city,
+                    mobility: userData.mobility,
+                    gender: userData.gender,
+                    sexuality: userData.sexuality,
+                    looking_for: userData.relationshipPreference,
+                });
+
+            // Insert data into the "Credential" table
+            const { data: credentialData, error: credentialError } = await supabase
+                .from("Credentials")
+                .insert({
+                    user_id: userData.activationKey,
+                    email: userData.email,
+                    password: userData.password
+                });
+
+            if (credentialError) {
+                throw new Error(`Error saving credentials: ${credentialError.message}`);
+            }
+
+            if (profileError) {
+                throw new Error(`Error saving profile data: ${profileError.message}`);
+            }
+
+            console.log("Profile saved successfully", { credentialData, userDataResponse, profileData });
+
+        } catch (error) {
+            console.error("Error saving user profile:", error.message);
         }
     };
 
 
-    const EmailAndPassword = (values) => {
-        // Hash the password
-        //const hashedPassword = CryptoJS.SHA256(values.password).toString();
+    const EmailAndPassword = async (values) => {
+        setLoading(true); // Show a loading state during validation
+        try {
+            // Check if the email already exists in the "Credentials" table
+            const { data, error } = await supabase
+                .from("Credentials")
+                .select("email")
+                .eq("email", values.email)
+                .single(); // Expect a single result if the email exists
 
-        setUserData((prevData) => ({
-            ...prevData,
-            email: values.email,
-            password: values.password, // Store the hashed password
-        }));
-        console.log("User Data to Submit:", {userData});
-        saveUserProfile();
-        message.success("Account aangemaakt! Je kan een profiel foto toevoegen bij je profiel.");
-        //navigate("/login"); // Or navigate to the next appropriate step or route
+            if (error && error.code !== "PGRST116") {
+                // PGRST116 occurs when no row is found, which is acceptable here
+                console.error("Error checking email existence:", error.message);
+                message.error("Er is iets misgegaan tijdens de validatie van uw e-mailadres.");
+                setLoading(false);
+                return;
+            }
+
+            if (data) {
+                // Email already exists in the database
+                message.error("Dit e-mailadres is al geregistreerd. Probeer een ander e-mailadres.");
+                setLoading(false);
+                return;
+            }
+
+            // Hash the password
+            const hashedPassword = CryptoJS.SHA256(values.password).toString();
+
+            // Save the email and hashed password to userData
+            setUserData((prevData) => ({
+                ...prevData,
+                email: values.email,
+                password: hashedPassword, // Store the hashed password
+            }));
+
+            console.log("User Data to Submit:", { ...userData, email: values.email });
+            saveUserProfile();
+            message.success("Account aangemaakt! Je kan een profielfoto toevoegen bij je profiel.");
+            // Optionally navigate to the login page or next step
+            // navigate("/login");
+        } catch (err) {
+            console.error("Unexpected error during email validation:", err);
+            message.error("Er is iets misgegaan. Probeer het later opnieuw.");
+        } finally {
+            setLoading(false); // Hide the loading state
+        }
     };
+
 
     return (
         <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
@@ -190,7 +312,24 @@ const ActivationPage = () => {
                                 name="Geboortedatum"
                                 rules={[{ required: true, message: 'Selecteer uw geboortedatum' }]}
                             >
-                                <DatePicker style={{ width: '100%' }} format="YYYY-MM-DD" disabledDate={(current) => current && current > new Date()} />
+                                <DatePicker
+                                    style={{ width: '100%' }}
+                                    format="YYYY-MM-DD"
+                                    disabledDate={(current) => {
+                                        // Get today's date
+                                        const today = new Date();
+                                        // Calculate the minimum allowed birthdate (18 years ago)
+                                        const minimumBirthdate = new Date(
+                                            today.getFullYear() - 18,
+                                            today.getMonth(),
+                                            today.getDate()
+                                        );
+                                        // Disable future dates and dates after the minimum allowed birthdate
+                                        return current && (current > today || current > minimumBirthdate);
+                                    }}
+                                    // Default picker view set to 18 years ago
+                                    defaultPickerValue={dayjs().subtract(18, 'year')}
+                                />
                             </Form.Item>
                             <Form.Item>
                                 <Button type="primary" htmlType="submit" style={{ width: '100%' }}>Volgende</Button>
@@ -201,18 +340,39 @@ const ActivationPage = () => {
 
                     {step === 3 && (
                         <Form name="additionalInfoForm" onFinish={Location}>
-                            <Form.Item label="Stad" name="city" rules={[{ required: true, message: 'Voer uw stad in' }]}>
-                                <Input />
+                            <Form.Item
+                                label="Stad"
+                                name="city"
+                                rules={[{ required: true, message: 'Selecteer uw stad' }]}
+                            >
+                                <Select
+                                    showSearch
+                                    placeholder="Zoek en selecteer uw stad"
+                                    onSearch={handleSearch} // Trigger search
+                                    filterOption={false} // Disable client-side filtering
+                                    options={locations.map((location) => ({
+                                        value: location.id, // Use ID as the value
+                                        label: location.Gemeente, // Display gemeente
+                                    }))}
+                                />
                             </Form.Item>
-                            <Form.Item label="Kan zelfstandig verplaatsen" name="mobility" rules={[{ required: true, message: 'Selecteer uw mobiliteits optie' }]}>
+                            <Form.Item
+                                label="Kan zelfstandig verplaatsen"
+                                name="mobility"
+                                rules={[{ required: true, message: 'Selecteer uw mobiliteitsoptie' }]}
+                            >
                                 <Select>
                                     <Select.Option value="True">Ja</Select.Option>
                                     <Select.Option value="False">Nee</Select.Option>
                                 </Select>
                             </Form.Item>
                             <Form.Item>
-                                <Button type="primary" htmlType="submit" style={{ width: '100%' }}>Volgende</Button>
-                                <Button onClick={goBack} style={{ marginTop: '8px', width: '100%' }}>Terug</Button>
+                                <Button type="primary" htmlType="submit" style={{ width: '100%' }}>
+                                    Volgende
+                                </Button>
+                                <Button onClick={goBack} style={{ marginTop: '8px', width: '100%' }}>
+                                    Terug
+                                </Button>
                             </Form.Item>
                         </Form>
                     )}
@@ -221,9 +381,9 @@ const ActivationPage = () => {
                         <Form name="additionalInfoForm" onFinish={Sexuality}>
                             <Form.Item label="Geslacht" name="gender" rules={[{ required: true, message: 'Selecteer uw geslacht' }]}>
                                 <Select placeholder="Selecteer uw geslacht">
-                                    <Select.Option value="male">Man</Select.Option>
-                                    <Select.Option value="female">Vrouw</Select.Option>
-                                    <Select.Option value="non binary">Non-binair</Select.Option>
+                                    <Select.Option value="Man">Man</Select.Option>
+                                    <Select.Option value="Vrouw">Vrouw</Select.Option>
+                                    <Select.Option value="Non-binair">Non-binair</Select.Option>
                                 </Select>
                             </Form.Item>
                             <Form.Item label="Sexualiteit" name="sexuality" rules={[{ required: true, message: 'Selecteer uw seksualiteit' }]}>
@@ -244,9 +404,9 @@ const ActivationPage = () => {
                                     placeholder="Selecteer uw voorkeur"
                                     allowClear
                                 >
-                                    <Select.Option value="relatie">Relatie</Select.Option>
-                                    <Select.Option value="friends">Vrienden</Select.Option>
-                                    <Select.Option value="intiem">Intieme ontmoetingen</Select.Option>
+                                    <Select.Option value="Relatie">Relatie</Select.Option>
+                                    <Select.Option value="Vrienden">Vrienden</Select.Option>
+                                    <Select.Option value="Intieme ontmoetingen">Intieme ontmoetingen</Select.Option>
                                 </Select>
                             </Form.Item>
 

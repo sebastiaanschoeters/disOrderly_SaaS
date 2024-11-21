@@ -50,6 +50,7 @@ const Search = () => {
                     id,
                     name,
                     birthdate,
+                    profile_picture,
                     "User information" (gender, looking_for, mobility)
                 `);
 
@@ -262,6 +263,7 @@ const Search = () => {
                                     }}
                                 >
                                     <Avatar
+                                        src={item.profile_picture}
                                         style={{
                                             backgroundColor: themeColors.primary10,
                                             marginRight: '1.5vw',  // Reduced margin

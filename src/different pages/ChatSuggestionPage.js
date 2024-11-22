@@ -1,7 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import { Avatar, Button, Typography, ConfigProvider } from 'antd';
 import {useLocation, useNavigate, useParams} from 'react-router-dom';
-import { CloseOutlined } from '@ant-design/icons';
 import { themes, antThemeTokens } from '../themes';
 import '../CSS/ChatSuggestionPage.css';
 import { createClient } from "@supabase/supabase-js";
@@ -129,12 +128,6 @@ const ChatSuggestionPage = () => {
             cursor: 'pointer',
             fontSize: '1rem',
         },
-        closeButton: {
-            position: 'absolute',
-            top: '10px',
-            right: '10px',
-            cursor: 'pointer',
-        },
         messageContainer: {
             padding: '15px',
             borderRadius: '8px',
@@ -181,7 +174,6 @@ const ChatSuggestionPage = () => {
                 <div style={styles.header}>
                     <Avatar src={profilePicture || 'default-avatar.png'} onClick={handleProfile} style={styles.headerAvatar}>U</Avatar>
                     <Title level={2} style={{ margin: 0, color: themeColors.primary10 }}h2>{`${name}`}</Title>
-                    <Button type='primary' shape='circle' style={styles.closeButton} icon={<CloseOutlined/>} onClick={() => navigate('/chatOverview')}/>
                 </div>
                 <div style={styles.messageContainer}>
                     <p>{Message}</p>

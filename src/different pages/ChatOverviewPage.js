@@ -1,6 +1,5 @@
 import React, { useState,useEffect } from 'react';
 import {List, Avatar, Typography, Input, ConfigProvider, Card, Button} from 'antd';
-import { CloseOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { antThemeTokens, themes } from '../themes';
 import { createClient } from "@supabase/supabase-js";
@@ -54,10 +53,6 @@ const ChatOverviewPage = () => {
     const handleSearch = (value) => {
         setSearchQuery(value);
     };
-    const handleClose = () => {
-        navigate('/home');
-    };
-
     const styles = {
         chatContainer: {
             padding: '20px',
@@ -79,9 +74,6 @@ const ChatOverviewPage = () => {
             flexGrow: 1,
             textAlign: 'center',
             margin: 0,
-        },
-        button: {
-            backgroundColor: themeColors.primary8,
         },
         searchBar: {
             width: '75%',
@@ -121,7 +113,6 @@ const ChatOverviewPage = () => {
             <div style={styles.chatContainer}>
                 <div style={styles.titleButton}>
                     <Title level={2} style={styles.title}>Chat Overzicht</Title>
-                    <Button type='primary' shape='circle' style={styles.button} icon={<CloseOutlined/>} onClick={handleClose}/>
                     </div>
                     <Input.Search
                         placeholder="Zoek in chats..."

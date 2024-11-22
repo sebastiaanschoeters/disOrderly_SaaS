@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Avatar, Input, Button, ConfigProvider, Card } from 'antd';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { antThemeTokens, themes } from '../themes';
-import { CloseOutlined } from '@ant-design/icons';
 import { createClient } from "@supabase/supabase-js";
 import '../CSS/ChatPage.css';
 
@@ -63,9 +62,6 @@ const ChatPage = () => {
         fetchMessages(chatroomId);
     };
 
-    const handleCloseChat = () => {
-        navigate('/chatoverview');
-    };
 
     const handleProfile = () => {
         navigate('/profile');
@@ -109,13 +105,6 @@ const ChatPage = () => {
         },
         avatar: {
             marginRight: '20px',
-        },
-        closeButton: {
-            position: 'absolute',
-            right: '10px',
-            background: 'transparent',
-            border: 'none',
-            cursor: 'pointer',
         },
         messageList: {
             flexGrow: 1,
@@ -187,9 +176,6 @@ const ChatPage = () => {
                             <h2 style={{margin: 0, fontSize: '1.5rem', color: themeColors.primary1}}>
                                 {`${name}`}
                             </h2>
-                            <button style={styles.closeButton} onClick={handleCloseChat}>
-                                <CloseOutlined/>
-                            </button>
                         </div>
                         <div style={styles.messageList}>
                             {messages.map((message) => {

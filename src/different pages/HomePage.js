@@ -17,7 +17,7 @@ const HomePage = () => {
         navigate('/login');
     };
 
-
+    const userEmail = localStorage.getItem('userEmail'); //nu heb je hier de email van de logged in user
     return (
         <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
             <div

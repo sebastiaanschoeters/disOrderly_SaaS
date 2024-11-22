@@ -8,29 +8,9 @@ import forestImage from '../Media/forest.jpg'; // Path to the image
 
 const LoginPage = () => {
     const [theme, setTheme] = useState('default');
-    const [isTransitioning, setIsTransitioning] = useState(false); // To handle transition state
+    const [isTransitioning, setIsTransitioning] = useState(false);  // To handle transition state
     const themeColors = themes[theme] || themes.blauw;
     const navigate = useNavigate();
-
-    // Simulate a login request (replace with your real API call)
-    const handleLogin = (values) => {
-        console.log('Form values:', values);
-        const { email, password } = values;
-
-        // Example of a successful login response
-        const fakeLoginResponse = {
-            token: 'fake-session-token',
-            user: { email },
-        };
-
-        // Save user session to localStorage
-        localStorage.setItem('sessionToken', fakeLoginResponse.token);
-        localStorage.setItem('userEmail', fakeLoginResponse.user.email);
-
-        // Navigate to the home page
-        setIsTransitioning(true);
-        setTimeout(() => navigate('/home'), 500);
-    };
 
     return (
         <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
@@ -41,7 +21,7 @@ const LoginPage = () => {
                     justifyContent: 'center',
                     alignItems: 'center',
                     height: '100vh',
-                    backgroundColor: themeColors.primary2,
+                    backgroundColor: themeColors.primary2, // Background color
                     color: themeColors.primary10,
                     position: 'relative',
                     zIndex: 0,
@@ -57,13 +37,14 @@ const LoginPage = () => {
                         backgroundImage: `url(${forestImage})`,
                         backgroundSize: 'cover',
                         backgroundPosition: 'center',
-                        opacity: isTransitioning ? 0 : 1,
-                        transition: 'opacity 0.5s ease',
+                        opacity: isTransitioning ? 0 : 1, // Fade the image in/out
+                        transition: 'opacity 0.5s ease', // Smooth fade transition
                         zIndex: -1,
                     }}
                 ></div>
 
                 <ButterflyIcon color="rgba(255, 255, 255, 0.2)" />
+                {/* Activate Button */}
                 <Button
                     type="link"
                     style={{
@@ -82,17 +63,13 @@ const LoginPage = () => {
                     <Form
                         name="loginForm"
                         initialValues={{ remember: true }}
-                        onFinish={handleLogin}
-                        onFinishFailed={(errorInfo) =>
-                            console.log('Failed:', errorInfo)
-                        }
+                        onFinish={(values) => console.log('Form values:', values)}
+                        onFinishFailed={(errorInfo) => console.log('Failed:', errorInfo)}
                     >
                         <Form.Item
                             label="Email"
                             name="email"
-                            rules={[
-                                { required: true, message: 'Please input your email!' },
-                            ]}
+                            rules={[{ required: true, message: 'Please input your email!' }]}
                         >
                             <Input />
                         </Form.Item>
@@ -100,9 +77,7 @@ const LoginPage = () => {
                         <Form.Item
                             label="Password"
                             name="password"
-                            rules={[
-                                { required: true, message: 'Please input your password!' },
-                            ]}
+                            rules={[{ required: true, message: 'Please input your password!' }]}
                         >
                             <Input.Password />
                         </Form.Item>
@@ -116,6 +91,12 @@ const LoginPage = () => {
                                 type="primary"
                                 htmlType="submit"
                                 style={{ width: '100%' }}
+                                onClick={() => {
+                                    setIsTransitioning(true); // Trigger the fade-out effect
+                                    setTimeout(() => {
+                                        navigate('/home'); // Go to homepage after transition
+                                    }, 500); // Wait for transition to complete
+                                }}
                             >
                                 Login
                             </Button>

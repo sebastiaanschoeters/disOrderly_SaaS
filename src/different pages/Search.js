@@ -5,6 +5,8 @@ import { Avatar, ConfigProvider, Input, List, Typography, Modal, Button, Slider,
 import { FilterOutlined } from "@ant-design/icons";
 import { createClient } from "@supabase/supabase-js";
 import React, { useState, useEffect } from "react";
+import { useNavigate } from 'react-router-dom'; // Import useNavigate for routing
+
 
 // Initialize Supabase client
 const supabase = createClient(
@@ -40,6 +42,8 @@ const Search = () => {
         }
         return age;
     };
+
+    const navigate = useNavigate();
 
     // Fetch users from Supabase
     const fetchUsers = async () => {
@@ -260,24 +264,27 @@ const Search = () => {
                             renderItem={(item) => (
                                 <List.Item
                                     key={item.id}
+                                    onClick={() => navigate(`/user/${item.id}`, { state: { user_id: item } })}
+                                        // Navigate to dynamic user link
                                     style={{
                                         display: 'flex',
                                         flexDirection: 'row',
-                                        marginBottom: '1.5vw',  // Reduced margin between items
-                                        padding: '1vw',  // Reduced padding for smaller list items
+                                        marginBottom: '1.5vw', // Reduced margin between items
+                                        padding: '1vw', // Reduced padding for smaller list items
                                         backgroundColor: themeColors.primary4,
                                         borderRadius: '8px',
                                         boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
                                         justifyContent: 'space-between',
+                                        cursor: 'pointer', // Add pointer cursor to indicate it's clickable
                                     }}
                                 >
                                     <Avatar
                                         src={item.profile_picture}
                                         style={{
                                             backgroundColor: themeColors.primary10,
-                                            marginRight: '1.5vw',  // Reduced margin
-                                            width: '5vw',  // Reduced avatar size
-                                            height: '5vw',  // Reduced avatar size
+                                            marginRight: '1.5vw', // Reduced margin
+                                            width: '5vw', // Reduced avatar size
+                                            height: '5vw', // Reduced avatar size
                                         }}
                                     >
                                         {item.name[0]}

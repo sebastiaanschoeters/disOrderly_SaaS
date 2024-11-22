@@ -56,7 +56,7 @@ const useFetchProfileData = (actCode) => {
             try {
                 const { data: userData, error: userError } = await supabase
                     .from('User')
-                    .select('*')
+                    .select('id, name, birthdate, profile_picture')
                     .eq('id', actCode);
 
                 if (userError) throw userError;
@@ -82,7 +82,6 @@ const useFetchProfileData = (actCode) => {
                         user.living_situation = userInfo.living_situation;
                         user.mobility = userInfo.mobility;
                         user.theme = userInfo.theme;
-                        user.sexuality = userInfo.sexuality;
                         user.gender = userInfo.gender;
 
                         if (userInfo.theme) {

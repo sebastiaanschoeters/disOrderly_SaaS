@@ -5,11 +5,14 @@ import { Button, ConfigProvider, Avatar } from 'antd';
 import { MessageOutlined, SearchOutlined, SettingOutlined, PoweroffOutlined } from "@ant-design/icons";
 import React, { useState } from "react";
 import { useNavigate } from 'react-router-dom';
+import {createClient} from "@supabase/supabase-js";
 
 const HomePage = () => {
     const [theme, setTheme] = useState('blauw');
     const themeColors = themes[theme] || themes.blauw;
     const navigate = useNavigate();
+    const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q");
+
 
     const handleLogout = () => {
         localStorage.removeItem('sessionToken');
@@ -18,6 +21,9 @@ const HomePage = () => {
     };
 
     const userEmail = localStorage.getItem('userEmail'); //nu heb je hier de email van de logged in user
+    console.log(userEmail);
+    const userId = localStorage.getItem('user_id');
+    console.log(userId);
     return (
         <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
             <div
@@ -110,7 +116,7 @@ const HomePage = () => {
                             whiteSpace: 'nowrap',
                         }}
                     >
-                        Martin
+                        {userId}
                     </span>
                 </div>
 

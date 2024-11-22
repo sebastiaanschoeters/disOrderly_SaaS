@@ -11,20 +11,24 @@ const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbG
 const ChatPage = () => {
     const location = useLocation();
     const { profileData } = location.state || {};
-    const { name, profilePicture, user_id } = profileData || {};
+    const { name, profilePicture } = profileData || {};
     const navigate = useNavigate();
     const [theme, setTheme] = useState('blue');
     const themeColors = themes[theme] || themes.blauw;
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState("");
     const { chatroomId } = useParams();
+    const userEmail = localStorage.getItem('userEmail');
+    console.log(userEmail);
+    const userId = parseInt(localStorage.getItem('user_id'),10);
+    console.log(userId);
 
     const dummyRef = useRef(null);
 
-    const fetchMessages = async (chatroomId) => {
+    const fetchMessages = async () => {
         const { data, error } = await supabase
             .from('Messages')
-            .select('id,sender_id, created_at, message_content')
+            .select('id, sender_id, created_at, message_content')
             .eq('chatroom_id', chatroomId)
             .order('created_at', { ascending: true });
 
@@ -32,12 +36,25 @@ const ChatPage = () => {
             console.error("Error fetching messages:", error);
             return;
         }
-
+        console.log("Fetched messages:", data);
         setMessages(data || []);
     };
 
     useEffect(() => {
-        fetchMessages(chatroomId);
+        fetchMessages(); // Fetch messages when chatroomId changes
+
+        const channel = supabase
+            .channel(`chatroom-${chatroomId}`)
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'Messages' }, (payload) => {
+                console.log('New message payload:', payload); // Check payload data
+                fetchMessages(); // Fetch new messages when a new message is inserted
+            })
+            .subscribe();
+
+        // Cleanup subscription when component unmounts or chatroomId changes
+        return () => {
+            supabase.removeChannel(channel); // Correct way to remove channel
+        };
     }, [chatroomId]);
 
     useEffect(() => {
@@ -50,16 +67,21 @@ const ChatPage = () => {
         if (newMessage.trim() === "") return;
 
         const { error } = await supabase
-            .from("Messages")
-            .insert([{ chatroom_id: chatroomId, sender_id: user_id, message_content: newMessage }]);
+            .from('Messages')
+            .insert([{ chatroom_id: chatroomId, sender_id: userId, message_content: newMessage }]);
 
         if (error) {
             console.error("Error sending message:", error);
             return;
         }
 
+        await supabase
+            .from('Chatrooms')
+            .update({ last_sender_id: userId })
+            .eq('id', chatroomId);
+
         setNewMessage("");
-        fetchMessages(chatroomId);
+        fetchMessages();
     };
 
 
@@ -173,13 +195,13 @@ const ChatPage = () => {
                             >
                                 U
                             </Avatar>
-                            <h2 style={{margin: 0, fontSize: '1.5rem', color: themeColors.primary1}}>
+                            <h2 style={{ margin: 0, fontSize: '1.5rem', color: themeColors.primary1 }}>
                                 {`${name}`}
                             </h2>
                         </div>
                         <div style={styles.messageList}>
                             {messages.map((message) => {
-                                const isSender = message.sender_id === user_id;
+                                const isSender = message.sender_id === userId;
                                 return (
                                     <div
                                         key={message.id}
@@ -196,7 +218,7 @@ const ChatPage = () => {
                                                 ...(isSender ? styles.senderBubble : styles.receiverBubble),
                                             }}
                                         >
-                                            <p style={{margin: 0}}>{message.message_content}</p>
+                                            <p style={{ margin: 0 }}>{message.message_content}</p>
                                         </div>
                                         {/* Timestamp */}
                                         <span
@@ -205,15 +227,15 @@ const ChatPage = () => {
                                                 alignSelf: isSender ? 'flex-end' : 'flex-start', // Align timestamp below bubble
                                             }}
                                         >
-        {new Date(message.created_at).toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit',
-        })}
-    </span>
+                                            {new Date(message.created_at).toLocaleTimeString([], {
+                                                hour: '2-digit',
+                                                minute: '2-digit',
+                                            })}
+                                        </span>
                                     </div>
                                 );
                             })}
-                            <div ref={dummyRef}/>
+                            <div ref={dummyRef} />
                         </div>
                         <div style={styles.inputContainer}>
                             <Input

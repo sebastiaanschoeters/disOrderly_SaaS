@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import { Avatar, Button, Typography, ConfigProvider } from 'antd';
+import { Avatar, Button, Modal, Input, Typography, ConfigProvider } from 'antd';
 import {useLocation, useNavigate, useParams} from 'react-router-dom';
 import { themes, antThemeTokens } from '../themes';
 import '../CSS/ChatSuggestionPage.css';
@@ -14,12 +14,19 @@ const { Title } = Typography;
 const ChatSuggestionPage = () => {
     const location = useLocation();
     const { profileData} = location.state || {};
-    const { name, profilePicture, user_id, otherUserId, isSender } = profileData || {};
+    const { name, profilePicture, otherUserId, isSender } = profileData || {};
     const { chatroomId } = useParams();
     const navigate = useNavigate();
     const theme = 'blue';
-    const [Message, setMessage] = useState("");
+    const [message, setMessage] = useState("");
     const themeColors = themes[theme] || themes.blauw;
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [editedMessage, setEditedMessage] = useState('');
+
+    const userEmail = localStorage.getItem('userEmail');
+    console.log(userEmail);
+    const userId = localStorage.getItem('user_id');
+    console.log(userId);
 
     const fetchMessages = async (chatroomId) => {
         const { data, error } = await supabase
@@ -77,12 +84,27 @@ const ChatSuggestionPage = () => {
         console.log('Chatroom deleted:');
     };
 
+    const updateMessage = async (chatroomId, newContent) => {
+        const { data, error } = await supabase
+            .from('Messages')
+            .update({ message_content: newContent })
+            .eq('chatroom_id', chatroomId);
+
+        if (error) {
+            console.error('Error updating message:', error);
+            return;
+        }
+
+        console.log('Message updated:', data);
+        setMessage(newContent);
+    };
+
     const insertBlocked = async () => {
         const { data, error } = await supabase
             .from('Blocked list')
             .insert([
                 {
-                    user_id: user_id,
+                    user_id: userId,
                     blocked_id: otherUserId,
                     chatroom_id: chatroomId,
                     blocked: true
@@ -145,6 +167,11 @@ const ChatSuggestionPage = () => {
             margin: '0 5px',
             flex: 1,
             maxWidth: '250px',
+        },
+        editButton:{
+            width: '50%',
+            maxWidth: '250px',
+            textAlign: 'center',
         }
     };
 
@@ -167,6 +194,20 @@ const ChatSuggestionPage = () => {
         insertBlocked();
         navigate('/chatOverview');
     };
+    const handleEdit = () => {
+        setEditedMessage(message);
+        setIsModalVisible(true);
+    };
+
+    const handleSave = () => {
+        updateMessage(chatroomId, editedMessage);
+        setIsModalVisible(false);
+    };
+
+    const handleCancel = () => {
+        setIsModalVisible(false);
+    };
+
 
     return (
         <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
@@ -176,7 +217,7 @@ const ChatSuggestionPage = () => {
                     <Title level={2} style={{ margin: 0, color: themeColors.primary10 }}h2>{`${name}`}</Title>
                 </div>
                 <div style={styles.messageContainer}>
-                    <p>{Message}</p>
+                    <p>{message}</p>
                 </div>
                 <div style={styles.buttonContainer}>
                     {!isSender && (
@@ -188,6 +229,27 @@ const ChatSuggestionPage = () => {
                         </>
                     )}
                 </div>
+                <div>
+                    {isSender && (
+                        <>
+                            <Button styles={styles.editButton} onClick={handleEdit} >Bewerken</Button>
+                        </>
+                    )}
+                </div>
+                <Modal
+                    title="Edit Message"
+                    visible={isModalVisible}
+                    onOk={handleSave}
+                    onCancel={handleCancel}
+                    okText="Save"
+                    cancelText="Cancel"
+                >
+                    <Input.TextArea
+                        value={editedMessage}
+                        onChange={(e) => setEditedMessage(e.target.value)}
+                        rows={4}
+                    />
+                </Modal>
             </div>
         </ConfigProvider>
     );

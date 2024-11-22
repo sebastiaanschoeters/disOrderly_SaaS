@@ -14,12 +14,13 @@ const ChatOverviewPage = () => {
     const themeColors = themes[theme] || themes.blauw;
     const [searchQuery, setSearchQuery] = useState('');
     const [chatrooms, setChatrooms] = useState([]);
-    const userID = 1234;
+    const userID = parseInt(localStorage.getItem('user_id'), 10);
+    console.log(userID);
 
     const fetchChatrooms = async () => {
         const {data, error} = await supabase
             .from('Chatroom')
-            .select('id,sender_id,receiver_id,acceptance,senderProfile: sender_id(name),receiverProfile: receiver_id(name)')
+            .select('id,sender_id,receiver_id,acceptance,senderProfile: sender_id(name, profile_picture),receiverProfile: receiver_id(name, profile_picture)')
             .or(`sender_id.eq.${userID},receiver_id.eq.${userID}`);
 
         if (error) {
@@ -33,7 +34,7 @@ const ChatOverviewPage = () => {
                 return {
                     ...chat,
                     profileName: profile.name,
-                    profilePicture: profile.profilePicture
+                    profilePicture: profile.profile_picture
                 };
             });
             setChatrooms(formattedChatrooms);

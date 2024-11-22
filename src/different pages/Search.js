@@ -264,7 +264,8 @@ const Search = () => {
                             renderItem={(item) => (
                                 <List.Item
                                     key={item.id}
-                                    onClick={() => navigate(`/user/${item.id}`, { state: { user_id: item } })}
+
+                                    onClick={() => navigate(`/profile`, { state: { user_id: item.id} })}
                                         // Navigate to dynamic user link
                                     style={{
                                         display: 'flex',

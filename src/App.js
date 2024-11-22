@@ -12,6 +12,7 @@ import ChatSuggestionPage from './different pages/ChatSuggestionPage';
 import Search from './different pages/Search';
 import SupabaseTestPage from './different pages/SupabaseTestPage';
 import ProtectedRoute from './different pages/ProtectedRoute'; // Import the ProtectedRoute component
+import AdminPage from "./different pages/AdminPage";
 
 const App = () => {
     return (
@@ -93,6 +94,14 @@ const App = () => {
                     element={
                         <ProtectedRoute>
                             <SupabaseTestPage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/admin"
+                    element={
+                        <ProtectedRoute>
+                            <AdminPage />
                         </ProtectedRoute>
                     }
                 />

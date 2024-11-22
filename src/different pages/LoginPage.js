@@ -134,7 +134,7 @@ const LoginPage = () => {
         const userId = await getUserIdByEmail(fakeLoginResponse.user.email);
         const theme = await getTheme(userId);
         const name = await getName(userId);
-        const pfp = awaitgetPfp(userId);
+        const pfp = await getPfp(userId);
 
         if (userId) {
             localStorage.setItem('user_id', userId);

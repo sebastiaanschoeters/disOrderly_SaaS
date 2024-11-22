@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import { Modal, Button, Input, Typography, Space } from 'antd';
 import { createClient } from '@supabase/supabase-js';
 
@@ -9,7 +9,7 @@ const supabase = createClient(
 
 const { Title, Text, Paragraph } = Typography;
 
-const ButterflyHangman = ({ visibleSteps, wrongGuesses }) => {
+const ButterflyHangman = ({ wrongGuesses }) => {
     const paths = [
         "M179.222 296.039C171.929 321.836 117.118 349.829 100.868 317.327C83.9601 283.513 128.707 258.291 155.272 253.461",
         "M154.089 255.235C140.063 256.692 126.178 245.826 114.468 239.268C74.9513 217.139 49.2305 174.06 54.7419 127.208C60.5666 77.6967 120.975 104.935 142.262 123.068C160.693 138.769 174.617 160.101 184.839 181.908C193.152 199.64 200.112 214.666 205.536 233.651",
@@ -40,22 +40,71 @@ const ButterflyHangman = ({ visibleSteps, wrongGuesses }) => {
                     strokeWidth="16"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    style={{ display: index < visibleSteps ? "block" : "none" }}  // Only show visible steps
                 />
             ))}
         </svg>
     );
 };
 
-
+const player1Id = 1234
+const player2Id= 1519
 
 const HangmanGame = () => {
+    const [gameId, setGameId] = useState(0);
     const [step, setStep] = useState(1); // 1: Question, 2: Answer, 3: Hangman Game
     const [question, setQuestion] = useState('');
     const [answer, setAnswer] = useState('');
     const [guessedLetters, setGuessedLetters] = useState([]);
     const [wrongGuesses, setWrongGuesses] = useState(0);
+    const [gameEnded, setGameEnded] = useState(false);
     const maxWrong = 5;
+
+    const renderWord = () => {
+        return answer.split('').map((letter) => {
+            return guessedLetters.includes(letter.toUpperCase()) ? letter : '_';
+        }).join(' ');
+    };
+
+    const startNewGame = async (player1Id, player2Id, question) => {
+        const { data, error } = await supabase
+            .from('Hangman')
+            .insert([
+                {
+                    player_1_id: player1Id,
+                    player_2_id: player2Id,
+                    question: question,
+                    guessed_letters: [],
+                    wrong_guesses: 0,
+                    current_step: 2,
+                }
+            ])
+            .select('id')
+
+        if (error) {
+            console.error('Error starting new game:', error);
+            return;
+        }
+
+        setGameId(data[0].id)
+        setStep(2)
+        return data;  // Return the new game data
+    };
+
+    const handleAnswer = async (gameId, answer) => {
+        const {data, error} = await supabase
+            .from('Hangman')
+            .update({
+                answer: answer,
+                current_step: 3
+            })
+            .eq('id', gameId)
+
+        if (error) {
+            console.error('Error saving answer:', error);
+        }
+        setStep(3)
+        return answer
+    };
 
     const handleGuess = (letter) => {
         if (guessedLetters.includes(letter)) return;
@@ -64,16 +113,53 @@ const HangmanGame = () => {
         if (!answer.toUpperCase().includes(letter)) {
             setWrongGuesses(wrongGuesses + 1);
         }
+        handleGuessInDatabase(gameId, guessedLetters, wrongGuesses)
     };
 
-    const renderWord = () => {
-        return answer.split('').map((letter) => {
-            return guessedLetters.includes(letter.toUpperCase()) ? letter : '_';
-        }).join(' ');
+    const handleGuessInDatabase = async (gameId, guessedLetters, currentWrongGuesses) => {
+        const { data, error } = await supabase
+            .from('Hangman')
+            .update({
+                guessed_letters: guessedLetters,
+                wrong_guesses: currentWrongGuesses,
+            })
+            .eq('id', gameId); // Use game ID to identify which game to update
+
+        if (error) {
+            console.error('Error updating guess:', error);
+        }
+
+        return data;  // Return the updated game data
+    };
+
+    const handleGameEnd = async (gameId) => {
+        const { data, error } = await supabase
+            .from('Hangman')
+            .delete()
+            .eq('id', gameId); // Use game ID to update the correct game record
+
+        if (error) {
+            console.error('Error finishing game', error);
+        }
+
+        return data;
     };
 
     const isGameOver = wrongGuesses >= maxWrong;
     const isGameWon = answer.split('').every((letter) => guessedLetters.includes(letter.toUpperCase()));
+
+    useEffect(() => {
+        if (isGameOver || isGameWon) {
+            setGameEnded(true);
+        }
+    }, [isGameOver, isGameWon]);
+
+    useEffect(() => {
+        if (gameEnded) {
+            handleGameEnd(gameId);
+            setGameEnded(false);
+        }
+    }, [gameEnded, gameId]);
 
     return (
         <div>
@@ -90,7 +176,7 @@ const HangmanGame = () => {
                         value={question}
                         onChange={(e) => setQuestion(e.target.value)}
                     />
-                    <Button type="primary" style={{ marginTop: 10 }} onClick={() => setStep(2)}>
+                    <Button type="primary" style={{ marginTop: 10 }} onClick={() => startNewGame(player1Id,player2Id,question)}>
                         Vraag instellen
                     </Button>
                 </Modal>
@@ -120,13 +206,14 @@ const HangmanGame = () => {
                     <Button
                         type="primary"
                         style={{ marginTop: 10 }}
-                        onClick={() => setStep(3)}
+                        onClick={() => handleAnswer(gameId, answer)}
                         disabled={ !answer || !/^[a-zA-Z]*$/.test(answer) }
                     >
                         Antwoord instellen
                     </Button>
                 </Modal>
             )}
+
 
             {step === 3 && (
                 <Modal
@@ -145,8 +232,8 @@ const HangmanGame = () => {
                         </Paragraph>
                     </Typography>
 
-                    <div style={{textAlign: 'center', marginBottom: 20}}>
-                        <ButterflyHangman visibleSteps={wrongGuesses} wrongGuesses={wrongGuesses} />
+                    <div style={{ textAlign: 'center', marginBottom: 20 }}>
+                        <ButterflyHangman wrongGuesses={wrongGuesses} />
                     </div>
 
                     <Space wrap>
@@ -161,15 +248,19 @@ const HangmanGame = () => {
                         ))}
                     </Space>
 
-                    <Typography style={{marginTop: 16}}>
-                        {isGameWon && <Text type="success">Gefeliciteerd! Je hebt gewonnen!</Text>}
-                        {isGameOver && <Text type="danger">Jammer! Het juiste antwoord was: {answer}</Text>}
+                    <Typography style={{ marginTop: 16 }}>
                         {!isGameWon && !isGameOver && <Text>Blijf raden!</Text>}
+                        {isGameWon && (
+                            <Text type="success">Gefeliciteerd! Je hebt gewonnen!</Text>
+                        )}
+                        {isGameOver && !isGameWon && (
+                            <Text type="danger">Jammer! Het juiste antwoord was: {answer}</Text>
+                        )}
                     </Typography>
 
                     <Button
                         type="primary"
-                        style={{marginTop: 16}}
+                        style={{ marginTop: 16 }}
                         onClick={() => {
                             setStep(1);
                             setGuessedLetters([]);

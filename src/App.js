@@ -7,12 +7,12 @@ import HomePage from './different pages/HomePage';
 import themes from './themes';
 import ProfilePage from "./different pages/ProfilePage";
 import EditableProfilePage from "./different pages/EditableProfilePage";
-import PersonalProfilePage from "./different pages/PersonalProfilePage"; // Import themes
-import ChatOverviewPage from './different pages/ChatOverviewPage'; // Import your Chat Overview Page
+import PersonalProfilePage from "./different pages/PersonalProfilePage";
+import ChatOverviewPage from './different pages/ChatOverviewPage';
 import ChatPage from './different pages/ChatPage';
-import ChatSuggestionPage from './different pages/ChatSuggestionPage'; // Import your Chat Page
+import ChatSuggestionPage from './different pages/ChatSuggestionPage';
 import Search from "./different pages/Search";
-
+import Hangman from "./different pages/Hangman";
 import SupabaseTestPage from "./different pages/SupabaseTestPage";
 
 const App = () => {
@@ -34,6 +34,7 @@ const App = () => {
                 <Route path="/chat/:chatroomId" element={<ChatPage />} />
                 <Route path="/chatSuggestion/:chatroomId" element={<ChatSuggestionPage />} />
                 <Route path="/supabase" element={<SupabaseTestPage />} />
+                <Route path="/hangman" element={<Hangman />} />
             </Routes>
         </Router>
     );

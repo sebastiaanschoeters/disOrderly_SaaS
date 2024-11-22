@@ -19,11 +19,8 @@ const supabase = createClient(
 );
 
 // Initial list of caretakers
-const initialCaretakers = [
-    { id: 1, name: 'John Doe', accessLevel: 'full', picture: 'https://i.pravatar.cc/150?img=1' },
-    { id: 2, name: 'Jane Smith', accessLevel: 'contact', picture: 'https://i.pravatar.cc/150?img=2' },
-    { id: 3, name: 'Sam Brown', accessLevel: 'chat', picture: 'https://i.pravatar.cc/150?img=3' },
-];
+const initialCaretakers =
+    { id: 1, name: 'John Doe', accessLevel: 'Volledige toegang', picture: 'https://i.pravatar.cc/150?img=1' };
 
 const debounce = (func, delay) => {
     let timer;
@@ -41,28 +38,48 @@ const useFetchProfileData = (actCode) => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const { data: profileData, error: profileError } = await supabase
-                    .from('Profile')
-                    .select('*')
-                    .eq('ActCode', actCode);
+                // Fetch user data
+                const { data: userData, error: userError } = await supabase
+                    .from('User')
+                    .select('id, name, birthdate, profile_picture')
+                    .eq('id', actCode);
 
-                if (profileError) throw profileError;
-                if (profileData.length > 0) {
-                    const profile = profileData[0];
+                if (userError) throw userError;
+                if (userData.length > 0) {
+                    const user = userData[0];
+
+                    // Fetch user information
+                    const { data: userInfoData, error: userInfoError } = await supabase
+                        .from('User information')
+                        .select('theme, sexuality')
+                        .eq('user_id', user.id);
+
+                    if (userInfoError) throw userInfoError;
+
                     let parsedTheme = 'blauw';
                     let isDarkMode = false;
 
-                    if (profile.theme) {
-                        try {
-                            const [themeName, darkModeFlag] = JSON.parse(profile.theme);
-                            parsedTheme = themeName;
-                            isDarkMode = darkModeFlag;
-                        } catch (error) {
-                            console.error('Error parsing theme', error);
+                    if (userInfoData && userInfoData.length > 0) {
+                        const userInfo = userInfoData[0];
+                        user.theme = userInfo.theme;
+                        user.sexuality = userInfo.sexuality;
+
+                        if (userInfo.theme) {
+                            try {
+                                const [themeName, darkModeFlag] = JSON.parse(userInfo.theme);
+                                parsedTheme = themeName;
+                                isDarkMode = darkModeFlag;
+                            } catch (error) {
+                                console.error('Error parsing theme', error);
+                            }
                         }
                     }
 
-                    setProfileData({ ...profile, theme: [parsedTheme, isDarkMode] });
+                    // Set the user profile data with the theme
+                    setProfileData({
+                       ...user,
+                        theme: [parsedTheme, isDarkMode]
+                    });
                 }
             } catch (error) {
                 setError(error.message);
@@ -78,7 +95,7 @@ const useFetchProfileData = (actCode) => {
 };
 
 const ProfileCard = () => {
-    const { profileData, isLoading, error } = useFetchProfileData('1547');
+    const { profileData, isLoading, error } = useFetchProfileData(localStorage.getItem('user_id'));
     const [theme, setTheme] = useState('blauw');
     const [isDarkMode, setIsDarkMode] = useState(false);
     const themeKey = isDarkMode ? `${theme}_donker` : theme;
@@ -99,8 +116,8 @@ const ProfileCard = () => {
             }
         }
 
-        if (profileData.profilePicture) {
-            const imageUrlWithCacheBuster = `${profileData.profilePicture}?t=${new Date().getTime()}`;
+        if (profileData.profile_picture) {
+            const imageUrlWithCacheBuster = `${profileData.profile_picture}?t=${new Date().getTime()}`;
             setProfilePicture(imageUrlWithCacheBuster);
         }
         if (profileData.sexuality) {
@@ -108,13 +125,15 @@ const ProfileCard = () => {
         }
     }, [profileData]);
 
+    console.log(profileData)
+
     // Define async save functions
     const saveField = async (field, value) => {
         try {
             const { data, error } = await supabase
-                .from('Profile')
+                .from('User information')
                 .update({ [field]: value })
-                .eq('ActCode', profileData.ActCode);
+                .eq('user_id', profileData.id);
             if (error) throw error;
 
             console.log(`${field} saved successfully with value ${value}`);
@@ -126,7 +145,8 @@ const ProfileCard = () => {
     const debouncedSaveTheme = debounce(async (newTheme, darkModeFlag) => {
         try {
             const themeData = [newTheme, darkModeFlag]; // Ensure both theme and dark mode flag are saved together
-            await saveField('theme', JSON.stringify(themeData)); // Save it as a stringified JSON array
+            await saveField('theme', JSON.stringify(themeData));
+            localStorage.setItem('theme',JSON.stringify(themeData))// Save it as a stringified JSON array
         } catch (error) {
             console.error('Error saving theme:', error);
         }
@@ -140,14 +160,6 @@ const ProfileCard = () => {
                 caretaker.id === id ? { ...caretaker, accessLevel: value } : caretaker
             )
         );
-    };
-
-    const handleDelete = (id) => {
-        if (caretakers.length <= 1) {
-            message.warning('You must have at least one caretaker.');
-            return;
-        }
-        setCaretakers((prevCaretakers) => prevCaretakers.filter((caretaker) => caretaker.id !== id));
     };
 
     const handleThemeChange = (value) => {
@@ -206,7 +218,7 @@ const ProfileCard = () => {
                         }}
                     />
                     <h2 style={{ margin: '0', textAlign: 'center' }}>
-                        {profileData.name || 'Naam'}, {calculateAge(profileData.birthDate) || 'Leeftijd'}
+                        {profileData.name || 'Naam'}, {calculateAge(profileData.birthdate) || 'Leeftijd'}
                     </h2>
                     <Divider />
                 </div>
@@ -246,45 +258,32 @@ const ProfileCard = () => {
                     </strong>
                 </p>
 
-                {caretakers.map((caretaker) => (
-                    <div key={caretaker.id} style={{ display: 'flex', alignItems: 'center', gap: '2%', marginBottom: '20px' }}>
-                        <Avatar src={caretaker.picture} style={{ width: '40px', height: '40px', objectFit: 'cover' }} />
-                        <span style={{ width: '18%' }}>{caretaker.name}</span>
-                        <Select
-                            value={caretaker.accessLevel}
-                            onChange={(value) => handleAccessLevelChange(value, caretaker.id)}
-                            style={{ width: '50%' }}
-                        >
-                            <Select.Option value="full">Volledige toegang</Select.Option>
-                            <Select.Option value="chat">Gesprekken</Select.Option>
-                            <Select.Option value="contact">Contacten</Select.Option>
-                            <Select.Option value="profile">Publiek profiel</Select.Option>
-                        </Select>
-                        <Popconfirm
-                            title="Ben je zeker dat je deze begeleider wilt verwijderen?"
-                            onConfirm={() => handleDelete(caretaker.id)}
-                            okText="Ja"
-                            cancelText="Nee"
-                            disabled={caretakers.length <= 1}
-                        >
-                            <Button
-                                type="text"
-                                icon={<DeleteOutlined />}
-                                disabled={caretakers.length <= 1}
-                                style={{ marginLeft: '10px' }}
-                            />
-                        </Popconfirm>
+                <p style={{ display: 'flex', alignItems: 'center', gap: '2%', marginBottom: '20px' }}>
+                    <div style={{ width: '20%', minWidth: '150px' }}>
+                        <Avatar src={caretakers.picture} style={{ width: '40px', height: '40px', objectFit: 'cover' }} />
+                        <span>{caretakers.name}</span>
                     </div>
-                ))}
+
+                    <Select
+                        style={{flex: 1, minWidth: '200px'}}
+                        value={caretakers.accessLevel}
+                        onChange={(value) => handleAccessLevelChange(value, caretakers.id)}
+                    >
+                        <Select.Option value="Volledige toegang">Volledige toegang</Select.Option>
+                        <Select.Option value="Gesprekken">Gesprekken</Select.Option>
+                        <Select.Option value="Contacten">Contacten</Select.Option>
+                        <Select.Option value="Publiek profiel">Publiek profiel</Select.Option>
+                    </Select>
+                </p>
 
                 <Divider />
 
-                <p style={{ display: 'flex', alignItems: 'center', gap: '2%' }}>
-                    <strong style={{ width: '20%' }}>
+                <p style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '2%' }}>
+                    <strong style={{ width: '20%', minWidth: '150px' }}>
                         <HeartOutlined /> Ik ben geïntereseerd in:
                     </strong>
                     <Select
-                        style={{ width: '78%' }}
+                        style={{flex: 1, minWidth: '200px'}}
                         placeholder="Selecteer seksualiteit"
                         value={sexuality}
                         options={[

@@ -1,35 +1,67 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import {List, Avatar, Typography, Input, ConfigProvider, Card, Button} from 'antd';
-import { CloseOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { antThemeTokens, themes } from '../themes';
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
 
 const { Title } = Typography;
 
 const ChatOverviewPage = () => {
     const navigate = useNavigate();
-    const [theme, setTheme] = useState('blauw');
-    const themeColors = themes[theme] || themes.blauw;
     const [searchQuery, setSearchQuery] = useState('');
+    const [chatrooms, setChatrooms] = useState([]);
+    const userID = parseInt(localStorage.getItem('user_id'), 10);
 
-    const chats = [
-        { id: 1, name: "Alice Johnson", hasNewMessage: true},
-        { id: 2, name: "Bob Smith", hasNewMessage: true },
-        { id: 3, name: "Carla Martin", hasNewMessage: false },
-        { id: 4, name: "David Lee", hasNewMessage: false}
-    ];
+    const [themeName, darkModeFlag] = JSON.parse(localStorage.getItem('theme')) || ['blauw', false];
+    const [themeColors, setThemeColors] = useState(themes[themeName] || themes.blauw);
+    useEffect(() => {
+        if (darkModeFlag){
+            setThemeColors(themes[`${themeName}_donker`] || themes.blauw_donker)
+        }
+        else{
+            setThemeColors(themes[themeName] || themes.blauw);
+        }
+    }, [themeName, darkModeFlag]);
 
-    const filteredChats = chats.filter((chat) =>
-        chat.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const fetchChatrooms = async () => {
+        const {data, error} = await supabase
+            .from('Chatroom')
+            .select('id,sender_id,receiver_id,acceptance,senderProfile: sender_id(name, profile_picture),receiverProfile: receiver_id(name, profile_picture)')
+            .or(`sender_id.eq.${userID},receiver_id.eq.${userID}`);
+
+        if (error) {
+            console.error("Error fetching chatrooms:", error);
+        } else {
+            const formattedChatrooms = data.map((chat) => {
+                const senderProfile = chat.senderProfile;
+                const receiverProfile = chat.receiverProfile;
+                const profile = chat.sender_id === userID ? receiverProfile : senderProfile;
+
+                return {
+                    ...chat,
+                    profileName: profile.name,
+                    profilePicture: profile.profile_picture
+                };
+            });
+            setChatrooms(formattedChatrooms);
+        }
+    };
+
+    useEffect(() => {
+        fetchChatrooms();
+    }, []);
+
+    const filteredChats = chatrooms.filter((chat) => {
+        const chatName = chat.sender_id === userID
+            ? `${chat.receiverProfile.name}`
+            : `${chat.senderProfile.name}`;        return chatName.toLowerCase().includes(searchQuery.toLowerCase());
+    });
 
     const handleSearch = (value) => {
         setSearchQuery(value);
     };
-    const handleClose = () => {
-        navigate('/home');
-    };
-
     const styles = {
         chatContainer: {
             padding: '20px',
@@ -51,9 +83,6 @@ const ChatOverviewPage = () => {
             flexGrow: 1,
             textAlign: 'center',
             margin: 0,
-        },
-        button: {
-            backgroundColor: themeColors.primary8,
         },
         searchBar: {
             width: '75%',
@@ -93,7 +122,6 @@ const ChatOverviewPage = () => {
             <div style={styles.chatContainer}>
                 <div style={styles.titleButton}>
                     <Title level={2} style={styles.title}>Chat Overzicht</Title>
-                    <Button type='primary' shape='circle' style={styles.button} icon={<CloseOutlined/>} onClick={handleClose}/>
                     </div>
                     <Input.Search
                         placeholder="Zoek in chats..."
@@ -108,34 +136,51 @@ const ChatOverviewPage = () => {
                         itemLayout="horizontal"
                         style={styles.list}
                         dataSource={filteredChats}
-                        renderItem={(chat) => (
-                            <Card
-                                style={styles.card}
-                                hoverable={true}
-                                onClick={() => {
-                                    if (chat.hasNewMessage) {
-                                        navigate(`/chatsuggestion/${chat.name}`);
-                                    } else {
-                                        navigate(`/chat/${chat.name}`);
-                                    }
-                                }}
-                            >
-                                <Card.Meta
-                                    avatar={<Avatar>U</Avatar>}
-                                    title={<span style={styles.name}>{chat.name}</span>}
-                                />
+                        renderItem={(chat) => {
+                            const otherUserId = chat.sender_id === userID ? chat.receiver_id : chat.sender_id;
+                            const isSender = chat.sender_id === userID;
+                            return (
+                                <Card
+                                    style={styles.card}
+                                    hoverable={true}
+                                    onClick={() => {
+                                        const profileData = {
+                                            name: chat.profileName,
+                                            profilePicture: chat.profilePicture,
+                                            user_id: userID,
+                                            otherUserId: otherUserId,
+                                            isSender: isSender,
+                                        };
+                                        if (chat.acceptance === true) {
+                                            navigate(`/chat/${chat.id}`, { state: { profileData} });
+                                        } else {
+                                            navigate(`/chatsuggestion/${chat.id}`, { state: { profileData } });
+                                        }
+                                    }}
+                                >
+                                    <Card.Meta
+                                        avatar={<Avatar src={chat.profilePicture || 'default-avatar.png'} />}
+                                        title={<span style={styles.name}>{`${chat.profileName}`}</span>}
+                                    />
 
-                                {chat.hasNewMessage && (
-                                    <div style={styles.newMessageIndicator}>
-                                        Nieuwe Berichten
-                                    </div>
-                                )}
-                            </Card>
-                        )}
+                                    {isSender && !chat.acceptance && (
+                                        <div style={styles.newMessageIndicator}>
+                                            Bericht in behandeling
+                                        </div>
+                                    )}
+
+                                    {!isSender && !chat.acceptance && (
+                                        <div style={styles.newMessageIndicator}>
+                                            Nieuwe Berichten
+                                        </div>
+                                    )}
+                                </Card>
+                            );
+                        }}
                     />
-                </div>
+            </div>
         </ConfigProvider>
-);
+    );
 };
 
 

@@ -1,0 +1,27 @@
+/* Ensure smooth transition for opacity */
+.fade-enter {
+    opacity: 0;
+}
+.fade-enter-active {
+    opacity: 1;
+    transition: opacity 0.5s ease;
+}
+.fade-exit {
+    opacity: 1;
+}
+.fade-exit-active {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+
+.login-container {
+    position: relative;
+    //transition: opacity 0.5s ease
+}
+
+/* Keep non-fading elements on top */
+.non-fading-elements {
+    position: relative;
+    z-index: 10; /* Ensure form and button stay visible */
+}

@@ -158,6 +158,49 @@ const useFetchPicturesData = (actCode) => {
     return { pictures };
 };
 
+const useFetchUserLocation = (actCode) => {
+    const [locationData, setLocationData] = useState(null);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchLocation = async () => {
+            try {
+                // Fetch user location ID
+                const { data: userInfoData, error: userInfoError } = await supabase
+                    .from('User information')
+                    .select('location')
+                    .eq('user_id', actCode);
+
+                if (userInfoError) throw userInfoError;
+
+                if (userInfoData && userInfoData.length > 0 && userInfoData[0].location) {
+                    const locationId = userInfoData[0].location;
+
+                    // Fetch location details using location ID
+                    const { data: locationDetails, error: locationError } = await supabase
+                        .from('Location')
+                        .select('Gemeente, Longitude, Latitude')
+                        .eq('id', locationId);
+
+                    if (locationError) throw locationError;
+
+                    // Set location data
+                    if (locationDetails && locationDetails.length > 0) {
+                        setLocationData(locationDetails[0]);
+                    }
+                }
+            } catch (error) {
+                setError(error.message);
+            }
+        };
+
+        fetchLocation();
+    }, [actCode]);
+
+    return { locationData, error };
+};
+
+
 const ProfileDetail = ({ label, value, icon }) => (
     <p style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '5px'}}>
         <strong style={{ width: '20%', minWidth: '150px', flexShrink: 0 }}>{icon} {label}: </strong>
@@ -171,17 +214,14 @@ const ProfileCard = () => {
     const [theme, setTheme] = useState('blauw');
     const [profilePicture, setProfilePicture] = useState(''); /* get images from database */
     const [images, setImages] = useState([
-        'https://i.pravatar.cc/150?img=1',
-        'https://i.pravatar.cc/150?img=2',
-        'https://i.pravatar.cc/150?img=3',
-        'https://i.pravatar.cc/150?img=4'
+        "https://example.com/photo.jpg"
     ]);
     const { profileData, isLoading, error } = useFetchProfileData(state.user_id);//state.user_id) ; // Replace with dynamic ActCode as needed
     const { pictures} = useFetchPicturesData(state.user_id);
     const themeColors = themes[theme] || themes.blauw;
     const [slidesToShow, setSlidesToShow] = useState(3);
-
-    const currentUserLocation = { latitude: 50.8, longitude: 4.3333333 }; // Use real location data
+    const { locationData, locationError} = useFetchUserLocation(localStorage.getItem('user_id'))
+    const [currentUserLocation, setCurrentUserLocation] = useState({latitude: 50.8, longitude: 4.3333333})
 
     useEffect(() => {
         if (profileData.theme){
@@ -202,16 +242,23 @@ const ProfileCard = () => {
             }
             setImages(list_of_images)
         }
-    }, [profileData.theme]);
 
-    useEffect(() => {
         updateSlidesToShow();  // Update on initial render
         window.addEventListener('resize', updateSlidesToShow); // Listen for window resize
 
         return () => {
             window.removeEventListener('resize', updateSlidesToShow); // Clean up the listener
         };
-    }, []);
+
+    }, [profileData.theme]);
+
+    useEffect(()=>{
+        if (locationData){
+            const latitude = locationData.Latitude;
+            const longitude = locationData.Longitude;
+            setCurrentUserLocation({latitude: latitude, longitude: longitude})
+        }
+    })
 
     const updateSlidesToShow = () => {
         const width = window.innerWidth;
@@ -236,6 +283,10 @@ const ProfileCard = () => {
         else {
             setSlidesToShow(slides);
         }
+
+        console.log(slides)
+        console.log(totalImages, images)
+        console.log(slidesToShow)
     };
 
     const calculateAge = (birthdate) => {
@@ -318,8 +369,6 @@ const ProfileCard = () => {
     if (isLoading) return <Spin tip="Profiel laden..." />;
     if (error) return <p>Failed to load profile: {error}</p>;
 
-    console.log(images)
-
     return (
         <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
             <div
@@ -360,7 +409,7 @@ const ProfileCard = () => {
 
                 <Divider />
 
-                <ProfileDetail label="Locatie" value={`${profileData.locationData.gemeente} (${distanceToProfileUser} km van jou verwijdert)`} icon={<EnvironmentOutlined />} />
+                <ProfileDetail label="Locatie" value={`${profileData.locationData.gemeente} (${distanceToProfileUser}km van jou verwijderd)`} icon={<EnvironmentOutlined />} />
                 <Divider />
                 <ProfileDetail label="Geslacht" value={profileData.gender} icon={<UserOutlined />} />
                 <Divider />
@@ -412,7 +461,7 @@ const ProfileCard = () => {
                     Chat met {profileData?.name || 'de gebruiker'}
                 </Button>
                 <Divider/>
-                {images.length > 0 && (
+                {pictures.length > 0 && (
                     <>
                         <p>
                             <strong style={{width: '40%', minWidth: '150px', flexShrink: 0}}>

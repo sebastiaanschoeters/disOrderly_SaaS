@@ -45,7 +45,7 @@ const ChatPage = () => {
 
         const channel = supabase
             .channel(`chatroom-${chatroomId}`)
-            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'Messages' }, (payload) => {
+            .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'Chatroom' }, (payload) => {
                 console.log('New message payload:', payload); // Check payload data
                 fetchMessages(); // Fetch new messages when a new message is inserted
             })
@@ -76,7 +76,7 @@ const ChatPage = () => {
         }
 
         await supabase
-            .from('Chatrooms')
+            .from('Chatroom')
             .update({ last_sender_id: userId })
             .eq('id', chatroomId);
 

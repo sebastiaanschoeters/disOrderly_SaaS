@@ -26,8 +26,7 @@ const HomePage = () => {
     }, [themeName, darkModeFlag]);
 
     const handleLogout = () => {
-        localStorage.removeItem('sessionToken');
-        localStorage.removeItem('userEmail');
+        localStorage.clear();
         navigate('/login');
     };
 
@@ -113,13 +112,14 @@ const HomePage = () => {
                 >
                     <Avatar
                         size={60}
+                        src={profile_picture}
                         style={{
                             backgroundColor: themeColors.primary4,
                             color: themeColors.primary10,
                             fontSize: '1.5vw',
                         }}
                     >
-                        M
+                        {name[0]}
                     </Avatar>
                     <span
                         style={{

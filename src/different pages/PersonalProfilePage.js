@@ -95,7 +95,7 @@ const useFetchProfileData = (actCode) => {
 };
 
 const ProfileCard = () => {
-    const { profileData, isLoading, error } = useFetchProfileData('1519');
+    const { profileData, isLoading, error } = useFetchProfileData(localStorage.getItem('user_id'));
     const [theme, setTheme] = useState('blauw');
     const [isDarkMode, setIsDarkMode] = useState(false);
     const themeKey = isDarkMode ? `${theme}_donker` : theme;
@@ -145,7 +145,8 @@ const ProfileCard = () => {
     const debouncedSaveTheme = debounce(async (newTheme, darkModeFlag) => {
         try {
             const themeData = [newTheme, darkModeFlag]; // Ensure both theme and dark mode flag are saved together
-            await saveField('theme', JSON.stringify(themeData)); // Save it as a stringified JSON array
+            await saveField('theme', JSON.stringify(themeData));
+            localStorage.setItem('theme',JSON.stringify(themeData))// Save it as a stringified JSON array
         } catch (error) {
             console.error('Error saving theme:', error);
         }

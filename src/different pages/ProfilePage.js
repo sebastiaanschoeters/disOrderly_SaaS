@@ -176,8 +176,8 @@ const ProfileCard = () => {
         'https://i.pravatar.cc/150?img=3',
         'https://i.pravatar.cc/150?img=4'
     ]);
-    const { profileData, isLoading, error } = useFetchProfileData(localStorage.getItem('user_id'));//state.user_id) ; // Replace with dynamic ActCode as needed
-    const { pictures} = useFetchPicturesData(localStorage.getItem('user_id'));
+    const { profileData, isLoading, error } = useFetchProfileData(state.user_id);//state.user_id) ; // Replace with dynamic ActCode as needed
+    const { pictures} = useFetchPicturesData(state.user_id);
     const themeColors = themes[theme] || themes.blauw;
     const [slidesToShow, setSlidesToShow] = useState(3);
 

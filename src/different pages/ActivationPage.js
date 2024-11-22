@@ -138,9 +138,22 @@ const ActivationPage = () => {
         //navigate("/login");
     };
 
-    const saveUserProfile = async () => {
+    const saveUserProfile = async (userData) => {
         try {
-            // Insert data into the "User" table
+            // Insert data into "Credentials" table
+            const { data: credentialData, error: credentialError } = await supabase
+                .from("Credentials")
+                .insert({
+                    user_id: userData.activationKey,
+                    email: userData.email,
+                    password: userData.password,
+                });
+
+            if (credentialError) {
+                throw new Error(`Error saving credentials: ${credentialError.message}`);
+            }
+
+            // Insert data into "User" table
             const { data: userDataResponse, error: userError } = await supabase
                 .from("User")
                 .insert({
@@ -153,7 +166,7 @@ const ActivationPage = () => {
                 throw new Error(`Error saving user data: ${userError.message}`);
             }
 
-            // Insert data into the "Profile" table
+            // Insert data into "User information" table
             const { data: profileData, error: profileError } = await supabase
                 .from("User information")
                 .insert({
@@ -166,43 +179,26 @@ const ActivationPage = () => {
                     looking_for: userData.relationshipPreference,
                 });
 
-            // Insert data into the "Credential" table
-            const { data: credentialData, error: credentialError } = await supabase
-                .from("Credentials")
-                .insert({
-                    user_id: userData.activationKey,
-                    email: userData.email,
-                    password: userData.password
-                });
-
-            if (credentialError) {
-                throw new Error(`Error saving credentials: ${credentialError.message}`);
-            }
-
             if (profileError) {
                 throw new Error(`Error saving profile data: ${profileError.message}`);
             }
 
             console.log("Profile saved successfully", { credentialData, userDataResponse, profileData });
-
         } catch (error) {
             console.error("Error saving user profile:", error.message);
         }
     };
 
-
     const EmailAndPassword = async (values) => {
-        setLoading(true); // Show a loading state during validation
+        setLoading(true);
         try {
-            // Check if the email already exists in the "Credentials" table
             const { data, error } = await supabase
                 .from("Credentials")
                 .select("email")
                 .eq("email", values.email)
-                .single(); // Expect a single result if the email exists
+                .single();
 
             if (error && error.code !== "PGRST116") {
-                // PGRST116 occurs when no row is found, which is acceptable here
                 console.error("Error checking email existence:", error.message);
                 message.error("Er is iets misgegaan tijdens de validatie van uw e-mailadres.");
                 setLoading(false);
@@ -210,7 +206,6 @@ const ActivationPage = () => {
             }
 
             if (data) {
-                // Email already exists in the database
                 message.error("Dit e-mailadres is al geregistreerd. Probeer een ander e-mailadres.");
                 setLoading(false);
                 return;
@@ -219,26 +214,26 @@ const ActivationPage = () => {
             // Hash the password
             const hashedPassword = CryptoJS.SHA256(values.password).toString();
 
-            // Save the email and hashed password to userData
-            setUserData((prevData) => ({
-                ...prevData,
+            // Combine the updated data
+            const updatedUserData = {
+                ...userData, // Preserve existing user data
                 email: values.email,
-                password: hashedPassword, // Store the hashed password
-            }));
+                password: hashedPassword,
+            };
 
-            console.log("User Data to Submit:", { ...userData, email: values.email });
-            saveUserProfile();
+            console.log("User Data to Submit:", updatedUserData);
+
+            // Pass updated data to saveUserProfile
+            await saveUserProfile(updatedUserData);
+
             message.success("Account aangemaakt! Je kan een profielfoto toevoegen bij je profiel.");
-            // Optionally navigate to the login page or next step
-            // navigate("/login");
         } catch (err) {
             console.error("Unexpected error during email validation:", err);
             message.error("Er is iets misgegaan. Probeer het later opnieuw.");
         } finally {
-            setLoading(false); // Hide the loading state
+            setLoading(false);
         }
     };
-
 
     return (
         <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>

@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import forestImage from '../Media/forest.jpg';
 import {createClient} from "@supabase/supabase-js"; // Path to the image
 
+
 const LoginPage = () => {
     const [theme, setTheme] = useState('default');
     const [isTransitioning, setIsTransitioning] = useState(false); // To handle transition state
@@ -32,7 +33,7 @@ const LoginPage = () => {
             }
 
             console.log('Fetched user_id:', data[0].user_id);
-            return data[0].user_id.toString(); // Ensure it's a string
+            return data[0].user_id; // Ensure it's a string
         } catch (err) {
             console.error('Unexpected error:', err);
             return null;
@@ -47,7 +48,7 @@ const LoginPage = () => {
                 .eq('id', user_id);
 
             if (error) {
-                console.error('Error fetching user_id:', error.message);
+                console.error('Error fetching pfp:', error.message);
                 return null;
             }
 
@@ -56,8 +57,8 @@ const LoginPage = () => {
                 return null;
             }
 
-            console.log('Fetched user_id:', data[0].profile_picture);
-            return data[0].profile_picture.toString(); // Ensure it's a string
+            console.log('Fetched pfp:', data[0].profile_picture);
+            return data[0].profile_picture; // Ensure it's a string
         } catch (err) {
             console.error('Unexpected error:', err);
             return null;
@@ -81,8 +82,8 @@ const LoginPage = () => {
                 return null;
             }
 
-            console.log('Fetched theme:', data[0].name);
-            return data[0].name.toString(); // Ensure it's a string
+            console.log('Fetched name:', data[0].name);
+            return data[0].name; // Ensure it's a string
         } catch (err) {
             console.error('Unexpected error:', err);
             return null;
@@ -105,12 +106,11 @@ const LoginPage = () => {
                 console.log('No user found with the provided user ID.');
                 return;
             }
+            return data[0].theme;
+            const fetchedTheme = data[0].theme; // Ensure it's a string
+            console.log('Fetched themea:', fetchedTheme);
 
-            const fetchedTheme = data[0].theme.toString(); // Ensure it's a string
-            console.log('Fetched theme:', fetchedTheme);
 
-            // Update the theme state
-            setTheme(fetchedTheme);
         } catch (err) {
             console.error('Unexpected error:', err);
         }
@@ -151,16 +151,16 @@ const LoginPage = () => {
 
         if (name) {
             localStorage.setItem('name', name);
-            console.log('Fetched and stored theme:', name);
+            console.log('Fetched and stored name:', name);
         } else {
-            console.error('Failed to fetch theme',);
+            console.error('Failed to fetch name',);
         }
 
         if (pfp) {
             localStorage.setItem('profile_picture', pfp);
-            console.log('Fetched and stored theme:', pfp);
+            console.log('Fetched and stored pfp:', pfp);
         } else {
-            console.error('Failed to fetch theme',);
+            console.error('Failed to fetch pfp',);
         }
 
         // Navigate to the home page after resolving all async operations

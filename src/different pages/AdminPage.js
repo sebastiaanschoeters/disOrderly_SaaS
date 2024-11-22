@@ -1,7 +1,7 @@
 import 'antd/dist/reset.css'; // Import Ant Design styles
 import '../CSS/AntDesignOverride.css'
 import { antThemeTokens, themes } from '../themes';
-import {Button, Card, ConfigProvider, List} from 'antd';
+import {Button, Card, Checkbox, ConfigProvider, Input, List, Modal, Radio, Slider, Typography} from 'antd';
 import {PlusOutlined} from "@ant-design/icons";
 import React, {useEffect, useState} from "react";
 import { useNavigate } from 'react-router-dom';
@@ -15,6 +15,9 @@ const AdminPage = () => {
     const themeColors = themes[theme] || themes.blauw;
     const navigate = useNavigate();
     const [Organizations, setOrganizations] = useState([]);
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [OrganizationName, setOrganizationName] = useState('');
+    const [AmountUsers, setAmountUsers] = useState('');
 
     useEffect(() => {fetchData()}
     , [])
@@ -24,6 +27,19 @@ const AdminPage = () => {
         setOrganizations(data)
         console.log(data)
     }
+
+    const showModal = () => {
+        setIsModalVisible(true);
+    };
+
+    const handleModalClose = () => {
+        setIsModalVisible(false);
+    };
+
+    const handleChangeAmountUsers = (event) => {
+        setAmountUsers(event.target.value);
+    };
+
 
     const styles = {
         list: {
@@ -40,9 +56,25 @@ const AdminPage = () => {
         },
         name: {
             fontSize: '14px',
+        },
+        modal: {
+            backgroundColor: 'white',
+            padding: '20px',
+            borderRadius: '8px',
+            position: 'relative',
+            width: '80%',
+            maxWidth: '500px'
+        },
+        closeButton: {
+            position: 'absolute',
+            top: '10px',
+            right: '10px',
+            background: 'transparent',
+            border: 'none',
+            fontSize: '18px',
+            cursor: 'pointer'
         }
     }
-
 
     return (<ConfigProvider theme={{token: antThemeTokens(themeColors)}}>
             <div
@@ -67,13 +99,13 @@ const AdminPage = () => {
                             <Card
                                 style={styles.card}
                                 hoverable={true}
-                                >
+                            >
                                 <Card.Meta
                                     title={<span style={styles.name}><li>{Organizations.name}</li></span>}
                                 />
 
                             </Card>
-                    )}
+                        )}
                     >
                     </List>
 
@@ -85,14 +117,14 @@ const AdminPage = () => {
                             flexDirection: 'column',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            width: '300px',
-                            height: '150px',
+                            width: '360px',
+                            height: '180px',
                         }}
+                        onClick={showModal}
+
                     >
-                        <h2 style={{margin: '0', fontSize: '24px'}}>Add new organization</h2>
+                        <h2 style={{margin: '0', fontSize: '24px'}}>Nieuwe organisatie toevoegen</h2>
                     </Button>
-
-
                 </div>
 
 
@@ -115,6 +147,30 @@ const AdminPage = () => {
                     <h2 style={{margin: '0', fontSize: '1rem'}}>Afmelden</h2>
                 </Button>
 
+                <Modal
+                    title="Nieuwe Organisatie"
+                    visible={isModalVisible}
+                    onCancel={handleModalClose}
+                    footer={null}
+                >
+                    <div>
+                        Geef de nieuwe organisatie een naam:
+                        <Input>
+
+                        </Input>
+
+                    </div>
+
+                    <div>
+                        <label htmlFor="dropdown">Hoeveel accounts worden beschikbaar gemaakt voor de organisatie: </label>
+                        <select id="dropdown" value={AmountUsers} onChange={handleChangeAmountUsers}>
+                            <option value="">--Select--</option>
+                            <option value="option1">1-50</option>
+                            <option value="option2">51-200</option>
+                            <option value="option3">200+</option>
+                        </select>
+                    </div>
+                </Modal>
             </div>
         </ConfigProvider>
     );

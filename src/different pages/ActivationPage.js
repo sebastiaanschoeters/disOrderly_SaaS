@@ -299,12 +299,12 @@ const ActivationPage = () => {
                                 rules={[{ required: true, message: 'Selecteer een woonsituatie' }]}
                             >
                                 <Select placeholder="Selecteer uw woonsituatie">
-                                    <Select.Option value="bij ouders">Bij ouders</Select.Option>
-                                    <Select.Option value="woont alleen">Woont alleen</Select.Option>
-                                    <Select.Option value="begeleid wonen">Begeleid wonen</Select.Option>
-                                    <Select.Option value="in groepsverband">In groepsverband</Select.Option>
-                                    <Select.Option value="zorginstelling">Zorginstelling</Select.Option>
-                                    <Select.Option value="andere">Andere</Select.Option>
+                                    <Select.Option value="Woont in bij ouders">Woont in bij ouders</Select.Option>
+                                    <Select.Option value="Woont alleen">Woont alleen</Select.Option>
+                                    <Select.Option value="Begeleid wonen">Begeleid wonen</Select.Option>
+                                    <Select.Option value="Woont in groepsverband">Woont in groepsverband</Select.Option>
+                                    <Select.Option value="Woont in zorginstelling">Woont in zorginstelling</Select.Option>
+                                    <Select.Option value="Andere">Andere</Select.Option>
                                 </Select>
                             </Form.Item>
                             <Form.Item

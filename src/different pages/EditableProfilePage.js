@@ -212,8 +212,8 @@ const ProfileCard = () => {
     const [locations, setLocations] = useState([])
     const [searchValue, setSearchValue] = useState(""); // For search functionality
     const [slidesToShow, setSlidesToShow] = useState(3);
-    const { pictures} = useFetchPicturesData('1519');
-    const { profileData, isLoading, error, interest} = useFetchProfileData('1519');
+    const { pictures} = useFetchPicturesData(localStorage.getItem('user_id'));
+    const { profileData, isLoading, error, interest} = useFetchProfileData(localStorage.getItem('user_id'));
 
     useEffect(() => {
         if (profileData.theme) {
@@ -937,6 +937,7 @@ const ProfileCard = () => {
                             {value: 'Woont in bij ouders', label: 'Woont in bij ouders'},
                             {value: 'Woont in groepsverband', label: 'Woont in groepsverband'},
                             {value: 'Woont in zorginstelling', label: 'Woont in zorginstelling'},
+                            {value: 'Andere', label: 'Andere'},
                         ]}
                     />
                 </p>

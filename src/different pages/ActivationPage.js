@@ -77,6 +77,7 @@ const ActivationPage = () => {
                 return;
             }
 
+            console.log(data)
             if (!data.usable) {
                 message.error("Deze activatiecode is al in gebruik.");
                 setLoading(false);

@@ -7,13 +7,11 @@ const isLoggedIn = () => {
     return !!token; // Returns true if a session token exists
 };
 
-const ProtectedRoute = ({ element }) => {
-    const sessionToken = sessionStorage.getItem('sessionToken'); // or localStorage if that's where you store it
-    if (!sessionToken) {
-        return <Navigate to="/login" replace />; // Redirect to login if no session token
+const ProtectedRoute = ({ children }) => {
+    if (!isLoggedIn()) {
+        return <Navigate to="/login" />; // Redirect to login page if not logged in
     }
-    return element; // Allow access to the protected route if session token exists
+    return children; // Render the protected content
 };
-
 
 export default ProtectedRoute;

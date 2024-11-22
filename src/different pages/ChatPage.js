@@ -20,7 +20,7 @@ const ChatPage = () => {
     const { chatroomId } = useParams();
     const userEmail = localStorage.getItem('userEmail');
     console.log(userEmail);
-    const userId = parseInt(localStorage.getItem('user_id'),10);
+    const userId = parseInt(localStorage.getItem('user_id'), 10);
     console.log(userId);
 
     const dummyRef = useRef(null);
@@ -41,21 +41,18 @@ const ChatPage = () => {
     };
 
     useEffect(() => {
-        fetchMessages(); // Fetch messages when chatroomId changes
+        fetchMessages(); // Initial fetch when the component mounts
 
-        const channel = supabase
-            .channel(`chatroom-${chatroomId}`)
-            .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'Chatroom' }, (payload) => {
-                console.log('New message payload:', payload); // Check payload data
-                fetchMessages(); // Fetch new messages when a new message is inserted
-            })
-            .subscribe();
+        // Set interval to fetch messages every 1 second
+        const intervalId = setInterval(() => {
+            fetchMessages();
+        }, 1000);
 
-        // Cleanup subscription when component unmounts or chatroomId changes
+        // Cleanup interval on component unmount or chatroomId change
         return () => {
-            supabase.removeChannel(channel); // Correct way to remove channel
+            clearInterval(intervalId);
         };
-    }, [chatroomId]);
+    }, [chatroomId]); // Re-run the effect when chatroomId changes
 
     useEffect(() => {
         if (dummyRef.current) {
@@ -81,14 +78,11 @@ const ChatPage = () => {
             .eq('id', chatroomId);
 
         setNewMessage("");
-        fetchMessages();
     };
-
 
     const handleProfile = () => {
         navigate('/profile');
     };
-
     const styles = {
         background: {
             width: '100vw',

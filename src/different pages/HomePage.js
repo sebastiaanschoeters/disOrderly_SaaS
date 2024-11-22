@@ -34,6 +34,7 @@ const HomePage = () => {
     const userEmail = localStorage.getItem('userEmail'); // Logged-in user's email
     const userId = localStorage.getItem('user_id');
     const name = localStorage.getItem('name');
+    const profile_picture = localStorage.getItem('profile_picture');
 
     return (
         <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>

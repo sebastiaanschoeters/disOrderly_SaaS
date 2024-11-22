@@ -39,6 +39,55 @@ const LoginPage = () => {
         }
     };
 
+    const getName = async (user_id) => {
+        try {
+            const { data, error } = await supabase
+                .from('User')
+                .select('name')
+                .eq('id', user_id);
+
+            if (error) {
+                console.error('Error fetching user_id:', error.message);
+                return null;
+            }
+
+            if (data.length === 0) {
+                console.log('No user found with the provided email.');
+                return null;
+            }
+
+            console.log('Fetched theme:', data[0].name);
+            return data[0].name.toString(); // Ensure it's a string
+        } catch (err) {
+            console.error('Unexpected error:', err);
+            return null;
+        }
+    };
+
+    const getTheme = async (user_id) => {
+        try {
+            const { data, error } = await supabase
+                .from('User information')
+                .select('theme')
+                .eq('user_id', user_id);
+
+            if (error) {
+                console.error('Error fetching user_id:', error.message);
+                return null;
+            }
+
+            if (data.length === 0) {
+                console.log('No user found with the provided email.');
+                return null;
+            }
+
+            console.log('Fetched theme:', data[0].theme);
+            return data[0].theme.toString(); // Ensure it's a string
+        } catch (err) {
+            console.error('Unexpected error:', err);
+            return null;
+        }
+    };
     const handleLogin = async (values) => {
         console.log('Form values:', values);
         const { email, password } = values;
@@ -55,12 +104,28 @@ const LoginPage = () => {
 
         // Fetch the user ID asynchronously and store it in localStorage
         const userId = await getUserIdByEmail(fakeLoginResponse.user.email);
+        const theme = await getTheme(userId);
+        const name = await getName(userId);
 
         if (userId) {
             localStorage.setItem('user_id', userId);
             console.log('Fetched and stored user_id:', userId);
         } else {
             console.error('Failed to fetch user_id');
+        }
+
+        if (theme) {
+            localStorage.setItem('theme', theme);
+            console.log('Fetched and stored theme:', theme);
+        } else {
+            console.error('Failed to fetch theme',);
+        }
+
+        if (name) {
+            localStorage.setItem('name', name);
+            console.log('Fetched and stored theme:', name);
+        } else {
+            console.error('Failed to fetch theme',);
         }
 
         // Navigate to the home page after resolving all async operations

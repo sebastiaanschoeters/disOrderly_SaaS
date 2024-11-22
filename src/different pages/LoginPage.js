@@ -19,7 +19,7 @@ const LoginPage = () => {
         try {
             const { data, error } = await supabase
                 .from('Credentials')
-                .select('user_id')
+                .select('user_id','type')
                 .eq('email', email)
 
             if (error) {
@@ -33,7 +33,7 @@ const LoginPage = () => {
             }
 
             console.log('Fetched user_id:', data[0].user_id);
-            return data[0].user_id; // Ensure it's a string
+            return [data[0].user_id,data[0].type]; // Ensure it's a string
         } catch (err) {
             console.error('Unexpected error:', err);
             return null;
@@ -107,8 +107,6 @@ const LoginPage = () => {
                 return;
             }
             return data[0].theme;
-            const fetchedTheme = data[0].theme; // Ensure it's a string
-            console.log('Fetched themea:', fetchedTheme);
 
 
         } catch (err) {
@@ -130,7 +128,7 @@ const LoginPage = () => {
         localStorage.setItem('userEmail', fakeLoginResponse.user.email);
 
         // Fetch the user ID asynchronously and store it in localStorage
-        const userId = await getUserIdByEmail(fakeLoginResponse.user.email);
+        const [userId,type] = await getUserIdByEmail(fakeLoginResponse.user.email);
         const theme = await getTheme(userId);
         const name = await getName(userId);
         const pfp = await getPfp(userId);
@@ -140,6 +138,13 @@ const LoginPage = () => {
             console.log('Fetched and stored user_id:', userId);
         } else {
             console.error('Failed to fetch user_id');
+        }
+
+        if (type) {
+            localStorage.setItem('type', type);
+            console.log('Fetched and stored type:', type);
+        } else {
+            console.error('Failed to fetch type');
         }
 
         if (theme) {

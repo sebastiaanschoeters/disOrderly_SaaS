@@ -14,6 +14,7 @@ import ProtectedRoute from './different pages/ProtectedRoute'; // Import the Pro
 import AdminPage from "./different pages/AdminPage";
 import Hangman from "./different pages/Hangman";
 import EditableProfilePage from "./different pages/EditableProfilePage";
+import CaretakerProfilePage from "./different pages/CaretakerProfilePage";
 
 const App = () => {
     return (
@@ -105,6 +106,14 @@ const App = () => {
                     element={
                         <ProtectedRoute>
                             <AdminPage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/caretaker"
+                    element={
+                        <ProtectedRoute>
+                            <CaretakerProfilePage />
                         </ProtectedRoute>
                     }
                 />

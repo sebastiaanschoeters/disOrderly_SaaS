@@ -13,6 +13,7 @@ import SupabaseTestPage from './different pages/SupabaseTestPage';
 import ProtectedRoute from './different pages/ProtectedRoute'; // Import the ProtectedRoute component
 import AdminPage from "./different pages/AdminPage";
 import Hangman from "./different pages/Hangman";
+import EditableProfilePage from "./different pages/EditableProfilePage";
 
 const App = () => {
     return (

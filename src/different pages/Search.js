@@ -15,8 +15,8 @@ const supabase = createClient(
 );
 
 const Search = () => {
-    const [theme, setTheme] = useState('blauw');
-    const themeColors = themes[theme] || themes.blauw;
+    const [themeName, darkModeFlag] = JSON.parse(localStorage.getItem('theme')) || ['blauw', false];
+    const [themeColors, setThemeColors] = useState(themes[themeName] || themes.blauw);
     const [users, setUsers] = useState([]);
     const [filteredUsers, setFilteredUsers] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -30,6 +30,15 @@ const Search = () => {
     const [mobility, setMobility] = useState(null);  // Mobility filter: TRUE for "Ja", null for "Maakt niet uit"
 
     const { Title } = Typography;
+
+    useEffect(() => {
+        if (darkModeFlag){
+            setThemeColors(themes[`${themeName}_donker`] || themes.blauw_donker)
+        }
+        else{
+            setThemeColors(themes[themeName] || themes.blauw);
+        }
+    }, [themeName, darkModeFlag]);
 
     // Helper function to calculate age from birthdate
     const calculateAge = (birthdate) => {

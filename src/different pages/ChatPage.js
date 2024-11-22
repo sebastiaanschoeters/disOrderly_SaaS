@@ -13,15 +13,21 @@ const ChatPage = () => {
     const { profileData } = location.state || {};
     const { name, profilePicture } = profileData || {};
     const navigate = useNavigate();
-    const [theme, setTheme] = useState('blue');
-    const themeColors = themes[theme] || themes.blauw;
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState("");
     const { chatroomId } = useParams();
-    const userEmail = localStorage.getItem('userEmail');
-    console.log(userEmail);
     const userId = parseInt(localStorage.getItem('user_id'), 10);
-    console.log(userId);
+
+    const [themeName, darkModeFlag] = JSON.parse(localStorage.getItem('theme')) || ['blauw', false];
+    const [themeColors, setThemeColors] = useState(themes[themeName] || themes.blauw);
+    useEffect(() => {
+        if (darkModeFlag){
+            setThemeColors(themes[`${themeName}_donker`] || themes.blauw_donker)
+        }
+        else{
+            setThemeColors(themes[themeName] || themes.blauw);
+        }
+    }, [themeName, darkModeFlag]);
 
     const dummyRef = useRef(null);
 

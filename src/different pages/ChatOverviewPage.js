@@ -10,12 +10,20 @@ const { Title } = Typography;
 
 const ChatOverviewPage = () => {
     const navigate = useNavigate();
-    const [theme, setTheme] = useState('blauw');
-    const themeColors = themes[theme] || themes.blauw;
     const [searchQuery, setSearchQuery] = useState('');
     const [chatrooms, setChatrooms] = useState([]);
     const userID = parseInt(localStorage.getItem('user_id'), 10);
-    console.log(userID);
+
+    const [themeName, darkModeFlag] = JSON.parse(localStorage.getItem('theme')) || ['blauw', false];
+    const [themeColors, setThemeColors] = useState(themes[themeName] || themes.blauw);
+    useEffect(() => {
+        if (darkModeFlag){
+            setThemeColors(themes[`${themeName}_donker`] || themes.blauw_donker)
+        }
+        else{
+            setThemeColors(themes[themeName] || themes.blauw);
+        }
+    }, [themeName, darkModeFlag]);
 
     const fetchChatrooms = async () => {
         const {data, error} = await supabase

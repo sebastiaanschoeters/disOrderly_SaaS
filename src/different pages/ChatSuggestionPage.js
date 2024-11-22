@@ -17,16 +17,21 @@ const ChatSuggestionPage = () => {
     const { name, profilePicture, otherUserId, isSender } = profileData || {};
     const { chatroomId } = useParams();
     const navigate = useNavigate();
-    const theme = 'blue';
     const [message, setMessage] = useState("");
-    const themeColors = themes[theme] || themes.blauw;
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [editedMessage, setEditedMessage] = useState('');
-
-    const userEmail = localStorage.getItem('userEmail');
-    console.log(userEmail);
     const userId = localStorage.getItem('user_id');
-    console.log(userId);
+    const [themeName, darkModeFlag] = JSON.parse(localStorage.getItem('theme')) || ['blauw', false];
+    const [themeColors, setThemeColors] = useState(themes[themeName] || themes.blauw);
+
+    useEffect(() => {
+        if (darkModeFlag){
+            setThemeColors(themes[`${themeName}_donker`] || themes.blauw_donker)
+        }
+        else{
+            setThemeColors(themes[themeName] || themes.blauw);
+        }
+    }, [themeName, darkModeFlag]);
 
     const fetchMessages = async (chatroomId) => {
         const { data, error } = await supabase

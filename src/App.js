@@ -4,7 +4,6 @@ import ActivationPage from './different pages/ActivationPage';
 import LoginPage from './different pages/LoginPage';
 import HomePage from './different pages/HomePage';
 import ProfilePage from './different pages/ProfilePage';
-import EditableProfilePage from './different pages/EditableProfilePage';
 import PersonalProfilePage from './different pages/PersonalProfilePage';
 import ChatOverviewPage from './different pages/ChatOverviewPage';
 import ChatPage from './different pages/ChatPage';
@@ -13,10 +12,7 @@ import Search from './different pages/Search';
 import SupabaseTestPage from './different pages/SupabaseTestPage';
 import ProtectedRoute from './different pages/ProtectedRoute'; // Import the ProtectedRoute component
 import AdminPage from "./different pages/AdminPage";
-import ChatSuggestionPage from './different pages/ChatSuggestionPage';
-import Search from "./different pages/Search";
 import Hangman from "./different pages/Hangman";
-import SupabaseTestPage from "./different pages/SupabaseTestPage";
 
 const App = () => {
     return (

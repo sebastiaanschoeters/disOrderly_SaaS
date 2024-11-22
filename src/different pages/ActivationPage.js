@@ -137,8 +137,11 @@ const ActivationPage = () => {
         setStep(6)
         //navigate("/login");
     };
-
+    /*
     const saveUserProfile = async (userData) => {
+        let insertedCredentialId = null; // Track inserted IDs for rollback
+        let insertedUserId = null;
+
         try {
             // Insert data into "Credentials" table
             const { data: credentialData, error: credentialError } = await supabase
@@ -147,11 +150,14 @@ const ActivationPage = () => {
                     user_id: userData.activationKey,
                     email: userData.email,
                     password: userData.password,
-                });
+                })
+                .select("user_id")
+                .single(); // Retrieve the inserted ID
 
             if (credentialError) {
                 throw new Error(`Error saving credentials: ${credentialError.message}`);
             }
+            insertedCredentialId = credentialData.id;
 
             // Insert data into "User" table
             const { data: userDataResponse, error: userError } = await supabase
@@ -160,11 +166,14 @@ const ActivationPage = () => {
                     name: userData.name,
                     id: userData.activationKey,
                     birthdate: userData.birthDate,
-                });
+                })
+                .select("id")
+                .single();
 
             if (userError) {
                 throw new Error(`Error saving user data: ${userError.message}`);
             }
+            insertedUserId = userDataResponse.id;
 
             // Insert data into "User information" table
             const { data: profileData, error: profileError } = await supabase
@@ -183,11 +192,133 @@ const ActivationPage = () => {
                 throw new Error(`Error saving profile data: ${profileError.message}`);
             }
 
-            console.log("Profile saved successfully", { credentialData, userDataResponse, profileData });
+            console.log("Profile saved successfully", {
+                credentialData,
+                userDataResponse,
+                profileData,
+            });
+            //navigate("/login");
+
+            return { success: true };
         } catch (error) {
             console.error("Error saving user profile:", error.message);
+
+            // Rollback inserted records
+            if (insertedCredentialId) {
+                await supabase.from("Credentials").delete().eq("id", insertedCredentialId);
+            }
+            if (insertedUserId) {
+                await supabase.from("User").delete().eq("id", insertedUserId);
+            }
+            await supabase
+                .from("User information")
+                .delete()
+                .eq("user_id", userData.activationKey);
+
+            return { success: false, error: error.message };
+        }
+    };*/
+
+    const saveUserProfile = async (userData) => {
+        let insertedCredentialId = null; // Track inserted IDs for rollback
+        let insertedUserId = null;
+        let activationKeyUpdated = false; // Track if activation key was updated
+
+        try {
+            // Insert data into "Credentials" table
+            const { data: credentialData, error: credentialError } = await supabase
+                .from("Credentials")
+                .insert({
+                    user_id: userData.activationKey,
+                    email: userData.email,
+                    password: userData.password,
+                })
+                .select("user_id")
+                .single(); // Retrieve the inserted ID
+
+            if (credentialError) {
+                throw new Error(`Error saving credentials: ${credentialError.message}`);
+            }
+            insertedCredentialId = credentialData.id;
+
+            // Insert data into "User" table
+            const { data: userDataResponse, error: userError } = await supabase
+                .from("User")
+                .insert({
+                    name: userData.name,
+                    id: userData.activationKey,
+                    birthdate: userData.birthDate,
+                })
+                .select("id")
+                .single();
+
+            if (userError) {
+                throw new Error(`Error saving user data: ${userError.message}`);
+            }
+            insertedUserId = userDataResponse.id;
+
+            // Insert data into "User information" table
+            const { data: profileData, error: profileError } = await supabase
+                .from("User information")
+                .insert({
+                    user_id: userData.activationKey,
+                    living_situation: userData.livingSituation,
+                    location: userData.city,
+                    mobility: userData.mobility,
+                    gender: userData.gender,
+                    sexuality: userData.sexuality,
+                    looking_for: userData.relationshipPreference,
+                });
+
+            if (profileError) {
+                throw new Error(`Error saving profile data: ${profileError.message}`);
+            }
+
+            // Update the "usable" column in "ActivationKeys" table
+            const { error: activationKeyError } = await supabase
+                .from("Activation")
+                .update({ usable: false })
+                .eq("code", userData.activationKey);
+
+            if (activationKeyError) {
+                throw new Error(`Error updating activation key: ${activationKeyError.message}`);
+            }
+            activationKeyUpdated = true;
+
+            console.log("Profile saved successfully", {
+                credentialData,
+                userDataResponse,
+                profileData,
+            });
+
+            return { success: true };
+        } catch (error) {
+            console.error("Error saving user profile:", error.message);
+
+            // Rollback logic
+            if (insertedCredentialId) {
+                await supabase.from("Credentials").delete().eq("user_id", insertedCredentialId);
+            }
+            if (insertedUserId) {
+                await supabase.from("User").delete().eq("id", insertedUserId);
+            }
+            await supabase
+                .from("User information")
+                .delete()
+                .eq("user_id", userData.activationKey);
+
+            if (activationKeyUpdated) {
+                // Revert the "usable" column to true if it was updated
+                await supabase
+                    .from("Activation")
+                    .update({ usable: true })
+                    .eq("code", userData.activationKey);
+            }
+
+            return { success: false, error: error.message };
         }
     };
+
 
     const EmailAndPassword = async (values) => {
         setLoading(true);

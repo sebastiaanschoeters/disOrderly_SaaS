@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { Form, Input, Button, Checkbox, Card, ConfigProvider } from 'antd';
+import {Form, Input, Button, Checkbox, Card, ConfigProvider, message} from 'antd';
 import 'antd/dist/reset.css';
 import '../CSS/AntDesignOverride.css';
 import { antThemeTokens, ButterflyIcon, themes } from '../themes';
 import { useNavigate } from 'react-router-dom';
 import forestImage from '../Media/forest.jpg';
-import {createClient} from "@supabase/supabase-js"; // Path to the image
+import {createClient} from "@supabase/supabase-js";
+import CryptoJS from "crypto-js"; // Path to the image
 
 const LoginPage = () => {
     const [theme, setTheme] = useState('default');
@@ -14,21 +15,21 @@ const LoginPage = () => {
     const navigate = useNavigate();
     const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q");
 
-    const getUserIdByEmail = async (email) => {
+    const getUserIdByEmail = async (email,password) => {
         try {
             const { data, error } = await supabase
                 .from('Credentials')
-                .select('user_id')
-                .eq('email', email);
-
+                .select('password')
+                .eq('email', email)
+                //.eq('password', password);
             if (error) {
                 console.error('Error fetching user_id:', error.message);
-                return null;
+                return;
             }
 
             if (data.length === 0) {
                 console.log('No user found with the provided email.');
-                return null;
+                return;
             }
 
             console.log('Fetched user_id:', data[0].user_id);
@@ -98,12 +99,12 @@ const LoginPage = () => {
 
             if (error) {
                 console.error('Error fetching user theme:', error.message);
-                return;
+                return false;
             }
 
             if (data.length === 0) {
                 console.log('No user found with the provided user ID.');
-                return;
+                return false;
             }
 
             const fetchedTheme = data[0].theme.toString(); // Ensure it's a string
@@ -117,10 +118,7 @@ const LoginPage = () => {
     };
 
     const handleLogin = async (values) => {
-        console.log('Form values:', values);
         const { email, password } = values;
-
-        // Simulate a successful login response
         const fakeLoginResponse = {
             token: 'fake-session-token',
             user: { email },
@@ -131,7 +129,7 @@ const LoginPage = () => {
         localStorage.setItem('userEmail', fakeLoginResponse.user.email);
 
         // Fetch the user ID asynchronously and store it in localStorage
-        const userId = await getUserIdByEmail(fakeLoginResponse.user.email);
+        const userId = await getUserIdByEmail(fakeLoginResponse.user.email, );
         const theme = await getTheme(userId);
         const name = await getName(userId);
         const pfp = await getPfp(userId);

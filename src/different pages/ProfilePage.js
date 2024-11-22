@@ -13,6 +13,7 @@ import { createClient } from "@supabase/supabase-js";
 import 'antd/dist/reset.css';
 import '../CSS/AntDesignOverride.css';
 import { ButterflyIcon, antThemeTokens, themes } from '../themes';
+import { useLocation } from 'react-router-dom';
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
 
@@ -165,6 +166,8 @@ const ProfileDetail = ({ label, value, icon }) => (
 );
 
 const ProfileCard = () => {
+    const location = useLocation();
+    const { state } = location;
     const [theme, setTheme] = useState('blauw');
     const [profilePicture, setProfilePicture] = useState(''); /* get images from database */
     const [images, setImages] = useState([
@@ -173,8 +176,8 @@ const ProfileCard = () => {
         'https://i.pravatar.cc/150?img=3',
         'https://i.pravatar.cc/150?img=4'
     ]);
-    const { profileData, isLoading, error } = useFetchProfileData('1519'); // Replace with dynamic ActCode as needed
-    const { pictures} = useFetchPicturesData('1519');
+    const { profileData, isLoading, error } = useFetchProfileData(localStorage.getItem('user_id'));//state.user_id) ; // Replace with dynamic ActCode as needed
+    const { pictures} = useFetchPicturesData(localStorage.getItem('user_id'));
     const themeColors = themes[theme] || themes.blauw;
     const [slidesToShow, setSlidesToShow] = useState(3);
 

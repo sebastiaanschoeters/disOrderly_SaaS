@@ -127,24 +127,20 @@ const useFetchProfileData = (actCode) => {
 };
 
 const useFetchPicturesData = (actCode) => {
-    const [pictures, setPictures] = useState({});
+    const [pictures, setPictures] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // Fetch user data
-                const { data: pictures, error: userError } = await supabase
+                const { data: picturesData, error: userError } = await supabase
                     .from('Pictures')
                     .select('*')
                     .eq('User_id', actCode);
 
                 if (userError) throw userError;
-                if (pictures.length > 0) {
-                    const user = pictures[0];
-                }
-                setPictures(pictures)
+                setPictures(picturesData || []);
             } catch (error) {
                 setError(error.message);
             } finally {
@@ -155,7 +151,7 @@ const useFetchPicturesData = (actCode) => {
         fetchData();
     }, [actCode]);
 
-    return { pictures };
+    return { pictures, isLoading, error };
 };
 
 const useFetchUserLocation = (actCode) => {
@@ -165,7 +161,6 @@ const useFetchUserLocation = (actCode) => {
     useEffect(() => {
         const fetchLocation = async () => {
             try {
-                // Fetch user location ID
                 const { data: userInfoData, error: userInfoError } = await supabase
                     .from('User information')
                     .select('location')
@@ -176,7 +171,6 @@ const useFetchUserLocation = (actCode) => {
                 if (userInfoData && userInfoData.length > 0 && userInfoData[0].location) {
                     const locationId = userInfoData[0].location;
 
-                    // Fetch location details using location ID
                     const { data: locationDetails, error: locationError } = await supabase
                         .from('Location')
                         .select('Gemeente, Longitude, Latitude')
@@ -184,7 +178,6 @@ const useFetchUserLocation = (actCode) => {
 
                     if (locationError) throw locationError;
 
-                    // Set location data
                     if (locationDetails && locationDetails.length > 0) {
                         setLocationData(locationDetails[0]);
                     }
@@ -200,7 +193,6 @@ const useFetchUserLocation = (actCode) => {
     return { locationData, error };
 };
 
-
 const ProfileDetail = ({ label, value, icon }) => (
     <p style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '5px'}}>
         <strong style={{ width: '20%', minWidth: '150px', flexShrink: 0 }}>{icon} {label}: </strong>
@@ -208,87 +200,78 @@ const ProfileDetail = ({ label, value, icon }) => (
     </p>
 );
 
+const CustomPrevArrow = ({ onClick }) => (
+    <Button
+        type="default"
+        shape="circle"
+        icon={<LeftOutlined />}
+        onClick={onClick}
+        style={{
+            position: 'absolute',
+            top: '50%',
+            left: '-40px',
+            transform: 'translateY(-50%)',
+            zIndex: 10,
+        }}
+    />
+);
+
+const CustomNextArrow = ({ onClick }) => (
+    <Button
+        type="default"
+        shape="circle"
+        icon={<RightOutlined />}
+        onClick={onClick}
+        style={{
+            position: 'absolute',
+            top: '50%',
+            right: '-40px',
+            transform: 'translateY(-50%)',
+            zIndex: 10,
+        }}
+    />
+);
+
 const ProfileCard = () => {
     const location = useLocation();
     const { state } = location;
-    const [theme, setTheme] = useState('blauw');
-    const [profilePicture, setProfilePicture] = useState(''); /* get images from database */
-    const [images, setImages] = useState([
-        "https://example.com/photo.jpg"
-    ]);
-    const { profileData, isLoading, error } = useFetchProfileData(state.user_id);//state.user_id) ; // Replace with dynamic ActCode as needed
-    const { pictures} = useFetchPicturesData(state.user_id);
-    const themeColors = themes[theme] || themes.blauw;
-    const [slidesToShow, setSlidesToShow] = useState(3);
-    const { locationData, locationError} = useFetchUserLocation(localStorage.getItem('user_id'))
-    const [currentUserLocation, setCurrentUserLocation] = useState({latitude: 50.8, longitude: 4.3333333})
 
-    useEffect(() => {
-        if (profileData.theme){
-            setTheme(profileData.theme);
-        }
-        if (profileData.profile_picture){
-            const imageUrlWithCacheBuster = `${profileData.profile_picture}?t=${new Date().getTime()}`;
-            setProfilePicture(imageUrlWithCacheBuster);
-        }
-        if (pictures.length > 0){
-            let list_of_images = []
+    const { profileData, isLoading, error } = useFetchProfileData(state.user_id);
+    const { pictures } = useFetchPicturesData(state.user_id);
+    const { locationData } = useFetchUserLocation(localStorage.getItem('user_id'));
 
-            for (let i = 0; i < pictures.length; i++) {
-                const picture = pictures[i];
-                if (picture.picture_url){
-                    list_of_images.push(picture.picture_url);
-                }
-            }
-            setImages(list_of_images)
-        }
+    const imageUrls = pictures
+        .filter(picture => picture.picture_url)
+        .map(picture => picture.picture_url);
 
-        updateSlidesToShow();  // Update on initial render
-        window.addEventListener('resize', updateSlidesToShow); // Listen for window resize
-
-        return () => {
-            window.removeEventListener('resize', updateSlidesToShow); // Clean up the listener
-        };
-
-    }, [profileData.theme]);
-
-    useEffect(()=>{
-        if (locationData){
-            const latitude = locationData.Latitude;
-            const longitude = locationData.Longitude;
-            setCurrentUserLocation({latitude: latitude, longitude: longitude})
-        }
-    })
-
-    const updateSlidesToShow = () => {
+    // Simplified slides calculation
+    const calculateSlidesToShow = (imageCount) => {
         const width = window.innerWidth;
-        const totalImages = images.length;
-
         let slides = 5.5;
 
-        if (width < 700){
-            slides = 1;
-        }else if (width < 1100){
-            slides = 1.5;
-        }else if (width < 1500) {
-            slides = 2.5;
-        } else if (width < 2000) {
-            slides = 3.5;
-        } else if (width < 3000) {
-            slides = 4.5;
-        }
-        if (totalImages < slides){
-            setSlidesToShow(totalImages+0.5);
-        }
-        else {
-            setSlidesToShow(slides);
-        }
+        if (width < 700) slides = 1;
+        else if (width < 1100) slides = 1.5;
+        else if (width < 1500) slides = 2.5;
+        else if (width < 2000) slides = 3.5;
+        else if (width < 3000) slides = 4.5;
 
-        console.log(slides)
-        console.log(totalImages, images)
-        console.log(slidesToShow)
+        return Math.min(slides, imageCount);
     };
 
+    const [slidesToShow, setSlidesToShow] = useState(calculateSlidesToShow(imageUrls.length))
+
+    useEffect(() => {
+        const handleResize = () => {
+            setSlidesToShow(calculateSlidesToShow(imageUrls.length));
+        };
+
+        window.addEventListener('resize', handleResize);
+
+        // Cleanup on unmount
+        return () => window.removeEventListener('resize', handleResize);
+    }, [imageUrls.length]);
+
+    // Calculate age
     const calculateAge = (birthdate) => {
         if (!birthdate) return 'Onbekend';
         const birthDate = new Date(birthdate);
@@ -301,69 +284,56 @@ const ProfileCard = () => {
         return age;
     };
 
-    function calculateDistance(lat1, lon1, lat2, lon2) {
+    // Distance calculation
+    const calculateDistance = (lat1, lon1, lat2, lon2) => {
         const R = 6371;
         const φ1 = lat1 * Math.PI / 180;
         const φ2 = lat2 * Math.PI / 180;
         const Δφ = (lat2 - lat1) * Math.PI / 180;
         const Δλ = (lon2 - lon1) * Math.PI / 180;
 
-        // Haversine formula
         const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
             Math.cos(φ1) * Math.cos(φ2) *
             Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        const distance = R * c; // Distance in kilometers
+        const distance = R * c;
 
         return Math.round(distance);
-    }
+    };
 
-    const distanceToProfileUser = calculateDistance(
-        currentUserLocation.latitude, currentUserLocation.longitude,
-        profileData.locationData?.latitude, profileData.locationData?.longitude
-    );
-
-    let lookingForArray = profileData.looking_for;
-
-    if (typeof profileData.looking_for === 'string') {
-        try {
-            lookingForArray = JSON.parse(profileData.looking_for);
-        } catch (error) {
-            console.error('Error parsing JSON:', error);
-            lookingForArray = [];
+    // Parse looking for array
+    const parseLookingForArray = (lookingFor) => {
+        if (typeof lookingFor === 'string') {
+            try {
+                return JSON.parse(lookingFor);
+            } catch (error) {
+                console.error('Error parsing JSON:', error);
+                return [];
+            }
         }
-    }
+        return lookingFor || [];
+    };
 
-    const CustomPrevArrow = ({ onClick }) => (
-        <Button
-            type="default"
-            shape="circle"
-            icon={<LeftOutlined />}
-            onClick={onClick}
-            style={{
-                position: 'absolute',
-                top: '50%',
-                left: '-40px',
-                transform: 'translateY(-50%)',
-                zIndex: 10,
-            }}
-        />
-    );
+    // Derive theme colors
+    const theme = profileData.theme || 'blauw';
+    const themeColors = themes[theme] || themes.blauw;
 
-    const CustomNextArrow = ({ onClick }) => (
-        <Button
-            type="default"
-            shape="circle"
-            icon={<RightOutlined />}
-            onClick={onClick}
-            style={{
-                position: 'absolute',
-                top: '50%',
-                right: '-40px',
-                transform: 'translateY(-50%)',
-                zIndex: 10,
-            }}
-        />
+    // Current user location (with fallback)
+    const currentUserLocation = locationData
+        ? { latitude: locationData.Latitude, longitude: locationData.Longitude }
+        : { latitude: 50.8, longitude: 4.3333333 };
+
+    // Profile picture
+    const profilePicture = profileData.profile_picture
+        ? `${profileData.profile_picture}?t=${new Date().getTime()}`
+        : "https://example.com/photo.jpg";
+
+    // Distance calculation
+    const distanceToProfileUser = calculateDistance(
+        currentUserLocation.latitude,
+        currentUserLocation.longitude,
+        profileData.locationData?.latitude,
+        profileData.locationData?.longitude
     );
 
     if (isLoading) return <Spin tip="Profiel laden..." />;
@@ -388,7 +358,7 @@ const ProfileCard = () => {
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingBottom: '20px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '10px' }}>
                         <Avatar
-                            src={profilePicture || "https://example.com/photo.jpg"} // Fallback to default avatar
+                            src={profilePicture}
                             alt={profileData.name || "No Name"}
                             style ={{
                                 minWidth: '200px',
@@ -409,7 +379,7 @@ const ProfileCard = () => {
 
                 <Divider />
 
-                <ProfileDetail label="Locatie" value={`${profileData.locationData.gemeente} (${distanceToProfileUser}km van jou verwijderd)`} icon={<EnvironmentOutlined />} />
+                <ProfileDetail label="Locatie" value={`${profileData.locationData?.gemeente} (${distanceToProfileUser}km van jou verwijderd)`} icon={<EnvironmentOutlined />} />
                 <Divider />
                 <ProfileDetail label="Geslacht" value={profileData.gender} icon={<UserOutlined />} />
                 <Divider />
@@ -428,10 +398,8 @@ const ProfileCard = () => {
                 <ProfileDetail
                     label="Is op zoek naar"
                     value={
-                        Array.isArray(lookingForArray)
-                            ? lookingForArray.map((option, index) => <Tag key={index}>{option}</Tag>)
-                            : "Niet beschikbaar"
-                    }
+                        parseLookingForArray(profileData.looking_for)
+                            .map((option, index) => <Tag key={index}>{option}</Tag>)}
                     icon={<HeartOutlined />}
                 />
                 <Divider />
@@ -460,49 +428,44 @@ const ProfileCard = () => {
                 >
                     Chat met {profileData?.name || 'de gebruiker'}
                 </Button>
+
                 <Divider/>
-                {pictures.length > 0 && (
-                    <>
-                        <p>
-                            <strong style={{width: '40%', minWidth: '150px', flexShrink: 0}}>
-                                <PictureOutlined/> Meer fotos van {profileData?.name || 'de gebruiker'}:
-                            </strong>
-                        </p>
-                        <Carousel
-                            prevArrow={<CustomPrevArrow />}
-                            nextArrow={<CustomNextArrow />}
-                            arrows
-                            slidesToShow={slidesToShow}
-                            draggable
-                            infinite={false}
-                            style={{
-                                maxWidth: '80%',
-                                margin: '0 auto'
-                            }}
-                        >
-                            {images.map((imageUrl, index) => (
-                                <div
-                                    key={index}
+
+                {imageUrls.length > 0 && (
+                    <Carousel
+                        prevArrow={<CustomPrevArrow />}
+                        nextArrow={<CustomNextArrow />}
+                        arrows
+                        slidesToShow={slidesToShow}
+                        draggable
+                        infinite={false}
+                        style={{
+                            maxWidth: '80%',
+                            margin: '0 auto'
+                        }}
+                    >
+                        {imageUrls.map((imageUrl, index) => (
+                            <div
+                                key={index}
+                                style={{
+                                    position: 'relative',
+                                    height: '200px',
+                                }}
+                            >
+                                <img
+                                    src={imageUrl}
+                                    alt={`carousel-image-${index}`}
                                     style={{
-                                        position: 'relative',
-                                        height: '200px',
+                                        height: '200px', // Image height is set to fill the container's height
+                                        width: 'auto', // This maintains the aspect ratio
+                                        objectFit: 'cover', // Ensure the image covers the space without distortion
+                                        borderRadius: '10px',
+                                        margin: '0 auto'
                                     }}
-                                >
-                                    <img
-                                        src={imageUrl}
-                                        alt={`carousel-image-${index}`}
-                                        style={{
-                                            height: '200px', // Image height is set to fill the container's height
-                                            width: 'auto', // This maintains the aspect ratio
-                                            objectFit: 'cover', // Ensure the image covers the space without distortion
-                                            borderRadius: '10px',
-                                            margin: '0 auto'
-                                        }}
-                                    />
-                                </div>
-                            ))}
-                        </Carousel>
-                    </>
+                                />
+                            </div>
+                        ))}
+                    </Carousel>
                 )}
             </div>
         </ConfigProvider>

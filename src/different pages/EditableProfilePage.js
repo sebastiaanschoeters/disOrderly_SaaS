@@ -215,6 +215,17 @@ const ProfileCard = () => {
     const { pictures} = useFetchPicturesData(localStorage.getItem('user_id'));
     const { profileData, isLoading, error, interest} = useFetchProfileData(localStorage.getItem('user_id'));
 
+    const applyThemeToCSS = (themeColors) => {
+        const root = document.documentElement;
+        Object.entries(themeColors).forEach(([key, value]) => {
+            root.style.setProperty(`--${key}`, value);
+        });
+    };
+
+    useEffect(() => {
+        applyThemeToCSS(themeColors); // Apply the selected theme
+    }, [themeColors]);
+
     useEffect(() => {
         if (profileData.theme) {
             setTheme(profileData.theme);

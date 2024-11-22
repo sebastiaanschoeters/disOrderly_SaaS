@@ -1,5 +1,5 @@
 // Import necessary libraries
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import { Card, Tag, Avatar, Button, Divider, ConfigProvider } from 'antd';
 import {
     MessageOutlined,
@@ -21,6 +21,18 @@ const ProfileCard = () => {
     const [theme, setTheme] = useState('blauw');
     const themeColors = themes[theme] || themes.blauw;
     const [images, setImages] = useState([]); /* get images from database */
+
+    const applyThemeToCSS = (themeColors) => {
+        const root = document.documentElement;
+        Object.entries(themeColors).forEach(([key, value]) => {
+            root.style.setProperty(`--${key}`, value);
+        });
+    };
+
+    useEffect(() => {
+        applyThemeToCSS(themeColors); // Apply the selected theme
+    }, [themeColors]);
+
 
     return (
         <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>

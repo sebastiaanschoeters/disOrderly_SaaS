@@ -1,9 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Avatar, Button, Divider, Select, Popconfirm, message, ConfigProvider, Switch, Spin } from 'antd';
+import { Avatar, Divider, Select, ConfigProvider, Switch, Spin } from 'antd';
 import {
-    CloseOutlined,
-    SaveOutlined,
-    DeleteOutlined,
     UserSwitchOutlined,
     BgColorsOutlined,
     HeartOutlined,
@@ -103,6 +100,18 @@ const ProfileCard = () => {
     const [profilePicture, setProfilePicture] = useState('https://example.com/photo.jpg');
     const [caretakers, setCaretakers] = useState(initialCaretakers);
     const [sexuality, setSexuality] = useState('');
+
+    const applyThemeToCSS = (themeColors) => {
+        const root = document.documentElement;
+        Object.entries(themeColors).forEach(([key, value]) => {
+            root.style.setProperty(`--${key}`, value);
+        });
+    };
+
+    useEffect(() => {
+        applyThemeToCSS(themeColors); // Apply the selected theme
+    }, [themeColors]);
+
 
     // Set theme and dark mode when profileData changes
     useEffect(() => {
@@ -292,6 +301,7 @@ const ProfileCard = () => {
                             { value: 'Beide', label: 'Beide' },
                         ]}
                         onChange={handleSexualityChange}
+
                     />
                 </p>
 

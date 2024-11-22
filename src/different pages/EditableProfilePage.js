@@ -56,7 +56,7 @@ const useFetchProfileData = (actCode) => {
             try {
                 const { data: userData, error: userError } = await supabase
                     .from('User')
-                    .select('*')
+                    .select('id, name, birthdate, profile_picture')
                     .eq('id', actCode);
 
                 if (userError) throw userError;
@@ -82,7 +82,6 @@ const useFetchProfileData = (actCode) => {
                         user.living_situation = userInfo.living_situation;
                         user.mobility = userInfo.mobility;
                         user.theme = userInfo.theme;
-                        user.sexuality = userInfo.sexuality;
                         user.gender = userInfo.gender;
 
                         if (userInfo.theme) {
@@ -213,8 +212,8 @@ const ProfileCard = () => {
     const [locations, setLocations] = useState([])
     const [searchValue, setSearchValue] = useState(""); // For search functionality
     const [slidesToShow, setSlidesToShow] = useState(3);
-    const { pictures} = useFetchPicturesData('1519');
-    const { profileData, isLoading, error, interest} = useFetchProfileData('1519');
+    const { pictures} = useFetchPicturesData(localStorage.getItem('user_id'));
+    const { profileData, isLoading, error, interest} = useFetchProfileData(localStorage.getItem('user_id'));
 
     useEffect(() => {
         if (profileData.theme) {

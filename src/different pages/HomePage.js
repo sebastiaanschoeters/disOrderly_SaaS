@@ -1,29 +1,40 @@
 import 'antd/dist/reset.css'; // Import Ant Design styles
-import '../CSS/AntDesignOverride.css'
+import '../CSS/AntDesignOverride.css';
 import { antThemeTokens, ButterflyIcon, themes } from '../themes';
 import { Button, ConfigProvider, Avatar } from 'antd';
 import { MessageOutlined, SearchOutlined, SettingOutlined, PoweroffOutlined } from "@ant-design/icons";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
-import {createClient} from "@supabase/supabase-js";
+import { createClient } from "@supabase/supabase-js";
 
 const HomePage = () => {
-    const [theme, setTheme] = useState('blauw');
-    const themeColors = themes[theme] || themes.blauw;
-    const navigate = useNavigate();
-    const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q");
+    // Load theme from localStorage
+    const [themeName, darkModeFlag] = JSON.parse(localStorage.getItem('theme')) || ['blauw', false];
+    const [themeColors, setThemeColors] = useState(themes[themeName] || themes.blauw);
 
+    const navigate = useNavigate();
+    const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co", "YOUR_SUPABASE_KEY");
+
+    // Update theme colors if theme changes
+    useEffect(() => {
+        if (darkModeFlag){
+            setThemeColors(themes[`${themeName}_donker`] || themes.blauw_donker)
+        }
+        else{
+            setThemeColors(themes[themeName] || themes.blauw);
+        }
+    }, [themeName, darkModeFlag]);
 
     const handleLogout = () => {
-        localStorage.removeItem('sessionToken');
-        localStorage.removeItem('userEmail');
+        localStorage.clear();
         navigate('/login');
     };
 
-    const userEmail = localStorage.getItem('userEmail'); //nu heb je hier de email van de logged in user
-    console.log(userEmail);
+    const userEmail = localStorage.getItem('userEmail'); // Logged-in user's email
     const userId = localStorage.getItem('user_id');
-    console.log(userId);
+    const name = localStorage.getItem('name');
+    const profile_picture = localStorage.getItem('profile_picture');
+
     return (
         <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
             <div
@@ -101,13 +112,14 @@ const HomePage = () => {
                 >
                     <Avatar
                         size={60}
+                        src={profile_picture}
                         style={{
                             backgroundColor: themeColors.primary4,
                             color: themeColors.primary10,
                             fontSize: '1.5vw',
                         }}
                     >
-                        M
+                        {name[0]}
                     </Avatar>
                     <span
                         style={{
@@ -116,13 +128,13 @@ const HomePage = () => {
                             whiteSpace: 'nowrap',
                         }}
                     >
-                        {userId}
+                        {name}
                     </span>
                 </div>
 
                 <Button
                     type="secondary"
-                    icon={<SettingOutlined style={{fontSize: '2vw'}}/>}
+                    icon={<SettingOutlined style={{ fontSize: '2vw' }} />}
                     style={{
                         position: 'absolute',
                         bottom: '1%',
@@ -143,7 +155,7 @@ const HomePage = () => {
 
                 <Button
                     type="secondary"
-                    icon={<PoweroffOutlined style={{fontSize: '2vw'}}/>}
+                    icon={<PoweroffOutlined style={{ fontSize: '2vw' }} />}
                     style={{
                         position: 'absolute',
                         bottom: '1%',

@@ -5,6 +5,8 @@ import { Avatar, ConfigProvider, Input, List, Typography, Modal, Button, Slider,
 import { FilterOutlined } from "@ant-design/icons";
 import { createClient } from "@supabase/supabase-js";
 import React, { useState, useEffect } from "react";
+import { useNavigate } from 'react-router-dom'; // Import useNavigate for routing
+
 
 // Initialize Supabase client
 const supabase = createClient(
@@ -41,18 +43,20 @@ const Search = () => {
         return age;
     };
 
+    const navigate = useNavigate();
+
     // Fetch users from Supabase
     const fetchUsers = async () => {
         try {
             const { data, error } = await supabase
                 .from('User')
                 .select(`
-                    id,
-                    name,
-                    birthdate,
-                    profile_picture,
-                    "User information" (gender, looking_for, mobility)
-                `);
+                id,
+                name,
+                birthdate,
+                profile_picture,
+                "User information" (gender, looking_for, mobility)
+            `);
 
             if (error) {
                 console.error("Supabase Error:", error);
@@ -65,8 +69,15 @@ const Search = () => {
                 return;
             }
 
+            // Retrieve the logged-in user's ID from localStorage
+            const loggedInUserId = parseInt(localStorage.getItem('user_id'), 10); // Convert to integer
+
+            // Filter out the user whose ID matches the logged-in user's ID
+            const filteredData = data.filter(user => user.id !== loggedInUserId);
+            console.log(loggedInUserId);
+            console.log(filteredData);
             // Add calculated age and user information to the result
-            const usersWithDetails = data.map((user) => {
+            const usersWithDetails = filteredData.map((user) => {
                 const age = calculateAge(user.birthdate); // Calculate age based on birthdate
                 const { gender, looking_for, mobility } = user["User information"] || {}; // Handle missing user_information
 
@@ -88,6 +99,8 @@ const Search = () => {
             setLoading(false); // Set loading state to false after fetching
         }
     };
+
+
 
     // Filter Users Based on Criteria
     const applyFilters = () => {
@@ -251,24 +264,28 @@ const Search = () => {
                             renderItem={(item) => (
                                 <List.Item
                                     key={item.id}
+
+                                    onClick={() => navigate(`/profile`, { state: { user_id: item.id} })}
+                                        // Navigate to dynamic user link
                                     style={{
                                         display: 'flex',
                                         flexDirection: 'row',
-                                        marginBottom: '1.5vw',  // Reduced margin between items
-                                        padding: '1vw',  // Reduced padding for smaller list items
+                                        marginBottom: '1.5vw', // Reduced margin between items
+                                        padding: '1vw', // Reduced padding for smaller list items
                                         backgroundColor: themeColors.primary4,
                                         borderRadius: '8px',
                                         boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
                                         justifyContent: 'space-between',
+                                        cursor: 'pointer', // Add pointer cursor to indicate it's clickable
                                     }}
                                 >
                                     <Avatar
                                         src={item.profile_picture}
                                         style={{
                                             backgroundColor: themeColors.primary10,
-                                            marginRight: '1.5vw',  // Reduced margin
-                                            width: '5vw',  // Reduced avatar size
-                                            height: '5vw',  // Reduced avatar size
+                                            marginRight: '1.5vw', // Reduced margin
+                                            width: '5vw', // Reduced avatar size
+                                            height: '5vw', // Reduced avatar size
                                         }}
                                     >
                                         {item.name[0]}

@@ -1,6 +1,6 @@
 /* Default font size for various components */
 body, p, .ant-typography, .ant-btn, .ant-select,
-.ant-checkbox-wrapper, .ant-tag {
+.ant-checkbox-wrapper, .ant-tag, .ant-txtArea {
     font-size: 1rem; /* Default base font size */
 }
 

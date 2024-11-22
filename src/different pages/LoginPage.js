@@ -19,7 +19,7 @@ const LoginPage = () => {
             const { data, error } = await supabase
                 .from('Credentials')
                 .select('user_id')
-                .eq('email', email);
+                .eq('email', email)
 
             if (error) {
                 console.error('Error fetching user_id:', error.message);
@@ -39,8 +39,85 @@ const LoginPage = () => {
         }
     };
 
+    const getPfp = async (user_id) => {
+        try {
+            const { data, error } = await supabase
+                .from('User')
+                .select('profile_picture')
+                .eq('id', user_id);
+
+            if (error) {
+                console.error('Error fetching user_id:', error.message);
+                return null;
+            }
+
+            if (data.length === 0) {
+                console.log('No user found with the provided email.');
+                return null;
+            }
+
+            console.log('Fetched user_id:', data[0].profile_picture);
+            return data[0].profile_picture.toString(); // Ensure it's a string
+        } catch (err) {
+            console.error('Unexpected error:', err);
+            return null;
+        }
+    };
+
+    const getName = async (user_id) => {
+        try {
+            const { data, error } = await supabase
+                .from('User')
+                .select('name')
+                .eq('id', user_id);
+
+            if (error) {
+                console.error('Error fetching user_id:', error.message);
+                return null;
+            }
+
+            if (data.length === 0) {
+                console.log('No user found with the provided email.');
+                return null;
+            }
+
+            console.log('Fetched theme:', data[0].name);
+            return data[0].name.toString(); // Ensure it's a string
+        } catch (err) {
+            console.error('Unexpected error:', err);
+            return null;
+        }
+    };
+
+    const getTheme = async (user_id, setTheme) => {
+        try {
+            const { data, error } = await supabase
+                .from('User information')
+                .select('theme')
+                .eq('user_id', user_id);
+
+            if (error) {
+                console.error('Error fetching user theme:', error.message);
+                return;
+            }
+
+            if (data.length === 0) {
+                console.log('No user found with the provided user ID.');
+                return;
+            }
+
+            setTheme(data[0].theme)
+            const fetchedTheme = data[0].theme.toString(); // Ensure it's a string
+            console.log('Fetched theme:', fetchedTheme);
+
+            // Update the theme state
+            setTheme(fetchedTheme);
+        } catch (err) {
+            console.error('Unexpected error:', err);
+        }
+    };
+
     const handleLogin = async (values) => {
-        console.log('Form values:', values);
         const { email, password } = values;
 
         // Simulate a successful login response
@@ -55,12 +132,36 @@ const LoginPage = () => {
 
         // Fetch the user ID asynchronously and store it in localStorage
         const userId = await getUserIdByEmail(fakeLoginResponse.user.email);
+        const theme = await getTheme(userId);
+        const name = await getName(userId);
+        const pfp = await getPfp(userId);
 
         if (userId) {
             localStorage.setItem('user_id', userId);
             console.log('Fetched and stored user_id:', userId);
         } else {
             console.error('Failed to fetch user_id');
+        }
+
+        if (theme) {
+            localStorage.setItem('theme', theme);
+            console.log('Fetched and stored theme:', theme);
+        } else {
+            console.error('Failed to fetch theme',);
+        }
+
+        if (name) {
+            localStorage.setItem('name', name);
+            console.log('Fetched and stored theme:', name);
+        } else {
+            console.error('Failed to fetch theme',);
+        }
+
+        if (pfp) {
+            localStorage.setItem('profile_picture', pfp);
+            console.log('Fetched and stored theme:', pfp);
+        } else {
+            console.error('Failed to fetch theme',);
         }
 
         // Navigate to the home page after resolving all async operations

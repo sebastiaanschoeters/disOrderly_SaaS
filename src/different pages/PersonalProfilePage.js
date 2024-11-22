@@ -19,9 +19,8 @@ const supabase = createClient(
 );
 
 // Initial list of caretakers
-const initialCaretakers = [
-    { id: 1, name: 'John Doe', accessLevel: 'full', picture: 'https://i.pravatar.cc/150?img=1' },
-    ];
+const initialCaretakers =
+    { id: 1, name: 'John Doe', accessLevel: 'Volledige toegang', picture: 'https://i.pravatar.cc/150?img=1' };
 
 const debounce = (func, delay) => {
     let timer;
@@ -42,7 +41,7 @@ const useFetchProfileData = (actCode) => {
                 // Fetch user data
                 const { data: userData, error: userError } = await supabase
                     .from('User')
-                    .select('*')
+                    .select('id, name, birthdate, profile_picture')
                     .eq('id', actCode);
 
                 if (userError) throw userError;
@@ -52,7 +51,7 @@ const useFetchProfileData = (actCode) => {
                     // Fetch user information
                     const { data: userInfoData, error: userInfoError } = await supabase
                         .from('User information')
-                        .select('*')
+                        .select('theme, sexuality')
                         .eq('user_id', user.id);
 
                     if (userInfoError) throw userInfoError;
@@ -62,14 +61,8 @@ const useFetchProfileData = (actCode) => {
 
                     if (userInfoData && userInfoData.length > 0) {
                         const userInfo = userInfoData[0];
-                        user.bio = userInfo.bio;
-                        user.location = userInfo.location;
-                        user.looking_for = userInfo.looking_for;
-                        user.living_situation = userInfo.living_situation;
-                        user.mobility = userInfo.mobility;
                         user.theme = userInfo.theme;
                         user.sexuality = userInfo.sexuality;
-                        user.gender = userInfo.gender;
 
                         if (userInfo.theme) {
                             try {
@@ -102,7 +95,7 @@ const useFetchProfileData = (actCode) => {
 };
 
 const ProfileCard = () => {
-    const { profileData, isLoading, error } = useFetchProfileData('1519');
+    const { profileData, isLoading, error } = useFetchProfileData(localStorage.getItem('user_id'));
     const [theme, setTheme] = useState('blauw');
     const [isDarkMode, setIsDarkMode] = useState(false);
     const themeKey = isDarkMode ? `${theme}_donker` : theme;
@@ -152,7 +145,8 @@ const ProfileCard = () => {
     const debouncedSaveTheme = debounce(async (newTheme, darkModeFlag) => {
         try {
             const themeData = [newTheme, darkModeFlag]; // Ensure both theme and dark mode flag are saved together
-            await saveField('theme', JSON.stringify(themeData)); // Save it as a stringified JSON array
+            await saveField('theme', JSON.stringify(themeData));
+            localStorage.setItem('theme',JSON.stringify(themeData))// Save it as a stringified JSON array
         } catch (error) {
             console.error('Error saving theme:', error);
         }
@@ -264,32 +258,32 @@ const ProfileCard = () => {
                     </strong>
                 </p>
 
-                {caretakers.map((caretaker) => (
-                    <div key={caretaker.id} style={{ display: 'flex', alignItems: 'center', gap: '2%', marginBottom: '20px' }}>
-                        <Avatar src={caretaker.picture} style={{ width: '40px', height: '40px', objectFit: 'cover' }} />
-                        <span style={{ width: '15%' }}>{caretaker.name}</span>
-                        <Select
-                            value={caretaker.accessLevel}
-                            onChange={(value) => handleAccessLevelChange(value, caretaker.id)}
-                            style={{ width: '78%' }}
-                        >
-                            <Select.Option value="Volledige toegang">Volledige toegang</Select.Option>
-                            <Select.Option value="Gesprekken">Gesprekken</Select.Option>
-                            <Select.Option value="Contacten">Contacten</Select.Option>
-                            <Select.Option value="Publiek profiel">Publiek profiel</Select.Option>
-                        </Select>
-
+                <p style={{ display: 'flex', alignItems: 'center', gap: '2%', marginBottom: '20px' }}>
+                    <div style={{ width: '20%', minWidth: '150px' }}>
+                        <Avatar src={caretakers.picture} style={{ width: '40px', height: '40px', objectFit: 'cover' }} />
+                        <span>{caretakers.name}</span>
                     </div>
-                ))}
+
+                    <Select
+                        style={{flex: 1, minWidth: '200px'}}
+                        value={caretakers.accessLevel}
+                        onChange={(value) => handleAccessLevelChange(value, caretakers.id)}
+                    >
+                        <Select.Option value="Volledige toegang">Volledige toegang</Select.Option>
+                        <Select.Option value="Gesprekken">Gesprekken</Select.Option>
+                        <Select.Option value="Contacten">Contacten</Select.Option>
+                        <Select.Option value="Publiek profiel">Publiek profiel</Select.Option>
+                    </Select>
+                </p>
 
                 <Divider />
 
-                <p style={{ display: 'flex', alignItems: 'center', gap: '2%' }}>
-                    <strong style={{ width: '20%' }}>
+                <p style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '2%' }}>
+                    <strong style={{ width: '20%', minWidth: '150px' }}>
                         <HeartOutlined /> Ik ben geïntereseerd in:
                     </strong>
                     <Select
-                        style={{ width: '78%' }}
+                        style={{flex: 1, minWidth: '200px'}}
                         placeholder="Selecteer seksualiteit"
                         value={sexuality}
                         options={[

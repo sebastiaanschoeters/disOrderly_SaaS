@@ -106,6 +106,7 @@ const LoginPage = () => {
                 return;
             }
 
+            setTheme(data[0].theme)
             const fetchedTheme = data[0].theme.toString(); // Ensure it's a string
             console.log('Fetched theme:', fetchedTheme);
 

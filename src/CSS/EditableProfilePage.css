@@ -1,9 +1,11 @@
 .delete-button {
-    opacity: 0.5 !important; /* Default transparency */
-    transition: opacity 0.3s ease !important; /* Smooth transition */
+    opacity: 0.3 !important; /* Default transparency */
+    transition: opacity 0.5s ease !important; /* Smooth transition */
+    font-size: 122px !important;
 }
 
 .delete-button:hover {
     opacity: 1 !important; /* Fully visible on hover */
     background-color: transparent !important;
+    font-size: 155px !important;
 }

@@ -1,18 +1,19 @@
-import React, {useEffect, useRef, useState} from 'react';
-import {Avatar, Button, Divider, Select, Checkbox, Upload, ConfigProvider, Spin, Carousel, message} from 'antd';
+import React, {useEffect, useState} from 'react';
+import {Avatar, Button, Carousel, Checkbox, ConfigProvider, Divider, message, Select, Spin, Upload} from 'antd';
 import {
     BookOutlined,
-    UploadOutlined,
-    EnvironmentOutlined,
-    UserOutlined,
-    HeartOutlined,
-    StarOutlined,
-    HomeOutlined,
     CarOutlined,
-    PlusCircleOutlined,
     DeleteOutlined,
+    EnvironmentOutlined,
+    HeartOutlined,
+    HomeOutlined,
+    LeftOutlined,
     PictureOutlined,
-    LeftOutlined, RightOutlined
+    PlusCircleOutlined,
+    RightOutlined,
+    StarOutlined,
+    UploadOutlined,
+    UserOutlined
 } from '@ant-design/icons';
 import 'antd/dist/reset.css';
 import '../CSS/AntDesignOverride.css';
@@ -198,7 +199,6 @@ const ProfileCard = () => {
     ]);
     const [uploadingPicture, setUploadingPicture] = useState(false);
     const [removingPicture, setRemovingPicture] = useState(false);
-    const imgRefs= useRef([]);
     const [location, setLocation] = useState(null);
     const [gender, setGender] = useState('')
     const [biography, setBiography] = useState('');
@@ -280,11 +280,6 @@ const ProfileCard = () => {
         console.log(list_of_images)
     }, [pictures]);
 
-    useEffect(() => {
-        imgRefs.current = images.map((_, index) => imgRefs.current[index] || null);
-    }, [images]);
-
-
     // Simplified slides calculation
     const calculateSlidesToShow = (imageCount) => {
         const width = window.innerWidth;
@@ -299,11 +294,11 @@ const ProfileCard = () => {
         return Math.min(slides, imageCount);
     };
 
-    const [slidesToShow, setSlidesToShow] = useState(calculateSlidesToShow(images.length)+1)
+    const [slidesToShow, setSlidesToShow] = useState(calculateSlidesToShow(images.length+1))
 
     useEffect(() => {
         const handleResize = () => {
-            setSlidesToShow(calculateSlidesToShow(images.length)+1);
+            setSlidesToShow(calculateSlidesToShow(images.length+1));
         };
 
         window.addEventListener('resize', handleResize);
@@ -604,11 +599,8 @@ const ProfileCard = () => {
 
             if (dbInsertError) throw dbInsertError;
 
-            setImages((prevImages) => {
-                const updatedImages = [...prevImages, imageUrlWithCacheBuster];
-                imgRefs.current = updatedImages.map((_, index) => imgRefs.current[index] || null);
-                return updatedImages;
-            });
+            setImages([...images, imageUrlWithCacheBuster])
+
         } catch (error) {
             message.error(error.message);
         } finally {
@@ -638,16 +630,15 @@ const ProfileCard = () => {
                 .delete()
                 .eq('picture_url', imageUrlToRemove);
 
-            console.log("removed picture:", imageUrlToRemove)
-
             if (dbDeleteError) {
+                console.error("DB Delete Error:", dbDeleteError)
                 throw dbDeleteError;
             }
 
+            console.log("removed picture:", imageUrlToRemove)
+
             setImages((prevImages) => {
-                const updatedImages = prevImages.filter((url) => url !== imageUrlToRemove);
-                imgRefs.current = updatedImages.map((_, index) => imgRefs.current[index] || null);
-                return updatedImages;
+                return prevImages.filter((url) => url !== imageUrlToRemove);
             });
         } catch (error) {
             console.error('Error removing profile picture:', error);
@@ -1004,7 +995,6 @@ const ProfileCard = () => {
                                 }}
                             >
                                 <img
-                                    ref={(el) => (imgRefs.current[index] = el)}
                                     src={imageUrl}
                                     alt={`carousel-image-${index}`}
                                     style={{
@@ -1015,7 +1005,7 @@ const ProfileCard = () => {
                                         margin: '0 auto'
                                     }}
                                 />
-                                {imgRefs.current[index] && (
+                                {images[index] && (
                                     <Button
                                         type="text"
                                         onClick={() => handlePictureRemove(imageUrl)}
@@ -1030,8 +1020,6 @@ const ProfileCard = () => {
                                             padding: '0',
                                             cursor: 'pointer',
                                             fontSize: '96px',
-                                            opacity: 0.5,
-                                            transition: 'opacity 0.5s ease'
                                         }}
                                         className='delete-button'
                                         loading={removingPicture}

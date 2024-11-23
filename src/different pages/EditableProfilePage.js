@@ -16,10 +16,10 @@ import {
 } from '@ant-design/icons';
 import 'antd/dist/reset.css';
 import '../CSS/AntDesignOverride.css';
+import '../CSS/EditableProfilePage.css';
 import {antThemeTokens, ButterflyIcon, themes} from '../themes';
 import TextArea from "antd/es/input/TextArea";
 import {createClient} from "@supabase/supabase-js";
-
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
 
@@ -211,7 +211,6 @@ const ProfileCard = () => {
     const [lookingForArray, setLookingForArray] = useState([])
     const [locations, setLocations] = useState([])
     const [searchValue, setSearchValue] = useState(""); // For search functionality
-    const [slidesToShow, setSlidesToShow] = useState(3);
     const { pictures} = useFetchPicturesData(localStorage.getItem('user_id'));
     const { profileData, isLoading, error, interest} = useFetchProfileData(localStorage.getItem('user_id'));
 
@@ -278,45 +277,40 @@ const ProfileCard = () => {
             }
         }
         setImages(list_of_images);
+        console.log(list_of_images)
     }, [pictures]);
 
     useEffect(() => {
         imgRefs.current = images.map((_, index) => imgRefs.current[index] || null);
     }, [images]);
 
-    useEffect(() => {
-        updateSlidesToShow();  // Update on initial render
-        window.addEventListener('resize', updateSlidesToShow); // Listen for window resize
 
-        return () => {
-            window.removeEventListener('resize', updateSlidesToShow); // Clean up the listener
-        };
-    }, []);
-
-    const updateSlidesToShow = () => {
+    // Simplified slides calculation
+    const calculateSlidesToShow = (imageCount) => {
         const width = window.innerWidth;
-        const totalImages = images.length;
-
         let slides = 5.5;
 
-        if (width < 700){
-            slides = 1;
-        }else if (width < 1100){
-            slides = 1.5;
-        }else if (width < 1500) {
-            slides = 2.5;
-        } else if (width < 2000) {
-            slides = 3.5;
-        } else if (width < 3000) {
-            slides = 4.5;
-        }
-        if (totalImages < slides){
-            setSlidesToShow(totalImages+0.5);
-        }
-        else {
-            setSlidesToShow(slides);
-        }
+        if (width < 700) slides = 1;
+        else if (width < 1100) slides = 1.5;
+        else if (width < 1500) slides = 2.5;
+        else if (width < 2000) slides = 3.5;
+        else if (width < 3000) slides = 4.5;
+
+        return Math.min(slides, imageCount);
     };
+
+    const [slidesToShow, setSlidesToShow] = useState(calculateSlidesToShow(images.length)+1)
+
+    useEffect(() => {
+        const handleResize = () => {
+            setSlidesToShow(calculateSlidesToShow(images.length)+1);
+        };
+
+        window.addEventListener('resize', handleResize);
+
+        // Cleanup on unmount
+        return () => window.removeEventListener('resize', handleResize);
+    }, [images.length]);
 
     useEffect(() => {
         const fetchLocations = async (searchTerm = "") => {
@@ -644,6 +638,8 @@ const ProfileCard = () => {
                 .delete()
                 .eq('picture_url', imageUrlToRemove);
 
+            console.log("removed picture:", imageUrlToRemove)
+
             if (dbDeleteError) {
                 throw dbDeleteError;
             }
@@ -719,7 +715,6 @@ const ProfileCard = () => {
         }
     };
 
-
     const calculateAge = (birthdate) => {
         if (!birthdate) return 'Onbekend';
         const birthDate = new Date(birthdate);
@@ -772,8 +767,9 @@ const ProfileCard = () => {
             <div style={{
                 padding: '20px',
                 position: 'relative',
-                minWidth: '100%',
+                minWidth: '100vw',
                 minHeight: '100vh',
+                overflow: 'hidden',
                 backgroundColor: themeColors.primary2,
                 color: themeColors.primary10,
                 zIndex: '0'
@@ -783,8 +779,8 @@ const ProfileCard = () => {
                 <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', paddingBottom: '20px'}}>
                     <div style={{display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '10px'}}>
                         <Avatar
-                            src={profilePicture || "https://example.com/photo.jpg"} // Fallback to default avatar
-                            alt={profileData.name || "No Name"}
+                            src={profilePicture}
+                            alt={profileData.name}
                             style={{
                                 minWidth: '200px',
                                 minHeight: '200px',
@@ -985,6 +981,7 @@ const ProfileCard = () => {
                         infinite={false}
                         style={{
                             maxWidth: '80%',
+                            height: '200px',
                             margin: '0 auto'
                         }}
                     >
@@ -1020,17 +1017,23 @@ const ProfileCard = () => {
                                 />
                                 {imgRefs.current[index] && (
                                     <Button
-                                        type="primary"
+                                        type="text"
                                         onClick={() => handlePictureRemove(imageUrl)}
                                         style={{
+                                            height: '200px',
+                                            width: '200px',
                                             position: 'relative',
-                                            top: `calc(10px - ${imgRefs.current[index]?.offsetHeight}px)`,
-                                            left: `calc(50% - ${imgRefs.current[index]?.offsetWidth / 2}px + 10px)`,
+                                            top: `-100px`,
+                                            left: `50%`,
+                                            transform: 'translate(-50%, -50%)',
                                             zIndex: 10,
-                                            padding: '5px 10px',
+                                            padding: '0',
                                             cursor: 'pointer',
-                                            borderRadius: '5px'
+                                            fontSize: '96px',
+                                            opacity: 0.5,
+                                            transition: 'opacity 0.5s ease'
                                         }}
+                                        className='delete-button'
                                         loading={removingPicture}
                                     >
                                         <DeleteOutlined/>

@@ -35,6 +35,17 @@ body, p, .ant-typography, .ant-btn, .ant-select,
     background-color: var(--primary1) !important;
 }
 
+.ant-select-multiple .ant-select-selection-item {
+    background-color: var(--primary2) !important;
+}
+.ant-select-selection-item-remove {
+    color: var(--primary6) !important;
+}
+
+.ant-select-selection-item-remove:hover {
+    color: var(--primary9) !important;
+}
+
 .ant-tag {
     border-radius: 2rem;
     padding: 1rem 1rem;

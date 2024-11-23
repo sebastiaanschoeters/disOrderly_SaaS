@@ -1,0 +1,9 @@
+.delete-button {
+    opacity: 0.5 !important; /* Default transparency */
+    transition: opacity 0.3s ease !important; /* Smooth transition */
+}
+
+.delete-button:hover {
+    opacity: 1 !important; /* Fully visible on hover */
+    background-color: transparent !important;
+}

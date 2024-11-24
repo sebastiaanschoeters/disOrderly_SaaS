@@ -32,6 +32,10 @@ body, p, .ant-typography, .ant-btn, .ant-select,
     font-size: 1rem; /* Font size for dropdown options */
 }
 
+.ant-select-arrow {
+    color: var(--primary6) !important;
+}
+
 .ant-select-item-option-selected{
     background-color: var(--primary1) !important;
 }
@@ -69,6 +73,20 @@ h1, h2 {
 .ant-radio-wrapper {
     display: block;
     margin-bottom: 16px; /* Adjust this value for more or less space */
+}
+
+.ant-btn-primary {
+    box-shadow: 3px 3px 3px var(--primary9);
+}
+
+.ant-btn-primary:hover{
+    box-shadow: 5px 5px 5px var(--primary9);
+    transform: translateY(-2px);
+}
+
+.ant-btn-primary:active{
+    box-shadow: 1px 1px 1px var(--primary9);
+    transform: translateY(2px);
 }
 
 .butterfly-icon{

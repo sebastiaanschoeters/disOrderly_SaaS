@@ -318,6 +318,18 @@ const ProfileCard = () => {
     const theme = profileData.theme || 'blauw';
     const themeColors = themes[theme] || themes.blauw;
 
+
+    const applyThemeToCSS = (themeColors) => {
+        const root = document.documentElement;
+        Object.entries(themeColors).forEach(([key, value]) => {
+            root.style.setProperty(`--${key}`, value);
+        });
+    };
+
+    useEffect(() => {
+        applyThemeToCSS(themeColors); // Apply the selected theme
+    }, [themeColors]);
+
     // Current user location (with fallback)
     const currentUserLocation = locationData
         ? { latitude: locationData.Latitude, longitude: locationData.Longitude }

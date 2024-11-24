@@ -1,19 +1,12 @@
 import React, {useEffect, useState} from 'react';
-import {Avatar, Button, Carousel, Checkbox, ConfigProvider, Divider, message, Select, Spin, Upload} from 'antd';
+import {Avatar, Button, ConfigProvider, Divider, Select, Switch, Upload} from 'antd';
 import {
-    BookOutlined,
-    CarOutlined,
-    DeleteOutlined,
-    EnvironmentOutlined,
-    HeartOutlined,
-    HomeOutlined,
-    LeftOutlined, MailOutlined, PhoneOutlined,
-    PictureOutlined,
-    PlusCircleOutlined,
-    RightOutlined,
-    StarOutlined, TeamOutlined,
-    UploadOutlined,
-    UserOutlined
+    BgColorsOutlined,
+    CodeOutlined,
+    MailOutlined,
+    PhoneOutlined,
+    TeamOutlined,
+    UploadOutlined
 } from '@ant-design/icons';
 import 'antd/dist/reset.css';
 import '../CSS/AntDesignOverride.css';
@@ -32,7 +25,6 @@ const debounce = (func, delay) => {
         timer = setTimeout(() => func(...args), delay);
     };
 };
-
 
 const useFetchProfileData = (actCode) => {
     const [profileData, setProfileData] = useState({});
@@ -83,7 +75,7 @@ const useFetchProfileData = (actCode) => {
                     // Set the user profile data with the theme
                     setProfileData({
                         ...user,
-                        theme: isDarkMode ? `${parsedTheme}_donker` : parsedTheme
+                        theme: [parsedTheme, isDarkMode]
                     });
                 }
             } catch (error) {
@@ -101,12 +93,14 @@ const useFetchProfileData = (actCode) => {
 };
 
 const ProfileCard = () => {
-    const [theme, setTheme] = useState('blauw');
-    const themeColors = themes[theme] || themes.blauw;
-    const [profilePicture, setProfilePicture] = useState('https://example.com/photo.jpg');
-    const [uploading, setUploading] = useState(false);
     // const { profileData, isLoading, error, interest} = useFetchProfileData(localStorage.getItem('user_id'));
     const { profileData, isLoading, error} = useFetchProfileData(1111)
+    const [theme, setTheme] = useState('blauw');
+    const [isDarkMode, setIsDarkMode] = useState(false);
+    const themeKey = isDarkMode ? `${theme}_donker` : theme;
+    const themeColors = themes[themeKey] || themes.blauw;
+    const [profilePicture, setProfilePicture] = useState('https://example.com/photo.jpg');
+    const [uploading, setUploading] = useState(false);
     const [phoneNumber, setPhoneNumber] = useState('')
     const [email, setEmail] = useState('')
 
@@ -123,7 +117,13 @@ const ProfileCard = () => {
 
     useEffect(() => {
         if (profileData.theme) {
-            setTheme(profileData.theme);
+            try {
+                const [savedTheme, darkModeFlag] = profileData.theme;
+                setTheme(savedTheme);
+                setIsDarkMode(darkModeFlag);
+            } catch (error) {
+                console.error('Error parsing theme data:', error);
+            }
         }
         if (profileData.profile_picture) {
             const imageUrlWithCacheBuster = `${profileData.profile_picture}?t=${new Date().getTime()}`;
@@ -154,6 +154,25 @@ const ProfileCard = () => {
 
     const debounceSavePhoneNumber = debounce((value) => saveField('phone_number', value), 1000);
     const debounceSaveEmail = debounce((value) => saveField('email', value), 1000);
+    const debouncedSaveTheme = debounce(async (newTheme, darkModeFlag) => {
+        try {
+            const themeData = [newTheme, darkModeFlag]; // Ensure both theme and dark mode flag are saved together
+            await saveField('theme', JSON.stringify(themeData));
+            localStorage.setItem('theme',JSON.stringify(themeData))// Save it as a stringified JSON array
+        } catch (error) {
+            console.error('Error saving theme:', error);
+        }
+    }, 500);
+
+    const handleThemeChange = (value) => {
+        setTheme(value);
+        debouncedSaveTheme(value, isDarkMode); // Save theme with dark mode flag
+    };
+
+    const handleThemeToggle = (checked) => {
+        setIsDarkMode(checked);
+        debouncedSaveTheme(theme, checked); // Save theme with dark mode flag
+    };
 
     const handlePhoneNumberChange = (e) => {
         const newValue = e.target.value;
@@ -253,7 +272,7 @@ const ProfileCard = () => {
                         />
                         <div>
                             <h2 style={{margin: '0', textAlign: 'center'}}>
-                                {profileData.name || 'Naam'}
+                                {profileData.name || 'Naam'}, {profileData.organization || 'Organizatie'}
                             </h2>
                             <div style={{marginTop: '10px', marginBottom: '20px'}}>
                                 <Upload showUploadList={false} beforeUpload={() => false}
@@ -268,12 +287,41 @@ const ProfileCard = () => {
 
                 <Divider/>
 
+                <p style={{display: 'flex', alignItems: 'center', gap: '2%'}}>
+                    <strong style={{width: '20%', minWidth: '150px'}}>
+                        <BgColorsOutlined/> Kies een kleur:
+                    </strong>
+                    <div style={{display: 'flex', flexGrow: 1, alignItems: 'center'}}>
+                        <Select
+                            style={{flexGrow: 1, marginRight: '10px'}}
+                            placeholder="Selecteer een kleur"
+                            options={Object.keys(themes)
+                                .filter((key) => !key.endsWith('_donker'))
+                                .map((themeKey) => ({
+                                    value: themeKey,
+                                    label: themeKey.charAt(0).toUpperCase() + themeKey.slice(1),
+                                }))}
+                            value={theme}
+                            onChange={handleThemeChange} // When theme is selected, update it
+                        />
+                        <Switch
+                            checked={isDarkMode}
+                            onChange={handleThemeToggle} // When dark mode is toggled, update it
+                            checkedChildren={<span>Donker</span>}
+                            unCheckedChildren={<span>Licht</span>}
+                            style={{marginLeft: 'auto'}}
+                        />
+                    </div>
+                </p>
+
+                <Divider/>
+
                 <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
                     <strong style={{width: '20%', minWidth: '150px'}}>
                         <PhoneOutlined/> Telefoon nummer:
                     </strong>
                     <TextArea
-                        style={{width: '100%', paddingBottom: '20px'}}
+                        style={{flex: 1, minWidth: '200px'}}
                         placeholder="Geef je telefoon nummer in"
                         value={phoneNumber}
                         onChange={handlePhoneNumberChange}
@@ -287,7 +335,7 @@ const ProfileCard = () => {
                         <MailOutlined/> E-mail:
                     </strong>
                     <TextArea
-                        style={{width: '100%', paddingBottom: '20px'}}
+                        style={{minWidth: '200px', flex: 1}}
                         placeholder="Geef je e-mail adres in"
                         value={email}
                         onChange={handleEmailChange}
@@ -296,14 +344,36 @@ const ProfileCard = () => {
 
                 <Divider/>
 
-                <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
-                    <strong style={{width: '20%', minWidth: '150px'}}>
-                        <TeamOutlined/> Organizatie:
-                    </strong>
-                    <p>
-                        {profileData.organization}
-                    </p>
+                <p style={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '100%',
+                    gap: '20%'
+                }}>
+                    <Button
+                        type='primary'
+                        icon={<TeamOutlined/>}
+                        style={{
+                            margin: '10px'
+                        }}
+                    >
+                        Bekijk clienten
+                    </Button>
+
+                    <Button
+                        type='primary'
+                        icon={<CodeOutlined/>}
+                        style={{
+                            margin: '10px'
+                        }}
+                    >
+                        Genereer een nieuwe activatie code
+                    </Button>
+
                 </p>
+
             </div>
         </ConfigProvider>
     );

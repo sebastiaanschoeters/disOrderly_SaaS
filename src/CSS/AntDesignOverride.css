@@ -19,6 +19,7 @@ body, p, .ant-typography, .ant-btn, .ant-select,
 
 .ant-btn-primary{
     font-size: 1.5rem;
+    padding: 20px;
 }
 
 /* Specific styles for Select component */

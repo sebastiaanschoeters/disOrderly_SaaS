@@ -16,6 +16,7 @@ import Hangman from "./different pages/Hangman";
 import EditableProfilePage from "./different pages/EditableProfilePage";
 import CaretakerProfilePage from "./different pages/CaretakerProfilePage";
 import CaretakerEditableProfile from "./different pages/CaretakerEditableProfile";
+import ClientOverview from "./different pages/ClientOverview";
 
 const App = () => {
     return (
@@ -30,6 +31,7 @@ const App = () => {
                 <Route path="/hangman" element={<Hangman />} />
                 <Route path="/caretakerProfile" element={<CaretakerProfilePage />} />
                 <Route path="/caretakerProfileEdit" element={<CaretakerEditableProfile />} />
+                <Route path="/clientOverview" element={<ClientOverview />} />
 
                 {/* Protected routes */}
                 <Route

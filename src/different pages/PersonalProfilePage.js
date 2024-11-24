@@ -38,7 +38,7 @@ const useFetchProfileData = (actCode) => {
                 // Fetch user data
                 const { data: userData, error: userError } = await supabase
                     .from('User')
-                    .select('id, name, birthdate, profile_picture')
+                    .select('id, name, birthdate, profile_picture, caretaker, access_level')
                     .eq('id', actCode);
 
                 if (userError) throw userError;
@@ -72,6 +72,16 @@ const useFetchProfileData = (actCode) => {
                         }
                     }
 
+                    const {data: caretakerInfo, error: cartakerInfoError}= await supabase
+                        .from('Caretaker')
+                        .select('name, profile_picture')
+                        .eq('id', user.caretaker)
+
+                    if (caretakerInfo.length > 0){
+                        const caretaker = caretakerInfo[0];
+                        user.caretaker = {name: caretaker.name, profilePicture: caretaker.profile_picture, accessLevel: user.access_level}
+                    }
+
                     // Set the user profile data with the theme
                     setProfileData({
                        ...user,
@@ -98,7 +108,7 @@ const ProfileCard = () => {
     const themeKey = isDarkMode ? `${theme}_donker` : theme;
     const themeColors = themes[themeKey] || themes.blauw;
     const [profilePicture, setProfilePicture] = useState('https://example.com/photo.jpg');
-    const [caretakers, setCaretakers] = useState(initialCaretakers);
+    const [caretaker, setCaretaker] = useState({});
     const [sexuality, setSexuality] = useState('');
 
     const applyThemeToCSS = (themeColors) => {
@@ -132,6 +142,9 @@ const ProfileCard = () => {
         if (profileData.sexuality) {
             setSexuality(profileData.sexuality);
         }
+        if (profileData.caretaker){
+            setCaretaker(profileData.caretaker)
+        }
     }, [profileData]);
 
     console.log(profileData)
@@ -164,7 +177,7 @@ const ProfileCard = () => {
     const debouncedSaveSexuality = debounce((value) => saveField('sexuality', value), 1000);
 
     const handleAccessLevelChange = (value, id) => {
-        setCaretakers((prevCaretakers) =>
+        setCaretaker((prevCaretakers) =>
             prevCaretakers.map((caretaker) =>
                 caretaker.id === id ? { ...caretaker, accessLevel: value } : caretaker
             )
@@ -269,14 +282,14 @@ const ProfileCard = () => {
 
                 <p style={{ display: 'flex', alignItems: 'center', gap: '2%', marginBottom: '20px' }}>
                     <div style={{ width: '20%', minWidth: '150px' }}>
-                        <Avatar src={caretakers.picture} style={{ width: '40px', height: '40px', objectFit: 'cover' }} />
-                        <span>{caretakers.name}</span>
+                        <Avatar src={caretaker.profilePicture} style={{ width: '40px', height: '40px', objectFit: 'cover', marginRight: '15px' }} />
+                        <span>{caretaker.name}</span>
                     </div>
 
                     <Select
                         style={{flex: 1, minWidth: '200px'}}
-                        value={caretakers.accessLevel}
-                        onChange={(value) => handleAccessLevelChange(value, caretakers.id)}
+                        value={caretaker.accessLevel}
+                        onChange={(value) => handleAccessLevelChange(value, caretaker.id)}
                     >
                         <Select.Option value="Volledige toegang">Volledige toegang</Select.Option>
                         <Select.Option value="Gesprekken">Gesprekken</Select.Option>

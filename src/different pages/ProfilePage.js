@@ -167,7 +167,7 @@ const ProfileDetail = ({ label, value, icon }) => (
 
 const ProfileCard = () => {
     const location = useLocation();
-    const { state } = location;
+    const {state} = location;
     const [theme, setTheme] = useState('blauw');
     const [profilePicture, setProfilePicture] = useState(''); /* get images from database */
     const [images, setImages] = useState([
@@ -176,13 +176,14 @@ const ProfileCard = () => {
         'https://i.pravatar.cc/150?img=3',
         'https://i.pravatar.cc/150?img=4'
     ]);
-    const { profileData, isLoading, error } = useFetchProfileData(state.user_id);//state.user_id) ; // Replace with dynamic ActCode as needed
-    const { pictures} = useFetchPicturesData(state.user_id);
+    const {profileData, isLoading, error} = useFetchProfileData(state.user_id);//state.user_id) ; // Replace with dynamic ActCode as needed
+    const {pictures} = useFetchPicturesData(state.user_id);
     const themeColors = themes[theme] || themes.blauw;
     const [slidesToShow, setSlidesToShow] = useState(3);
 
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [newMessage, setNewMessage] = useState('');
+    const [isChatroomExistent, setChatroomExistent] = useState(false); // State to track chatroom existence
     const navigate = useNavigate();
 
     const currentUserLocation = { latitude: 50.8, longitude: 4.3333333 }; // Use real location data
@@ -327,36 +328,88 @@ const ProfileCard = () => {
         if (!newMessage.trim()) return;
 
         try {
+            const senderId = parseInt(localStorage.getItem('user_id'), 10);
+            const receiverId = state.user_id;
 
+            // Insert into Chatroom table and return the 'id' of the newly inserted row
             const { data: chatroomData, error: chatroomError } = await supabase
                 .from('Chatroom')
                 .insert([{
-                    sender_id: parseInt(localStorage.getItem('user_id'), 10),
-                    // reciever_id
-                    last_message: newMessage,
-                    last_message_timestamp: new Date(),
-                }]);
+                    sender_id: senderId,
+                    receiver_id: receiverId,
+                    acceptance: false,
+                    last_sender_id: senderId
+                }])
+                .select('id')  // Specify the column(s) to return (in this case, 'id')
 
-            if (chatroomError) throw chatroomError;
+            if (chatroomError) {
+                console.error('Error inserting chatroom:', chatroomError);
+                throw chatroomError;
+            }
 
+            // Ensure the ID is available
+            const chatroomId = chatroomData?.[0]?.id;
+
+            if (!chatroomId) {
+                console.error('Chatroom ID is missing');
+                return;  // Exit early if the ID is missing
+            }
+
+            console.log('Chatroom created with ID:', chatroomId);
+
+            // Insert the message into the Messages table
             const { data: messageData, error: messageError } = await supabase
                 .from('Messages')
                 .insert([{
-                    chatroom_id: profileData.chatroom_id,
-                    sender_id: parseInt(localStorage.getItem('user_id'), 10),
+                    sender_id: senderId,
+                    chatroom_id: chatroomId,
                     message_content: newMessage,
                 }]);
 
-            if (messageError) throw messageError;
+            if (messageError) {
+                console.error('Error inserting message:', messageError);
+                throw messageError;
+            }
 
+            // Hide the modal, clear the message, and navigate to the chatroom
             setIsModalVisible(false);
             setNewMessage('');
-            navigate(`/chatroom/${profileData.chatroom_id}`); // Navigate to the chatroom page
+            setChatroomExistent(true);
+
 
         } catch (error) {
-            console.error('Error sending message or inserting chatroom:', error); // Log any errors
+            console.error('Error sending message or inserting data:', error);
+            // Optionally handle user-friendly error messaging
         }
     };
+
+    useEffect(() => {
+        const checkChatroom = async () => {
+            const senderId = parseInt(localStorage.getItem('user_id'), 10);
+            const receiverId = state.user_id;
+
+            try {
+                // Check if the chatroom exists between sender and receiver
+                const { data: chatroomData, error } = await supabase
+                    .from('Chatroom')
+                    .select('id')
+                    .or(`and(sender_id.eq.${senderId},receiver_id.eq.${receiverId}),and(sender_id.eq.${receiverId},receiver_id.eq.${senderId})`)
+                    .single();
+
+                if (error) {
+                    console.error('Error fetching chatroom:', error);
+                    return;
+                }
+
+                // If chatroomData is found, set the state to true
+                setChatroomExistent(!!chatroomData);
+            } catch (error) {
+                console.error('Error checking chatroom:', error);
+            }
+        };
+
+        checkChatroom();
+    }, [state.user_id]);
 
     const handleCancel = () => {
         setIsModalVisible(false);
@@ -455,9 +508,10 @@ const ProfileCard = () => {
                         right: '20px',
                         zIndex: 1000
                     }}
+                    disabled={isChatroomExistent}
                     onClick={handleMessage}
                 >
-                    Chat met {profileData?.name || 'de gebruiker'}
+                    {isChatroomExistent ? 'chat is al gestart' : `Chat met ${profileData?.name || 'de gebruiker'}`}
                 </Button>
                 <Divider/>
                 {images.length > 0 && (
@@ -509,9 +563,6 @@ const ProfileCard = () => {
                     visible={isModalVisible}
                     onCancel={handleCancel}
                     footer={[
-                        <Button key="cancel" onClick={handleCancel}>
-                            Annuleren
-                        </Button>,
                         <Button key="send" type="primary" onClick={handleSendMessage} >
                             Verzenden
                         </Button>,

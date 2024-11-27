@@ -106,7 +106,7 @@ const ChatPage = () => {
             width: '100vw',
             height: '100vh',
             display: 'flex',
-            justifyContent: 'center',
+             justifyContent: 'center',
             alignItems: 'center',
             backgroundColor: themeColors.primary2, // Background color for the entire screen
         },

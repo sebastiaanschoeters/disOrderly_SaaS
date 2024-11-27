@@ -245,8 +245,11 @@ const ChatSuggestionPage = () => {
                     visible={isModalVisible}
                     onOk={handleSave}
                     onCancel={handleCancel}
-                    okText="Save"
-                    cancelText="Cancel"
+                    footer={[
+                        <Button key="send" type="primary" onClick={handleSave} >
+                            Opslaan
+                        </Button>,
+                    ]}
                 >
                     <Input.TextArea
                         value={editedMessage}

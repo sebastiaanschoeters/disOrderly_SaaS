@@ -63,11 +63,25 @@ const ChatPage = () => {
         };
     }, [chatroomId]); // Re-run the effect when chatroomId changes
 
+    useEffect(() => {
+        if (isScrolledToBottom) {
+            scrollToBottom(); // Scroll only if user is near bottom
+        }
+    }, [messages]);
 
     const handleScroll = () => {
         if (messageListRef.current) {
-            const isAtBottom = messageListRef.current.scrollHeight - messageListRef.current.scrollTop === messageListRef.current.clientHeight;
+            const isAtBottom =
+                messageListRef.current.scrollHeight - messageListRef.current.scrollTop <=
+                messageListRef.current.clientHeight + 50; // Allow a small offset (50px)
+
             setIsScrolledToBottom(isAtBottom);
+        }
+    };
+
+    const scrollToBottom = () => {
+        if (dummyRef.current) {
+            dummyRef.current.scrollIntoView({ behavior: 'smooth' });
         }
     };
 
@@ -88,13 +102,12 @@ const ChatPage = () => {
             .update({ last_sender_id: userId })
             .eq('id', chatroomId);
 
-        setNewMessage("");
-    };
+        setNewMessage(""); // Clear the input field
 
-    const handleScrollDown = () => {
-        if (messageListRef.current) {
-            dummyRef.current.scrollIntoView({ behavior: 'smooth' });
-        }
+        // Automatically scroll to bottom after sending a message
+        setTimeout(() => {
+            scrollToBottom(); // Smooth scroll to bottom after DOM updates
+        }, 100);
     };
 
     const handleProfile = () => {
@@ -262,8 +275,9 @@ const ChatPage = () => {
                             })}
                             <Button
                                 style={styles.scrollButton}
-                                onClick={handleScrollDown}
+                                onClick={scrollToBottom}
                                 icon={<ArrowDownOutlined />}
+                                hidden={isScrolledToBottom}
                             />
                             <div ref={dummyRef} />
                         </div>

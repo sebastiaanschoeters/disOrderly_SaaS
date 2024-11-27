@@ -12,7 +12,7 @@ const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbG
 const ChatPage = () => {
     const location = useLocation();
     const { profileData } = location.state || {};
-    const { name, profilePicture, chatroomId } = profileData || {};
+    const { name, profilePicture, chatroomId, otherUserId } = profileData || {};
     const navigate = useNavigate();
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState("");
@@ -244,8 +244,8 @@ const ChatPage = () => {
                         <div style={styles.header}>
                             <Avatar
                                 src={profilePicture || 'default-avatar.png'}
-                                onClick={handleProfile}
                                 style={styles.avatar}
+                                onClick={() => navigate(`/profile`, { state: { user_id: otherUserId} })}
                             >
                                 U
                             </Avatar>

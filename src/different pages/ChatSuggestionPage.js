@@ -217,7 +217,7 @@ const ChatSuggestionPage = () => {
         <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
             <div style={styles.container}>
                 <div style={styles.header}>
-                    <Avatar src={profilePicture || 'default-avatar.png'} onClick={handleProfile} style={styles.headerAvatar}>U</Avatar>
+                    <Avatar src={profilePicture || 'default-avatar.png'} onClick={() => navigate(`/profile`, { state: { user_id: otherUserId} })} style={styles.headerAvatar}>U</Avatar>
                     <Title level={2} style={{ margin: 0, color: themeColors.primary10 }}h2>{`${name}`}</Title>
                 </div>
                 <div style={styles.messageContainer}>

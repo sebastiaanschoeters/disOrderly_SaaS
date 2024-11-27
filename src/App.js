@@ -77,7 +77,7 @@ const App = () => {
                     }
                 />
                 <Route
-                    path="/chat/:chatroomId"
+                    path="/chat"
                     element={
                         <ProtectedRoute>
                             <ChatPage />
@@ -85,7 +85,7 @@ const App = () => {
                     }
                 />
                 <Route
-                    path="/chatSuggestion/:chatroomId"
+                    path="/chatSuggestion"
                     element={
                         <ProtectedRoute>
                             <ChatSuggestionPage />

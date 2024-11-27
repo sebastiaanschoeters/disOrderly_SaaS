@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {Tag, Avatar, Button, Divider, ConfigProvider, Spin, Carousel} from 'antd';
+import {Tag, Avatar, Button,Input, Modal, Divider, ConfigProvider, Spin, Carousel} from 'antd';
 import {
     MessageOutlined,
     EnvironmentOutlined,
@@ -13,7 +13,7 @@ import { createClient } from "@supabase/supabase-js";
 import 'antd/dist/reset.css';
 import '../CSS/AntDesignOverride.css';
 import { ButterflyIcon, antThemeTokens, themes } from '../themes';
-import { useLocation } from 'react-router-dom';
+import {useLocation, useNavigate} from 'react-router-dom';
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
 
@@ -181,6 +181,10 @@ const ProfileCard = () => {
     const themeColors = themes[theme] || themes.blauw;
     const [slidesToShow, setSlidesToShow] = useState(3);
 
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [newMessage, setNewMessage] = useState('');
+    const navigate = useNavigate();
+
     const currentUserLocation = { latitude: 50.8, longitude: 4.3333333 }; // Use real location data
 
     useEffect(() => {
@@ -315,6 +319,50 @@ const ProfileCard = () => {
         />
     );
 
+    const handleMessage = async () => {
+        setIsModalVisible(true);
+    };
+
+    const handleSendMessage = async () => {
+        if (!newMessage.trim()) return;
+
+        try {
+
+            const { data: chatroomData, error: chatroomError } = await supabase
+                .from('Chatroom')
+                .insert([{
+                    sender_id: parseInt(localStorage.getItem('user_id'), 10),
+                    // reciever_id
+                    last_message: newMessage,
+                    last_message_timestamp: new Date(),
+                }]);
+
+            if (chatroomError) throw chatroomError;
+
+            const { data: messageData, error: messageError } = await supabase
+                .from('Messages')
+                .insert([{
+                    chatroom_id: profileData.chatroom_id,
+                    sender_id: parseInt(localStorage.getItem('user_id'), 10),
+                    message_content: newMessage,
+                }]);
+
+            if (messageError) throw messageError;
+
+            setIsModalVisible(false);
+            setNewMessage('');
+            navigate(`/chatroom/${profileData.chatroom_id}`); // Navigate to the chatroom page
+
+        } catch (error) {
+            console.error('Error sending message or inserting chatroom:', error); // Log any errors
+        }
+    };
+
+    const handleCancel = () => {
+        setIsModalVisible(false);
+        setNewMessage('');
+    };
+
     if (isLoading) return <Spin tip="Profiel laden..." />;
     if (error) return <p>Failed to load profile: {error}</p>;
 
@@ -398,7 +446,6 @@ const ProfileCard = () => {
                     icon={<CarOutlined />}
                 />
 
-                {/* Chat button in the bottom right */}
                 <Button
                     type="primary"
                     icon={<MessageOutlined />}
@@ -408,6 +455,7 @@ const ProfileCard = () => {
                         right: '20px',
                         zIndex: 1000
                     }}
+                    onClick={handleMessage}
                 >
                     Chat met {profileData?.name || 'de gebruiker'}
                 </Button>
@@ -455,6 +503,27 @@ const ProfileCard = () => {
                         </Carousel>
                     </>
                 )}
+
+                <Modal
+                    title={`Chat met ${profileData.name || 'de gebruiker'}`}
+                    visible={isModalVisible}
+                    onCancel={handleCancel}
+                    footer={[
+                        <Button key="cancel" onClick={handleCancel}>
+                            Annuleren
+                        </Button>,
+                        <Button key="send" type="primary" onClick={handleSendMessage} >
+                            Verzenden
+                        </Button>,
+                    ]}
+                >
+                    <Input.TextArea
+                        value={newMessage}
+                        onChange={(e) => setNewMessage(e.target.value)}
+                        rows={4}
+                        placeholder="Typ je bericht..."
+                    />
+                </Modal>
             </div>
         </ConfigProvider>
     );

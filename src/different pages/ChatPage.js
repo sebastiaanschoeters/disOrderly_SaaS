@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Avatar, Input, Button, ConfigProvider, Card } from 'antd';
-import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { antThemeTokens, themes } from '../themes';
+import {ArrowDownOutlined} from '@ant-design/icons';
 import { createClient } from "@supabase/supabase-js";
 import '../CSS/ChatPage.css';
 
@@ -11,11 +12,10 @@ const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbG
 const ChatPage = () => {
     const location = useLocation();
     const { profileData } = location.state || {};
-    const { name, profilePicture } = profileData || {};
+    const { name, profilePicture, chatroomId } = profileData || {};
     const navigate = useNavigate();
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState("");
-    const { chatroomId } = useParams();
     const userId = parseInt(localStorage.getItem('user_id'), 10);
 
     const [themeName, darkModeFlag] = JSON.parse(localStorage.getItem('theme')) || ['blauw', false];
@@ -30,6 +30,9 @@ const ChatPage = () => {
     }, [themeName, darkModeFlag]);
 
     const dummyRef = useRef(null);
+    const [isScrolledToBottom, setIsScrolledToBottom] = useState(true); // Track if at bottom
+    const messageListRef = useRef(null);
+
 
     const fetchMessages = async () => {
         const { data, error } = await supabase
@@ -60,11 +63,13 @@ const ChatPage = () => {
         };
     }, [chatroomId]); // Re-run the effect when chatroomId changes
 
-    useEffect(() => {
-        if (dummyRef.current) {
-            dummyRef.current.scrollIntoView({ behavior: 'smooth' });
+
+    const handleScroll = () => {
+        if (messageListRef.current) {
+            const isAtBottom = messageListRef.current.scrollHeight - messageListRef.current.scrollTop === messageListRef.current.clientHeight;
+            setIsScrolledToBottom(isAtBottom);
         }
-    }, [messages]);
+    };
 
     const handleSendMessage = async () => {
         if (newMessage.trim() === "") return;
@@ -86,9 +91,16 @@ const ChatPage = () => {
         setNewMessage("");
     };
 
+    const handleScrollDown = () => {
+        if (messageListRef.current) {
+            dummyRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+    };
+
     const handleProfile = () => {
         navigate('/profile');
     };
+
     const styles = {
         background: {
             width: '100vw',
@@ -180,6 +192,17 @@ const ChatPage = () => {
             padding: '0 15px',
             borderRadius: '5px',
         },
+        scrollButton: {
+            position: 'absolute',
+            bottom: '100px',
+            left: '47%',
+            backgroundColor: themeColors.primary8,
+            color: themeColors.primary1,
+            display: isScrolledToBottom ? 'none' : 'flex',
+            width: '40px',
+            height: '40px',
+            borderRadius: '50%',
+        },
     };
 
     return (
@@ -199,7 +222,9 @@ const ChatPage = () => {
                                 {`${name}`}
                             </h2>
                         </div>
-                        <div style={styles.messageList}>
+                        <div style={styles.messageList}
+                             ref={messageListRef}
+                             onScroll={handleScroll}>
                             {messages.map((message) => {
                                 const isSender = message.sender_id === userId;
                                 return (
@@ -218,7 +243,7 @@ const ChatPage = () => {
                                                 ...(isSender ? styles.senderBubble : styles.receiverBubble),
                                             }}
                                         >
-                                            <p style={{ margin: 0 }}>{message.message_content}</p>
+                                            <p style={{margin: 0}}>{message.message_content}</p>
                                         </div>
                                         {/* Timestamp */}
                                         <span
@@ -235,6 +260,11 @@ const ChatPage = () => {
                                     </div>
                                 );
                             })}
+                            <Button
+                                style={styles.scrollButton}
+                                onClick={handleScrollDown}
+                                icon={<ArrowDownOutlined />}
+                            />
                             <div ref={dummyRef} />
                         </div>
                         <div style={styles.inputContainer}>

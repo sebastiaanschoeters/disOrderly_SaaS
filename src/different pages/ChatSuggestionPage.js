@@ -14,8 +14,7 @@ const { Title } = Typography;
 const ChatSuggestionPage = () => {
     const location = useLocation();
     const { profileData} = location.state || {};
-    const { name, profilePicture, otherUserId, isSender } = profileData || {};
-    const { chatroomId } = useParams();
+    const { name, profilePicture, otherUserId, isSender, chatroomId } = profileData || {};
     const navigate = useNavigate();
     const [message, setMessage] = useState("");
     const [isModalVisible, setIsModalVisible] = useState(false);

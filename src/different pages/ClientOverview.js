@@ -2,7 +2,9 @@ import React, { useEffect, useState } from "react";
 import { Avatar, ConfigProvider, Select, Table, Button, message } from "antd";
 import { antThemeTokens, ButterflyIcon, themes } from "../themes";
 import { createClient } from "@supabase/supabase-js";
-import {DeleteOutlined} from "@ant-design/icons";
+import { DeleteOutlined } from "@ant-design/icons";
+import 'antd/dist/reset.css';
+import '../CSS/AntDesignOverride.css';
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q");
 
@@ -89,30 +91,96 @@ const deleteClient = async (clientId) => {
     try {
         const { error } = await supabase
             .from("User")
-            .delete() // Assuming there's an 'active' field to deactivate the account
+            .delete()
             .eq("id", clientId);
 
         if (error) throw error;
 
-        message.success("Client account deactivated successfully!");
+        const { infoError } = await supabase
+            .from("User information")
+            .delete()
+            .eq("user_id", clientId)
+
+        if (infoError) throw infoError;
+
+        message.success("Klantaccount succesvol gedeactiveerd!");
     } catch (error) {
-        message.error("Failed to deactivate client account: " + error.message);
+        message.error("Klantaccount deactiveren is mislukt: " + error.message);
     }
+};
+
+const useFetchCaretakers = (organizationId) => {
+    const [caretakers, setCaretakers] = useState([]);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const { data: activationData, error: idError } = await supabase
+                    .from("Activation")
+                    .select("code")
+                    .eq("organization", organizationId);
+
+                if (idError) throw new Error(`Fout bij het ophalen van activatiecodes: ${idError.message}`);
+                if (!activationData || activationData.length === 0) {
+                    setCaretakers([]);
+                    return;
+                }
+
+                const caretakerIds = activationData.map((item) => item.code);
+
+                const { data: caretakerData, error: caretakersError } = await supabase
+                    .from("Caretaker")
+                    .select("name, profile_picture")
+                    .in("id", caretakerIds);
+
+                if (caretakersError) throw new Error(`Fout bij het ophalen van begeleiders: ${caretakersError.message}`);
+
+                setCaretakers(caretakerData || []);
+            } catch (error) {
+                setError(error.message);
+            }
+        };
+
+        if (organizationId) fetchData();
+    }, [organizationId]);
+
+    return { caretakers, error };
 };
 
 const ClientOverview = () => {
     const { clients, error } = useFetchClients(1111);
+    const { caretakers } = useFetchCaretakers('KUL')
     const { profileData } = useFetchTheme(1111);
     const theme = profileData.theme || "blauw";
     const themeColors = themes[theme] || themes.blauw;
 
     const handleAccessLevelChange = (id, value) => {
-        console.log(`Client ID: ${id}, New Access Level: ${value}`);
+        console.log(`Klant ID: ${id}, Nieuw Toegangsniveau: ${value}`);
     };
 
     const handleDelete = (clientId) => {
-        // Call deleteClient function to deactivate the account
         deleteClient(clientId);
+    };
+
+    const handleCaretakerChange = async (clientId, newCaretakerId) => {
+        try {
+            const { error } = await supabase
+                .from("User")
+                .update({ caretaker: newCaretakerId })
+                .eq("id", clientId);
+
+            if (error) throw error;
+
+            message.success("Begeleider succesvol bijgewerkt!");
+        } catch (error) {
+            message.error("Fout bij het bijwerken van begeleider: " + error.message);
+        }
+    };
+
+    const handleRowClick = (record) => {
+        console.log("Row clicked: ", record);
+        // Add additional functionality here (e.g., navigation or modal display)
     };
 
     const columns = [
@@ -123,7 +191,7 @@ const ClientOverview = () => {
                 <div style={{ display: "flex", alignItems: "center" }}>
                     <Avatar
                         src={clientInfo.profile_picture}
-                        alt="Profile Picture"
+                        alt="Profielfoto"
                         size={64}
                         style={{ marginRight: 10 }}
                     />
@@ -132,7 +200,7 @@ const ClientOverview = () => {
             ),
         },
         {
-            title: "Access Level",
+            title: "Toegangsniveau",
             dataIndex: "access_level",
             key: "access_level",
             render: (accessLevel, record) => (
@@ -150,18 +218,29 @@ const ClientOverview = () => {
             ),
         },
         {
-            title: "Actions",
+            title: "Acties",
             key: "actions",
             render: (_, record) => (
-                <Button
-                    type="default"
-                    onClick={() => handleDelete(record.id)}
-                    style={{
-                        fontSize: '1rem',
-                    }}
-                >
-                    Deactiveer Account<DeleteOutlined/>
-                </Button>
+                <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                    <Select
+                        placeholder="Verander begeleiding"
+                        onChange={(value) => handleCaretakerChange(record.id, value)}
+                        options={caretakers.map((caretaker) => ({
+                            value: caretaker.id,
+                            label: caretaker.name,
+                        }))}
+                        style={{ width: '100%' }}
+                    />
+                    <Button
+                        type="default"
+                        onClick={() => handleDelete(record.id)}
+                        style={{
+                            fontSize: "1rem",
+                        }}
+                    >
+                        Account Deactiveren <DeleteOutlined />
+                    </Button>
+                </div>
             ),
         },
     ];
@@ -189,21 +268,24 @@ const ClientOverview = () => {
                 }}
             >
                 <ButterflyIcon color={themeColors.primary3} />
-                {error && <p>Error: {error}</p>}
+                {error && <p>Fout: {error}</p>}
                 {clients.length > 0 ? (
                     <Table
                         dataSource={dataSource}
                         columns={columns}
                         showHeader={false}
                         rowKey="id"
-                        pagination={{ pageSize: 5 }}
+                        pagination={{ pageSize: 10 }}
+                        onRow={(record) => ({
+                            onClick: () => handleRowClick(record),
+                        })}
                         style={{
                             marginTop: "20px",
                             backgroundColor: themeColors.primary1,
                         }}
                     />
                 ) : (
-                    <p>Loading clients...</p>
+                    <p>Cliënten laden...</p>
                 )}
             </div>
         </ConfigProvider>

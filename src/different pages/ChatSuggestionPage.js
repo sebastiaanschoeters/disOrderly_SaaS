@@ -241,7 +241,7 @@ const ChatSuggestionPage = () => {
                     )}
                 </div>
                 <Modal
-                    title="Edit Message"
+                    title="Bewerk bericht"
                     visible={isModalVisible}
                     onOk={handleSave}
                     onCancel={handleCancel}

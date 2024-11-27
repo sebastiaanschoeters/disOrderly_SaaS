@@ -114,12 +114,30 @@ const ChatPage = () => {
         navigate('/profile');
     };
 
+    // Function to group messages by date
+    const groupMessagesByDate = (messages) => {
+        return messages.reduce((groups, message) => {
+            const date = new Date(message.created_at).toLocaleDateString('nl-NL', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            });
+            if (!groups[date]) {
+                groups[date] = [];
+            }
+            groups[date].push(message);
+            return groups;
+        }, {});
+    };
+
+    const groupedMessages = groupMessagesByDate(messages);
+
     const styles = {
         background: {
             width: '100vw',
             height: '100vh',
             display: 'flex',
-             justifyContent: 'center',
+            justifyContent: 'center',
             alignItems: 'center',
             backgroundColor: themeColors.primary2, // Background color for the entire screen
         },
@@ -235,44 +253,42 @@ const ChatPage = () => {
                                 {`${name}`}
                             </h2>
                         </div>
-                        <div style={styles.messageList}
-                             ref={messageListRef}
-                             onScroll={handleScroll}>
-                            {messages.map((message) => {
-                                const isSender = message.sender_id === userId;
-                                return (
-                                    <div
-                                        key={message.id}
-                                        style={{
-                                            display: 'flex',
-                                            flexDirection: 'column',
-                                            alignItems: isSender ? 'flex-end' : 'flex-start', // Align bubble and timestamp dynamically
-                                        }}
-                                    >
-                                        {/* Message Bubble */}
-                                        <div
-                                            style={{
-                                                ...styles.bubble,
-                                                ...(isSender ? styles.senderBubble : styles.receiverBubble),
-                                            }}
-                                        >
-                                            <p style={{margin: 0}}>{message.message_content}</p>
-                                        </div>
-                                        {/* Timestamp */}
-                                        <span
-                                            style={{
-                                                ...styles.timestamp,
-                                                alignSelf: isSender ? 'flex-end' : 'flex-start', // Align timestamp below bubble
-                                            }}
-                                        >
-                                            {new Date(message.created_at).toLocaleTimeString([], {
-                                                hour: '2-digit',
-                                                minute: '2-digit',
-                                            })}
-                                        </span>
+                        <div style={styles.messageList} ref={messageListRef} onScroll={handleScroll}>
+                            {Object.keys(groupedMessages).map((date) => (
+                                <div key={date}>
+                                    <div style={{ textAlign: 'center', margin: '10px 0', color: themeColors.primary8 }}>
+                                        <strong>{date}</strong>
                                     </div>
-                                );
-                            })}
+                                    {groupedMessages[date].map((message) => {
+                                        const isSender = message.sender_id === userId;
+                                        return (
+                                            <div
+                                                key={message.id}
+                                                style={{
+                                                    display: 'flex',
+                                                    flexDirection: 'column',
+                                                    alignItems: isSender ? 'flex-end' : 'flex-start',
+                                                }}
+                                            >
+                                                <div
+                                                    style={{
+                                                        ...styles.bubble,
+                                                        ...(isSender ? styles.senderBubble : styles.receiverBubble),
+                                                    }}
+                                                >
+                                                    <p style={{ margin: 0 }}>{message.message_content}</p>
+                                                </div>
+                                                <span style={{ ...styles.timestamp }}>
+                                                    {new Date(message.created_at).toLocaleTimeString([], {
+                                                        hour: '2-digit',
+                                                        minute: '2-digit',
+                                                    })}
+                                                </span>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            ))}
                             <Button
                                 style={styles.scrollButton}
                                 onClick={scrollToBottom}

@@ -1,7 +1,16 @@
 import 'antd/dist/reset.css'; // Import Ant Design styles
 import '../CSS/AntDesignOverride.css'
 import { antThemeTokens, themes } from '../themes';
-import {Button, Card, Checkbox, ConfigProvider, Input, List, Modal, Radio, Slider, Typography} from 'antd';
+import {
+    Button,
+    Card,
+    ConfigProvider,
+    Form,
+    Input,
+    List,
+    Modal,
+    Select
+} from 'antd';
 import {PlusOutlined} from "@ant-design/icons";
 import React, {useEffect, useState} from "react";
 import { useNavigate } from 'react-router-dom';
@@ -14,18 +23,41 @@ const AdminPage = () => {
     const [theme, setTheme] = useState('blauw');
     const themeColors = themes[theme] || themes.blauw;
     const navigate = useNavigate();
-    const [Organizations, setOrganizations] = useState([]);
+    const [Organisations, setOrganisations] = useState([]);
     const [isModalVisible, setIsModalVisible] = useState(false);
-    const [OrganizationName, setOrganizationName] = useState('');
-    const [AmountUsers, setAmountUsers] = useState('');
+    const [isOrganisationVisible, setIsOrganisationVisible] = useState(false);
+    const [organisation, setOrganisation] = useState({
+        id: undefined,
+        name: undefined,
+        amountUsers: 0,
+        responsible: undefined,
+        location: undefined
+    });
+    const [selectedOrganisation, setSelectedOrganisation] = useState({
+        id: 0,
+        name: undefined,
+        amountUsers: 0,
+        responsible: 0,
+        location: 0
+    });
 
     useEffect(() => {fetchData()}
-    , [])
+    , []);
 
     const fetchData = async () => {
-        const {data, error} = await supabase.from("Organizations").select("name")
-        setOrganizations(data)
-        console.log(data)
+        const {data, error} = await supabase.from("Organisations").select("id, name, location, maximum_activations_codes, responsible");
+        const mappedData = data.map((organisation) => ({
+            id: organisation.id,
+            name: organisation.name,
+            amountUsers: organisation.maximum_activations_codes,
+            responsible: organisation.responsible,
+            location: organisation.location
+        }));
+        if(error) {
+            console.error(error);
+        }
+
+        setOrganisations(mappedData);
     }
 
     const showModal = () => {
@@ -36,10 +68,79 @@ const AdminPage = () => {
         setIsModalVisible(false);
     };
 
-    const handleChangeAmountUsers = (event) => {
-        setAmountUsers(event.target.value);
+    const handleClickOrganisation = (organisation) => {
+        setSelectedOrganisation(organisation);
+        setIsOrganisationVisible(true);
+        console.log("Selected organisation", selectedOrganisation);
+    }
+
+    const handleUpdateOrganisation = async () => {
+        try {
+            const {error } = await supabase
+                .from("Organisations")
+                .update({
+                    name: selectedOrganisation.name,
+                    maximum_activations_codes: selectedOrganisation.amountUsers,
+                    responsible: selectedOrganisation.responsible,
+                    location: selectedOrganisation.location,
+                })
+                .eq("id", selectedOrganisation.id);
+
+            if (error) {
+                console.error("Error updating organisation:", error);
+            } else {
+                console.log("Organisation updated successfully!");
+            }
+            fetchData();
+
+        } catch (err) {
+            console.error("Update failed:", err);
+        }
     };
 
+    const handleNewOrganisation = async () => {
+        try {
+            console.log(selectedOrganisation);
+            const {error } = await supabase
+                .from("Organisations")
+                .insert({
+                    name: selectedOrganisation.name,
+                    maximum_activations_codes: selectedOrganisation.amountUsers,
+                    responsible: selectedOrganisation.responsible,
+                    location: selectedOrganisation.location,
+                });
+
+            if (error) {
+                console.error("Error updating organisation:", error);
+            } else {
+                console.log("Organisation updated successfully!");
+            }
+            fetchData();
+
+        } catch (err) {
+            console.error("Update failed:", err);
+        }
+    }
+
+    const handleFieldChange = (field, value) => {
+        setSelectedOrganisation((prev) => ({
+            ...prev,
+            [field]: value,
+        }));
+    };
+
+    const handleCloseOrganisation = () => {
+        console.log(selectedOrganisation);
+        setIsOrganisationVisible(false);
+        setSelectedOrganisation({
+            id: undefined,
+            name: undefined,
+            amountUsers: 0,
+            responsible: undefined,
+            location: undefined,
+        });
+        fetchData();
+    };
 
     const styles = {
         list: {
@@ -76,6 +177,7 @@ const AdminPage = () => {
         }
     }
 
+
     return (<ConfigProvider theme={{token: antThemeTokens(themeColors)}}>
             <div
                 style={{
@@ -91,23 +193,29 @@ const AdminPage = () => {
                 }}>
                 <div style={{display: 'flex', gap: '144px', flexWrap: 'wrap', justifyContent: 'center'}}>
 
-                    <List
-                        itemLayout="horizontal"
-                        style={styles.list}
-                        dataSource={Organizations}
-                        renderItem={(Organizations) => (
-                            <Card
-                                style={styles.card}
-                                hoverable={true}
-                            >
-                                <Card.Meta
-                                    title={<span style={styles.name}><li>{Organizations.name}</li></span>}
-                                />
+                    <div style={{display: 'flex', gap: '144px', flexWrap: 'wrap', justifyContent: 'center'}}>
+                        <h1>Organisaties: </h1>
+                        <List
+                            itemLayout="horizontal"
+                            style={styles.list}
+                            dataSource={Organisations}
+                            renderItem={(organisation) => (
+                                <List.Item>
+                                    <Card
+                                        style={styles.card}
+                                        hoverable={true}
+                                        onClick={() => handleClickOrganisation(organisation)}
+                                    >
+                                        <Card.Meta
+                                            title={<span style={styles.name}><li>{organisation.name}</li></span>}
+                                        />
+                                        <p>{organisation.location}</p>
+                                    </Card>
+                                </List.Item>
+                            )}
+                        />
+                    </div>
 
-                            </Card>
-                        )}
-                    >
-                    </List>
 
                     <Button
                         type="primary"
@@ -149,28 +257,134 @@ const AdminPage = () => {
 
                 <Modal
                     title="Nieuwe Organisatie"
+                    name="newOrganisation"
                     visible={isModalVisible}
                     onCancel={handleModalClose}
                     footer={null}
                 >
                     <div>
-                        Geef de nieuwe organisatie een naam:
-                        <Input>
+                        <Form
+                            name="New Organisation Form"
+                            initialValues={{remember: true}}
+                            onFinish={handleNewOrganisation}
+                            onFinishFailed={(errorInfo) =>
+                                console.log('Failed:', errorInfo)
+                            }
+                        >
+                            <Form.Item
+                                label="De naam van de organisatie"
+                                name="organisationName"
+                                rules={[
+                                    {
+                                        required: true, message: 'Geef de naam van de nieuwe organisatie'
+                                    },]}>
+                                <Input onChange={(e) => handleFieldChange("name", e.target.value)}/>
+                            </Form.Item>
 
-                        </Input>
+                            <Form.Item
+                                name="hoeveelAccounts"
+                                label="Hoeveel Accounts?"
+                                rules={[{required: true},]}
+                            >
+                                <Select placeholder="Hoeveel gebruikers?" onChange={(value) => handleFieldChange("amountUsers", value)} >
+                                    <Select.Option value="1">1-50</Select.Option>
+                                    <Select.Option value="option2">51-200</Select.Option>
+                                    <Select.Option value="option3">200+</Select.Option>
+                                </Select>
+                            </Form.Item>
 
-                    </div>
+                            <Form.Item
+                                label="Locatie"
+                                name="location"
+                                rules={[{required:true, message: 'Vul een locatie in!'}]}>
 
-                    <div>
-                        <label htmlFor="dropdown">Hoeveel accounts worden beschikbaar gemaakt voor de organisatie: </label>
-                        <select id="dropdown" value={AmountUsers} onChange={handleChangeAmountUsers}>
-                            <option value="">--Select--</option>
-                            <option value="option1">1-50</option>
-                            <option value="option2">51-200</option>
-                            <option value="option3">200+</option>
-                        </select>
+                                <Input placeholder="Locatie" onChange={(e) => handleFieldChange("location", e.target.value)} />
+
+                            </Form.Item>
+
+                            <Form.Item
+                                label="Contactpersoon"
+                                name="contactPerson"
+                                rules={[{required:true}]} >
+
+                                <Input placeholder="Naam" onChange={(e) => handleFieldChange("responsible", e.target.value)} />
+
+                            </Form.Item>
+
+                            <Button onClick={handleNewOrganisation}>
+                                Aanmaken
+                            </Button>
+                        </Form>
                     </div>
                 </Modal>
+
+                <Modal
+                    visible={isOrganisationVisible}
+                    title = {selectedOrganisation.name}
+                    onCancel={handleCloseOrganisation}
+                    footer={null}
+                >
+                    <Form
+                        name="modal_form"// Set initial values for the form fields
+                    >
+                        <Form.Item
+                            label="Organisation"
+                            name="organisation"
+                            rules={[{ required: true}]}
+                            value={selectedOrganisation.name}
+                        >
+                            <Input
+                                value={selectedOrganisation.name}
+                                onChange={(e) => handleFieldChange("name", e.target.value)}
+                            />
+                            <div></div>
+                        </Form.Item>
+
+                        <Form.Item
+                            label="Aantal gebruikers"
+                            name="aantalGebruikers"
+                            rules={[{ required: true}]}
+                        >
+                            <Select
+                                value={selectedOrganisation.amountUsers}
+                                onChange={(value) => handleFieldChange("amountUsers", value)}
+                            >
+                                <Select.Option value="1-50">1-50</Select.Option>
+                                <Select.Option value="51-200">51-200</Select.Option>
+                                <Select.Option value="200+">200+</Select.Option>
+                            </Select>
+                        </Form.Item>
+
+                        <Form.Item
+                            label="Contactpersoon"
+                            name="contactPerson"
+                            rules={[{ required: true, message: 'Wijs een contactpersoon aan!' }]} >
+                            <Input
+                                value={selectedOrganisation.responsible}
+                                onChange={(e) => handleFieldChange("responsible", e.target.value)}
+                            />
+                        </Form.Item>
+                        <Form.Item
+                            label="Locatie"
+                            name="location"
+                            rules={[{ required: true, message: 'Duid de locatie van de organisatie aan!' }]} >
+                            <Input
+                                value={selectedOrganisation.location}
+                                onChange={(e) => handleFieldChange("location", e.target.value)}>
+
+                        </Input>
+                            <div></div>
+                        </Form.Item>
+
+
+                        <Form.Item>
+                            <Button type="primary" htmlType="submit" onClick={handleUpdateOrganisation}>
+                                Opslaan
+                            </Button>
+                        </Form.Item>
+                    </Form>
+                </Modal>
+
             </div>
         </ConfigProvider>
     );

@@ -26,19 +26,12 @@ const AdminPage = () => {
     const [Organisations, setOrganisations] = useState([]);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [isOrganisationVisible, setIsOrganisationVisible] = useState(false);
-    const [organisation, setOrganisation] = useState({
-        id: undefined,
-        name: undefined,
-        amountUsers: 0,
-        responsible: undefined,
-        location: undefined
-    });
     const [selectedOrganisation, setSelectedOrganisation] = useState({
         id: 0,
         name: undefined,
         amountUsers: 0,
         responsible: 0,
-        location: 0
+        location: undefined
     });
 
     useEffect(() => {fetchData()}
@@ -56,8 +49,17 @@ const AdminPage = () => {
         if(error) {
             console.error(error);
         }
-
         setOrganisations(mappedData);
+    }
+
+    const fetchLocation = async (locationCode) => {
+        console.log("Location code:", locationCode);
+        const {data, error} = await supabase.from("Location").select("Gemeente").eq("id", locationCode);
+        if(error) {
+            console.error(error);
+        }
+        debounce(handleFieldChange("location", data[0]["Gemeente"]), 1000);
+        console.log("location", data[0]["Gemeente"]);
     }
 
     const showModal = () => {
@@ -70,6 +72,7 @@ const AdminPage = () => {
 
     const handleClickOrganisation = (organisation) => {
         setSelectedOrganisation(organisation);
+        debounce(fetchLocation(organisation.location), 1000);
         setIsOrganisationVisible(true);
         console.log("Selected organisation", selectedOrganisation);
     }
@@ -139,7 +142,14 @@ const AdminPage = () => {
             responsible: undefined,
             location: undefined,
         });
-        fetchData();
+    };
+
+    const debounce = (func, delay) => {
+        let timer;
+        return (...args) => {
+            clearTimeout(timer);
+            timer = setTimeout(() => func(...args), delay);
+        };
     };
 
     const styles = {
@@ -204,7 +214,7 @@ const AdminPage = () => {
                                     <Card
                                         style={styles.card}
                                         hoverable={true}
-                                        onClick={() => handleClickOrganisation(organisation)}
+                                        onClick={() => debounce(handleClickOrganisation(organisation), 1000)}
                                     >
                                         <Card.Meta
                                             title={<span style={styles.name}><li>{organisation.name}</li></span>}
@@ -288,8 +298,8 @@ const AdminPage = () => {
                             >
                                 <Select placeholder="Hoeveel gebruikers?" onChange={(value) => handleFieldChange("amountUsers", value)} >
                                     <Select.Option value="1">1-50</Select.Option>
-                                    <Select.Option value="option2">51-200</Select.Option>
-                                    <Select.Option value="option3">200+</Select.Option>
+                                    <Select.Option value="2">51-200</Select.Option>
+                                    <Select.Option value="3">200+</Select.Option>
                                 </Select>
                             </Form.Item>
 
@@ -325,7 +335,7 @@ const AdminPage = () => {
                     footer={null}
                 >
                     <Form
-                        name="modal_form"// Set initial values for the form fields
+                        name="modal_form"
                     >
                         <Form.Item
                             label="Organisation"
@@ -343,27 +353,30 @@ const AdminPage = () => {
                         <Form.Item
                             label="Aantal gebruikers"
                             name="aantalGebruikers"
-                            rules={[{ required: true}]}
+                            rules={[{required: true}]}
                         >
                             <Select
                                 value={selectedOrganisation.amountUsers}
                                 onChange={(value) => handleFieldChange("amountUsers", value)}
                             >
-                                <Select.Option value="1-50">1-50</Select.Option>
-                                <Select.Option value="51-200">51-200</Select.Option>
-                                <Select.Option value="200+">200+</Select.Option>
+                                <Select.Option value={1}>1-50</Select.Option>
+                                <Select.Option value={2}>51-200</Select.Option>
+                                <Select.Option value={3}>200+</Select.Option>
                             </Select>
+                            <div/>
                         </Form.Item>
 
                         <Form.Item
                             label="Contactpersoon"
                             name="contactPerson"
-                            rules={[{ required: true, message: 'Wijs een contactpersoon aan!' }]} >
+                            rules={[{required: true, message: 'Wijs een contactpersoon aan!'}]}>
                             <Input
                                 value={selectedOrganisation.responsible}
                                 onChange={(e) => handleFieldChange("responsible", e.target.value)}
                             />
+                            <div/>
                         </Form.Item>
+
                         <Form.Item
                             label="Locatie"
                             name="location"

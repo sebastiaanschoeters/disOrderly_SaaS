@@ -17,7 +17,7 @@ body, p, .ant-typography, .ant-btn, .ant-select, .ant-tag, .ant-txtArea {
 }
 
 .ant-btn .anticon {
-    font-size: 2rem;
+    font-size: 1rem;
 }
 
 /* Specific styles for Select component */

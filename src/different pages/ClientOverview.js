@@ -3,6 +3,7 @@ import { Avatar, ConfigProvider, Select, Table, Button, message } from "antd";
 import { antThemeTokens, ButterflyIcon, themes } from "../themes";
 import { createClient } from "@supabase/supabase-js";
 import { DeleteOutlined } from "@ant-design/icons";
+import ClientDetailsModal from "./ClientDetailsModal";
 import 'antd/dist/reset.css';
 import '../CSS/AntDesignOverride.css';
 
@@ -86,7 +87,6 @@ const useFetchTheme = (actCode) => {
     return { profileData };
 };
 
-// New function to handle account deactivation (delete)
 const deleteClient = async (clientId) => {
     try {
         const { error } = await supabase
@@ -157,27 +157,26 @@ const ClientOverview = () => {
 
     const [localClients, setLocalClients] = useState(clients);
     const [pageSize, setPageSize] = useState(10);
+    const [selectedClient, setSelectedClient] = useState(null);
+    const [isModalVisible, setIsModalVisible] = useState(false);
 
     useEffect(() => {
         setLocalClients(clients);
     }, [clients]);
 
     useEffect(() => {
-        // Function to calculate rows based on screen height
         const calculatePageSize = () => {
             const screenHeight = window.innerHeight;
             const rowHeight = 130; // Approximate row height
-            const headerHeight = 0; // Approximate header and padding
+            const headerHeight = 60; // Approximate header and padding
             const footerHeight = 30; // Approximate footer height
             const availableHeight = screenHeight - headerHeight - footerHeight;
 
             return Math.max(1, Math.floor(availableHeight / rowHeight));
         };
 
-        // Set initial page size
         setPageSize(calculatePageSize());
 
-        // Update page size on window resize
         const handleResize = () => {
             setPageSize(calculatePageSize());
         };
@@ -187,6 +186,17 @@ const ClientOverview = () => {
             window.removeEventListener("resize", handleResize);
         };
     }, []);
+
+    const handleClientClick = (client) => {
+        setSelectedClient(client);
+        console.log(client)
+        setIsModalVisible(true);
+    };
+
+    const handleModalClose = () => {
+        setSelectedClient(null);
+        setIsModalVisible(false);
+    };
 
     const handleAccessLevelChange = (id, value) => {
         console.log(`Klant ID: ${id}, Nieuw Toegangsniveau: ${value}`);
@@ -226,7 +236,7 @@ const ClientOverview = () => {
         {
             dataIndex: "client_info",
             key: "client_info",
-            render: (clientInfo) => (
+            render: (clientInfo, record) => (
                 <div style={{ display: "flex", alignItems: "center" }}>
                     <Avatar
                         src={clientInfo.profile_picture}
@@ -246,7 +256,8 @@ const ClientOverview = () => {
                 <Select
                     defaultValue={accessLevel}
                     onChange={(value) => handleAccessLevelChange(record.id, value)}
-                    style={{ width: "90%" }}
+                    style={{ width: "90%", maxWidth: '400px' }}
+                    className="prevent-row-click" // Prevent row click
                     options={[
                         { value: "Volledige toegang", label: "Volledige toegang" },
                         { value: "Gesprekken", label: "Gesprekken" },
@@ -268,13 +279,17 @@ const ClientOverview = () => {
                             value: caretaker.id,
                             label: caretaker.name,
                         }))}
-                        style={{ width: "100%" }}
+                        style={{ width: "100%", maxWidth: "400px" }}
+                        className="prevent-row-click" // Prevent row click
                     />
                     <Button
                         type="default"
                         onClick={() => handleDelete(record.id)}
+                        className="prevent-row-click" // Prevent row click
                         style={{
                             fontSize: "1rem",
+                            width: "100%",
+                            maxWidth: "400px"
                         }}
                     >
                         Account Deactiveren <DeleteOutlined />
@@ -307,6 +322,9 @@ const ClientOverview = () => {
                 }}
             >
                 <ButterflyIcon color={themeColors.primary3} />
+
+                <h2>Clienten: </h2>
+
                 {fetchClientsError && <p>Fout: {fetchClientsError}</p>}
                 {clients.length > 0 ? (
                     <Table
@@ -319,9 +337,28 @@ const ClientOverview = () => {
                             marginTop: "20px",
                             backgroundColor: themeColors.primary1,
                         }}
+                        onRow={(record) => ({
+                            onClick: (event) => {
+                                // Prevent clicks on select and buttons from triggering row click
+                                if (!event.target.closest(".prevent-row-click")) {
+                                    handleClientClick(record);
+                                }
+                            },
+                        })}
+                        rowClassName="clickable-row"
                     />
+
                 ) : (
                     <p>Cliënten laden...</p>
+                )}
+
+                {/* Render the modal */}
+                {selectedClient && (
+                    <ClientDetailsModal
+                        visible={isModalVisible}
+                        onClose={handleModalClose}
+                        clientData={selectedClient}
+                    />
                 )}
             </div>
         </ConfigProvider>

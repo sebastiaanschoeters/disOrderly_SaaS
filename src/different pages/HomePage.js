@@ -75,7 +75,7 @@ const HomePage = () => {
                         }}
                         onClick={() => navigate('/search')}
                     >
-                        <h2 style={{ margin: '0', fontSize: '1.5vw', minWidth: '20px' }}>Mensen vinden</h2>
+                        <h2 style={{ margin: '0', minWidth: '20px' }}>Mensen vinden</h2>
                     </Button>
 
                     <Button
@@ -93,7 +93,7 @@ const HomePage = () => {
                         }}
                         onClick={() => navigate('/chatoverview')}
                     >
-                        <h2 style={{ margin: '0', fontSize: '1.5vw', minWidth: '20px' }}>Chats</h2>
+                        <h2 style={{ margin: '0', minWidth: '20px' }}>Chats</h2>
                     </Button>
                 </div>
 
@@ -116,25 +116,23 @@ const HomePage = () => {
                         style={{
                             backgroundColor: themeColors.primary4,
                             color: themeColors.primary10,
-                            fontSize: '1.5vw',
                         }}
                     >
                         {name[0]}
                     </Avatar>
-                    <span
+                    <p
                         style={{
-                            fontSize: '1.5vw',
                             color: themeColors.primary10,
                             whiteSpace: 'nowrap',
                         }}
                     >
                         {name}
-                    </span>
+                    </p>
                 </div>
 
                 <Button
                     type="secondary"
-                    icon={<SettingOutlined style={{ fontSize: '2vw' }} />}
+                    icon={<SettingOutlined/>}
                     style={{
                         position: 'absolute',
                         bottom: '1%',
@@ -150,12 +148,12 @@ const HomePage = () => {
                     }}
                     onClick={() => navigate('/profilePersonal')}
                 >
-                    <h2 style={{ margin: '0', fontSize: '1vw', minWidth: '10px' }}>Instellingen</h2>
+                    <h2 style={{ margin: '0', minWidth: '10px' }}>Instellingen</h2>
                 </Button>
 
                 <Button
                     type="secondary"
-                    icon={<PoweroffOutlined style={{ fontSize: '2vw' }} />}
+                    icon={<PoweroffOutlined/>}
                     style={{
                         position: 'absolute',
                         bottom: '1%',
@@ -171,7 +169,7 @@ const HomePage = () => {
                     }}
                     onClick={() => handleLogout()}
                 >
-                    <h2 style={{ margin: '0', fontSize: '1vw', minWidth: '10px' }}>Afmelden</h2>
+                    <h2 style={{ margin: '0', minWidth: '10px' }}>Afmelden</h2>
                 </Button>
             </div>
         </ConfigProvider>

@@ -88,6 +88,7 @@ const ChatOverviewPage = () => {
             width: '75%',
             marginBottom: '20px',
             marginTop: '20px',
+            fontSize: '1rem',
         },
         list: {
             width: '75%',
@@ -110,10 +111,10 @@ const ChatOverviewPage = () => {
             color: themeColors.primary1,
             padding: '0px 5px',
             borderRadius: '5px',
-            fontSize: '14px',
+            fontSize: '1rem',
         },
         name: {
-            fontSize: '14px',
+            fontSize: '1rem',
         }
     };
 

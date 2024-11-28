@@ -158,7 +158,7 @@ const ChatPage = () => {
             alignSelf: 'flex-start',
         },
         timestamp: {
-            fontSize: '12px',
+            fontSize: '1rem',
             marginTop: '3px',
             alignSelf: 'flex-end',
             color: themeColors.primary8,

@@ -293,18 +293,18 @@ const Search = () => {
                                         style={{
                                             backgroundColor: themeColors.primary10,
                                             marginRight: '1.5vw', // Reduced margin
-                                            width: '5vw', // Reduced avatar size
-                                            height: '5vw', // Reduced avatar size
+                                            width: '3rem', // Reduced avatar size
+                                            height: '3rem', // Reduced avatar size
                                         }}
                                     >
                                         {item.name[0]}
                                     </Avatar>
                                     <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>
                                         <div style={{ textAlign: 'right' }}>
-                                            <div style={{ fontSize: '1.25vw', fontWeight: 'bold' }}>
+                                            <p style={{ fontWeight: 'bold' }}>
                                                 {item.name}
-                                            </div>
-                                            <div style={{ fontSize: '1vw' }}>Leeftijd: {item.age}</div>
+                                            </p>
+                                            <p>Leeftijd: {item.age}</p>
                                         </div>
                                     </div>
                                 </List.Item>
@@ -324,9 +324,9 @@ const Search = () => {
                 >
                     <div style={{ marginBottom: '1vw' }}>
                         {/* Age Range Text */}
-                        <div style={{ fontSize: '1.2vw', fontFamily: 'Arial, sans-serif' }}>
+                        <p style={{ fontWeight: 'bold' }}>
                             Leeftijd {ageRange[0]} - {ageRange[1]}
-                        </div>
+                        </p>
                         <Slider
                             range
                             min={18}
@@ -337,7 +337,7 @@ const Search = () => {
                         />
                     </div>
                     <div style={{ marginBottom: '1vw' }}>
-                        <div style={{ fontSize: '1.2vw', fontFamily: 'Arial, sans-serif' }}>Geslacht</div>
+                        <p style={{ fontWeight: 'bold' }} >Geslacht</p>
                         <Radio.Group onChange={handleGenderChange} value={gender} style={{ display: 'flex', flexDirection: 'row' }}>
                             <Radio value="Man">
                                 <Typography.Text>Man</Typography.Text>
@@ -351,7 +351,7 @@ const Search = () => {
                         </Radio.Group>
                     </div>
                     <div style={{ marginBottom: '1vw' }}>
-                        <div style={{ fontSize: '1.2vw', fontFamily: 'Arial, sans-serif' }}>Zoekt naar</div>
+                        <p style={{ fontWeight: 'bold' }}>Zoekt naar</p>
                         <Checkbox.Group
                             options={['Relatie', 'Vrienden', 'Intieme ontmoeting']}
                             value={lookingFor}
@@ -363,7 +363,7 @@ const Search = () => {
                         />
                     </div>
                     <div style={{ marginBottom: '1vw' }}>
-                        <div style={{ fontSize: '1.2vw', fontFamily: 'Arial, sans-serif' }}>Mobiliteit</div>
+                        <p style={{fontWeight: 'bold' }}>Kan zich zelfstanding verplaatsen</p>
                         <Radio.Group onChange={handleMobilityChange} value={mobility} style={{ display: 'flex', flexDirection: 'row' }}>
                             <Radio value={true}>
                                 <Typography.Text>Ja</Typography.Text>

@@ -234,7 +234,7 @@ const ClientOverview = () => {
                         size={64}
                         style={{ marginRight: 10 }}
                     />
-                    <span>{clientInfo.name}</span>
+                    <p style={{ fontWeight: "bold"}}>{clientInfo.name}</p>
                 </div>
             ),
         },

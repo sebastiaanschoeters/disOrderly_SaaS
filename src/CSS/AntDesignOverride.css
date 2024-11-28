@@ -12,14 +12,12 @@
 }
 
 /* Default font size for various components */
-body, p, .ant-typography, .ant-btn, .ant-select,
-.ant-checkbox-wrapper, .ant-tag, .ant-txtArea {
+body, p, .ant-typography, .ant-btn, .ant-select, .ant-tag, .ant-txtArea {
     font-size: 1rem; /* Default base font size */
 }
 
-.ant-btn-primary{
-    font-size: 1.5rem;
-    padding: 20px;
+.ant-btn .anticon {
+    font-size: 2rem;
 }
 
 /* Specific styles for Select component */
@@ -30,6 +28,47 @@ body, p, .ant-typography, .ant-btn, .ant-select,
 /* Apply font size to dropdown items */
 .ant-select-dropdown .ant-select-item {
     font-size: 1rem; /* Font size for dropdown options */
+}
+
+/* Adjust font size of Card header */
+.ant-card-head-title {
+    font-size: 1.5rem; /* Use relative units to scale */
+    line-height: 1.2;  /* Adjust for readability */
+}
+
+/* Adjust font size of form item labels */
+.ant-form-item-label > label {
+    font-size: 1rem !important; /* Scale with browser settings */
+    line-height: 1.5rem; /* Ensure proper spacing */
+}
+
+/* Adjust font size of inputs */
+.ant-input,
+.ant-input-password {
+    font-size: 1rem; /* Scale input text size */
+}
+
+.ant-input-search {
+    font-size: 1rem;
+}
+
+/* Adjust spacing of form items */
+.ant-form-item {
+    margin-bottom: 1.5rem; /* Use relative units for spacing */
+}
+
+/* Checkbox font size */
+.ant-checkbox-wrapper {
+    font-size: 1rem;
+}
+
+/* Adjust the size of the modal title */
+.ant-modal-title {
+    font-size: 1.5rem !important;  /* Adjust the font size of the title */
+}
+
+.ant-typography {
+    font-size: 1rem !important;
 }
 
 .ant-select-arrow {
@@ -77,6 +116,8 @@ h1, h2 {
 
 .ant-btn-primary {
     box-shadow: 3px 3px 3px var(--primary9);
+    font-size: 1.5rem;
+    padding: 20px;
 }
 
 .ant-btn-primary:hover{

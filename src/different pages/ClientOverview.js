@@ -149,18 +149,54 @@ const useFetchCaretakers = (organizationId) => {
 };
 
 const ClientOverview = () => {
-    const { clients, error } = useFetchClients(1111);
-    const { caretakers } = useFetchCaretakers('KUL')
+    const { clients, error: fetchClientsError } = useFetchClients(1111);
+    const { caretakers } = useFetchCaretakers("KUL");
     const { profileData } = useFetchTheme(1111);
     const theme = profileData.theme || "blauw";
     const themeColors = themes[theme] || themes.blauw;
+
+    const [localClients, setLocalClients] = useState(clients);
+    const [pageSize, setPageSize] = useState(10);
+
+    useEffect(() => {
+        setLocalClients(clients);
+    }, [clients]);
+
+    useEffect(() => {
+        // Function to calculate rows based on screen height
+        const calculatePageSize = () => {
+            const screenHeight = window.innerHeight;
+            const rowHeight = 130; // Approximate row height
+            const headerHeight = 0; // Approximate header and padding
+            const footerHeight = 30; // Approximate footer height
+            const availableHeight = screenHeight - headerHeight - footerHeight;
+
+            return Math.max(1, Math.floor(availableHeight / rowHeight));
+        };
+
+        // Set initial page size
+        setPageSize(calculatePageSize());
+
+        // Update page size on window resize
+        const handleResize = () => {
+            setPageSize(calculatePageSize());
+        };
+
+        window.addEventListener("resize", handleResize);
+        return () => {
+            window.removeEventListener("resize", handleResize);
+        };
+    }, []);
 
     const handleAccessLevelChange = (id, value) => {
         console.log(`Klant ID: ${id}, Nieuw Toegangsniveau: ${value}`);
     };
 
     const handleDelete = (clientId) => {
-        deleteClient(clientId);
+        // deleteClient(clientId);
+        setLocalClients((prevClients) =>
+            prevClients.filter((client) => client[3] !== clientId)
+        );
     };
 
     const handleCaretakerChange = async (clientId, newCaretakerId) => {
@@ -173,14 +209,17 @@ const ClientOverview = () => {
             if (error) throw error;
 
             message.success("Begeleider succesvol bijgewerkt!");
+
+            setLocalClients((prevClients) =>
+                prevClients.map((client) =>
+                    client[3] === clientId
+                        ? { ...client, caretaker: newCaretakerId }
+                        : client
+                )
+            );
         } catch (error) {
             message.error("Fout bij het bijwerken van begeleider: " + error.message);
         }
-    };
-
-    const handleRowClick = (record) => {
-        console.log("Row clicked: ", record);
-        // Add additional functionality here (e.g., navigation or modal display)
     };
 
     const columns = [
@@ -207,7 +246,7 @@ const ClientOverview = () => {
                 <Select
                     defaultValue={accessLevel}
                     onChange={(value) => handleAccessLevelChange(record.id, value)}
-                    style={{ Width: '50%' }}
+                    style={{ width: "90%" }}
                     options={[
                         { value: "Volledige toegang", label: "Volledige toegang" },
                         { value: "Gesprekken", label: "Gesprekken" },
@@ -229,7 +268,7 @@ const ClientOverview = () => {
                             value: caretaker.id,
                             label: caretaker.name,
                         }))}
-                        style={{ width: '100%' }}
+                        style={{ width: "100%" }}
                     />
                     <Button
                         type="default"
@@ -245,7 +284,7 @@ const ClientOverview = () => {
         },
     ];
 
-    const dataSource = clients.map((clientArray) => ({
+    const dataSource = localClients.map((clientArray) => ({
         client_info: {
             profile_picture: clientArray[0],
             name: clientArray[1],
@@ -268,17 +307,14 @@ const ClientOverview = () => {
                 }}
             >
                 <ButterflyIcon color={themeColors.primary3} />
-                {error && <p>Fout: {error}</p>}
+                {fetchClientsError && <p>Fout: {fetchClientsError}</p>}
                 {clients.length > 0 ? (
                     <Table
                         dataSource={dataSource}
                         columns={columns}
                         showHeader={false}
                         rowKey="id"
-                        pagination={{ pageSize: 10 }}
-                        onRow={(record) => ({
-                            onClick: () => handleRowClick(record),
-                        })}
+                        pagination={{ pageSize: pageSize }}
                         style={{
                             marginTop: "20px",
                             backgroundColor: themeColors.primary1,

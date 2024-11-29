@@ -1,10 +1,10 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import ActivationPage from './different pages/ActivationPage';
-import LoginPage from './different pages/LoginPage';
+import ActivationPage from './different pages/Activation and Login/ActivationPage';
+import LoginPage from './different pages/Activation and Login/LoginPage';
 import HomePage from './different pages/HomePage';
-import ProfilePage from './different pages/ProfilePage';
-import PersonalProfilePage from './different pages/PersonalProfilePage';
+import ProfilePage from './different pages/Profile Pages/ProfilePage';
+import PersonalProfilePage from './different pages/Profile Pages/PersonalProfilePage';
 import ChatOverviewPage from './different pages/ChatOverviewPage';
 import ChatPage from './different pages/ChatPage';
 import ChatSuggestionPage from './different pages/ChatSuggestionPage';
@@ -12,12 +12,12 @@ import Search from './different pages/Search';
 import ProtectedRoute from './Extra components/ProtectedRoute'; // Import the ProtectedRoute component
 import {clarity} from "react-microsoft-clarity";
 
-import AdminPage from "./different pages/AdminPage";
+import AdminPage from "./different pages/Caretaker and Admin/AdminPage";
 import Hangman from "./different pages/Hangman";
-import EditableProfilePage from "./different pages/EditableProfilePage";
-import CaretakerProfilePage from "./different pages/CaretakerProfilePage";
-import CaretakerEditableProfile from "./different pages/CaretakerEditableProfile";
-import ClientOverview from "./different pages/ClientOverview";
+import EditableProfilePage from "./different pages/Profile Pages/EditableProfilePage";
+import CaretakerProfilePage from "./different pages/Caretaker and Admin/CaretakerProfilePage";
+import CaretakerEditableProfile from "./different pages/Caretaker and Admin/CaretakerEditableProfile";
+import ClientOverview from "./different pages/Caretaker and Admin/ClientOverview";
 
 clarity.init('p658v8svx1');
 
@@ -42,6 +42,30 @@ const App = () => {
                     path="/search"
                     element={
                         <ProtectedRoute allowedRoles={["user"]}>
+                            <Search />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/clientOverview"
+                    element={
+                        <ProtectedRoute allowedRoles={["caretaker, admin"]}>
+                            <Search />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/caretakerProfile"
+                    element={
+                        <ProtectedRoute allowedRoles={["caretaker, admin"]}>
+                            <Search />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/caretakerProfileEdit"
+                    element={
+                        <ProtectedRoute allowedRoles={["caretaker, admin"]}>
                             <Search />
                         </ProtectedRoute>
                     }

@@ -1,6 +1,6 @@
 import 'antd/dist/reset.css'; // Import Ant Design styles
-import '../CSS/AntDesignOverride.css'
-import { antThemeTokens, themes } from '../themes';
+import '../../CSS/AntDesignOverride.css'
+import { antThemeTokens, themes } from '../../Extra components/themes';
 import {
     Button,
     Card,

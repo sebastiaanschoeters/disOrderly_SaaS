@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Avatar, Input, Button, ConfigProvider, Card } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { antThemeTokens, themes } from '../themes';
+import { antThemeTokens, themes } from '../Extra components/themes';
 import {ArrowDownOutlined} from '@ant-design/icons';
 import { createClient } from "@supabase/supabase-js";
 import '../CSS/ChatPage.css';

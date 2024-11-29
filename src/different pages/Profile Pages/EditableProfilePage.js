@@ -15,12 +15,12 @@ import {
     UploadOutlined,
     UserOutlined
 } from '@ant-design/icons';
-import {antThemeTokens, ButterflyIcon, themes} from '../themes';
+import {antThemeTokens, ButterflyIcon, themes} from '../../Extra components/themes';
 import TextArea from "antd/es/input/TextArea";
 import {createClient} from "@supabase/supabase-js";
 import 'antd/dist/reset.css';
-import '../CSS/AntDesignOverride.css';
-import '../CSS/EditableProfilePage.css';
+import '../../CSS/AntDesignOverride.css';
+import '../../CSS/EditableProfilePage.css';
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
 

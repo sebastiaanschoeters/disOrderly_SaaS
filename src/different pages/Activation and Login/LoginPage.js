@@ -181,6 +181,10 @@ const LoginPage = () => {
             setIsTransitioning(true);
             setTimeout(() => navigate('/clientOverview'), 500);
         }
+        else if (userType == 'admin') {
+            setIsTransitioning(true);
+            setTimeout(() => navigate('/admin'), 500);
+        }
     };
 
     const getUserEmailById = async (userId) => {

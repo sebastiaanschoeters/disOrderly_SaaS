@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Form, Input, Button, Checkbox, Card, ConfigProvider } from 'antd';
 import 'antd/dist/reset.css';
 import '../../CSS/AntDesignOverride.css';
-import { antThemeTokens, ButterflyIcon, themes } from '../../themes';
+import { antThemeTokens, ButterflyIcon, themes } from '../../Extra components/themes';
 import { useNavigate } from 'react-router-dom';
 import forestImage from '../../Media/forest.jpg';
 import {createClient} from "@supabase/supabase-js"; // Path to the image
@@ -256,11 +256,6 @@ const LoginPage = () => {
                         >
                             <Input.Password />
                         </Form.Item>
-
-                        <Form.Item name="remember" valuePropName="checked">
-                            <Checkbox>Remember me</Checkbox>
-                        </Form.Item>
-
                         <Form.Item>
                             <Button
                                 type="primary"

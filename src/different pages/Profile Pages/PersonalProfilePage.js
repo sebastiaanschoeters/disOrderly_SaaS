@@ -7,7 +7,7 @@ import {
 } from '@ant-design/icons';
 import 'antd/dist/reset.css';
 import '../../CSS/AntDesignOverride.css';
-import {antThemeTokens, ButterflyIcon, themes} from '../../themes';
+import {antThemeTokens, ButterflyIcon, themes} from '../../Extra components/themes';
 import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(

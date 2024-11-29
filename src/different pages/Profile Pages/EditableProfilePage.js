@@ -15,7 +15,7 @@ import {
     UploadOutlined,
     UserOutlined
 } from '@ant-design/icons';
-import {antThemeTokens, ButterflyIcon, themes} from '../../themes';
+import {antThemeTokens, ButterflyIcon, themes} from '../../Extra components/themes';
 import TextArea from "antd/es/input/TextArea";
 import {createClient} from "@supabase/supabase-js";
 import 'antd/dist/reset.css';

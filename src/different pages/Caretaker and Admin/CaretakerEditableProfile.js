@@ -11,7 +11,7 @@ import {
 import 'antd/dist/reset.css';
 import '../../CSS/AntDesignOverride.css';
 import '../../CSS/EditableProfilePage.css';
-import {antThemeTokens, ButterflyIcon, themes} from '../../themes';
+import {antThemeTokens, ButterflyIcon, themes} from '../../Extra components/themes';
 import TextArea from "antd/es/input/TextArea";
 import {createClient} from "@supabase/supabase-js";
 import HomeButton from '../../Extra components/HomeButtonCaretaker'

@@ -1,6 +1,6 @@
 import 'antd/dist/reset.css'; // Import Ant Design styles
 import '../CSS/AntDesignOverride.css';
-import { ButterflyIcon, antThemeTokens, themes } from '../themes';
+import { ButterflyIcon, antThemeTokens, themes } from '../Extra components/themes';
 import { Avatar, ConfigProvider, Input, List, Typography, Modal, Button, Slider, Radio, Checkbox } from 'antd';
 import { FilterOutlined } from "@ant-design/icons";
 import { createClient } from "@supabase/supabase-js";

@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import { Avatar, Button, Modal, Input, Typography, ConfigProvider } from 'antd';
 import {useLocation, useNavigate, useParams} from 'react-router-dom';
-import { themes, antThemeTokens } from '../themes';
+import { themes, antThemeTokens } from '../Extra components/themes';
 import '../CSS/ChatSuggestionPage.css';
 import { createClient } from "@supabase/supabase-js";
 

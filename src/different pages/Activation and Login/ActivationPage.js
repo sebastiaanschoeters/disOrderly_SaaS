@@ -6,7 +6,7 @@ import '../../CSS/AntDesignOverride.css'
 import '../../CSS/ActivationPage.css'
 import 'antd/dist/reset.css';
 import {Form, Input, Button, Card, message, ConfigProvider, DatePicker, Radio, Select, Checkbox} from 'antd';
-import { antThemeTokens, themes } from '../../themes';
+import { antThemeTokens, themes } from '../../Extra components/themes';
 import { createClient } from "@supabase/supabase-js";
 import CryptoJS from 'crypto-js';
 
@@ -65,11 +65,17 @@ const ActivationPage = () => {
 
     const goBack = () => {
         console.log()
-        if (7> step && step > 1){
+        if (7> step && step > 2){
             setStep(step - 1);
         }
         else if(step == 7) {
             setStep(1);
+        }
+        else if(step == 2){
+            setStep(1);
+            setUserData(prevUserData => ({
+                activationCode: prevUserData.activationCode
+            }));
         }
     };
 
@@ -158,6 +164,54 @@ const ActivationPage = () => {
         }));
         setStep(6)
     };
+
+    const saveCaretaker = async (values) => {
+        setLoading(true);
+        const {vname, aname} = values;
+        let caretakerName = vname + ' ' + aname;
+        const hashedPassword = CryptoJS.SHA256(values.password).toString();
+
+        try {
+            const { data, error } = await supabase
+                .from("Credentials")
+                .select("email")
+                .eq("email", values.email)
+                .single();
+
+            if (error && error.code !== "PGRST116") {
+                console.error("Error checking email existence:", error.message);
+                message.error("Er is iets misgegaan tijdens de validatie van uw e-mailadres.");
+                setLoading(false);
+                return;
+            }
+
+            if (data) {
+                message.error("Dit e-mailadres is al geregistreerd. Probeer een ander e-mailadres.");
+                setLoading(false);
+                return;
+            }
+
+            const { error: careError } = await supabase
+                .from("Caretaker")
+                .insert({
+                    id: userData.activationKey,
+                    name: caretakerName,
+                    phone_number: values.phone,
+                    email: values.email
+                })
+
+            const { error: credError } = await supabase
+                .from("Credentials")
+                .insert({
+                    user_id: userData.activationKey,
+                    email: values.email,
+                    password: hashedPassword,
+                    type: 'caretaker'
+                })
+        } catch (error) {
+            console.error("something went wrong");
+        }
+    }
 
     const saveUserProfile = async (userData) => {
         let insertedCredentialId = null; // Track inserted IDs for rollback
@@ -579,11 +633,22 @@ const ActivationPage = () => {
                     )}
 
                     {step === 7 && (
-                        <Form name="userForm" onFinish={EmailAndPassword}>
+                        <Form name="userForm" onFinish={saveCaretaker}>
                             <Form.Item
                                 className="form-item"
-                                label="Name"
-                                name="name"
+                                label="Voornaam"
+                                name="vname"
+                                rules={[
+                                    { required: true, message: 'Please enter your name' },
+                                    { min: 2, message: 'Name must be at least 2 characters long' },
+                                ]}
+                            >
+                                <Input />
+                            </Form.Item>
+                            <Form.Item
+                                className="form-item"
+                                label="Achternaam"
+                                name="aname"
                                 rules={[
                                     { required: true, message: 'Please enter your name' },
                                     { min: 2, message: 'Name must be at least 2 characters long' },

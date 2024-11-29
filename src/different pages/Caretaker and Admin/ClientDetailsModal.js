@@ -1,11 +1,13 @@
-import React from "react";
-import { Modal } from "antd";
+import React, {useState} from "react";
+import {Button, Modal} from "antd";
 import ProfileCard from '../Profile Pages/ProfilePage'
+import ContactsOverview from "./ClientContacts";
 
 const ClientDetailsModal = ({ visible, onClose, clientData }) => {
     const [isViewingContactList, setIsViewingContactList] = useState(false);
 
     if (!clientData) return null; // Guard for no data
+    console.log(clientData)
 
     const handleToggleView = () =>{
         setIsViewingContactList((prevState) => !prevState);
@@ -53,12 +55,9 @@ const ClientDetailsModal = ({ visible, onClose, clientData }) => {
             onCancel={onClose}
             footer={null}
             width='90%'
-            style={{
-                position: 'relative',
-                overflow: 'hidden'
-            }}
         >
             <div>
+                <h2>{clientData.client_info.name || "Client Information"}</h2>
                 {renderContentByAccessLevel(clientData.access_level)}
             </div>
         </Modal>

@@ -33,9 +33,9 @@ const App = () => {
                 <Route path="/activate" element={<ActivationPage/>}/>
                 <Route path="/activate/:activationCodeLink" element={<ActivationPage />} />
                 <Route path="/hangman" element={<Hangman />} />
-                {/* <Route path="/caretakerProfile" element={<CaretakerProfilePage />} />
+                <Route path="/caretakerProfile" element={<CaretakerProfilePage />} />
                 <Route path="/caretakerProfileEdit" element={<CaretakerEditableProfile />} />
-                <Route path="/clientOverview" element={<ClientOverview />*/} />
+                <Route path="/clientOverview" element={<ClientOverview />} />
 
                 {/* Protected routes */}
                 <Route

@@ -49,6 +49,7 @@ const ContactsOverview = ({ id: userID }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [pageSize, setPageSize] = useState(5);
     const [selectedCaretakerId, setSelectedCaretakerId] = useState(null);
+    const [clientName, setClientName] = useState('')
     const [isModalVisible, setIsModalVisible] = useState(false);
 
 
@@ -83,9 +84,10 @@ const ContactsOverview = ({ id: userID }) => {
         };
     }, []);
 
-    function handleCaretakerClick(caretaker) {
+    function handleCaretakerClick(caretaker, clientName) {
         console.log("caretaker clicked:", caretaker)
         setSelectedCaretakerId(caretaker);
+        setClientName(clientName);
         setIsModalVisible(true);
     }
 
@@ -111,7 +113,7 @@ const ContactsOverview = ({ id: userID }) => {
             render: (_, record) => (
                 <Button
                     type="default"
-                    onClick={() => handleCaretakerClick(record.caretaker)}
+                    onClick={() => handleCaretakerClick(record.caretaker, record.profileName)}
                     style={{
                         fontSize: "1rem",
                         width: "100%",
@@ -157,7 +159,7 @@ const ContactsOverview = ({ id: userID }) => {
             )}
             {/* Modal to display caretaker details */}
             <Modal
-                title="Contact gegevens begeleidng"
+                title={`Contact gegevens begeleiding van ${clientName}`}
                 open={isModalVisible}
                 footer={null}
                 onCancel={() => setIsModalVisible(false)}

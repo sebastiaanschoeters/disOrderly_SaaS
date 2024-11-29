@@ -1,8 +1,17 @@
 import 'antd/dist/reset.css'; // Import Ant Design styles
 import '../CSS/AntDesignOverride.css'
 import { antThemeTokens, themes } from '../themes';
-import {Button, Card, Checkbox, ConfigProvider, Input, List, Modal, Radio, Slider, Typography} from 'antd';
-import {PlusOutlined} from "@ant-design/icons";
+import {
+    Button,
+    Card,
+    ConfigProvider,
+    Form,
+    Input,
+    List,
+    Modal,
+    Select
+} from 'antd';
+import {PlusOutlined, RedoOutlined} from "@ant-design/icons";
 import React, {useEffect, useState} from "react";
 import { useNavigate } from 'react-router-dom';
 import { createClient } from "@supabase/supabase-js";
@@ -14,19 +23,60 @@ const AdminPage = () => {
     const [theme, setTheme] = useState('blauw');
     const themeColors = themes[theme] || themes.blauw;
     const navigate = useNavigate();
-    const [Organizations, setOrganizations] = useState([]);
+    const [Organisations, setOrganisations] = useState([]);
     const [isModalVisible, setIsModalVisible] = useState(false);
-    const [OrganizationName, setOrganizationName] = useState('');
-    const [AmountUsers, setAmountUsers] = useState('');
+    const [isOrganisationVisible, setIsOrganisationVisible] = useState(false);
+    const [selectedOrganisation, setSelectedOrganisation] = useState({
+        id: 0,
+        name: undefined,
+        amountUsers: 0,
+        responsible: 0,
+        location: undefined,
+        locationName: undefined
+    });
 
     useEffect(() => {fetchData()}
-    , [])
+    , []);
 
     const fetchData = async () => {
-        const {data, error} = await supabase.from("Organizations").select("name")
-        setOrganizations(data)
-        console.log(data)
+        const {data, error} = await supabase.from("Organisations").select("id, name, maximum_activations_codes, responsible, location:Location ( id, Gemeente )").order("name");
+        const mappedData = data.map((organisation) => ({
+            id: organisation.id,
+            name: organisation.name,
+            amountUsers: organisation.maximum_activations_codes,
+            responsible: organisation.responsible,
+            location: organisation.location?.id || null,
+            locationName: organisation.location?.Gemeente || "",
+        }));
+        if(error) {
+            console.error(error);
+        }
+        setOrganisations(mappedData);
     }
+
+    const fetchLocationCode = async (locationName) => {
+        try {
+            const { data, error } = await supabase
+                .from("Location")
+                .select("id")
+                .eq("Gemeente", locationName);
+
+            if (error) {
+                console.error("Error fetching location code:", error);
+                return null;
+            }
+
+            if (data.length === 0) {
+                console.warn("No location found for the given name.");
+                return null;
+            }
+
+            return data[0].id; // Return the first matching location ID
+        } catch (err) {
+            console.error("Error:", err);
+            return null;
+        }
+    };
 
     const showModal = () => {
         setIsModalVisible(true);
@@ -36,10 +86,130 @@ const AdminPage = () => {
         setIsModalVisible(false);
     };
 
-    const handleChangeAmountUsers = (event) => {
-        setAmountUsers(event.target.value);
+    const handleClickOrganisation = async (organisation) => {
+        try {
+            console.log(organisation);
+            const {data, error} = await supabase
+                .from("Location")
+                .select("id")
+                .eq("Gemeente", organisation.locationName);
+
+            if (error) {
+                console.error(error);
+                return;
+            }
+
+            const locationCode = data.length > 0 ? data[0].id : 0;
+
+            setSelectedOrganisation({
+                ...organisation,
+                location: locationCode, // Use the resolved location name
+            });
+
+            setIsOrganisationVisible(true);
+        } catch (error) {
+            console.error("Error fetching organisation details:", error);
+        }
+    }
+
+    const handleUpdateOrganisation = async () => {
+        try {
+            console.log(selectedOrganisation);
+            const {error } = await supabase
+                .from("Organisations")
+                .update({
+                    name: selectedOrganisation.name,
+                    maximum_activations_codes: selectedOrganisation.amountUsers,
+                    responsible: selectedOrganisation.responsible,
+                    location: selectedOrganisation.location,
+                })
+                .eq("id", selectedOrganisation.id);
+
+            if (error) {
+                console.error("Error updating organisation:", error);
+            } else {
+                console.log("Organisation updated successfully!");
+            }
+            fetchData();
+            handleCloseOrganisation();
+
+        } catch (err) {
+            console.error("Update failed:", err);
+        }
     };
 
+    const handleNewOrganisation = async () => {
+        try {
+            console.log(selectedOrganisation);
+            const {error } = await supabase
+                .from("Organisations")
+                .insert({
+                    name: selectedOrganisation.name,
+                    maximum_activations_codes: selectedOrganisation.amountUsers,
+                    responsible: selectedOrganisation.responsible,
+                    location: selectedOrganisation.location,
+                });
+
+            if (error) {
+                console.error("Error updating organisation:", error);
+            } else {
+                console.log("Organisation updated successfully!");
+            }
+            fetchData();
+            handleCloseOrganisation();
+
+        } catch (err) {
+            console.error("Update failed:", err);
+        }
+    }
+
+    const handleFieldChange = async (field, value) => {
+        if (field === "location") {
+            // Convert location name to code
+            const locationCode = await fetchLocationCode(value);
+            if (!locationCode) {
+                console.error("Invalid location provided.");
+                setSelectedOrganisation((prev) => ({
+                    ...prev,
+                    [field]: value,
+                }));
+            }
+
+            else {
+                setSelectedOrganisation((prev) => ({
+                    ...prev,
+                    [field]: locationCode, // Save the code instead of the name
+                }));
+            }
+        }
+        else {
+            setSelectedOrganisation((prev) => ({
+                ...prev,
+                [field]: value,
+            }))
+        }
+    };
+
+    const handleCloseOrganisation = () => {
+        console.log(selectedOrganisation);
+        setIsOrganisationVisible(false);
+        setSelectedOrganisation({
+            id: 0,
+            name: undefined,
+            amountUsers: 0,
+            responsible: 0,
+            location: 0,
+            locationName: undefined
+        });
+    };
+
+    const debounce = (func, delay) => {
+        let timer;
+        return (...args) => {
+            clearTimeout(timer);
+            timer = setTimeout(() => func(...args), delay);
+        };
+    };
 
     const styles = {
         list: {
@@ -76,6 +246,7 @@ const AdminPage = () => {
         }
     }
 
+
     return (<ConfigProvider theme={{token: antThemeTokens(themeColors)}}>
             <div
                 style={{
@@ -90,24 +261,41 @@ const AdminPage = () => {
                     alignItems: 'center',
                 }}>
                 <div style={{display: 'flex', gap: '144px', flexWrap: 'wrap', justifyContent: 'center'}}>
+                    <div>
+                        <Button
+                            type="primary"
+                            icon={<RedoOutlined />}
+                            onClick={fetchData}
+                        >
+                            <h3 style={styles.name}> Reload data </h3>
+                        </Button>
 
-                    <List
-                        itemLayout="horizontal"
-                        style={styles.list}
-                        dataSource={Organizations}
-                        renderItem={(Organizations) => (
-                            <Card
-                                style={styles.card}
-                                hoverable={true}
-                            >
-                                <Card.Meta
-                                    title={<span style={styles.name}><li>{Organizations.name}</li></span>}
-                                />
+                    </div>
 
-                            </Card>
-                        )}
-                    >
-                    </List>
+                    <div style={{display: 'flex', gap: '144px', flexWrap: 'wrap', justifyContent: 'center'}}>
+                        <h1>Organisaties: </h1>
+                        <List
+                            itemLayout="horizontal"
+                            style={styles.list}
+
+                            dataSource={Organisations}
+                            renderItem={(organisation) => (
+                                <List.Item>
+                                    <Card
+                                        style={styles.card}
+                                        hoverable={true}
+                                        onClick={() => handleClickOrganisation(organisation)}
+                                    >
+                                        <Card.Meta
+                                            title={<span style={styles.name}><li>{organisation.name}</li></span>}
+                                        />
+                                        <p>{organisation.locationName}</p>
+                                    </Card>
+                                </List.Item>
+                            )}
+                        />
+                    </div>
+
 
                     <Button
                         type="primary"
@@ -149,28 +337,163 @@ const AdminPage = () => {
 
                 <Modal
                     title="Nieuwe Organisatie"
+                    name="newOrganisation"
                     visible={isModalVisible}
                     onCancel={handleModalClose}
                     footer={null}
                 >
                     <div>
-                        Geef de nieuwe organisatie een naam:
-                        <Input>
+                        <Form
+                            name="New Organisation Form"
+                            initialValues={{remember: true}}
+                            onFinish={handleNewOrganisation}
+                            onFinishFailed={(errorInfo) =>
+                                console.log('Failed:', errorInfo)
+                            }
+                        >
+                            <Form.Item
+                                label="De naam van de organisatie"
+                                name="organisationName"
+                                rules={[
+                                    {
+                                        required: true, message: 'Geef de naam van de nieuwe organisatie'
+                                    },]}>
+                                <Input onChange={async (e) => await handleFieldChange("name", e.target.value)}
+                                value = {selectedOrganisation.name}
+                                />
+                            </Form.Item>
 
-                        </Input>
+                            <Form.Item
+                                name="hoeveelAccounts"
+                                label="Hoeveel Accounts?"
+                                rules={[{required: true},]}
+                            >
+                                <Select placeholder="Hoeveel gebruikers?"
+                                        value = {selectedOrganisation.amountUsers}
+                                        onChange={(value) => handleFieldChange("amountUsers", value)} >
+                                    <Select.Option value="1">1-50</Select.Option>
+                                    <Select.Option value="2">51-200</Select.Option>
+                                    <Select.Option value="3">200+</Select.Option>
+                                </Select>
+                            </Form.Item>
 
-                    </div>
+                            <Form.Item
+                                label="Locatie"
+                                name="location"
+                                rules={[{required:true, message: 'Vul een locatie in!'}]}>
 
-                    <div>
-                        <label htmlFor="dropdown">Hoeveel accounts worden beschikbaar gemaakt voor de organisatie: </label>
-                        <select id="dropdown" value={AmountUsers} onChange={handleChangeAmountUsers}>
-                            <option value="">--Select--</option>
-                            <option value="option1">1-50</option>
-                            <option value="option2">51-200</option>
-                            <option value="option3">200+</option>
-                        </select>
+                                <Input placeholder="Locatie"
+                                       onChange={(e) => handleFieldChange("location", e.target.value)} />
+
+                            </Form.Item>
+
+                            <Form.Item
+                                label="Contactpersoon"
+                                name="contactPerson"
+                                rules={[{required:true}]} >
+
+                                <Input placeholder="Naam" onChange={(e) => handleFieldChange("responsible", e.target.value)} />
+
+                            </Form.Item>
+
+                            <Button onClick={handleNewOrganisation}>
+                                Aanmaken
+                            </Button>
+                        </Form>
                     </div>
                 </Modal>
+
+                <Modal
+                    visible={isOrganisationVisible}
+                    title = {selectedOrganisation.name}
+                    onCancel={handleCloseOrganisation}
+                    footer={null}
+                >
+                    <Form
+                        name="modal_form"
+                        initialValues={{
+                            organisation: selectedOrganisation.name,
+                            aantalGebruikers: selectedOrganisation.amountUsers,
+                            contactPerson: selectedOrganisation.responsible,
+                            location: selectedOrganisation.location,
+                        }}
+                        onValuesChange={(changedValues) => {
+                            const [key, value] = Object.entries(changedValues)[0];
+                            handleFieldChange(key, value);
+                        }}
+                        onFinish={handleUpdateOrganisation}
+                    >
+                        <Form.Item
+                            label="Organisation"
+                            name="organisation"
+                            value={selectedOrganisation.name}
+                        >
+                            <Input
+                                value={selectedOrganisation.name}
+                                onChange={(e) => handleFieldChange("name", e.target.value)}
+                            />
+                            <div></div>
+                        </Form.Item>
+
+                        <Form.Item
+                            label="Aantal gebruikers"
+                            name="aantalGebruikers"
+                        >
+                            <Select
+                                value={selectedOrganisation.amountUsers}
+                                onChange={(value) => handleFieldChange("amountUsers", value)}
+                            >
+                                <Select.Option value={1}>1-50</Select.Option>
+                                <Select.Option value={2}>51-200</Select.Option>
+                                <Select.Option value={3}>200+</Select.Option>
+                            </Select>
+                            <div/>
+                        </Form.Item>
+
+                        <Form.Item
+                            label="Contactpersoon"
+                            name="contactPerson" >
+                            <Input
+                                value={selectedOrganisation.responsible}
+                                onChange={(e) => handleFieldChange("responsible", e.target.value)}
+                            />
+                            <div/>
+                        </Form.Item>
+
+                        <Form.Item
+                            label="Locatie"
+                            name="location" >
+                            <Input
+                                value={selectedOrganisation.locationName}
+                                onChange={async (e) => {
+                                    const locationName = e.target.value;
+                                    setSelectedOrganisation((prev) => ({
+                                        ...prev,
+                                        locationName, // Update the name for display immediately
+                                    }));
+
+                                    // Fetch the location code asynchronously
+                                    const locationCode = await fetchLocationCode(locationName);
+
+                                    if (locationCode !== null) {
+                                        setSelectedOrganisation((prev) => ({
+                                            ...prev,
+                                            location: locationCode, // Save the location ID
+                                        }));
+                                    }}} />
+
+                            <div/>
+                        </Form.Item>
+
+
+                        <Form.Item>
+                            <Button type="primary" htmlType="submit" onClick={handleUpdateOrganisation}>
+                                Opslaan
+                            </Button>
+                        </Form.Item>
+                    </Form>
+                </Modal>
+
             </div>
         </ConfigProvider>
     );

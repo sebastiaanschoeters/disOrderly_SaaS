@@ -13,20 +13,19 @@ const HomeButton = () => {
     return (
         <Button
             type="primary"
-            shape="circle"
-            icon={<HomeOutlined />}
+            icon={<HomeOutlined style={{ fontSize:'2rem' }}/>}
             onClick={goToHome}
             style={{
-                position: "fixed", // Optional for fixed positioning
+                position: "fixed",
                 left: "20px",
                 top: "20px",
                 zIndex: 1000,
-                width: "60px", // Ensures a perfect circle
-                height: "60px", // Matches width
-                padding: "0", // Removes extra padding
+                width: "60px",
+                height: "60px",
+                borderRadius: "12px",
                 display: "flex",
                 justifyContent: "center",
-                alignItems: "center", // Centers the icon
+                alignItems: "center",
             }}
         />
     );

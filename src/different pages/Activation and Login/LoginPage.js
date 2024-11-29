@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { Form, Input, Button, Checkbox, Card, ConfigProvider } from 'antd';
 import 'antd/dist/reset.css';
 import '../../CSS/AntDesignOverride.css';
-import { antThemeTokens, ButterflyIcon, themes } from '../../Extra components/themes';
+import { antThemeTokens, ButterflyIcon, themes} from '../../Extra components/themes';
 import { useNavigate } from 'react-router-dom';
+//import LocalStorageViewer from '../../Extra components/LocalStorageViewer';
 import forestImage from '../../Media/forest.jpg';
 import {createClient} from "@supabase/supabase-js"; // Path to the image
 
@@ -186,6 +187,87 @@ const LoginPage = () => {
         }
     };
 
+    const getUserEmailById = async (userId) => {
+        try {
+            const { data, error } = await supabase
+                .from('Credentials')
+                .select('email')
+                .eq('user_id', userId)
+
+            if (error) {
+                console.error('Error fetching email:', error.message);
+                return null;
+            }
+
+            if (data.length === 0) {
+                console.log('No user found with the provided userid.');
+                return null;
+            }
+
+            console.log('Fetched dataaaaaa:', data);
+            return data;
+        } catch (err) {
+            console.error('Unexpected error:', err);
+            return null;
+        }
+    };
+
+
+    const testfunctie = async (clientId) => {
+        localStorage.setItem('controlling', true);
+        const email = await getUserEmailById(clientId);
+        const LoginResponse = {
+            token: 'fake-session-token',
+            user: { email },
+        };
+
+
+        // Save user session to localStorage
+        localStorage.setItem('sessionToken', LoginResponse.token);
+        localStorage.setItem('userEmail', LoginResponse.user.email);
+
+        const theme = await getTheme(clientId);
+        const name = await getName(clientId);
+        const pfp = await getPfp(clientId);
+        localStorage.setItem('userType', 'user');
+
+        if (clientId) {
+            localStorage.setItem('user_id', clientId);
+            console.log('Fetched and stored user_id:', clientId);
+        } else {
+            console.error('Failed to fetch user_id');
+        }
+
+        if (theme) {
+            localStorage.setItem('theme', theme);
+            console.log('Fetched and stored theme:', theme);
+        } else {
+            console.error('Failed to fetch theme',);
+        }
+
+        if (name) {
+            localStorage.setItem('name', name);
+            console.log('Fetched and stored name:', name);
+        } else {
+            console.error('Failed to fetch name',);
+        }
+
+        if (pfp) {
+            localStorage.setItem('profile_picture', pfp);
+            console.log('Fetched and stored pfp:', pfp);
+        } else {
+            console.error('Failed to fetch pfp',);
+        }
+
+        setIsTransitioning(true);
+        setTimeout(() => navigate('/home'), 500);
+
+    }
+
+    /**/
+
+
+
     return (
         <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
             <div
@@ -216,7 +298,6 @@ const LoginPage = () => {
                         zIndex: -1,
                     }}
                 ></div>
-
                 <ButterflyIcon color="rgba(255, 255, 255, 0.2)" />
                 <Button
                     type="link"

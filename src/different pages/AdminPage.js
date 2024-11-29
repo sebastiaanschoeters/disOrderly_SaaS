@@ -4,7 +4,7 @@ import { antThemeTokens, themes } from '../themes';
 import {
     Button,
     Card,
-    ConfigProvider,
+    ConfigProvider, Flex,
     Form,
     Input,
     List,
@@ -25,7 +25,10 @@ const AdminPage = () => {
     const navigate = useNavigate();
     const [Organisations, setOrganisations] = useState([]);
     const [isModalVisible, setIsModalVisible] = useState(false);
+    const [isCaretakerVisible, setCaretakerVisible] = useState(false);
     const [isOrganisationVisible, setIsOrganisationVisible] = useState(false);
+    const [names, setNames] = useState([]);
+    const [generatedCode, setGeneratedCode] = useState('');
     const [selectedOrganisation, setSelectedOrganisation] = useState({
         id: 0,
         name: undefined,
@@ -52,6 +55,8 @@ const AdminPage = () => {
             console.error(error);
         }
         setOrganisations(mappedData);
+
+        fetchNames();
     }
 
     const fetchLocationCode = async (locationName) => {
@@ -77,6 +82,27 @@ const AdminPage = () => {
             return null;
         }
     };
+
+    const fetchNames = async () => {
+        const {data, error} = await supabase.from("User").select("id, name");
+        const mappedData = data.map((user) => ({
+            id: user.id,
+            name: user.name,
+        }))
+
+
+        setNames(mappedData);
+        console.log("Mapped Data: ", mappedData)
+    }
+
+    const showCaretaker = () => {
+        setCaretakerVisible(true);
+    }
+
+    const handleCloseCaretaker = () => {
+        setCaretakerVisible(false);
+        setGeneratedCode("");
+    }
 
     const showModal = () => {
         setIsModalVisible(true);
@@ -203,13 +229,12 @@ const AdminPage = () => {
         });
     };
 
-    const debounce = (func, delay) => {
-        let timer;
-        return (...args) => {
-            clearTimeout(timer);
-            timer = setTimeout(() => func(...args), delay);
-        };
-    };
+
+    const handleGenerateCode = async () => {
+        const {data, error} = await supabase.from("Activation").insert({"usable": true, "type": "caretaker"}).select();
+        await setGeneratedCode(data[0].code);
+        console.log("Generated code: ", data[0]["code"]);
+    }
 
     const styles = {
         list: {
@@ -243,41 +268,77 @@ const AdminPage = () => {
             border: 'none',
             fontSize: '18px',
             cursor: 'pointer'
+        },
+        button: {
+            width: '90%',
+            maxWidth: '400px',
+            height: 'auto',
         }
     }
 
 
+
     return (<ConfigProvider theme={{token: antThemeTokens(themeColors)}}>
+
             <div
                 style={{
                     padding: '20px',
                     position: 'relative',
                     width: '100%',
-                    height: '100vh',
+                    height: '100%',
                     backgroundColor: themeColors.primary2,
                     color: themeColors.primary10,
                     display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
+                    flexDirection: 'column',
+                    alignItems: 'begin',
+                    gap: '20px',
                 }}>
-                <div style={{display: 'flex', gap: '144px', flexWrap: 'wrap', justifyContent: 'center'}}>
-                    <div>
-                        <Button
-                            type="primary"
-                            icon={<RedoOutlined />}
-                            onClick={fetchData}
-                        >
-                            <h3 style={styles.name}> Reload data </h3>
-                        </Button>
+                <Button
+                    type="primary"
+                    style={{
+                        position: 'absolute',
+                        top: '20px',
+                        left: '20px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '120px',
+                        height: '100px',
+                    }}
+                    icon={<RedoOutlined/>}
+                    onClick={fetchData}
+                >
+                    <h6> Reload data </h6>
+                </Button>
+                <Button
+                    type="primary"
+                    style={{
+                        position: 'absolute',
+                        top: '20px',
+                        right: '20px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '120px',
+                        height: '100px',
+                    }}
+                    onClick={() => navigate('/login')}
 
-                    </div>
+                >
+                    <h2 style={{margin: '0', fontSize: '1rem'}}>Afmelden</h2>
+                </Button>
+                <div style={{display: 'flex', flexDirection:'column', gap: '20px', width: '100%', alignItems: 'center', paddingTop:'100px'}}>
 
-                    <div style={{display: 'flex', gap: '144px', flexWrap: 'wrap', justifyContent: 'center'}}>
-                        <h1>Organisaties: </h1>
+                    <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', gap: '20px'}}>
+                        <div
+                        style={{display: 'flex', flexDirection: 'row', alignItems: 'center', gap:'20px',}}>
+                            <h1>Organisaties: </h1>
+                        </div>
                         <List
                             itemLayout="horizontal"
                             style={styles.list}
-
                             dataSource={Organisations}
                             renderItem={(organisation) => (
                                 <List.Item>
@@ -296,44 +357,34 @@ const AdminPage = () => {
                         />
                     </div>
 
-
-                    <Button
-                        type="primary"
-                        icon={<PlusOutlined style={{fontSize: '4rem'}}/>}
-                        style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            width: '360px',
-                            height: '180px',
-                        }}
-                        onClick={showModal}
-
-                    >
-                        <h2 style={{margin: '0', fontSize: '24px'}}>Nieuwe organisatie toevoegen</h2>
-                    </Button>
-                </div>
-
-
-                <Button
-                    type="primary"
-                    style={{
-                        position: 'absolute',
-                        top: '20px',
-                        right: '20px',
+                    <div style={{
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
-                        justifyContent: 'center',
-                        width: '100px',
-                        height: '40px',
-                    }}
-                    onClick={() => navigate('/login')}
+                        gap: '20px',
+                        width: '100%',
+                    }}>
+                        <Button
+                            type="primary"
+                            icon={<PlusOutlined/>}
+                            style={styles.button}
+                            onClick={showModal}
+                        >
+                            <h6> Nieuwe organisatie toevoegen </h6>
+                        </Button>
 
-                >
-                    <h2 style={{margin: '0', fontSize: '1rem'}}>Afmelden</h2>
-                </Button>
+                        <Button
+                            type="primary"
+                            icon={<PlusOutlined/>}
+                            style={styles.button}
+                            onClick={showCaretaker}
+                        >
+                            <h6> Genereer code voor een begeleider </h6>
+                        </Button>
+                    </div>
+
+
+                </div>
 
                 <Modal
                     title="Nieuwe Organisatie"
@@ -341,6 +392,7 @@ const AdminPage = () => {
                     visible={isModalVisible}
                     onCancel={handleModalClose}
                     footer={null}
+                    style={{padding: '10px'}}
                 >
                     <div>
                         <Form
@@ -359,7 +411,7 @@ const AdminPage = () => {
                                         required: true, message: 'Geef de naam van de nieuwe organisatie'
                                     },]}>
                                 <Input onChange={async (e) => await handleFieldChange("name", e.target.value)}
-                                value = {selectedOrganisation.name}
+                                       value={selectedOrganisation.name}
                                 />
                             </Form.Item>
 
@@ -369,8 +421,8 @@ const AdminPage = () => {
                                 rules={[{required: true},]}
                             >
                                 <Select placeholder="Hoeveel gebruikers?"
-                                        value = {selectedOrganisation.amountUsers}
-                                        onChange={(value) => handleFieldChange("amountUsers", value)} >
+                                        value={selectedOrganisation.amountUsers}
+                                        onChange={(value) => handleFieldChange("amountUsers", value)}>
                                     <Select.Option value="1">1-50</Select.Option>
                                     <Select.Option value="2">51-200</Select.Option>
                                     <Select.Option value="3">200+</Select.Option>
@@ -380,19 +432,20 @@ const AdminPage = () => {
                             <Form.Item
                                 label="Locatie"
                                 name="location"
-                                rules={[{required:true, message: 'Vul een locatie in!'}]}>
+                                rules={[{required: true, message: 'Vul een locatie in!'}]}>
 
                                 <Input placeholder="Locatie"
-                                       onChange={(e) => handleFieldChange("location", e.target.value)} />
+                                       onChange={(e) => handleFieldChange("location", e.target.value)}/>
 
                             </Form.Item>
 
                             <Form.Item
                                 label="Contactpersoon"
                                 name="contactPerson"
-                                rules={[{required:true}]} >
+                                rules={[{required: true}]}>
 
-                                <Input placeholder="Naam" onChange={(e) => handleFieldChange("responsible", e.target.value)} />
+                                <Input placeholder="Naam"
+                                       onChange={(e) => handleFieldChange("responsible", e.target.value)}/>
 
                             </Form.Item>
 
@@ -405,9 +458,10 @@ const AdminPage = () => {
 
                 <Modal
                     visible={isOrganisationVisible}
-                    title = {selectedOrganisation.name}
+                    title={selectedOrganisation.name}
                     onCancel={handleCloseOrganisation}
                     footer={null}
+                    style={{padding: '10px'}}
                 >
                     <Form
                         name="modal_form"
@@ -452,7 +506,7 @@ const AdminPage = () => {
 
                         <Form.Item
                             label="Contactpersoon"
-                            name="contactPerson" >
+                            name="contactPerson">
                             <Input
                                 value={selectedOrganisation.responsible}
                                 onChange={(e) => handleFieldChange("responsible", e.target.value)}
@@ -462,7 +516,7 @@ const AdminPage = () => {
 
                         <Form.Item
                             label="Locatie"
-                            name="location" >
+                            name="location">
                             <Input
                                 value={selectedOrganisation.locationName}
                                 onChange={async (e) => {
@@ -480,7 +534,8 @@ const AdminPage = () => {
                                             ...prev,
                                             location: locationCode, // Save the location ID
                                         }));
-                                    }}} />
+                                    }
+                                }}/>
 
                             <div/>
                         </Form.Item>
@@ -492,6 +547,27 @@ const AdminPage = () => {
                             </Button>
                         </Form.Item>
                     </Form>
+                </Modal>
+
+                <Modal
+                    visible={isCaretakerVisible}
+                    onCancel={handleCloseCaretaker}
+                    footer={null}
+                    style={{padding: '10px'}}
+                >
+                    <div>
+                        <h3>Code voor de nieuwe caretaker:</h3>
+                        <h2>{generatedCode}</h2>
+                    </div>
+                    <div>
+                        <Button
+                            type={"primary"}
+                            onClick={handleGenerateCode}
+                        >
+                            Genereer
+                        </Button>
+                    </div>
+
                 </Modal>
 
             </div>

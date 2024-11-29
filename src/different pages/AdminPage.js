@@ -11,7 +11,7 @@ import {
     Modal,
     Select
 } from 'antd';
-import {PlusOutlined} from "@ant-design/icons";
+import {PlusOutlined, RedoOutlined} from "@ant-design/icons";
 import React, {useEffect, useState} from "react";
 import { useNavigate } from 'react-router-dom';
 import { createClient } from "@supabase/supabase-js";
@@ -31,20 +31,22 @@ const AdminPage = () => {
         name: undefined,
         amountUsers: 0,
         responsible: 0,
-        location: undefined
+        location: undefined,
+        locationName: undefined
     });
 
     useEffect(() => {fetchData()}
     , []);
 
     const fetchData = async () => {
-        const {data, error} = await supabase.from("Organisations").select("id, name, location, maximum_activations_codes, responsible");
+        const {data, error} = await supabase.from("Organisations").select("id, name, maximum_activations_codes, responsible, location:Location ( id, Gemeente )").order("name");
         const mappedData = data.map((organisation) => ({
             id: organisation.id,
             name: organisation.name,
             amountUsers: organisation.maximum_activations_codes,
             responsible: organisation.responsible,
-            location: organisation.location
+            location: organisation.location?.id || null,
+            locationName: organisation.location?.Gemeente || "",
         }));
         if(error) {
             console.error(error);
@@ -52,15 +54,29 @@ const AdminPage = () => {
         setOrganisations(mappedData);
     }
 
-    const fetchLocation = async (locationCode) => {
-        console.log("Location code:", locationCode);
-        const {data, error} = await supabase.from("Location").select("Gemeente").eq("id", locationCode);
-        if(error) {
-            console.error(error);
+    const fetchLocationCode = async (locationName) => {
+        try {
+            const { data, error } = await supabase
+                .from("Location")
+                .select("id")
+                .eq("Gemeente", locationName);
+
+            if (error) {
+                console.error("Error fetching location code:", error);
+                return null;
+            }
+
+            if (data.length === 0) {
+                console.warn("No location found for the given name.");
+                return null;
+            }
+
+            return data[0].id; // Return the first matching location ID
+        } catch (err) {
+            console.error("Error:", err);
+            return null;
         }
-        debounce(handleFieldChange("location", data[0]["Gemeente"]), 1000);
-        console.log("location", data[0]["Gemeente"]);
-    }
+    };
 
     const showModal = () => {
         setIsModalVisible(true);
@@ -70,15 +86,35 @@ const AdminPage = () => {
         setIsModalVisible(false);
     };
 
-    const handleClickOrganisation = (organisation) => {
-        setSelectedOrganisation(organisation);
-        debounce(fetchLocation(organisation.location), 1000);
-        setIsOrganisationVisible(true);
-        console.log("Selected organisation", selectedOrganisation);
+    const handleClickOrganisation = async (organisation) => {
+        try {
+            console.log(organisation);
+            const {data, error} = await supabase
+                .from("Location")
+                .select("id")
+                .eq("Gemeente", organisation.locationName);
+
+            if (error) {
+                console.error(error);
+                return;
+            }
+
+            const locationCode = data.length > 0 ? data[0].id : 0;
+
+            setSelectedOrganisation({
+                ...organisation,
+                location: locationCode, // Use the resolved location name
+            });
+
+            setIsOrganisationVisible(true);
+        } catch (error) {
+            console.error("Error fetching organisation details:", error);
+        }
     }
 
     const handleUpdateOrganisation = async () => {
         try {
+            console.log(selectedOrganisation);
             const {error } = await supabase
                 .from("Organisations")
                 .update({
@@ -95,6 +131,7 @@ const AdminPage = () => {
                 console.log("Organisation updated successfully!");
             }
             fetchData();
+            handleCloseOrganisation();
 
         } catch (err) {
             console.error("Update failed:", err);
@@ -119,28 +156,50 @@ const AdminPage = () => {
                 console.log("Organisation updated successfully!");
             }
             fetchData();
+            handleCloseOrganisation();
 
         } catch (err) {
             console.error("Update failed:", err);
         }
     }
 
-    const handleFieldChange = (field, value) => {
-        setSelectedOrganisation((prev) => ({
-            ...prev,
-            [field]: value,
-        }));
+    const handleFieldChange = async (field, value) => {
+        if (field === "location") {
+            // Convert location name to code
+            const locationCode = await fetchLocationCode(value);
+            if (!locationCode) {
+                console.error("Invalid location provided.");
+                setSelectedOrganisation((prev) => ({
+                    ...prev,
+                    [field]: value,
+                }));
+            }
+
+            else {
+                setSelectedOrganisation((prev) => ({
+                    ...prev,
+                    [field]: locationCode, // Save the code instead of the name
+                }));
+            }
+        }
+        else {
+            setSelectedOrganisation((prev) => ({
+                ...prev,
+                [field]: value,
+            }))
+        }
     };
 
     const handleCloseOrganisation = () => {
         console.log(selectedOrganisation);
         setIsOrganisationVisible(false);
         setSelectedOrganisation({
-            id: undefined,
+            id: 0,
             name: undefined,
             amountUsers: 0,
-            responsible: undefined,
-            location: undefined,
+            responsible: 0,
+            location: 0,
+            locationName: undefined
         });
     };
 
@@ -202,24 +261,35 @@ const AdminPage = () => {
                     alignItems: 'center',
                 }}>
                 <div style={{display: 'flex', gap: '144px', flexWrap: 'wrap', justifyContent: 'center'}}>
+                    <div>
+                        <Button
+                            type="primary"
+                            icon={<RedoOutlined />}
+                            onClick={fetchData}
+                        >
+                            <h3 style={styles.name}> Reload data </h3>
+                        </Button>
+
+                    </div>
 
                     <div style={{display: 'flex', gap: '144px', flexWrap: 'wrap', justifyContent: 'center'}}>
                         <h1>Organisaties: </h1>
                         <List
                             itemLayout="horizontal"
                             style={styles.list}
+
                             dataSource={Organisations}
                             renderItem={(organisation) => (
                                 <List.Item>
                                     <Card
                                         style={styles.card}
                                         hoverable={true}
-                                        onClick={() => debounce(handleClickOrganisation(organisation), 1000)}
+                                        onClick={() => handleClickOrganisation(organisation)}
                                     >
                                         <Card.Meta
                                             title={<span style={styles.name}><li>{organisation.name}</li></span>}
                                         />
-                                        <p>{organisation.location}</p>
+                                        <p>{organisation.locationName}</p>
                                     </Card>
                                 </List.Item>
                             )}
@@ -288,7 +358,9 @@ const AdminPage = () => {
                                     {
                                         required: true, message: 'Geef de naam van de nieuwe organisatie'
                                     },]}>
-                                <Input onChange={(e) => handleFieldChange("name", e.target.value)}/>
+                                <Input onChange={async (e) => await handleFieldChange("name", e.target.value)}
+                                value = {selectedOrganisation.name}
+                                />
                             </Form.Item>
 
                             <Form.Item
@@ -296,7 +368,9 @@ const AdminPage = () => {
                                 label="Hoeveel Accounts?"
                                 rules={[{required: true},]}
                             >
-                                <Select placeholder="Hoeveel gebruikers?" onChange={(value) => handleFieldChange("amountUsers", value)} >
+                                <Select placeholder="Hoeveel gebruikers?"
+                                        value = {selectedOrganisation.amountUsers}
+                                        onChange={(value) => handleFieldChange("amountUsers", value)} >
                                     <Select.Option value="1">1-50</Select.Option>
                                     <Select.Option value="2">51-200</Select.Option>
                                     <Select.Option value="3">200+</Select.Option>
@@ -308,7 +382,8 @@ const AdminPage = () => {
                                 name="location"
                                 rules={[{required:true, message: 'Vul een locatie in!'}]}>
 
-                                <Input placeholder="Locatie" onChange={(e) => handleFieldChange("location", e.target.value)} />
+                                <Input placeholder="Locatie"
+                                       onChange={(e) => handleFieldChange("location", e.target.value)} />
 
                             </Form.Item>
 
@@ -336,11 +411,21 @@ const AdminPage = () => {
                 >
                     <Form
                         name="modal_form"
+                        initialValues={{
+                            organisation: selectedOrganisation.name,
+                            aantalGebruikers: selectedOrganisation.amountUsers,
+                            contactPerson: selectedOrganisation.responsible,
+                            location: selectedOrganisation.location,
+                        }}
+                        onValuesChange={(changedValues) => {
+                            const [key, value] = Object.entries(changedValues)[0];
+                            handleFieldChange(key, value);
+                        }}
+                        onFinish={handleUpdateOrganisation}
                     >
                         <Form.Item
                             label="Organisation"
                             name="organisation"
-                            rules={[{ required: true}]}
                             value={selectedOrganisation.name}
                         >
                             <Input
@@ -353,7 +438,6 @@ const AdminPage = () => {
                         <Form.Item
                             label="Aantal gebruikers"
                             name="aantalGebruikers"
-                            rules={[{required: true}]}
                         >
                             <Select
                                 value={selectedOrganisation.amountUsers}
@@ -368,8 +452,7 @@ const AdminPage = () => {
 
                         <Form.Item
                             label="Contactpersoon"
-                            name="contactPerson"
-                            rules={[{required: true, message: 'Wijs een contactpersoon aan!'}]}>
+                            name="contactPerson" >
                             <Input
                                 value={selectedOrganisation.responsible}
                                 onChange={(e) => handleFieldChange("responsible", e.target.value)}
@@ -379,14 +462,27 @@ const AdminPage = () => {
 
                         <Form.Item
                             label="Locatie"
-                            name="location"
-                            rules={[{ required: true, message: 'Duid de locatie van de organisatie aan!' }]} >
+                            name="location" >
                             <Input
-                                value={selectedOrganisation.location}
-                                onChange={(e) => handleFieldChange("location", e.target.value)}>
+                                value={selectedOrganisation.locationName}
+                                onChange={async (e) => {
+                                    const locationName = e.target.value;
+                                    setSelectedOrganisation((prev) => ({
+                                        ...prev,
+                                        locationName, // Update the name for display immediately
+                                    }));
 
-                        </Input>
-                            <div></div>
+                                    // Fetch the location code asynchronously
+                                    const locationCode = await fetchLocationCode(locationName);
+
+                                    if (locationCode !== null) {
+                                        setSelectedOrganisation((prev) => ({
+                                            ...prev,
+                                            location: locationCode, // Save the location ID
+                                        }));
+                                    }}} />
+
+                            <div/>
                         </Form.Item>
 
 

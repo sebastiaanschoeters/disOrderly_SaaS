@@ -334,7 +334,7 @@ const Search = () => {
                 {selectedClient && (
                     <ProfileDetailsModal
                         visible={isModalProfileVisible}
-                        onClose={handleModalClose}
+                        onClose={handleModalProfileClose}
                         clientData={selectedClient}
                     />
                 )}

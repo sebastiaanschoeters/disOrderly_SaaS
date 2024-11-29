@@ -1,6 +1,6 @@
 import React from "react";
 import { Modal } from "antd";
-import ProfileCard from './ProfilePage'
+import ProfileCard from '../Profile Pages/ProfilePage'
 
 const ClientDetailsModal = ({ visible, onClose, clientData }) => {
     if (!clientData) return null; // Guard for no data

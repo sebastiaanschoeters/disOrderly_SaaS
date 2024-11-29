@@ -2,11 +2,11 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import React, {useEffect, useState} from 'react';
 import * as dayjs from 'dayjs'
-import '../CSS/AntDesignOverride.css'
-import '../CSS/ActivationPage.css'
+import '../../CSS/AntDesignOverride.css'
+import '../../CSS/ActivationPage.css'
 import 'antd/dist/reset.css';
 import {Form, Input, Button, Card, message, ConfigProvider, DatePicker, Radio, Select, Checkbox} from 'antd';
-import { antThemeTokens, themes } from '../themes';
+import { antThemeTokens, themes } from '../../themes';
 import { createClient } from "@supabase/supabase-js";
 import CryptoJS from 'crypto-js';
 

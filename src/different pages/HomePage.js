@@ -61,6 +61,7 @@ const HomePage = () => {
                     justifyContent: 'center',
                     width: '100%',
                     alignItems: 'center', // Keep buttons centered vertically when stacked
+                    marginTop: '-50px'
                 }}>
                     <Button
                         className="primary-button"  // Add class for targeting with CSS
@@ -234,6 +235,17 @@ const HomePage = () => {
                     text-align: center;
                     overflow: hidden;
                     white-space: nowrap;
+                }
+                /* Prevent scrolling */
+                html, body {
+                    overflow: hidden;
+                    height: 100%;
+                    margin: 0;
+                }
+
+                /* Container styles to ensure content fits within the viewport */
+                #root {
+                    height: 100%; /* Ensure the app takes the full viewport height */
                 }
             `}</style>
         </ConfigProvider>

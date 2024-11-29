@@ -33,15 +33,39 @@ const App = () => {
                 <Route path="/activate" element={<ActivationPage/>}/>
                 <Route path="/activate/:activationCodeLink" element={<ActivationPage />} />
                 <Route path="/hangman" element={<Hangman />} />
-                <Route path="/caretakerProfile" element={<CaretakerProfilePage />} />
+                {/* <Route path="/caretakerProfile" element={<CaretakerProfilePage />} />
                 <Route path="/caretakerProfileEdit" element={<CaretakerEditableProfile />} />
-                <Route path="/clientOverview" element={<ClientOverview />} />
+                <Route path="/clientOverview" element={<ClientOverview />*/} />
 
                 {/* Protected routes */}
                 <Route
                     path="/search"
                     element={
                         <ProtectedRoute allowedRoles={["user"]}>
+                            <Search />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/clientOverview"
+                    element={
+                        <ProtectedRoute allowedRoles={["caretaker, admin"]}>
+                            <Search />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/caretakerProfile"
+                    element={
+                        <ProtectedRoute allowedRoles={["caretaker, admin"]}>
+                            <Search />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/caretakerProfileEdit"
+                    element={
+                        <ProtectedRoute allowedRoles={["caretaker, admin"]}>
                             <Search />
                         </ProtectedRoute>
                     }

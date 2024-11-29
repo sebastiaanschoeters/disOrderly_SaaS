@@ -64,7 +64,10 @@ const ActivationPage = () => {
     };
 
     const goBack = () => {
-        if (7> step > 1) setStep(step - 1);
+        console.log()
+        if (7> step && step > 1){
+            setStep(step - 1);
+        }
         else if(step == 7) {
             setStep(1);
         }
@@ -338,6 +341,7 @@ const ActivationPage = () => {
                                 className="form-item"
                                 label="Activation Key"
                                 name="activationKey"
+                                initialValues={{ activationKey: userData.activationKey || '' }}
                                 rules={[{ required: true, message: 'Dit is geen geldige activatie sleutel' }]}
                             >
                                 <Input />
@@ -352,7 +356,9 @@ const ActivationPage = () => {
                     )}
 
                     {step === 2 && (
-                        <Form name="accountCreationForm" onFinish={nameAndBD}>
+                        <Form name="accountCreationForm" onFinish={nameAndBD}
+                              initialValues={{ Voornaam: userData.name || '',
+                                  Woonsituatie: userData.livingSituation || ''}}>
                             <Form.Item
                                 className="form-item"
                                 label="Voornaam"
@@ -408,7 +414,8 @@ const ActivationPage = () => {
                     )}
 
                     {step === 3 && (
-                        <Form name="additionalInfoForm" onFinish={Location}>
+                        <Form name="additionalInfoForm" onFinish={Location}
+                              initialValues={{ city: userData.city || ''}}>
                             <Form.Item
                                 className="form-item"
                                 label="Stad"
@@ -449,7 +456,9 @@ const ActivationPage = () => {
                     )}
 
                     {step === 4 && (
-                        <Form name="additionalInfoForm" onFinish={Sexuality}>
+                        <Form name="additionalInfoForm" onFinish={Sexuality}
+                              initialValues={{ gender: userData.gender || '',
+                                  sexuality: userData.sexuality || ''}}>
                             <Form.Item label="Geslacht" name="gender" rules={[{ required: true, message: 'Selecteer uw geslacht' }]}>
                                 <Select placeholder="Selecteer uw geslacht">
                                     <Select.Option value="Man">Man</Select.Option>
@@ -457,11 +466,11 @@ const ActivationPage = () => {
                                     <Select.Option value="Non-binair">Non-binair</Select.Option>
                                 </Select>
                             </Form.Item>
-                            <Form.Item label="Sexualiteit" name="sexuality" rules={[{ required: true, message: 'Selecteer uw seksualiteit' }]}>
+                            <Form.Item label="Valt op" name="sexuality" rules={[{ required: true, message: 'Selecteer uw seksualiteit' }]}>
                                 <Select placeholder="Selecteer uw seksualiteit">
-                                    <Select.Option value="hetero">Heteroseksueel</Select.Option>
-                                    <Select.Option value="homo">Homoseksueel</Select.Option>
-                                    <Select.Option value="bi">Biseksueel</Select.Option>
+                                    <Select.Option value="Mannen">Mannen</Select.Option>
+                                    <Select.Option value="Vrouwen">Vrouwen</Select.Option>
+                                    <Select.Option value="Beiden">Biseksueel</Select.Option>
                                 </Select>
                             </Form.Item>
 
@@ -489,7 +498,8 @@ const ActivationPage = () => {
                     )}
 
                     {step === 5 && (
-                        <Form name="preferenceForm" onFinish={lvlSelect}>
+                        <Form name="preferenceForm" onFinish={lvlSelect}
+                              initialValues={{ niveau: userData.niveau || '' }}>
                             <p>Selecteer de optie die het beste past bij jou en je begeleider</p>
                             <Form.Item name="niveau" rules={[{ required: true, message: 'Selecteer een optie' }]}>
                                 <Radio.Group>
@@ -507,7 +517,10 @@ const ActivationPage = () => {
                     )}
 
                     {step === 6 && (
-                        <Form name="emailPasswordForm" onFinish={EmailAndPassword}>
+                        <Form name="emailPasswordForm" onFinish={EmailAndPassword}
+                              initialValues={{ email: userData.email || '',
+                                  password: userData.password || ''
+                              }}>>
                             <Form.Item
                                 className="form-item"
                                 label="Email"
@@ -588,7 +601,7 @@ const ActivationPage = () => {
                                     { required: true, message: 'Please enter your phone number' },
                                     {
                                         pattern: /^[+]?[0-9]{10,15}$/,
-                                        message: 'Please enter a valid phone number (e.g., +1234567890)'
+                                        message: 'Please enter a valid phone number (e.g., +1234567890)',
                                     },
                                 ]}
                             >
@@ -646,7 +659,9 @@ const ActivationPage = () => {
                                 rules={[
                                     {
                                         validator: (_, value) =>
-                                            value ? Promise.resolve() : Promise.reject(new Error('You must accept the terms and services')),
+                                            value
+                                                ? Promise.resolve()
+                                                : Promise.reject(new Error('You must accept the terms and services')),
                                     },
                                 ]}
                             >
@@ -673,9 +688,26 @@ const ActivationPage = () => {
                             </Form.Item>
                         </Form>
                     )}
-
-
                 </Card>
+
+                {/* User Data Display */}
+                <div
+                    style={{
+                        marginTop: '20px',
+                        padding: '10px',
+                        backgroundColor: '#f5f5f5',
+                        border: '1px solid #ccc',
+                        borderRadius: '5px',
+                        width: '100%',
+                        maxWidth: '400px',
+                        overflowWrap: 'break-word',
+                    }}
+                >
+                    <h3>User Data</h3>
+                    <pre style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}>
+                {JSON.stringify(userData, null, 2)}
+            </pre>
+                </div>
             </div>
         </ConfigProvider>
     );

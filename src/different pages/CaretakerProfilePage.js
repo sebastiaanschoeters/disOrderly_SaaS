@@ -86,11 +86,9 @@ const ProfileDetail = ({ label, value, icon }) => (
     </p>
 );
 
-const ProfileCard = () => {
-    // const { state } = location;
-
-    // const { profileData, isLoading, error } = useFetchProfileData(state.user_id);
-    const { profileData, isLoading, error } = useFetchProfileData(1111)
+const ProfileCard = ({ actCode }) => {
+    console.log(actCode)
+    const { profileData, isLoading, error } = useFetchProfileData(actCode)
     // Derive theme colors
     const theme = profileData.theme || 'blauw';
     const themeColors = themes[theme] || themes.blauw;
@@ -107,14 +105,11 @@ const ProfileCard = () => {
                     padding: '20px',
                     position: 'relative',
                     minWidth: '100%',
-                    minHeight: '100vh',
                     backgroundColor: themeColors.primary2,
                     color: themeColors.primary10,
                     zIndex: '0'
                 }}
             >
-                <ButterflyIcon color={themeColors.primary3} />
-
                 {/* Header section with profile picture, name, age, and biography */}
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingBottom: '20px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '10px' }}>

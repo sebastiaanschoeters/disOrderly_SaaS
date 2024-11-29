@@ -17,6 +17,7 @@ const ChatPage = () => {
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState("");
     const userId = parseInt(localStorage.getItem('user_id'), 10);
+    const localTime = new Date();
 
     const [themeName, darkModeFlag] = JSON.parse(localStorage.getItem('theme')) || ['blauw', false];
     const [themeColors, setThemeColors] = useState(themes[themeName] || themes.blauw);
@@ -90,7 +91,7 @@ const ChatPage = () => {
 
         const { error } = await supabase
             .from('Messages')
-            .insert([{ chatroom_id: chatroomId, sender_id: userId, message_content: newMessage }]);
+            .insert([{ chatroom_id: chatroomId, sender_id: userId, message_content: newMessage,  created_at: localTime.toISOString() }]);
 
         if (error) {
             console.error("Error sending message:", error);
@@ -102,16 +103,12 @@ const ChatPage = () => {
             .update({ last_sender_id: userId })
             .eq('id', chatroomId);
 
-        setNewMessage(""); // Clear the input field
+        setNewMessage("");
 
-        // Automatically scroll to bottom after sending a message
+
         setTimeout(() => {
-            scrollToBottom(); // Smooth scroll to bottom after DOM updates
+            scrollToBottom();
         }, 100);
-    };
-
-    const handleProfile = () => {
-        navigate('/profile');
     };
 
     // Function to group messages by date

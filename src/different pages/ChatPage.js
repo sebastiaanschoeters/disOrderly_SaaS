@@ -278,7 +278,10 @@ const ChatPage = () => {
                                                 >
                                                     <p style={{ margin: 0 }}>{message.message_content}</p>
                                                 </div>
-                                                <span style={{ ...styles.timestamp }}>
+                                                <span style={{
+                                                    ...styles.timestamp,
+                                                    alignSelf: isSender ? 'flex-end' : 'flex-start',
+                                                }}>
                                                     {new Date(message.created_at).toLocaleTimeString([], {
                                                         hour: '2-digit',
                                                         minute: '2-digit',

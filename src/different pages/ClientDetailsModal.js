@@ -7,7 +7,7 @@ const ClientDetailsModal = ({ visible, onClose, clientData }) => {
     return (
         <Modal
             title="Client Details"
-            visible={visible}
+            open={visible}
             onCancel={onClose}
             onOk={onClose}
             footer={null} // Customize footer as needed

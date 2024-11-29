@@ -16,10 +16,6 @@ body, p, .ant-typography, .ant-btn, .ant-select, .ant-tag, .ant-txtArea {
     font-size: 1rem; /* Default base font size */
 }
 
-.ant-btn .anticon {
-    font-size: 1rem;
-}
-
 /* Specific styles for Select component */
 .ant-select .ant-select-selector {
     font-size: 1rem; /* Apply font size to the Select component */

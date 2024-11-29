@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { Avatar, ConfigProvider, Select, Table, Button, message } from "antd";
-import { antThemeTokens, ButterflyIcon, themes } from "../themes";
+import { antThemeTokens, ButterflyIcon, themes } from "../../Extra components/themes";
 import { createClient } from "@supabase/supabase-js";
 import { DeleteOutlined } from "@ant-design/icons";
+import { useNavigate } from 'react-router-dom';
 import ClientDetailsModal from "./ClientDetailsModal";
 import 'antd/dist/reset.css';
-import '../CSS/AntDesignOverride.css';
+import '../../CSS/AntDesignOverride.css';
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q");
 
@@ -42,24 +43,26 @@ const useFetchClients = (actCode) => {
     return { clients, error };
 };
 
-const useFetchTheme = (actCode) => {
+const useFetchProfileData = (actCode) => {
     const [profileData, setProfileData] = useState({});
+    const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const { data: profileInfo, error: profileError } = await supabase
-                    .from("Caretaker")
-                    .select("theme")
-                    .eq("id", actCode);
+                // Fetch user data
+                const { data: userData, error: userError } = await supabase
+                    .from('Caretaker')
+                    .select('*')
+                    .eq('id', actCode);
 
-                if (profileError) throw profileError;
+                if (userError) throw userError;
 
-                if (profileInfo.length > 0) {
-                    const user = profileInfo[0];
+                if (userData.length > 0) {
+                    const user = userData[0];
 
-                    let parsedTheme = "blauw";
+                    let parsedTheme = 'blauw';
                     let isDarkMode = false;
 
                     if (user.theme) {
@@ -68,16 +71,22 @@ const useFetchTheme = (actCode) => {
                             parsedTheme = themeName;
                             isDarkMode = darkModeFlag;
                         } catch (error) {
-                            console.error("Error parsing theme", error);
+                            console.error('Error parsing theme', error);
                         }
-                        setProfileData({
-                            ...user,
-                            theme: isDarkMode ? `${parsedTheme}_donker` : parsedTheme,
-                        });
                     }
+
+                    console.log(user)
+                    // Set the user profile data with the theme
+                    setProfileData({
+                        ...user,
+                        theme: isDarkMode ? `${parsedTheme}_donker` : parsedTheme
+                    });
                 }
             } catch (error) {
                 setError(error.message);
+            } finally {
+                console.log("user element: ", profileData)
+                setIsLoading(false);
             }
         };
 
@@ -151,7 +160,7 @@ const useFetchCaretakers = (organizationId) => {
 const ClientOverview = () => {
     const { clients, error: fetchClientsError } = useFetchClients(1111);
     const { caretakers } = useFetchCaretakers("KUL");
-    const { profileData } = useFetchTheme(1111);
+    const { profileData } = useFetchProfileData(1111);
     const theme = profileData.theme || "blauw";
     const themeColors = themes[theme] || themes.blauw;
 
@@ -159,6 +168,8 @@ const ClientOverview = () => {
     const [pageSize, setPageSize] = useState(10);
     const [selectedClient, setSelectedClient] = useState(null);
     const [isModalVisible, setIsModalVisible] = useState(false);
+
+    const navigate = useNavigate();
 
     useEffect(() => {
         setLocalClients(clients);
@@ -168,7 +179,7 @@ const ClientOverview = () => {
         const calculatePageSize = () => {
             const screenHeight = window.innerHeight;
             const rowHeight = 130; // Approximate row height
-            const headerHeight = 60; // Approximate header and padding
+            const headerHeight = 160; // Approximate header and padding
             const footerHeight = 30; // Approximate footer height
             const availableHeight = screenHeight - headerHeight - footerHeight;
 
@@ -323,7 +334,7 @@ const ClientOverview = () => {
             >
                 <ButterflyIcon color={themeColors.primary3} />
 
-                <h2>Clienten: </h2>
+                <h2 style={{ marginTop: '100px' }}>Clienten overzicht: </h2>
 
                 {fetchClientsError && <p>Fout: {fetchClientsError}</p>}
                 {clients.length > 0 ? (
@@ -335,7 +346,6 @@ const ClientOverview = () => {
                         pagination={{ pageSize: pageSize }}
                         style={{
                             marginTop: "20px",
-                            backgroundColor: themeColors.primary1,
                         }}
                         onRow={(record) => ({
                             onClick: (event) => {
@@ -360,6 +370,47 @@ const ClientOverview = () => {
                         clientData={selectedClient}
                     />
                 )}
+
+                <div style={{
+                    display: "flex",
+                    justifyContent: "center",
+                }}>
+                    <Button
+                        type="primary"
+                        style={{ marginTop: "20px" }}
+                    >
+                        Genereer nieuwe profiel code
+                    </Button>
+                </div>
+
+
+                <div
+                    style={{
+                        position: 'absolute',
+                        top: '2%',
+                        left: '2%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '15px',
+                        cursor: 'pointer',
+                        padding: '10px',
+                    }}
+                    onClick={() => navigate('/caretakerProfileEdit')}
+                >
+                    <Avatar
+                        size={60}
+                        src={profileData.profile_picture}
+                        style={{
+                            backgroundColor: themeColors.primary4,
+                            color: themeColors.primary10,
+                        }}
+                    >
+                        {profileData.name}
+                    </Avatar>
+                    <p style={{fontSize: '2rem'}}>
+                        {profileData.name}
+                    </p>
+                </div>
             </div>
         </ConfigProvider>
     );

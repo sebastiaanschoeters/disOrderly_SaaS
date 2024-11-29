@@ -11,8 +11,8 @@ import {
 } from '@ant-design/icons';
 import { createClient } from "@supabase/supabase-js";
 import 'antd/dist/reset.css';
-import '../CSS/AntDesignOverride.css';
-import { ButterflyIcon, antThemeTokens, themes } from '../themes';
+import '../../CSS/AntDesignOverride.css';
+import { ButterflyIcon, antThemeTokens, themes } from '../../Extra components/themes';
 import {useLocation, useNavigate} from 'react-router-dom';
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
@@ -232,12 +232,12 @@ const CustomNextArrow = ({ onClick }) => (
     />
 );
 
-const ProfileCard = () => {
-    const location = useLocation();
-    const { state } = location;
+const ProfileCard = (profileToShow) => {
 
-    const { profileData, isLoading, error } = useFetchProfileData(state.user_id);
-    const { pictures } = useFetchPicturesData(state.user_id);
+    const viewedByCaretaker = profileToShow.viewedByCareteaker
+
+    const { profileData, isLoading, error } = useFetchProfileData(profileToShow.user_id);
+    const { pictures } = useFetchPicturesData(profileToShow.user_id);
     const { locationData } = useFetchUserLocation(localStorage.getItem('user_id'));
 
     const [isModalVisible, setIsModalVisible] = useState(false);
@@ -362,7 +362,7 @@ const ProfileCard = () => {
 
         try {
             const senderId = parseInt(localStorage.getItem('user_id'), 10);
-            const receiverId = state.user_id;
+            const receiverId = profileToShow.user_id;
 
             // Insert into Chatroom table and return the 'id' of the newly inserted row
             const { data: chatroomData, error: chatroomError } = await supabase
@@ -419,7 +419,7 @@ const ProfileCard = () => {
     useEffect(() => {
         const checkChatroom = async () => {
             const senderId = parseInt(localStorage.getItem('user_id'), 10);
-            const receiverId = state.user_id;
+            const receiverId = profileToShow.user_id;
 
             try {
                 // Check if the chatroom exists between sender and receiver
@@ -442,7 +442,7 @@ const ProfileCard = () => {
         };
 
         checkChatroom();
-    }, [state.user_id]);
+    }, [profileToShow.user_id]);
 
     const handleCancel = () => {
         setIsModalVisible(false);
@@ -459,13 +459,11 @@ const ProfileCard = () => {
                     padding: '20px',
                     position: 'relative',
                     minWidth: '100%',
-                    minHeight: '100vh',
                     backgroundColor: themeColors.primary2,
                     color: themeColors.primary10,
                     zIndex: '0'
                 }}
             >
-                <ButterflyIcon color={themeColors.primary3} />
 
                 {/* Header section with profile picture, name, age, and biography */}
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingBottom: '20px' }}>
@@ -492,8 +490,24 @@ const ProfileCard = () => {
 
                 <Divider />
 
-                <ProfileDetail label="Locatie" value={`${profileData.locationData?.gemeente} (${distanceToProfileUser}km van jou verwijderd)`} icon={<EnvironmentOutlined />} />
+                {
+                    !viewedByCaretaker ? (
+                        <ProfileDetail
+                            label="Locatie"
+                            value={`${profileData.locationData?.gemeente} (${distanceToProfileUser}km van jou verwijderd)`}
+                            icon={<EnvironmentOutlined />}
+                        />
+                    ) : (
+                        <ProfileDetail
+                            label="Locatie"
+                            value={`${profileData.locationData?.gemeente}`}
+                        />
+                    )
+                }
+
+
                 <Divider />
+
                 <ProfileDetail label="Geslacht" value={profileData.gender} icon={<UserOutlined />} />
                 <Divider />
                 <ProfileDetail
@@ -528,21 +542,22 @@ const ProfileCard = () => {
                     icon={<CarOutlined />}
                 />
 
-                {/* Chat button in the bottom right */}
-                <Button
-                    type="primary"
-                    icon={<MessageOutlined />}
-                    style={{
-                        position: 'fixed',
-                        top: '20px',
-                        right: '20px',
-                        zIndex: 1000
-                    }}
-                    disabled={isChatroomExistent}
-                    onClick={handleMessage}
-                >
-                    {isChatroomExistent ? 'chat is al gestart' : `Chat met ${profileData?.name || 'de gebruiker'}`}
-                </Button>
+                {!viewedByCaretaker && (
+                    <Button
+                        type="primary"
+                        icon={<MessageOutlined />}
+                        style={{
+                            position: 'fixed',
+                            top: '20px',
+                            right: '20px',
+                            zIndex: 1000
+                        }}
+                        disabled={isChatroomExistent}
+                        onClick={handleMessage}
+                    >
+                        {isChatroomExistent ? 'chat is al gestart' : `Chat met ${profileData?.name || 'de gebruiker'}`}
+                    </Button>
+                )}
 
                 <Divider/>
 
@@ -583,23 +598,25 @@ const ProfileCard = () => {
                     </Carousel>
                 )}
 
-                <Modal
-                    title={`Chat met ${profileData.name || 'de gebruiker'}`}
-                    visible={isModalVisible}
-                    onCancel={handleCancel}
-                    footer={[
-                        <Button key="send" type="primary" onClick={handleSendMessage} >
-                            Verzenden
-                        </Button>,
-                    ]}
-                >
-                    <Input.TextArea
-                        value={newMessage}
-                        onChange={(e) => setNewMessage(e.target.value)}
-                        rows={4}
-                        placeholder="Typ je bericht..."
-                    />
-                </Modal>
+                {!viewedByCaretaker && (
+                    <Modal
+                        title={`Chat met ${profileData.name || 'de gebruiker'}`}
+                        visible={isModalVisible}
+                        onCancel={handleCancel}
+                        footer={[
+                            <Button key="send" type="primary" onClick={handleSendMessage} >
+                                Verzenden
+                            </Button>,
+                        ]}
+                    >
+                        <Input.TextArea
+                            value={newMessage}
+                            onChange={(e) => setNewMessage(e.target.value)}
+                            rows={4}
+                            placeholder="Typ je bericht..."
+                        />
+                    </Modal>
+                )}
             </div>
         </ConfigProvider>
     );

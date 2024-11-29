@@ -1,22 +1,26 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import ActivationPage from './different pages/ActivationPage';
-import LoginPage from './different pages/LoginPage';
+import ActivationPage from './different pages/Activation and Login/ActivationPage';
+import LoginPage from './different pages/Activation and Login/LoginPage';
 import HomePage from './different pages/HomePage';
-import ProfilePage from './different pages/ProfilePage';
-import PersonalProfilePage from './different pages/PersonalProfilePage';
+import ProfilePage from './different pages/Profile Pages/ProfilePage';
+import PersonalProfilePage from './different pages/Profile Pages/PersonalProfilePage';
 import ChatOverviewPage from './different pages/ChatOverviewPage';
 import ChatPage from './different pages/ChatPage';
 import ChatSuggestionPage from './different pages/ChatSuggestionPage';
 import Search from './different pages/Search';
-import SupabaseTestPage from './different pages/SupabaseTestPage';
-import ProtectedRoute from './different pages/ProtectedRoute'; // Import the ProtectedRoute component
-import AdminPage from "./different pages/AdminPage";
+import ProtectedRoute from './Extra components/ProtectedRoute'; // Import the ProtectedRoute component
+import {clarity} from "react-microsoft-clarity";
+
+import AdminPage from "./different pages/Caretaker and Admin/AdminPage";
 import Hangman from "./different pages/Hangman";
-import EditableProfilePage from "./different pages/EditableProfilePage";
-import CaretakerProfilePage from "./different pages/CaretakerProfilePage";
-import CaretakerEditableProfile from "./different pages/CaretakerEditableProfile";
-import ClientOverview from "./different pages/ClientOverview";
+import EditableProfilePage from "./different pages/Profile Pages/EditableProfilePage";
+import CaretakerProfilePage from "./different pages/Caretaker and Admin/CaretakerProfilePage";
+import CaretakerEditableProfile from "./different pages/Caretaker and Admin/CaretakerEditableProfile";
+import ClientOverview from "./different pages/Caretaker and Admin/ClientOverview";
+
+clarity.init('p658v8svx1');
+
 
 const App = () => {
     return (
@@ -24,9 +28,9 @@ const App = () => {
             {/* Route definitions */}
             <Routes>
                 {/* Public routes */}
-                <Route path="/" element={<LoginPage />} />
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/activate" element={<ActivationPage />} />
+                <Route path="/" element={<LoginPage/>}/>
+                <Route path="/login" element={<LoginPage/>}/>
+                <Route path="/activate" element={<ActivationPage/>}/>
                 <Route path="/activate/:activationCodeLink" element={<ActivationPage />} />
                 <Route path="/hangman" element={<Hangman />} />
                 <Route path="/caretakerProfile" element={<CaretakerProfilePage />} />
@@ -37,7 +41,31 @@ const App = () => {
                 <Route
                     path="/search"
                     element={
-                        <ProtectedRoute>
+                        <ProtectedRoute allowedRoles={["user"]}>
+                            <Search />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/clientOverview"
+                    element={
+                        <ProtectedRoute allowedRoles={["caretaker, admin"]}>
+                            <Search />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/caretakerProfile"
+                    element={
+                        <ProtectedRoute allowedRoles={["caretaker, admin"]}>
+                            <Search />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/caretakerProfileEdit"
+                    element={
+                        <ProtectedRoute allowedRoles={["caretaker, admin"]}>
                             <Search />
                         </ProtectedRoute>
                     }
@@ -45,7 +73,7 @@ const App = () => {
                 <Route
                     path="/home"
                     element={
-                        <ProtectedRoute>
+                        <ProtectedRoute allowedRoles={["user"]}>
                             <HomePage />
                         </ProtectedRoute>
                     }
@@ -53,7 +81,7 @@ const App = () => {
                 <Route
                     path="/profile"
                     element={
-                        <ProtectedRoute>
+                        <ProtectedRoute allowedRoles={["user"]}>
                             <ProfilePage />
                         </ProtectedRoute>
                     }
@@ -61,7 +89,7 @@ const App = () => {
                 <Route
                     path="/profileEdit"
                     element={
-                        <ProtectedRoute>
+                        <ProtectedRoute allowedRoles={["user"]}>
                             <EditableProfilePage />
                         </ProtectedRoute>
                     }
@@ -69,7 +97,7 @@ const App = () => {
                 <Route
                     path="/profilePersonal"
                     element={
-                        <ProtectedRoute>
+                        <ProtectedRoute allowedRoles={["user"]}>
                             <PersonalProfilePage />
                         </ProtectedRoute>
                     }
@@ -77,7 +105,7 @@ const App = () => {
                 <Route
                     path="/chatOverview"
                     element={
-                        <ProtectedRoute>
+                        <ProtectedRoute allowedRoles={["user"]}>
                             <ChatOverviewPage />
                         </ProtectedRoute>
                     }
@@ -85,7 +113,7 @@ const App = () => {
                 <Route
                     path="/chat"
                     element={
-                        <ProtectedRoute>
+                        <ProtectedRoute allowedRoles={["user"]}>
                             <ChatPage />
                         </ProtectedRoute>
                     }
@@ -93,25 +121,15 @@ const App = () => {
                 <Route
                     path="/chatSuggestion"
                     element={
-                        <ProtectedRoute>
+                        <ProtectedRoute allowedRoles={["user"]}>
                             <ChatSuggestionPage />
-                        </ProtectedRoute>
-                    }
-                />
-                <Route
-                    path="/supabase"
-                    element={
-                        <ProtectedRoute>
-                            <SupabaseTestPage />
                         </ProtectedRoute>
                     }
                 />
                 <Route
                     path="/admin"
                     element={
-                        <ProtectedRoute>
                             <AdminPage />
-                        </ProtectedRoute>
                     }
                 />
             </Routes>

@@ -1,11 +1,14 @@
 import 'antd/dist/reset.css'; // Import Ant Design styles
 import '../CSS/AntDesignOverride.css';
-import { ButterflyIcon, antThemeTokens, themes } from '../themes';
+import { ButterflyIcon, antThemeTokens, themes } from '../Extra components/themes';
 import { Avatar, ConfigProvider, Input, List, Typography, Modal, Button, Slider, Radio, Checkbox } from 'antd';
 import { FilterOutlined } from "@ant-design/icons";
 import { createClient } from "@supabase/supabase-js";
 import React, { useState, useEffect } from "react";
-import { useNavigate } from 'react-router-dom'; // Import useNavigate for routing
+import HomeButton from '../Extra components/HomeButton'
+import { useNavigate } from 'react-router-dom';
+import ClientDetailsModal from "./Caretaker and Admin/ClientDetailsModal";
+import ProfileDetailsModal from "./Profile Pages/ProfileDetailsModal"; // Import useNavigate for routing
 
 
 // Initialize Supabase client
@@ -21,7 +24,10 @@ const Search = () => {
     const [filteredUsers, setFilteredUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
-    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [isModalVisible, setIsModalVisible] = useState(false)
+
+    const [selectedClient, setSelectedClient] = useState({});
+    const [isModalProfileVisible, setIsModalProfileVisible] = useState(false);
 
     // Filter State
     const [ageRange, setAgeRange] = useState([18, 100]);  // Set the default age range to 18-100
@@ -51,8 +57,6 @@ const Search = () => {
         }
         return age;
     };
-
-    const navigate = useNavigate();
 
     // Fetch users from Supabase
     const fetchUsers = async () => {
@@ -171,6 +175,17 @@ const Search = () => {
         setIsModalVisible(false);
     };
 
+    const handleProfileClick = (client) => {
+        console.log(client)
+        setSelectedClient({id: client});
+        setIsModalProfileVisible(true);
+    };
+
+    const handleModalProfileClose = () => {
+        setSelectedClient({});
+        setIsModalProfileVisible(false);
+    };
+
     useEffect(() => {
         fetchUsers(); // Fetch users when the component mounts
     }, []);
@@ -198,6 +213,7 @@ const Search = () => {
                     zIndex: '0'
                 }}
             >
+                <HomeButton color={themeColors.primary7} />
                 <ButterflyIcon color={themeColors.primary3} />
 
                 <Title level={2} style={{ color: themeColors.primary10, marginBottom: '2vw' }}>
@@ -274,7 +290,7 @@ const Search = () => {
                                 <List.Item
                                     key={item.id}
 
-                                    onClick={() => navigate(`/profile`, { state: { user_id: item.id} })}
+                                    onClick={() => handleProfileClick(item.id)}
                                         // Navigate to dynamic user link
                                     style={{
                                         display: 'flex',
@@ -314,6 +330,15 @@ const Search = () => {
                 ) : (
                     <div>Geen gebruikers gevonden.</div>
                 )}
+
+                {selectedClient && (
+                    <ProfileDetailsModal
+                        visible={isModalProfileVisible}
+                        onClose={handleModalClose}
+                        clientData={selectedClient}
+                    />
+                )}
+
 
                 {/* Modal for Filters */}
                 <Modal

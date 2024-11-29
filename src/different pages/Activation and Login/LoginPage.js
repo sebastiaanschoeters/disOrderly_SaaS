@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { Form, Input, Button, Checkbox, Card, ConfigProvider } from 'antd';
 import 'antd/dist/reset.css';
-import '../CSS/AntDesignOverride.css';
-import { antThemeTokens, ButterflyIcon, themes } from '../themes';
+import '../../CSS/AntDesignOverride.css';
+import { antThemeTokens, ButterflyIcon, themes} from '../../Extra components/themes';
 import { useNavigate } from 'react-router-dom';
-import forestImage from '../Media/forest.jpg';
+//import LocalStorageViewer from '../../Extra components/LocalStorageViewer';
+import forestImage from '../../Media/forest.jpg';
 import {createClient} from "@supabase/supabase-js"; // Path to the image
 
 
@@ -19,7 +20,7 @@ const LoginPage = () => {
         try {
             const { data, error } = await supabase
                 .from('Credentials')
-                .select('user_id')
+                .select('user_id, type')
                 .eq('email', email)
 
             if (error) {
@@ -32,8 +33,8 @@ const LoginPage = () => {
                 return null;
             }
 
-            console.log('Fetched user_id:', data[0].user_id);
-            return data[0].user_id; // Ensure it's a string
+            console.log('Fetched dataaaaaa:', data);
+            return data;
         } catch (err) {
             console.error('Unexpected error:', err);
             return null;
@@ -120,17 +121,18 @@ const LoginPage = () => {
         const { email, password } = values;
 
         // Simulate a successful login response
-        const fakeLoginResponse = {
+        const LoginResponse = {
             token: 'fake-session-token',
             user: { email },
         };
 
         // Save user session to localStorage
-        localStorage.setItem('sessionToken', fakeLoginResponse.token);
-        localStorage.setItem('userEmail', fakeLoginResponse.user.email);
+        localStorage.setItem('sessionToken', LoginResponse.token);
+        localStorage.setItem('userEmail', LoginResponse.user.email);
 
-        // Fetch the user ID asynchronously and store it in localStorage
-        const userId = await getUserIdByEmail(fakeLoginResponse.user.email);
+        const user_data = await getUserIdByEmail(LoginResponse.user.email)
+        const userId = user_data[0].user_id;
+        const userType = user_data[0].type;
         const theme = await getTheme(userId);
         const name = await getName(userId);
         const pfp = await getPfp(userId);
@@ -138,6 +140,96 @@ const LoginPage = () => {
         if (userId) {
             localStorage.setItem('user_id', userId);
             console.log('Fetched and stored user_id:', userId);
+        } else {
+            console.error('Failed to fetch user_id');
+        }
+
+        if (userType) {
+            localStorage.setItem('userType', userType);
+            console.log('Fetched and stored userType:', userType);
+        } else {
+            console.error('Failed to fetch userType');
+        }
+
+        if (theme) {
+            localStorage.setItem('theme', theme);
+            console.log('Fetched and stored theme:', theme);
+        } else {
+            console.error('Failed to fetch theme',);
+        }
+
+        if (name) {
+            localStorage.setItem('name', name);
+            console.log('Fetched and stored name:', name);
+        } else {
+            console.error('Failed to fetch name',);
+        }
+
+        if (pfp) {
+            localStorage.setItem('profile_picture', pfp);
+            console.log('Fetched and stored pfp:', pfp);
+        } else {
+            console.error('Failed to fetch pfp',);
+        }
+
+        // Navigate to the home page after resolving all async operations
+        if (userType == 'user') {
+            setIsTransitioning(true);
+            setTimeout(() => navigate('/home'), 500);
+        }
+        else if (userType == 'caretaker') {
+            setIsTransitioning(true);
+            setTimeout(() => navigate('/clientOverview'), 500);
+        }
+    };
+
+    const getUserEmailById = async (userId) => {
+        try {
+            const { data, error } = await supabase
+                .from('Credentials')
+                .select('email')
+                .eq('user_id', userId)
+
+            if (error) {
+                console.error('Error fetching email:', error.message);
+                return null;
+            }
+
+            if (data.length === 0) {
+                console.log('No user found with the provided userid.');
+                return null;
+            }
+
+            console.log('Fetched dataaaaaa:', data);
+            return data;
+        } catch (err) {
+            console.error('Unexpected error:', err);
+            return null;
+        }
+    };
+
+
+    const testfunctie = async (clientId) => {
+        localStorage.setItem('controlling', true);
+        const email = await getUserEmailById(clientId);
+        const LoginResponse = {
+            token: 'fake-session-token',
+            user: { email },
+        };
+
+
+        // Save user session to localStorage
+        localStorage.setItem('sessionToken', LoginResponse.token);
+        localStorage.setItem('userEmail', LoginResponse.user.email);
+
+        const theme = await getTheme(clientId);
+        const name = await getName(clientId);
+        const pfp = await getPfp(clientId);
+        localStorage.setItem('userType', 'user');
+
+        if (clientId) {
+            localStorage.setItem('user_id', clientId);
+            console.log('Fetched and stored user_id:', clientId);
         } else {
             console.error('Failed to fetch user_id');
         }
@@ -163,10 +255,14 @@ const LoginPage = () => {
             console.error('Failed to fetch pfp',);
         }
 
-        // Navigate to the home page after resolving all async operations
         setIsTransitioning(true);
         setTimeout(() => navigate('/home'), 500);
-    };
+
+    }
+
+    /**/
+
+
 
     return (
         <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
@@ -198,7 +294,6 @@ const LoginPage = () => {
                         zIndex: -1,
                     }}
                 ></div>
-
                 <ButterflyIcon color="rgba(255, 255, 255, 0.2)" />
                 <Button
                     type="link"
@@ -242,11 +337,6 @@ const LoginPage = () => {
                         >
                             <Input.Password />
                         </Form.Item>
-
-                        <Form.Item name="remember" valuePropName="checked">
-                            <Checkbox>Remember me</Checkbox>
-                        </Form.Item>
-
                         <Form.Item>
                             <Button
                                 type="primary"

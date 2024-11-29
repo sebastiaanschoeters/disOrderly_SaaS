@@ -2,10 +2,11 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import React, {useEffect, useState} from 'react';
 import * as dayjs from 'dayjs'
-import '../CSS/AntDesignOverride.css'
+import '../../CSS/AntDesignOverride.css'
+import '../../CSS/ActivationPage.css'
 import 'antd/dist/reset.css';
 import {Form, Input, Button, Card, message, ConfigProvider, DatePicker, Radio, Select, Checkbox} from 'antd';
-import { antThemeTokens, themes } from '../themes';
+import { antThemeTokens, themes } from '../../Extra components/themes';
 import { createClient } from "@supabase/supabase-js";
 import CryptoJS from 'crypto-js';
 
@@ -63,7 +64,19 @@ const ActivationPage = () => {
     };
 
     const goBack = () => {
-        if (step > 1) setStep(step - 1);
+        console.log()
+        if (7> step && step > 2){
+            setStep(step - 1);
+        }
+        else if(step == 7) {
+            setStep(1);
+        }
+        else if(step == 2){
+            setStep(1);
+            setUserData(prevUserData => ({
+                activationCode: prevUserData.activationCode
+            }));
+        }
     };
 
     const activationCode = async (values) => {
@@ -72,9 +85,11 @@ const ActivationPage = () => {
             // Query the "Activation" table to validate the code
             const { data, error } = await supabase
                 .from("Activation")
-                .select("usable")
+                .select("usable, type")
                 .eq("code", values.activationKey)
                 .single(); // Expect a single result
+
+            console.log(data)
 
             if (error) {
                 console.error("Error checking activation code:", error.message);
@@ -89,7 +104,6 @@ const ActivationPage = () => {
                 return;
             }
 
-            console.log(data)
             if (!data.usable) {
                 message.error("Deze activatiecode is al in gebruik.");
                 setLoading(false);
@@ -101,8 +115,9 @@ const ActivationPage = () => {
                 ...prevData,
                 activationKey: values.activationKey,
             }));
-            setStep(2);
-            message.success("Activatiecode geaccepteerd!");
+            if(data.type == 'user'){setStep(2);}
+            if(data.type == 'caretaker'){setStep(7);}
+
         } catch (err) {
             console.error("Unexpected error during activation code validation:", err);
             message.error("Er is iets misgegaan. Probeer het later opnieuw.");
@@ -148,89 +163,55 @@ const ActivationPage = () => {
             niveau: values.niveau
         }));
         setStep(6)
-        //navigate("/login");
     };
-    /*
-    const saveUserProfile = async (userData) => {
-        let insertedCredentialId = null; // Track inserted IDs for rollback
-        let insertedUserId = null;
+
+    const saveCaretaker = async (values) => {
+        setLoading(true);
+        const {vname, aname} = values;
+        let caretakerName = vname + ' ' + aname;
+        const hashedPassword = CryptoJS.SHA256(values.password).toString();
 
         try {
-            // Insert data into "Credentials" table
-            const { data: credentialData, error: credentialError } = await supabase
+            const { data, error } = await supabase
+                .from("Credentials")
+                .select("email")
+                .eq("email", values.email)
+                .single();
+
+            if (error && error.code !== "PGRST116") {
+                console.error("Error checking email existence:", error.message);
+                message.error("Er is iets misgegaan tijdens de validatie van uw e-mailadres.");
+                setLoading(false);
+                return;
+            }
+
+            if (data) {
+                message.error("Dit e-mailadres is al geregistreerd. Probeer een ander e-mailadres.");
+                setLoading(false);
+                return;
+            }
+
+            const { error: careError } = await supabase
+                .from("Caretaker")
+                .insert({
+                    id: userData.activationKey,
+                    name: caretakerName,
+                    phone_number: values.phone,
+                    email: values.email
+                })
+
+            const { error: credError } = await supabase
                 .from("Credentials")
                 .insert({
                     user_id: userData.activationKey,
-                    email: userData.email,
-                    password: userData.password,
+                    email: values.email,
+                    password: hashedPassword,
+                    type: 'caretaker'
                 })
-                .select("user_id")
-                .single(); // Retrieve the inserted ID
-
-            if (credentialError) {
-                throw new Error(`Error saving credentials: ${credentialError.message}`);
-            }
-            insertedCredentialId = credentialData.id;
-
-            // Insert data into "User" table
-            const { data: userDataResponse, error: userError } = await supabase
-                .from("User")
-                .insert({
-                    name: userData.name,
-                    id: userData.activationKey,
-                    birthdate: userData.birthDate,
-                })
-                .select("id")
-                .single();
-
-            if (userError) {
-                throw new Error(`Error saving user data: ${userError.message}`);
-            }
-            insertedUserId = userDataResponse.id;
-
-            // Insert data into "User information" table
-            const { data: profileData, error: profileError } = await supabase
-                .from("User information")
-                .insert({
-                    user_id: userData.activationKey,
-                    living_situation: userData.livingSituation,
-                    location: userData.city,
-                    mobility: userData.mobility,
-                    gender: userData.gender,
-                    sexuality: userData.sexuality,
-                    looking_for: userData.relationshipPreference,
-                });
-
-            if (profileError) {
-                throw new Error(`Error saving profile data: ${profileError.message}`);
-            }
-
-            console.log("Profile saved successfully", {
-                credentialData,
-                userDataResponse,
-                profileData,
-            });
-            //navigate("/login");
-
-            return { success: true };
         } catch (error) {
-            console.error("Error saving user profile:", error.message);
-
-            // Rollback inserted records
-            if (insertedCredentialId) {
-                await supabase.from("Credentials").delete().eq("id", insertedCredentialId);
-            }
-            if (insertedUserId) {
-                await supabase.from("User").delete().eq("id", insertedUserId);
-            }
-            await supabase
-                .from("User information")
-                .delete()
-                .eq("user_id", userData.activationKey);
-
-            return { success: false, error: error.message };
+            console.error("something went wrong");
         }
-    };*/
+    }
 
     const saveUserProfile = async (userData) => {
         let insertedCredentialId = null; // Track inserted IDs for rollback
@@ -261,6 +242,7 @@ const ActivationPage = () => {
                     name: userData.name,
                     id: userData.activationKey,
                     birthdate: userData.birthDate,
+                    access_level: userData.niveau,
                 })
                 .select("id")
                 .single();
@@ -308,7 +290,6 @@ const ActivationPage = () => {
         } catch (error) {
             console.error("Error saving user profile:", error.message);
 
-            // Rollback logic
             if (insertedCredentialId) {
                 await supabase.from("Credentials").delete().eq("user_id", insertedCredentialId);
             }
@@ -355,10 +336,8 @@ const ActivationPage = () => {
                 return;
             }
 
-            // Hash the password
             const hashedPassword = CryptoJS.SHA256(values.password).toString();
 
-            // Combine the updated data
             const updatedUserData = {
                 ...userData, // Preserve existing user data
                 email: values.email,
@@ -387,6 +366,7 @@ const ActivationPage = () => {
                     justifyContent: 'center',
                     alignItems: 'center',
                     height: '100vh',
+                    overflowY: 'auto',
                     backgroundColor: themeColors.primary2,
                     color: themeColors.primary10
                 }}
@@ -402,14 +382,20 @@ const ActivationPage = () => {
                                     ? "Locatie"
                                     : step === 4
                                         ? "Sexualiteit"
-                                        : "Beschermings niveau"
+                                        : step === 5
+                                            ? "Beschermings niveau"
+                                            : step === 6
+                                                ? "De laatste stap"
+                                                : "Wie ben jij?"
                     }
                 >
                     {step === 1 && (
                         <Form form={form} name="activationForm" onFinish={activationCode}>
                             <Form.Item
+                                className="form-item"
                                 label="Activation Key"
                                 name="activationKey"
+                                initialValues={{ activationKey: userData.activationKey || '' }}
                                 rules={[{ required: true, message: 'Dit is geen geldige activatie sleutel' }]}
                             >
                                 <Input />
@@ -424,8 +410,11 @@ const ActivationPage = () => {
                     )}
 
                     {step === 2 && (
-                        <Form name="accountCreationForm" onFinish={nameAndBD}>
+                        <Form name="accountCreationForm" onFinish={nameAndBD}
+                              initialValues={{ Voornaam: userData.name || '',
+                                  Woonsituatie: userData.livingSituation || ''}}>
                             <Form.Item
+                                className="form-item"
                                 label="Voornaam"
                                 name="Voornaam"
                                 rules={[{ required: true, message: 'Vul uw voornaam in' }]}
@@ -433,6 +422,7 @@ const ActivationPage = () => {
                                 <Input />
                             </Form.Item>
                             <Form.Item
+                                className="form-item"
                                 label="Woonsituatie"
                                 name="Woonsituatie"
                                 rules={[{ required: true, message: 'Selecteer een woonsituatie' }]}
@@ -478,8 +468,10 @@ const ActivationPage = () => {
                     )}
 
                     {step === 3 && (
-                        <Form name="additionalInfoForm" onFinish={Location}>
+                        <Form name="additionalInfoForm" onFinish={Location}
+                              initialValues={{ city: userData.city || ''}}>
                             <Form.Item
+                                className="form-item"
                                 label="Stad"
                                 name="city"
                                 rules={[{ required: true, message: 'Selecteer uw stad' }]}
@@ -496,6 +488,7 @@ const ActivationPage = () => {
                                 />
                             </Form.Item>
                             <Form.Item
+                                className="form-item"
                                 label="Kan zelfstandig verplaatsen"
                                 name="mobility"
                                 rules={[{ required: true, message: 'Selecteer uw mobiliteitsoptie' }]}
@@ -517,7 +510,9 @@ const ActivationPage = () => {
                     )}
 
                     {step === 4 && (
-                        <Form name="additionalInfoForm" onFinish={Sexuality}>
+                        <Form name="additionalInfoForm" onFinish={Sexuality}
+                              initialValues={{ gender: userData.gender || '',
+                                  sexuality: userData.sexuality || ''}}>
                             <Form.Item label="Geslacht" name="gender" rules={[{ required: true, message: 'Selecteer uw geslacht' }]}>
                                 <Select placeholder="Selecteer uw geslacht">
                                     <Select.Option value="Man">Man</Select.Option>
@@ -525,11 +520,11 @@ const ActivationPage = () => {
                                     <Select.Option value="Non-binair">Non-binair</Select.Option>
                                 </Select>
                             </Form.Item>
-                            <Form.Item label="Sexualiteit" name="sexuality" rules={[{ required: true, message: 'Selecteer uw seksualiteit' }]}>
+                            <Form.Item label="Valt op" name="sexuality" rules={[{ required: true, message: 'Selecteer uw seksualiteit' }]}>
                                 <Select placeholder="Selecteer uw seksualiteit">
-                                    <Select.Option value="hetero">Heteroseksueel</Select.Option>
-                                    <Select.Option value="homo">Homoseksueel</Select.Option>
-                                    <Select.Option value="bi">Biseksueel</Select.Option>
+                                    <Select.Option value="Mannen">Mannen</Select.Option>
+                                    <Select.Option value="Vrouwen">Vrouwen</Select.Option>
+                                    <Select.Option value="Beiden">Biseksueel</Select.Option>
                                 </Select>
                             </Form.Item>
 
@@ -557,7 +552,8 @@ const ActivationPage = () => {
                     )}
 
                     {step === 5 && (
-                        <Form name="preferenceForm" onFinish={lvlSelect}>
+                        <Form name="preferenceForm" onFinish={lvlSelect}
+                              initialValues={{ niveau: userData.niveau || '' }}>
                             <p>Selecteer de optie die het beste past bij jou en je begeleider</p>
                             <Form.Item name="niveau" rules={[{ required: true, message: 'Selecteer een optie' }]}>
                                 <Radio.Group>
@@ -575,8 +571,12 @@ const ActivationPage = () => {
                     )}
 
                     {step === 6 && (
-                        <Form name="emailPasswordForm" onFinish={EmailAndPassword}>
+                        <Form name="emailPasswordForm" onFinish={EmailAndPassword}
+                              initialValues={{ email: userData.email || '',
+                                  password: userData.password || ''
+                              }}>>
                             <Form.Item
+                                className="form-item"
                                 label="Email"
                                 name="email"
                                 rules={[
@@ -588,6 +588,7 @@ const ActivationPage = () => {
                             </Form.Item>
 
                             <Form.Item
+                                className="form-item"
                                 label="Wachtwoord"
                                 name="password"
                                 rules={[{ required: true, message: 'Please enter your password' }]}
@@ -596,6 +597,7 @@ const ActivationPage = () => {
                             </Form.Item>
 
                             <Form.Item
+                                className="form-item"
                                 label="Confirm Password"
                                 name="confirmPassword"
                                 dependencies={['password']}
@@ -630,7 +632,147 @@ const ActivationPage = () => {
                         </Form>
                     )}
 
+                    {step === 7 && (
+                        <Form name="userForm" onFinish={saveCaretaker}>
+                            <Form.Item
+                                className="form-item"
+                                label="Voornaam"
+                                name="vname"
+                                rules={[
+                                    { required: true, message: 'Please enter your name' },
+                                    { min: 2, message: 'Name must be at least 2 characters long' },
+                                ]}
+                            >
+                                <Input />
+                            </Form.Item>
+                            <Form.Item
+                                className="form-item"
+                                label="Achternaam"
+                                name="aname"
+                                rules={[
+                                    { required: true, message: 'Please enter your name' },
+                                    { min: 2, message: 'Name must be at least 2 characters long' },
+                                ]}
+                            >
+                                <Input />
+                            </Form.Item>
+
+                            <Form.Item
+                                className="form-item"
+                                label="Phone Number"
+                                name="phone"
+                                style={{ marginBottom: '48px' }}
+                                rules={[
+                                    { required: true, message: 'Please enter your phone number' },
+                                    {
+                                        pattern: /^[+]?[0-9]{10,15}$/,
+                                        message: 'Please enter a valid phone number (e.g., +1234567890)',
+                                    },
+                                ]}
+                            >
+                                <Input />
+                            </Form.Item>
+
+                            <Form.Item
+                                className="form-item"
+                                label="Email"
+                                name="email"
+                                rules={[
+                                    { required: true, message: 'Please enter your email' },
+                                    { type: 'email', message: 'Please enter a valid email' },
+                                ]}
+                            >
+                                <Input />
+                            </Form.Item>
+
+                            <Form.Item
+                                className="form-item"
+                                label="Password"
+                                name="password"
+                                rules={[
+                                    { required: true, message: 'Please enter your password' },
+                                    { min: 6, message: 'Password must be at least 6 characters long' },
+                                ]}
+                            >
+                                <Input.Password />
+                            </Form.Item>
+
+                            <Form.Item
+                                className="form-item"
+                                label="Confirm Password"
+                                name="confirmPassword"
+                                dependencies={['password']}
+                                rules={[
+                                    { required: true, message: 'Please confirm your password' },
+                                    ({ getFieldValue }) => ({
+                                        validator(_, value) {
+                                            if (!value || getFieldValue('password') === value) {
+                                                return Promise.resolve();
+                                            }
+                                            return Promise.reject(new Error('The passwords do not match'));
+                                        },
+                                    }),
+                                ]}
+                            >
+                                <Input.Password />
+                            </Form.Item>
+
+                            <Form.Item
+                                className="form-item"
+                                name="terms"
+                                valuePropName="checked"
+                                rules={[
+                                    {
+                                        validator: (_, value) =>
+                                            value
+                                                ? Promise.resolve()
+                                                : Promise.reject(new Error('You must accept the terms and services')),
+                                    },
+                                ]}
+                            >
+                                <Checkbox>
+                                    I accept the{' '}
+                                    <a
+                                        href="https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab_channel=RickAstley"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        style={{ textDecoration: 'underline' }}
+                                    >
+                                        Terms and Services
+                                    </a>.
+                                </Checkbox>
+                            </Form.Item>
+
+                            <Form.Item>
+                                <Button type="primary" htmlType="submit" style={{ width: '100%' }}>
+                                    Submit
+                                </Button>
+                                <Button onClick={goBack} style={{ marginTop: '8px', width: '100%' }}>
+                                    Back
+                                </Button>
+                            </Form.Item>
+                        </Form>
+                    )}
                 </Card>
+
+                {/* User Data Display */}
+                <div
+                    style={{
+                        marginTop: '20px',
+                        padding: '10px',
+                        backgroundColor: '#f5f5f5',
+                        border: '1px solid #ccc',
+                        borderRadius: '5px',
+                        width: '100%',
+                        maxWidth: '400px',
+                        overflowWrap: 'break-word',
+                    }}
+                >
+                    <h3>User Data</h3>
+                    <pre style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}>
+                {JSON.stringify(userData, null, 2)}
+            </pre>
+                </div>
             </div>
         </ConfigProvider>
     );

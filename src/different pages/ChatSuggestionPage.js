@@ -1,9 +1,10 @@
 import React, {useEffect, useState} from 'react';
 import { Avatar, Button, Modal, Input, Typography, ConfigProvider } from 'antd';
 import {useLocation, useNavigate, useParams} from 'react-router-dom';
-import { themes, antThemeTokens } from '../themes';
+import {themes, antThemeTokens, ButterflyIcon} from '../Extra components/themes';
 import '../CSS/ChatSuggestionPage.css';
 import { createClient } from "@supabase/supabase-js";
+import HomeButton from "../Extra components/HomeButton";
 
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
@@ -215,6 +216,9 @@ const ChatSuggestionPage = () => {
 
     return (
         <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
+            <HomeButton color={themeColors.primary7} />
+            <ButterflyIcon color={themeColors.primary3} />
+
             <div style={styles.container}>
                 <div style={styles.header}>
                     <Avatar src={profilePicture || 'default-avatar.png'} onClick={() => navigate(`/profile`, { state: { user_id: otherUserId} })} style={styles.headerAvatar}>U</Avatar>

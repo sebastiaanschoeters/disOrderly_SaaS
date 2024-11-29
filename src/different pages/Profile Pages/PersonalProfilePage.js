@@ -6,9 +6,10 @@ import {
     HeartOutlined,
 } from '@ant-design/icons';
 import 'antd/dist/reset.css';
-import '../CSS/AntDesignOverride.css';
-import {antThemeTokens, ButterflyIcon, themes} from '../themes';
+import '../../CSS/AntDesignOverride.css';
+import {antThemeTokens, ButterflyIcon, themes} from '../../Extra components/themes';
 import { createClient } from '@supabase/supabase-js';
+import HomeButton from "../../Extra components/HomeButton";
 
 const supabase = createClient(
     'https://flsogkmerliczcysodjt.supabase.co',
@@ -227,6 +228,7 @@ const ProfileCard = () => {
                     zIndex: '0'
                 }}
             >
+                <HomeButton color={themeColors.primary7} />
                 <ButterflyIcon color={themeColors.primary3} />
 
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>

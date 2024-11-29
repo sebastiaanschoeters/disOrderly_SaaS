@@ -7,8 +7,8 @@ import {
 } from '@ant-design/icons';
 import { createClient } from "@supabase/supabase-js";
 import 'antd/dist/reset.css';
-import '../CSS/AntDesignOverride.css';
-import { ButterflyIcon, antThemeTokens, themes } from '../themes';
+import '../../CSS/AntDesignOverride.css';
+import { ButterflyIcon, antThemeTokens, themes } from '../../Extra components/themes';
 import { useLocation } from 'react-router-dom';
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
@@ -86,11 +86,9 @@ const ProfileDetail = ({ label, value, icon }) => (
     </p>
 );
 
-const ProfileCard = () => {
-    // const { state } = location;
-
-    // const { profileData, isLoading, error } = useFetchProfileData(state.user_id);
-    const { profileData, isLoading, error } = useFetchProfileData(1111)
+const ProfileCard = ({ actCode }) => {
+    console.log(actCode)
+    const { profileData, isLoading, error } = useFetchProfileData(actCode)
     // Derive theme colors
     const theme = profileData.theme || 'blauw';
     const themeColors = themes[theme] || themes.blauw;
@@ -107,14 +105,11 @@ const ProfileCard = () => {
                     padding: '20px',
                     position: 'relative',
                     minWidth: '100%',
-                    minHeight: '100vh',
                     backgroundColor: themeColors.primary2,
                     color: themeColors.primary10,
                     zIndex: '0'
                 }}
             >
-                <ButterflyIcon color={themeColors.primary3} />
-
                 {/* Header section with profile picture, name, age, and biography */}
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingBottom: '20px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '10px' }}>

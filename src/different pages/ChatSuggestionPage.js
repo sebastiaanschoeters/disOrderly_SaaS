@@ -186,7 +186,7 @@ const ChatSuggestionPage = () => {
 
     const handleAccept = () => {
         updateAcceptance(chatroomId, true);
-        navigate(`/chat/${chatroomId}`, { state: { profileData} });
+        navigate(`/chat`, { state: { profileData} });
     };
 
     const handleDecline = () => {

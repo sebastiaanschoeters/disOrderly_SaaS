@@ -244,6 +244,7 @@ const ProfileCard = (profileToShow) => {
     const [newMessage, setNewMessage] = useState('');
     const [isChatroomExistent, setChatroomExistent] = useState(false); // State to track chatroom existence
     const navigate = useNavigate();
+    const localTime = new Date();
 
     const imageUrls = pictures
         .filter(picture => picture.picture_url)
@@ -372,6 +373,7 @@ const ProfileCard = (profileToShow) => {
                     receiver_id: receiverId,
                     acceptance: false,
                     last_sender_id: senderId
+
                 }])
                 .select('id')  // Specify the column(s) to return (in this case, 'id')
 
@@ -397,6 +399,7 @@ const ProfileCard = (profileToShow) => {
                     sender_id: senderId,
                     chatroom_id: chatroomId,
                     message_content: newMessage,
+                    created_at: localTime.toISOString()
                 }]);
 
             if (messageError) {

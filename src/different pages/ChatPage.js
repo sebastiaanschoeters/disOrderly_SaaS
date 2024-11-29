@@ -1,31 +1,34 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Avatar, Input, Button, ConfigProvider, Card } from 'antd';
+import { Avatar, Input, Button, Modal, ConfigProvider, Card, Typography, Space } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
+import {ArrowDownOutlined, PlusOutlined, SendOutlined} from '@ant-design/icons';
 import {antThemeTokens, ButterflyIcon, themes} from '../Extra components/themes';
-import {ArrowDownOutlined} from '@ant-design/icons';
 import { createClient } from "@supabase/supabase-js";
 import '../CSS/ChatPage.css';
 import HomeButton from "../Extra components/HomeButton";
+import HangmanGame from "./Hangman";
 
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
 
 const ChatPage = () => {
     const location = useLocation();
-    const { profileData } = location.state || {};
-    const { name, profilePicture, chatroomId, otherUserId } = profileData || {};
+    const {profileData} = location.state || {};
+    const {name, profilePicture, chatroomId, otherUserId} = profileData || {};
     const navigate = useNavigate();
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState("");
     const userId = parseInt(localStorage.getItem('user_id'), 10);
+    const localTime = new Date();
 
     const [themeName, darkModeFlag] = JSON.parse(localStorage.getItem('theme')) || ['blauw', false];
     const [themeColors, setThemeColors] = useState(themes[themeName] || themes.blauw);
+    const [isModalVisible, setIsModalVisible] = useState(false);
+
     useEffect(() => {
-        if (darkModeFlag){
+        if (darkModeFlag) {
             setThemeColors(themes[`${themeName}_donker`] || themes.blauw_donker)
-        }
-        else{
+        } else {
             setThemeColors(themes[themeName] || themes.blauw);
         }
     }, [themeName, darkModeFlag]);
@@ -34,13 +37,12 @@ const ChatPage = () => {
     const [isScrolledToBottom, setIsScrolledToBottom] = useState(true); // Track if at bottom
     const messageListRef = useRef(null);
 
-
     const fetchMessages = async () => {
-        const { data, error } = await supabase
+        const {data, error} = await supabase
             .from('Messages')
             .select('id, sender_id, created_at, message_content')
             .eq('chatroom_id', chatroomId)
-            .order('created_at', { ascending: true });
+            .order('created_at', {ascending: true});
 
         if (error) {
             console.error("Error fetching messages:", error);
@@ -82,16 +84,21 @@ const ChatPage = () => {
 
     const scrollToBottom = () => {
         if (dummyRef.current) {
-            dummyRef.current.scrollIntoView({ behavior: 'smooth' });
+            dummyRef.current.scrollIntoView({behavior: 'smooth'});
         }
     };
 
     const handleSendMessage = async () => {
         if (newMessage.trim() === "") return;
 
-        const { error } = await supabase
+        const {error} = await supabase
             .from('Messages')
-            .insert([{ chatroom_id: chatroomId, sender_id: userId, message_content: newMessage }]);
+            .insert([{
+                chatroom_id: chatroomId,
+                sender_id: userId,
+                message_content: newMessage,
+                created_at: localTime.toISOString()
+            }]);
 
         if (error) {
             console.error("Error sending message:", error);
@@ -100,19 +107,15 @@ const ChatPage = () => {
 
         await supabase
             .from('Chatroom')
-            .update({ last_sender_id: userId })
+            .update({last_sender_id: userId})
             .eq('id', chatroomId);
 
-        setNewMessage(""); // Clear the input field
+        setNewMessage("");
 
-        // Automatically scroll to bottom after sending a message
+
         setTimeout(() => {
-            scrollToBottom(); // Smooth scroll to bottom after DOM updates
+            scrollToBottom();
         }, 100);
-    };
-
-    const handleProfile = () => {
-        navigate('/profile');
     };
 
     // Function to group messages by date
@@ -133,6 +136,15 @@ const ChatPage = () => {
 
     const groupedMessages = groupMessagesByDate(messages);
 
+    // Function to handle when the "Start Game" button is clicked
+    const handleHangman = () => {
+        setIsModalVisible(true);
+    };
+
+    const handleCloseModal = () => {
+        setIsModalVisible(false);
+    };
+
     const styles = {
         background: {
             width: '100vw',
@@ -147,7 +159,7 @@ const ChatPage = () => {
             maxWidth: '650px',
             borderRadius: '10px',
             boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-            backgroundColor: themeColors.primary3, // Chatbox color
+            backgroundColor: themeColors.primary3,
             display: 'flex',
             flexDirection: 'column',
         },
@@ -248,18 +260,22 @@ const ChatPage = () => {
                             <Avatar
                                 src={profilePicture || 'default-avatar.png'}
                                 style={styles.avatar}
-                                onClick={() => navigate(`/profile`, { state: { user_id: otherUserId} })}
+                                onClick={() => navigate(`/profile`, {state: {user_id: otherUserId}})}
                             >
                                 U
                             </Avatar>
-                            <h2 style={{ margin: 0, fontSize: '1.5rem', color: themeColors.primary1 }}>
+                            <h2 style={{margin: 0, fontSize: '1.5rem', color: themeColors.primary1}}>
                                 {`${name}`}
                             </h2>
                         </div>
                         <div style={styles.messageList} ref={messageListRef} onScroll={handleScroll}>
                             {Object.keys(groupedMessages).map((date) => (
                                 <div key={date}>
-                                    <div style={{ textAlign: 'center', margin: '10px 0', color: themeColors.primary8 }}>
+                                    <div style={{
+                                        textAlign: 'center',
+                                        margin: '10px 0',
+                                        color: themeColors.primary8
+                                    }}>
                                         <strong>{date}</strong>
                                     </div>
                                     {groupedMessages[date].map((message) => {
@@ -279,7 +295,7 @@ const ChatPage = () => {
                                                         ...(isSender ? styles.senderBubble : styles.receiverBubble),
                                                     }}
                                                 >
-                                                    <p style={{ margin: 0 }}>{message.message_content}</p>
+                                                    <p style={{margin: 0}}>{message.message_content}</p>
                                                 </div>
                                                 <span style={{
                                                     ...styles.timestamp,
@@ -298,12 +314,16 @@ const ChatPage = () => {
                             <Button
                                 style={styles.scrollButton}
                                 onClick={scrollToBottom}
-                                icon={<ArrowDownOutlined />}
+                                icon={<ArrowDownOutlined/>}
                                 hidden={isScrolledToBottom}
                             />
-                            <div ref={dummyRef} />
+                            <div ref={dummyRef}/>
                         </div>
                         <div style={styles.inputContainer}>
+                            <Button type="primary"
+                                    style={styles.sendButton}
+                                    icon={<PlusOutlined/>}
+                                    onClick={handleHangman}/>
                             <Input
                                 style={styles.input}
                                 placeholder="Type hier..."
@@ -311,15 +331,23 @@ const ChatPage = () => {
                                 onChange={(e) => setNewMessage(e.target.value)}
                                 onPressEnter={handleSendMessage}
                             />
-                            <Button type="primary" style={styles.sendButton} onClick={handleSendMessage}>
-                                Verstuur
-                            </Button>
+                            <Button type="primary" style={styles.sendButton} icon={<SendOutlined/>}
+                                    onClick={handleSendMessage}/>
                         </div>
                     </div>
                 </Card>
             </div>
+            {isModalVisible && (
+                <HangmanGame
+                    isModalVisible={isModalVisible}
+                    setIsModalVisible={setIsModalVisible}
+                    player1Id = {userId}
+                    player2Id = {otherUserId}
+                />
+            )}
         </ConfigProvider>
     );
 };
+
 
 export default ChatPage;

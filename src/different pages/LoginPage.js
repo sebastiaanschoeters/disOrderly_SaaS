@@ -172,9 +172,14 @@ const LoginPage = () => {
         }
 
         // Navigate to the home page after resolving all async operations
-        setIsTransitioning(true);
-        //if(userType.equals('user'))
-        setTimeout(() => navigate('/home'), 500);
+        if (userType == 'user') {
+            setIsTransitioning(true);
+            setTimeout(() => navigate('/home'), 500);
+        }
+        else if (userType == 'caretaker') {
+            setIsTransitioning(true);
+            setTimeout(() => navigate('/clientOverview'), 500);
+        }
     };
 
     return (

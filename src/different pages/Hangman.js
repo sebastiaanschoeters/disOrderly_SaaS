@@ -324,7 +324,7 @@ const HangmanGame = ({ isModalVisible, setIsModalVisible, player1Id, player2Id }
                             <Button
                                 key={letter}
                                 onClick={() => handleGuess(letter)}
-                                disabled={guessedLetters.includes(letter) || isSender}
+                                disabled={guessedLetters.includes(letter) || !isSender}
                             >
                                 {letter}
                             </Button>
@@ -351,7 +351,7 @@ const HangmanGame = ({ isModalVisible, setIsModalVisible, player1Id, player2Id }
                             setQuestion('');
                             setAnswer('');
                         }}
-                        disabled={isSender}
+                        disabled={!isSender}
                     >
                         Opnieuw spelen
                     </Button>

@@ -10,6 +10,8 @@ import ChatPage from './different pages/ChatPage';
 import ChatSuggestionPage from './different pages/ChatSuggestionPage';
 import Search from './different pages/Search';
 import ProtectedRoute from './Extra components/ProtectedRoute'; // Import the ProtectedRoute component
+import {clarity} from "react-microsoft-clarity";
+
 import AdminPage from "./different pages/AdminPage";
 import Hangman from "./different pages/Hangman";
 import EditableProfilePage from "./different pages/EditableProfilePage";
@@ -17,15 +19,18 @@ import CaretakerProfilePage from "./different pages/CaretakerProfilePage";
 import CaretakerEditableProfile from "./different pages/CaretakerEditableProfile";
 import ClientOverview from "./different pages/ClientOverview";
 
+clarity.init('p658v8svx1');
+
+
 const App = () => {
     return (
         <Router>
             {/* Route definitions */}
             <Routes>
                 {/* Public routes */}
-                <Route path="/" element={<LoginPage />} />
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/activate" element={<ActivationPage />} />
+                <Route path="/" element={<LoginPage/>}/>
+                <Route path="/login" element={<LoginPage/>}/>
+                <Route path="/activate" element={<ActivationPage/>}/>
                 <Route path="/activate/:activationCodeLink" element={<ActivationPage />} />
                 <Route path="/hangman" element={<Hangman />} />
                 <Route path="/caretakerProfile" element={<CaretakerProfilePage />} />
@@ -100,9 +105,7 @@ const App = () => {
                 <Route
                     path="/admin"
                     element={
-                        <ProtectedRoute>
                             <AdminPage />
-                        </ProtectedRoute>
                     }
                 />
             </Routes>

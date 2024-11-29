@@ -55,45 +55,51 @@ const HomePage = () => {
                 <ButterflyIcon color={themeColors.primary3} />
                 <div style={{
                     display: 'flex',
-                    gap: '5%',
-                    flexWrap: 'wrap',
+                    rowGap: '20px', // Vertical gap between stacked buttons
+                    columnGap: '80px', // Horizontal gap between buttons
+                    flexWrap: 'wrap', // Allows buttons to wrap to the next line on smaller screens
                     justifyContent: 'center',
-                    width: '100%'
+                    width: '100%',
+                    alignItems: 'center', // Keep buttons centered vertically when stacked
                 }}>
                     <Button
+                        className="primary-button"  // Add class for targeting with CSS
                         type="primary"
-                        icon={<SearchOutlined style={{ fontSize: '3vw' }} />}
+                        icon={<SearchOutlined style={{ fontSize: '4rem' }} />}  // Increase icon size
                         style={{
                             display: 'flex',
                             flexDirection: 'column',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            width: '20vw',
-                            height: '20vw',
-                            minWidth: '120px',
-                            minHeight: '120px',
+                            width: '240px',
+                            height: '240px',
+                            fontSize: '2rem',
+                            textAlign: 'center',  // Ensure text is centered
+                            overflow: 'hidden',   // Prevent text overflow
                         }}
                         onClick={() => navigate('/search')}
                     >
-                        <h2 style={{ margin: '0', minWidth: '20px' }}>Mensen vinden</h2>
+                        <h2 style={{ margin: '0', minWidth: '20px', whiteSpace: 'nowrap' }}>Mensen vinden</h2>
                     </Button>
 
                     <Button
+                        className="primary-button"  // Add class for targeting with CSS
                         type="primary"
-                        icon={<MessageOutlined style={{ fontSize: '3vw' }} />}
+                        icon={<MessageOutlined style={{ fontSize: '4rem' }} />}  // Increase icon size
                         style={{
                             display: 'flex',
                             flexDirection: 'column',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            width: '20vw',
-                            height: '20vw',
-                            minWidth: '120px',
-                            minHeight: '120px',
+                            width: '240px',
+                            height: '240px',
+                            fontSize: '2rem',
+                            textAlign: 'center',  // Ensure text is centered
+                            overflow: 'hidden',   // Prevent text overflow
                         }}
                         onClick={() => navigate('/chatoverview')}
                     >
-                        <h2 style={{ margin: '0', minWidth: '20px' }}>Chats</h2>
+                        <h2 style={{ margin: '0', minWidth: '20px', whiteSpace: 'nowrap' }}>Chats</h2>
                     </Button>
                 </div>
 
@@ -124,6 +130,7 @@ const HomePage = () => {
                         style={{
                             color: themeColors.primary10,
                             whiteSpace: 'nowrap',
+                            fontSize: '1.4rem',  // Increase font size for name
                         }}
                     >
                         {name}
@@ -131,8 +138,9 @@ const HomePage = () => {
                 </div>
 
                 <Button
+                    className="secondary-button"  // Add class for targeting with CSS
                     type="secondary"
-                    icon={<SettingOutlined/>}
+                    icon={<SettingOutlined />}
                     style={{
                         position: 'absolute',
                         bottom: '1%',
@@ -141,19 +149,23 @@ const HomePage = () => {
                         flexDirection: 'column',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        width: '10vw',
-                        height: '8vw',
-                        minWidth: '60px',
-                        minHeight: '40px',
+                        width: '15vw',
+                        height: '12vw',
+                        minWidth: '100px',
+                        minHeight: '80px',
+                        fontSize: '1.8rem',  // Increase text size for "Instellingen"
+                        textAlign: 'center',
+                        overflow: 'hidden',
                     }}
                     onClick={() => navigate('/profilePersonal')}
                 >
-                    <h2 style={{ margin: '0', minWidth: '10px' }}>Instellingen</h2>
+                    <h2 style={{ margin: '0', minWidth: '10px', whiteSpace: 'nowrap' }}>Instellingen</h2>
                 </Button>
 
                 <Button
+                    className="secondary-button"  // Add class for targeting with CSS
                     type="secondary"
-                    icon={<PoweroffOutlined/>}
+                    icon={<PoweroffOutlined />}
                     style={{
                         position: 'absolute',
                         bottom: '1%',
@@ -162,16 +174,68 @@ const HomePage = () => {
                         flexDirection: 'column',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        width: '10vw',
-                        height: '8vw',
-                        minWidth: '60px',
-                        minHeight: '40px',
+                        width: '15vw',
+                        height: '12vw',
+                        minWidth: '100px',
+                        minHeight: '80px',
+                        fontSize: '1.8rem',  // Increase text size for "Afmelden"
+                        textAlign: 'center',
+                        overflow: 'hidden',
                     }}
                     onClick={() => handleLogout()}
                 >
-                    <h2 style={{ margin: '0', minWidth: '10px' }}>Afmelden</h2>
+                    <h2 style={{ margin: '0', minWidth: '10px', whiteSpace: 'nowrap' }}>Afmelden</h2>
                 </Button>
             </div>
+
+            {/* External CSS with Media Query */}
+            <style>{`
+                .primary-button {
+                    width: 240px;
+                    height: 240px;
+                    font-size: 2rem;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+
+                /* Media Query for Smaller Screens */
+                @media (max-width: 768px) {
+                    .primary-button {
+                        width: 180px !important;  /* 25% smaller width */
+                        height: 180px !important; /* 25% smaller height */
+                        font-size: 1.5rem !important;  /* 25% smaller font size */
+                    }
+                    
+                    .secondary-button {
+                        width: 130px !important;  /* Adjust for secondary button width */
+                        height: 130px !important; /* Adjust for secondary button height */
+                        font-size: 1.4rem !important;  /* Adjust font size */
+                    }
+
+                    .secondary-button h2 {
+                        font-size: 1rem !important;  /* Scale down font size for secondary buttons */
+                        white-space: nowrap;  /* Prevent text from wrapping */
+                        overflow: hidden;  /* Prevent overflow */
+                    }
+                }
+
+                .primary-button h2 {
+                    margin: 0;
+                    font-size: inherit;
+                    text-align: center;
+                    overflow: hidden; /* Prevent text overflow */
+                    white-space: nowrap; /* Prevent text from wrapping */
+                }
+
+                .secondary-button h2 {
+                    margin: 0;
+                    font-size: inherit;
+                    text-align: center;
+                    overflow: hidden;
+                    white-space: nowrap;
+                }
+            `}</style>
         </ConfigProvider>
     );
 };

@@ -209,61 +209,6 @@ const LoginPage = () => {
     };
 
 
-    const testfunctie = async (clientId) => {
-        localStorage.setItem('controlling', true);
-        const email = await getUserEmailById(clientId);
-        const LoginResponse = {
-            token: 'fake-session-token',
-            user: { email },
-        };
-
-
-        // Save user session to localStorage
-        localStorage.setItem('sessionToken', LoginResponse.token);
-        localStorage.setItem('userEmail', LoginResponse.user.email);
-
-        const theme = await getTheme(clientId);
-        const name = await getName(clientId);
-        const pfp = await getPfp(clientId);
-        localStorage.setItem('userType', 'user');
-
-        if (clientId) {
-            localStorage.setItem('user_id', clientId);
-            console.log('Fetched and stored user_id:', clientId);
-        } else {
-            console.error('Failed to fetch user_id');
-        }
-
-        if (theme) {
-            localStorage.setItem('theme', theme);
-            console.log('Fetched and stored theme:', theme);
-        } else {
-            console.error('Failed to fetch theme',);
-        }
-
-        if (name) {
-            localStorage.setItem('name', name);
-            console.log('Fetched and stored name:', name);
-        } else {
-            console.error('Failed to fetch name',);
-        }
-
-        if (pfp) {
-            localStorage.setItem('profile_picture', pfp);
-            console.log('Fetched and stored pfp:', pfp);
-        } else {
-            console.error('Failed to fetch pfp',);
-        }
-
-        setIsTransitioning(true);
-        setTimeout(() => navigate('/home'), 500);
-
-    }
-
-    /**/
-
-
-
     return (
         <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
             <div

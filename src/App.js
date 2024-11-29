@@ -9,8 +9,7 @@ import ChatOverviewPage from './different pages/ChatOverviewPage';
 import ChatPage from './different pages/ChatPage';
 import ChatSuggestionPage from './different pages/ChatSuggestionPage';
 import Search from './different pages/Search';
-import SupabaseTestPage from './different pages/SupabaseTestPage';
-import ProtectedRoute from './different pages/ProtectedRoute'; // Import the ProtectedRoute component
+import ProtectedRoute from './Extra components/ProtectedRoute'; // Import the ProtectedRoute component
 import AdminPage from "./different pages/AdminPage";
 import Hangman from "./different pages/Hangman";
 import EditableProfilePage from "./different pages/EditableProfilePage";
@@ -37,7 +36,7 @@ const App = () => {
                 <Route
                     path="/search"
                     element={
-                        <ProtectedRoute>
+                        <ProtectedRoute allowedRoles={["user"]}>
                             <Search />
                         </ProtectedRoute>
                     }
@@ -45,7 +44,7 @@ const App = () => {
                 <Route
                     path="/home"
                     element={
-                        <ProtectedRoute>
+                        <ProtectedRoute allowedRoles={["user"]}>
                             <HomePage />
                         </ProtectedRoute>
                     }
@@ -53,7 +52,7 @@ const App = () => {
                 <Route
                     path="/profile"
                     element={
-                        <ProtectedRoute>
+                        <ProtectedRoute allowedRoles={["user"]}>
                             <ProfilePage />
                         </ProtectedRoute>
                     }
@@ -61,7 +60,7 @@ const App = () => {
                 <Route
                     path="/profileEdit"
                     element={
-                        <ProtectedRoute>
+                        <ProtectedRoute allowedRoles={["user"]}>
                             <EditableProfilePage />
                         </ProtectedRoute>
                     }
@@ -69,7 +68,7 @@ const App = () => {
                 <Route
                     path="/profilePersonal"
                     element={
-                        <ProtectedRoute>
+                        <ProtectedRoute allowedRoles={["user"]}>
                             <PersonalProfilePage />
                         </ProtectedRoute>
                     }
@@ -77,7 +76,7 @@ const App = () => {
                 <Route
                     path="/chatOverview"
                     element={
-                        <ProtectedRoute>
+                        <ProtectedRoute allowedRoles={["user"]}>
                             <ChatOverviewPage />
                         </ProtectedRoute>
                     }
@@ -85,7 +84,7 @@ const App = () => {
                 <Route
                     path="/chat"
                     element={
-                        <ProtectedRoute>
+                        <ProtectedRoute allowedRoles={["user"]}>
                             <ChatPage />
                         </ProtectedRoute>
                     }
@@ -93,16 +92,8 @@ const App = () => {
                 <Route
                     path="/chatSuggestion"
                     element={
-                        <ProtectedRoute>
+                        <ProtectedRoute allowedRoles={["user"]}>
                             <ChatSuggestionPage />
-                        </ProtectedRoute>
-                    }
-                />
-                <Route
-                    path="/supabase"
-                    element={
-                        <ProtectedRoute>
-                            <SupabaseTestPage />
                         </ProtectedRoute>
                     }
                 />

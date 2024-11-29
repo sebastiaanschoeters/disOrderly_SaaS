@@ -346,7 +346,6 @@ const ClientOverview = () => {
                         pagination={{ pageSize: pageSize }}
                         style={{
                             marginTop: "20px",
-                            backgroundColor: themeColors.primary1,
                         }}
                         onRow={(record) => ({
                             onClick: (event) => {
@@ -371,6 +370,7 @@ const ClientOverview = () => {
                         clientData={selectedClient}
                     />
                 )}
+
                 <div style={{
                     display: "flex",
                     justifyContent: "center",

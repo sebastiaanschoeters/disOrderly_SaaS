@@ -1,9 +1,17 @@
-import React from "react";
-import { Modal } from "antd";
+import React, {useState} from "react";
+import {Button, Modal} from "antd";
 import ProfileCard from '../Profile Pages/ProfilePage'
+import ContactsOverview from "./ClientContacts";
 
 const ClientDetailsModal = ({ visible, onClose, clientData }) => {
+    const [isViewingContactList, setIsViewingContactList] = useState(false);
+
     if (!clientData) return null; // Guard for no data
+    console.log(clientData)
+
+    const handleToggleView = () =>{
+        setIsViewingContactList((prevState) => !prevState);
+    }
 
     const renderContentByAccessLevel = (accessLevel) => {
         switch (accessLevel) {
@@ -12,7 +20,27 @@ const ClientDetailsModal = ({ visible, onClose, clientData }) => {
             case "Gesprekken":
                 return <p>You have access to conversations.</p>;
             case "Contacten":
-                return <p>You have access to contact information.</p>;
+                return (
+                    <>
+                        <Button
+                            type="primary"
+                            onClick={handleToggleView}
+                            style={{ marginBottom: '20px' }}
+                        >
+                            {isViewingContactList ? "Bekijk Profiel" : "Bekijk Contacten"}
+                        </Button>
+                        {isViewingContactList ? (
+                            <>
+                                <ContactsOverview id={clientData.id} />
+                            </>
+                        ) : (
+                            <>
+                                <ProfileCard user_id={clientData.id} viewedByCareteaker={true} />
+                            </>
+                        )}
+
+                    </>
+                );
             case "Publiek Profiel":
                 return <ProfileCard user_id={clientData.id} viewedByCareteaker={true} />;
             default:
@@ -22,17 +50,14 @@ const ClientDetailsModal = ({ visible, onClose, clientData }) => {
 
     return (
         <Modal
-            title="Client Details"
+            title=""
             open={visible}
             onCancel={onClose}
             footer={null}
             width='90%'
-            style={{
-                position: 'relative',
-                overflow: 'hidden'
-            }}
         >
             <div>
+                <h2>{clientData.client_info.name || "Client Information"}</h2>
                 {renderContentByAccessLevel(clientData.access_level)}
             </div>
         </Modal>

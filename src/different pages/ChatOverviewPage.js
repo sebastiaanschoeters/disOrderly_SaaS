@@ -151,11 +151,12 @@ const ChatOverviewPage = () => {
                                             user_id: userID,
                                             otherUserId: otherUserId,
                                             isSender: isSender,
+                                            chatroomId: chat.id,
                                         };
                                         if (chat.acceptance === true) {
-                                            navigate(`/chat/${chat.id}`, { state: { profileData} });
+                                            navigate(`/chat`, { state: { profileData} });
                                         } else {
-                                            navigate(`/chatsuggestion/${chat.id}`, { state: { profileData } });
+                                            navigate(`/chatsuggestion`, { state: { profileData } });
                                         }
                                     }}
                                 >

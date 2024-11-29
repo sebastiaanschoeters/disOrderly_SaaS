@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {Tag, Avatar, Button, Divider, ConfigProvider, Spin, Carousel} from 'antd';
+import {Tag, Avatar, Button,Input, Modal, Divider, ConfigProvider, Spin, Carousel} from 'antd';
 import {
     MessageOutlined,
     EnvironmentOutlined,
@@ -13,7 +13,7 @@ import { createClient } from "@supabase/supabase-js";
 import 'antd/dist/reset.css';
 import '../CSS/AntDesignOverride.css';
 import { ButterflyIcon, antThemeTokens, themes } from '../themes';
-import { useLocation } from 'react-router-dom';
+import {useLocation, useNavigate} from 'react-router-dom';
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
 
@@ -240,6 +240,11 @@ const ProfileCard = () => {
     const { pictures } = useFetchPicturesData(state.user_id);
     const { locationData } = useFetchUserLocation(localStorage.getItem('user_id'));
 
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [newMessage, setNewMessage] = useState('');
+    const [isChatroomExistent, setChatroomExistent] = useState(false); // State to track chatroom existence
+    const navigate = useNavigate();
+
     const imageUrls = pictures
         .filter(picture => picture.picture_url)
         .map(picture => picture.picture_url);
@@ -348,6 +353,102 @@ const ProfileCard = () => {
         profileData.locationData?.longitude
     );
 
+    const handleMessage = async () => {
+        setIsModalVisible(true);
+    };
+
+    const handleSendMessage = async () => {
+        if (!newMessage.trim()) return;
+
+        try {
+            const senderId = parseInt(localStorage.getItem('user_id'), 10);
+            const receiverId = state.user_id;
+
+            // Insert into Chatroom table and return the 'id' of the newly inserted row
+            const { data: chatroomData, error: chatroomError } = await supabase
+                .from('Chatroom')
+                .insert([{
+                    sender_id: senderId,
+                    receiver_id: receiverId,
+                    acceptance: false,
+                    last_sender_id: senderId
+                }])
+                .select('id')  // Specify the column(s) to return (in this case, 'id')
+
+            if (chatroomError) {
+                console.error('Error inserting chatroom:', chatroomError);
+                throw chatroomError;
+            }
+
+            // Ensure the ID is available
+            const chatroomId = chatroomData?.[0]?.id;
+
+            if (!chatroomId) {
+                console.error('Chatroom ID is missing');
+                return;  // Exit early if the ID is missing
+            }
+
+            console.log('Chatroom created with ID:', chatroomId);
+
+            // Insert the message into the Messages table
+            const { data: messageData, error: messageError } = await supabase
+                .from('Messages')
+                .insert([{
+                    sender_id: senderId,
+                    chatroom_id: chatroomId,
+                    message_content: newMessage,
+                }]);
+
+            if (messageError) {
+                console.error('Error inserting message:', messageError);
+                throw messageError;
+            }
+
+            // Hide the modal, clear the message, and navigate to the chatroom
+            setIsModalVisible(false);
+            setNewMessage('');
+            setChatroomExistent(true);
+
+
+        } catch (error) {
+            console.error('Error sending message or inserting data:', error);
+            // Optionally handle user-friendly error messaging
+        }
+    };
+
+    useEffect(() => {
+        const checkChatroom = async () => {
+            const senderId = parseInt(localStorage.getItem('user_id'), 10);
+            const receiverId = state.user_id;
+
+            try {
+                // Check if the chatroom exists between sender and receiver
+                const { data: chatroomData, error } = await supabase
+                    .from('Chatroom')
+                    .select('id')
+                    .or(`and(sender_id.eq.${senderId},receiver_id.eq.${receiverId}),and(sender_id.eq.${receiverId},receiver_id.eq.${senderId})`)
+                    .single();
+
+                if (error) {
+                    console.error('Error fetching chatroom:', error);
+                    return;
+                }
+
+                // If chatroomData is found, set the state to true
+                setChatroomExistent(!!chatroomData);
+            } catch (error) {
+                console.error('Error checking chatroom:', error);
+            }
+        };
+
+        checkChatroom();
+    }, [state.user_id]);
+
+    const handleCancel = () => {
+        setIsModalVisible(false);
+        setNewMessage('');
+    };
+
     if (isLoading) return <Spin tip="Profiel laden..." />;
     if (error) return <p>Failed to load profile: {error}</p>;
 
@@ -437,8 +538,10 @@ const ProfileCard = () => {
                         right: '20px',
                         zIndex: 1000
                     }}
+                    disabled={isChatroomExistent}
+                    onClick={handleMessage}
                 >
-                    Chat met {profileData?.name || 'de gebruiker'}
+                    {isChatroomExistent ? 'chat is al gestart' : `Chat met ${profileData?.name || 'de gebruiker'}`}
                 </Button>
 
                 <Divider/>
@@ -479,6 +582,24 @@ const ProfileCard = () => {
                         ))}
                     </Carousel>
                 )}
+
+                <Modal
+                    title={`Chat met ${profileData.name || 'de gebruiker'}`}
+                    visible={isModalVisible}
+                    onCancel={handleCancel}
+                    footer={[
+                        <Button key="send" type="primary" onClick={handleSendMessage} >
+                            Verzenden
+                        </Button>,
+                    ]}
+                >
+                    <Input.TextArea
+                        value={newMessage}
+                        onChange={(e) => setNewMessage(e.target.value)}
+                        rows={4}
+                        placeholder="Typ je bericht..."
+                    />
+                </Modal>
             </div>
         </ConfigProvider>
     );

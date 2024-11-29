@@ -14,6 +14,7 @@ import '../CSS/EditableProfilePage.css';
 import {antThemeTokens, ButterflyIcon, themes} from '../themes';
 import TextArea from "antd/es/input/TextArea";
 import {createClient} from "@supabase/supabase-js";
+import HomeButton from '../Extra components/HomeButtonCaretaker'
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
 
@@ -257,6 +258,7 @@ const ProfileCard = () => {
                 color: themeColors.primary10,
                 zIndex: '0'
             }}>
+                <HomeButton color={themeColors.primary7} />
                 <ButterflyIcon color={themeColors.primary3}/>
 
                 <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', paddingBottom: '20px'}}>
@@ -343,37 +345,6 @@ const ProfileCard = () => {
                 </p>
 
                 <Divider/>
-
-                <p style={{
-                    display: 'flex',
-                    flexWrap: 'wrap',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: '100%',
-                    gap: '20%'
-                }}>
-                    <Button
-                        type='primary'
-                        icon={<TeamOutlined/>}
-                        style={{
-                            margin: '10px'
-                        }}
-                    >
-                        Bekijk clienten
-                    </Button>
-
-                    <Button
-                        type='primary'
-                        icon={<CodeOutlined/>}
-                        style={{
-                            margin: '10px'
-                        }}
-                    >
-                        Genereer een nieuwe activatie code
-                    </Button>
-
-                </p>
-
             </div>
         </ConfigProvider>
     );

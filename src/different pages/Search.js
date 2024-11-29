@@ -6,7 +6,9 @@ import { FilterOutlined } from "@ant-design/icons";
 import { createClient } from "@supabase/supabase-js";
 import React, { useState, useEffect } from "react";
 import HomeButton from '../Extra components/HomeButton'
-import { useNavigate } from 'react-router-dom'; // Import useNavigate for routing
+import { useNavigate } from 'react-router-dom';
+import ClientDetailsModal from "./ClientDetailsModal";
+import ProfileDetailsModal from "./ProfileDetailsModal"; // Import useNavigate for routing
 
 
 // Initialize Supabase client
@@ -22,7 +24,10 @@ const Search = () => {
     const [filteredUsers, setFilteredUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
-    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [isModalVisible, setIsModalVisible] = useState(false)
+
+    const [selectedClient, setSelectedClient] = useState({});
+    const [isModalProfileVisible, setIsModalProfileVisible] = useState(false);
 
     // Filter State
     const [ageRange, setAgeRange] = useState([18, 100]);  // Set the default age range to 18-100
@@ -52,8 +57,6 @@ const Search = () => {
         }
         return age;
     };
-
-    const navigate = useNavigate();
 
     // Fetch users from Supabase
     const fetchUsers = async () => {
@@ -172,6 +175,17 @@ const Search = () => {
         setIsModalVisible(false);
     };
 
+    const handleProfileClick = (client) => {
+        console.log(client)
+        setSelectedClient({id: client});
+        setIsModalProfileVisible(true);
+    };
+
+    const handleModalProfileClose = () => {
+        setSelectedClient({});
+        setIsModalProfileVisible(false);
+    };
+
     useEffect(() => {
         fetchUsers(); // Fetch users when the component mounts
     }, []);
@@ -276,7 +290,7 @@ const Search = () => {
                                 <List.Item
                                     key={item.id}
 
-                                    onClick={() => navigate(`/profile`, { state: { user_id: item.id} })}
+                                    onClick={() => handleProfileClick(item.id)}
                                         // Navigate to dynamic user link
                                     style={{
                                         display: 'flex',
@@ -316,6 +330,15 @@ const Search = () => {
                 ) : (
                     <div>Geen gebruikers gevonden.</div>
                 )}
+
+                {selectedClient && (
+                    <ProfileDetailsModal
+                        visible={isModalProfileVisible}
+                        onClose={handleModalClose}
+                        clientData={selectedClient}
+                    />
+                )}
+
 
                 {/* Modal for Filters */}
                 <Modal

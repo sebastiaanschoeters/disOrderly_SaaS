@@ -1,7 +1,6 @@
-import React, {useState} from "react";
-import {Button, Modal} from "antd";
-import ProfileCard from './ProfilePage'
-import ContactsOverview from "./ClientContacts";
+import React from "react";
+import { Modal } from "antd";
+import ProfileCard from '../Profile Pages/ProfilePage'
 
 const ClientDetailsModal = ({ visible, onClose, clientData }) => {
     const [isViewingContactList, setIsViewingContactList] = useState(false);

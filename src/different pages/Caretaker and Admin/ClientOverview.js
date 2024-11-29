@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { Avatar, ConfigProvider, Select, Table, Button, message } from "antd";
-import { antThemeTokens, ButterflyIcon, themes } from "../themes";
+import { antThemeTokens, ButterflyIcon, themes } from "../../themes";
 import { createClient } from "@supabase/supabase-js";
 import { DeleteOutlined } from "@ant-design/icons";
 import { useNavigate } from 'react-router-dom';
 import ClientDetailsModal from "./ClientDetailsModal";
 import 'antd/dist/reset.css';
-import '../CSS/AntDesignOverride.css';
+import '../../CSS/AntDesignOverride.css';
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q");
 

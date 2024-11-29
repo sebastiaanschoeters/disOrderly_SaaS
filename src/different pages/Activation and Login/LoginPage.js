@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Form, Input, Button, Checkbox, Card, ConfigProvider } from 'antd';
 import 'antd/dist/reset.css';
-import '../CSS/AntDesignOverride.css';
-import { antThemeTokens, ButterflyIcon, themes } from '../themes';
+import '../../CSS/AntDesignOverride.css';
+import { antThemeTokens, ButterflyIcon, themes } from '../../themes';
 import { useNavigate } from 'react-router-dom';
-import forestImage from '../Media/forest.jpg';
+import forestImage from '../../Media/forest.jpg';
 import {createClient} from "@supabase/supabase-js"; // Path to the image
 
 

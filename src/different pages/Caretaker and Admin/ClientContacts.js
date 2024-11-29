@@ -65,8 +65,8 @@ const ContactsOverview = ({ id: userID }) => {
         const calculatePageSize = () => {
             const screenHeight = window.innerHeight;
             const rowHeight = 130; // Approximate row height
-            const headerHeight = 180; // Approximate header and padding
-            const footerHeight = 50; // Approximate footer height
+            const headerHeight = 300; // Approximate header and padding
+            const footerHeight = 30; // Approximate footer height
             const availableHeight = screenHeight - headerHeight - footerHeight;
 
             return Math.max(1, Math.floor(availableHeight / rowHeight));
@@ -155,7 +155,7 @@ const ContactsOverview = ({ id: userID }) => {
                     style={{ marginTop: "20px" }}
                 />
             ) : (
-                <p>Loading contacts...</p>
+                <p>Geen contacten gevonden</p>
             )}
             {/* Modal to display caretaker details */}
             <Modal

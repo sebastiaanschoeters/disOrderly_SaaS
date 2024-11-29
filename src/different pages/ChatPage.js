@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Avatar, Input, Button, ConfigProvider, Card } from 'antd';
-import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { antThemeTokens, themes } from '../themes';
+import {ArrowDownOutlined} from '@ant-design/icons';
 import { createClient } from "@supabase/supabase-js";
 import '../CSS/ChatPage.css';
 
@@ -11,11 +12,10 @@ const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbG
 const ChatPage = () => {
     const location = useLocation();
     const { profileData } = location.state || {};
-    const { name, profilePicture } = profileData || {};
+    const { name, profilePicture, chatroomId, otherUserId } = profileData || {};
     const navigate = useNavigate();
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState("");
-    const { chatroomId } = useParams();
     const userId = parseInt(localStorage.getItem('user_id'), 10);
 
     const [themeName, darkModeFlag] = JSON.parse(localStorage.getItem('theme')) || ['blauw', false];
@@ -30,6 +30,9 @@ const ChatPage = () => {
     }, [themeName, darkModeFlag]);
 
     const dummyRef = useRef(null);
+    const [isScrolledToBottom, setIsScrolledToBottom] = useState(true); // Track if at bottom
+    const messageListRef = useRef(null);
+
 
     const fetchMessages = async () => {
         const { data, error } = await supabase
@@ -61,10 +64,26 @@ const ChatPage = () => {
     }, [chatroomId]); // Re-run the effect when chatroomId changes
 
     useEffect(() => {
+        if (isScrolledToBottom) {
+            scrollToBottom(); // Scroll only if user is near bottom
+        }
+    }, [messages]);
+
+    const handleScroll = () => {
+        if (messageListRef.current) {
+            const isAtBottom =
+                messageListRef.current.scrollHeight - messageListRef.current.scrollTop <=
+                messageListRef.current.clientHeight + 50; // Allow a small offset (50px)
+
+            setIsScrolledToBottom(isAtBottom);
+        }
+    };
+
+    const scrollToBottom = () => {
         if (dummyRef.current) {
             dummyRef.current.scrollIntoView({ behavior: 'smooth' });
         }
-    }, [messages]);
+    };
 
     const handleSendMessage = async () => {
         if (newMessage.trim() === "") return;
@@ -83,12 +102,36 @@ const ChatPage = () => {
             .update({ last_sender_id: userId })
             .eq('id', chatroomId);
 
-        setNewMessage("");
+        setNewMessage(""); // Clear the input field
+
+        // Automatically scroll to bottom after sending a message
+        setTimeout(() => {
+            scrollToBottom(); // Smooth scroll to bottom after DOM updates
+        }, 100);
     };
 
     const handleProfile = () => {
         navigate('/profile');
     };
+
+    // Function to group messages by date
+    const groupMessagesByDate = (messages) => {
+        return messages.reduce((groups, message) => {
+            const date = new Date(message.created_at).toLocaleDateString('nl-NL', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            });
+            if (!groups[date]) {
+                groups[date] = [];
+            }
+            groups[date].push(message);
+            return groups;
+        }, {});
+    };
+
+    const groupedMessages = groupMessagesByDate(messages);
+
     const styles = {
         background: {
             width: '100vw',
@@ -180,6 +223,17 @@ const ChatPage = () => {
             padding: '0 15px',
             borderRadius: '5px',
         },
+        scrollButton: {
+            position: 'absolute',
+            bottom: '100px',
+            left: '47%',
+            backgroundColor: themeColors.primary8,
+            color: themeColors.primary1,
+            display: isScrolledToBottom ? 'none' : 'flex',
+            width: '40px',
+            height: '40px',
+            borderRadius: '50%',
+        },
     };
 
     return (
@@ -190,8 +244,8 @@ const ChatPage = () => {
                         <div style={styles.header}>
                             <Avatar
                                 src={profilePicture || 'default-avatar.png'}
-                                onClick={handleProfile}
                                 style={styles.avatar}
+                                onClick={() => navigate(`/profile`, { state: { user_id: otherUserId} })}
                             >
                                 U
                             </Avatar>
@@ -199,42 +253,51 @@ const ChatPage = () => {
                                 {`${name}`}
                             </h2>
                         </div>
-                        <div style={styles.messageList}>
-                            {messages.map((message) => {
-                                const isSender = message.sender_id === userId;
-                                return (
-                                    <div
-                                        key={message.id}
-                                        style={{
-                                            display: 'flex',
-                                            flexDirection: 'column',
-                                            alignItems: isSender ? 'flex-end' : 'flex-start', // Align bubble and timestamp dynamically
-                                        }}
-                                    >
-                                        {/* Message Bubble */}
-                                        <div
-                                            style={{
-                                                ...styles.bubble,
-                                                ...(isSender ? styles.senderBubble : styles.receiverBubble),
-                                            }}
-                                        >
-                                            <p style={{ margin: 0 }}>{message.message_content}</p>
-                                        </div>
-                                        {/* Timestamp */}
-                                        <span
-                                            style={{
-                                                ...styles.timestamp,
-                                                alignSelf: isSender ? 'flex-end' : 'flex-start', // Align timestamp below bubble
-                                            }}
-                                        >
-                                            {new Date(message.created_at).toLocaleTimeString([], {
-                                                hour: '2-digit',
-                                                minute: '2-digit',
-                                            })}
-                                        </span>
+                        <div style={styles.messageList} ref={messageListRef} onScroll={handleScroll}>
+                            {Object.keys(groupedMessages).map((date) => (
+                                <div key={date}>
+                                    <div style={{ textAlign: 'center', margin: '10px 0', color: themeColors.primary8 }}>
+                                        <strong>{date}</strong>
                                     </div>
-                                );
-                            })}
+                                    {groupedMessages[date].map((message) => {
+                                        const isSender = message.sender_id === userId;
+                                        return (
+                                            <div
+                                                key={message.id}
+                                                style={{
+                                                    display: 'flex',
+                                                    flexDirection: 'column',
+                                                    alignItems: isSender ? 'flex-end' : 'flex-start',
+                                                }}
+                                            >
+                                                <div
+                                                    style={{
+                                                        ...styles.bubble,
+                                                        ...(isSender ? styles.senderBubble : styles.receiverBubble),
+                                                    }}
+                                                >
+                                                    <p style={{ margin: 0 }}>{message.message_content}</p>
+                                                </div>
+                                                <span style={{
+                                                    ...styles.timestamp,
+                                                    alignSelf: isSender ? 'flex-end' : 'flex-start',
+                                                }}>
+                                                    {new Date(message.created_at).toLocaleTimeString([], {
+                                                        hour: '2-digit',
+                                                        minute: '2-digit',
+                                                    })}
+                                                </span>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            ))}
+                            <Button
+                                style={styles.scrollButton}
+                                onClick={scrollToBottom}
+                                icon={<ArrowDownOutlined />}
+                                hidden={isScrolledToBottom}
+                            />
                             <div ref={dummyRef} />
                         </div>
                         <div style={styles.inputContainer}>

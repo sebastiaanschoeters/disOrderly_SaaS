@@ -14,8 +14,7 @@ const { Title } = Typography;
 const ChatSuggestionPage = () => {
     const location = useLocation();
     const { profileData} = location.state || {};
-    const { name, profilePicture, otherUserId, isSender } = profileData || {};
-    const { chatroomId } = useParams();
+    const { name, profilePicture, otherUserId, isSender, chatroomId } = profileData || {};
     const navigate = useNavigate();
     const [message, setMessage] = useState("");
     const [isModalVisible, setIsModalVisible] = useState(false);
@@ -218,7 +217,7 @@ const ChatSuggestionPage = () => {
         <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
             <div style={styles.container}>
                 <div style={styles.header}>
-                    <Avatar src={profilePicture || 'default-avatar.png'} onClick={handleProfile} style={styles.headerAvatar}>U</Avatar>
+                    <Avatar src={profilePicture || 'default-avatar.png'} onClick={() => navigate(`/profile`, { state: { user_id: otherUserId} })} style={styles.headerAvatar}>U</Avatar>
                     <Title level={2} style={{ margin: 0, color: themeColors.primary10 }}h2>{`${name}`}</Title>
                 </div>
                 <div style={styles.messageContainer}>
@@ -242,12 +241,15 @@ const ChatSuggestionPage = () => {
                     )}
                 </div>
                 <Modal
-                    title="Edit Message"
+                    title="Bewerk bericht"
                     visible={isModalVisible}
                     onOk={handleSave}
                     onCancel={handleCancel}
-                    okText="Save"
-                    cancelText="Cancel"
+                    footer={[
+                        <Button key="send" type="primary" onClick={handleSave} >
+                            Opslaan
+                        </Button>,
+                    ]}
                 >
                     <Input.TextArea
                         value={editedMessage}

@@ -19,7 +19,7 @@ const LoginPage = () => {
         try {
             const { data, error } = await supabase
                 .from('Credentials')
-                .select('user_id')
+                .select('user_id, type')
                 .eq('email', email)
 
             if (error) {
@@ -32,8 +32,8 @@ const LoginPage = () => {
                 return null;
             }
 
-            console.log('Fetched user_id:', data[0].user_id);
-            return data[0].user_id; // Ensure it's a string
+            console.log('Fetched dataaaaaa:', data);
+            return data;
         } catch (err) {
             console.error('Unexpected error:', err);
             return null;
@@ -120,17 +120,18 @@ const LoginPage = () => {
         const { email, password } = values;
 
         // Simulate a successful login response
-        const fakeLoginResponse = {
+        const LoginResponse = {
             token: 'fake-session-token',
             user: { email },
         };
 
         // Save user session to localStorage
-        localStorage.setItem('sessionToken', fakeLoginResponse.token);
-        localStorage.setItem('userEmail', fakeLoginResponse.user.email);
+        localStorage.setItem('sessionToken', LoginResponse.token);
+        localStorage.setItem('userEmail', LoginResponse.user.email);
 
-        // Fetch the user ID asynchronously and store it in localStorage
-        const userId = await getUserIdByEmail(fakeLoginResponse.user.email);
+        const user_data = await getUserIdByEmail(LoginResponse.user.email)
+        const userId = user_data[0].user_id;
+        const userType = user_data[0].type;
         const theme = await getTheme(userId);
         const name = await getName(userId);
         const pfp = await getPfp(userId);
@@ -140,6 +141,13 @@ const LoginPage = () => {
             console.log('Fetched and stored user_id:', userId);
         } else {
             console.error('Failed to fetch user_id');
+        }
+
+        if (userType) {
+            localStorage.setItem('userType', userType);
+            console.log('Fetched and stored userType:', userType);
+        } else {
+            console.error('Failed to fetch userType');
         }
 
         if (theme) {
@@ -164,8 +172,14 @@ const LoginPage = () => {
         }
 
         // Navigate to the home page after resolving all async operations
-        setIsTransitioning(true);
-        setTimeout(() => navigate('/home'), 500);
+        if (userType == 'user') {
+            setIsTransitioning(true);
+            setTimeout(() => navigate('/home'), 500);
+        }
+        else if (userType == 'caretaker') {
+            setIsTransitioning(true);
+            setTimeout(() => navigate('/clientOverview'), 500);
+        }
     };
 
     return (

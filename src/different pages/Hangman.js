@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import { Modal, Button, Input, Typography, Space } from 'antd';
+import { Modal, Button,Spin, Input, Typography, Space } from 'antd';
 import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
@@ -46,18 +46,69 @@ const ButterflyHangman = ({ wrongGuesses }) => {
     );
 };
 
-const player1Id = 1234
-const player2Id= 1519
+const generateConversationStarter = async () => {
+    try {
+        const response = await fetch('/api/generateQuestion', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                prompt: "Generate a fun and creative conversation starter question in Dutch with a one word answer.",
+            }),
+        });
 
-const HangmanGame = () => {
-    const [gameId, setGameId] = useState(0);
-    const [step, setStep] = useState(1); // 1: Question, 2: Answer, 3: Hangman Game
+        const data = await response.json();
+        return data.question || "Wat is jouw lievelingseten?"; // Fallback question
+    } catch (error) {
+        console.error("Error generating conversation starter:", error);
+        return "Wat is jouw lievelingseten?"; // Fallback question
+    }
+};
+
+
+const HangmanGame = ({ isModalVisible, setIsModalVisible, player1Id, player2Id }) => {
+    const [gameId, setGameId] = useState(null);
+    const [step, setStep] = useState(null); // 1: Question, 2: Answer, 3: Hangman Game
     const [question, setQuestion] = useState('');
     const [answer, setAnswer] = useState('');
     const [guessedLetters, setGuessedLetters] = useState([]);
     const [wrongGuesses, setWrongGuesses] = useState(0);
     const [gameEnded, setGameEnded] = useState(false);
     const maxWrong = 5;
+    const [isSender, setIsSender] = useState(false);
+    const userId = parseInt(localStorage.getItem('user_id'), 10);
+
+    const fetchGameState = async (player1Id, player2Id) => {
+        const {data, error} = await supabase
+            .from('Hangman')
+            .select('*')
+            .or(`and(player_1_id.eq.${player1Id},player_2_id.eq.${player2Id}),and(player_1_id.eq.${player2Id},player_2_id.eq.${player1Id})`)
+            .single();
+
+        if (error) {
+            console.error('Error fetching game state:', error);
+            setStep(1);
+            setIsSender(true);
+            return;
+        }
+
+        if (data) {
+            setGameId(data.id);
+            setStep(data.current_step);
+            setQuestion(data.question || '');
+            setAnswer(data.answer || '');
+            setGuessedLetters(data.guessed_letters || []);
+            setWrongGuesses(data.wrong_guesses || 0);
+            setIsSender(userId === data.player_1_id);
+        }
+    }
+
+    useEffect(() => {
+        if (player1Id && player2Id) {
+            fetchGameState(player1Id, player2Id);
+        }
+    }, [player1Id, player2Id]);
 
     const renderWord = () => {
         return answer.split('').map((letter) => {
@@ -65,12 +116,12 @@ const HangmanGame = () => {
         }).join(' ');
     };
 
-    const startNewGame = async (player1Id, player2Id, question) => {
+    const startNewGame = async (question) => {
         const { data, error } = await supabase
             .from('Hangman')
             .insert([
                 {
-                    player_1_id: player1Id,
+                    player_1_id: userId,
                     player_2_id: player2Id,
                     question: question,
                     guessed_letters: [],
@@ -161,14 +212,18 @@ const HangmanGame = () => {
         }
     }, [gameEnded, gameId]);
 
+    const handleCancel = () => {
+        setIsModalVisible(false); // Close modal
+    };
+
     return (
         <div>
-            {step === 1 && (
+            {step === 1 && isSender &&(
                 <Modal
                     title="Stel een vraag (Player 1)"
-                    open={true}
+                    open={step === 1} // Modal visibility controlled by state
+                    onCancel={() => setIsModalVisible(false)}
                     footer={null}
-                    onCancel={() => {}}
                 >
                     <Input.TextArea
                         rows={3}
@@ -176,18 +231,33 @@ const HangmanGame = () => {
                         value={question}
                         onChange={(e) => setQuestion(e.target.value)}
                     />
-                    <Button type="primary" style={{ marginTop: 10 }} onClick={() => startNewGame(player1Id,player2Id,question)}>
-                        Vraag instellen
-                    </Button>
+                    <Space direction="horizontal" style={{ marginTop: 10 }}>
+                        <Button
+                            type="default"
+                            onClick={async () => {
+                                const generatedQuestion = await generateConversationStarter();
+                                setQuestion(generatedQuestion);
+                            }}
+                        >
+                            Genereer een vraag
+                        </Button>
+                        <Button
+                            type="primary"
+                            onClick={() => startNewGame(question)}
+                            disabled={!question} // Disable if the question is empty
+                        >
+                            Vraag instellen
+                        </Button>
+                    </Space>
                 </Modal>
             )}
 
-            {step === 2 && (
+            {step === 2 && !isSender &&(
                 <Modal
                     title={`Vraag: ${question} (Player 2)`}
-                    open={true}
+                    open={step === 2} // Modal visibility controlled by state
+                    onCancel={() => setIsModalVisible(false)}
                     footer={null}
-                    onCancel={() => {}}
                 >
                     <Input
                         placeholder="Typ hier het antwoord... (geen spaties)"
@@ -214,13 +284,26 @@ const HangmanGame = () => {
                 </Modal>
             )}
 
+            {step === 2 && isSender && (
+                <Modal
+                    title={`Wachtende op het antwoord van de ander`}
+                    open={step === 2} // Modal visibility controlled by state
+                    onCancel={handleCancel}
+                    footer={null}
+                >
+                    <div style={{textAlign: 'center', marginTop: 20}}>
+                        <Spin size="large"/> {/* You can adjust the size if needed */}
+                    </div>
+                </Modal>
+            )}
+
 
             {step === 3 && (
                 <Modal
-                    title={`Vraag: ${question}`}
-                    open={true}
+                    title={`Vraag: ${question} `}
+                    open={step === 3} // Modal visibility controlled by state
+                    onCancel={() => setIsModalVisible(false)}
                     footer={null}
-                    onCancel={() => {}}
                 >
                     <Typography>
                         <Title level={4}>Het woord:</Title>
@@ -241,7 +324,7 @@ const HangmanGame = () => {
                             <Button
                                 key={letter}
                                 onClick={() => handleGuess(letter)}
-                                disabled={guessedLetters.includes(letter)}
+                                disabled={guessedLetters.includes(letter) || isSender}
                             >
                                 {letter}
                             </Button>
@@ -268,6 +351,7 @@ const HangmanGame = () => {
                             setQuestion('');
                             setAnswer('');
                         }}
+                        disabled={isSender}
                     >
                         Opnieuw spelen
                     </Button>

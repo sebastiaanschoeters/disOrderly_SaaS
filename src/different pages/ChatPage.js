@@ -52,18 +52,21 @@ const ChatPage = () => {
     };
 
     useEffect(() => {
-        fetchMessages(); // Initial fetch when the component mounts
-
-        // Set interval to fetch messages every 1 second
-        const intervalId = setInterval(() => {
-            fetchMessages();
-        }, 1000);
-
-        // Cleanup interval on component unmount or chatroomId change
+        fetchMessages();
+        const channel = supabase
+            .channel('realtime:Messages')
+            .on(
+                'postgres_changes',
+                { event: 'INSERT', schema: 'public', table: 'Messages' },
+                (payload) => {
+                    console.log("New message payload", payload);
+                    setMessages(prevMessages => [...prevMessages,payload.new]);
+            })
+            .subscribe();
         return () => {
-            clearInterval(intervalId);
+            supabase.removeChannel(channel);
         };
-    }, [chatroomId]); // Re-run the effect when chatroomId changes
+    },[chatroomId]);
 
     useEffect(() => {
         if (isScrolledToBottom) {
@@ -73,16 +76,24 @@ const ChatPage = () => {
 
     const handleScroll = () => {
         if (messageListRef.current) {
-            const isAtBottom =
-                messageListRef.current.scrollHeight - messageListRef.current.scrollTop <=
-                messageListRef.current.clientHeight + 50; // Allow a small offset (50px)
+            const scrollHeight = messageListRef.current.scrollHeight;
+            const scrollTop = messageListRef.current.scrollTop;
+            const clientHeight = messageListRef.current.clientHeight;
 
-            setIsScrolledToBottom(isAtBottom);
+            // Calculate the distance from the bottom
+            const distanceFromBottom = scrollHeight - (scrollTop + clientHeight);
+
+            // Show the button only if the user is more than 150px away from the bottom
+            if (distanceFromBottom > 150) {
+                setIsScrolledToBottom(false);  // Show the button
+            } else {
+                setIsScrolledToBottom(true);  // Hide the button
+            }
         }
     };
 
     const scrollToBottom = () => {
-        if (dummyRef.current) {
+        if (dummyRef.current ) {
             dummyRef.current.scrollIntoView({behavior: 'smooth'});
         }
     };

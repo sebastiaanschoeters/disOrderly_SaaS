@@ -4,7 +4,7 @@ import { antThemeTokens, themes } from '../../Extra components/themes';
 import {
     Button,
     Card,
-    ConfigProvider, Flex,
+    ConfigProvider,
     Form,
     Input,
     List,
@@ -20,7 +20,7 @@ const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbG
 
 
 const AdminPage = () => {
-    const [theme, setTheme] = useState('blauw');
+    const theme = 'blauw'
     const themeColors = themes[theme] || themes.blauw;
 
     const applyThemeToCSS = (themeColors) => {
@@ -401,7 +401,7 @@ const AdminPage = () => {
                 <Modal
                     title="Nieuwe Organisatie"
                     name="newOrganisation"
-                    visible={isModalVisible}
+                    open={isModalVisible}
                     onCancel={handleModalClose}
                     footer={null}
                     style={{padding: '10px'}}
@@ -469,7 +469,7 @@ const AdminPage = () => {
                 </Modal>
 
                 <Modal
-                    visible={isOrganisationVisible}
+                    open={isOrganisationVisible}
                     title={selectedOrganisation.name}
                     onCancel={handleCloseOrganisation}
                     footer={null}
@@ -562,7 +562,7 @@ const AdminPage = () => {
                 </Modal>
 
                 <Modal
-                    visible={isCaretakerVisible}
+                    open={isCaretakerVisible}
                     onCancel={handleCloseCaretaker}
                     footer={null}
                     style={{padding: '10px'}}

@@ -1,5 +1,5 @@
 // ActivationPage.js
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import React, {useEffect, useState} from 'react';
 import * as dayjs from 'dayjs'
 import '../../CSS/AntDesignOverride.css'
@@ -18,10 +18,9 @@ const ActivationPage = () => {
     const [loading, setLoading] = useState(false);
     const [userData, setUserData] = useState({});
     const [form] = Form.useForm();
-    const [theme, setTheme] = useState('blauw');
+    const theme = 'blauw'
     const themeColors = themes[theme] || themes.blauw;
     const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q");
-    const navigate = useNavigate();
 
     const applyThemeToCSS = (themeColors) => {
         const root = document.documentElement;
@@ -68,10 +67,10 @@ const ActivationPage = () => {
         if (7> step && step > 2){
             setStep(step - 1);
         }
-        else if(step == 7) {
+        else if(step === 7) {
             setStep(1);
         }
-        else if(step == 2){
+        else if(step === 2){
             setStep(1);
             setUserData(prevUserData => ({
                 activationCode: prevUserData.activationCode
@@ -115,8 +114,8 @@ const ActivationPage = () => {
                 ...prevData,
                 activationKey: values.activationKey,
             }));
-            if(data.type == 'user'){setStep(2);}
-            if(data.type == 'caretaker'){setStep(7);}
+            if(data.type === 'user'){setStep(2);}
+            if(data.type === 'caretaker'){setStep(7);}
 
         } catch (err) {
             console.error("Unexpected error during activation code validation:", err);
@@ -200,6 +199,8 @@ const ActivationPage = () => {
                     email: values.email
                 })
 
+            if (careError) throw careError;
+
             const { error: credError } = await supabase
                 .from("Credentials")
                 .insert({
@@ -208,6 +209,8 @@ const ActivationPage = () => {
                     password: hashedPassword,
                     type: 'caretaker'
                 })
+
+            if (credError) throw credError;
         } catch (error) {
             console.error("something went wrong");
         }

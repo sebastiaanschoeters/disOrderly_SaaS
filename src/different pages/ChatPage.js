@@ -5,7 +5,7 @@ import {ArrowDownOutlined, PlusOutlined, SendOutlined} from '@ant-design/icons';
 import {antThemeTokens, ButterflyIcon, themes} from '../Extra components/themes';
 import { createClient } from "@supabase/supabase-js";
 import '../CSS/ChatPage.css';
-import HomeButton from "../Extra components/HomeButton";
+import HomeButtonUser from "../Extra components/HomeButtonUser";
 import HangmanGame from "./Hangman";
 
 
@@ -262,7 +262,7 @@ const ChatPage = () => {
 
     return (
         <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
-            <HomeButton color={themeColors.primary7} />
+            <HomeButtonUser color={themeColors.primary7} />
             <ButterflyIcon color={themeColors.primary3} />
             <div style={styles.background}>
                 <Card style={styles.card} bordered>

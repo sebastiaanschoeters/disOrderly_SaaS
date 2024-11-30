@@ -5,7 +5,7 @@ import { Avatar, ConfigProvider, Input, List, Typography, Modal, Button, Slider,
 import { FilterOutlined } from "@ant-design/icons";
 import { createClient } from "@supabase/supabase-js";
 import React, { useState, useEffect } from "react";
-import HomeButton from '../Extra components/HomeButton'
+import HomeButtonUser from '../Extra components/HomeButtonUser'
 import { useNavigate } from 'react-router-dom';
 import ClientDetailsModal from "./Caretaker and Admin/ClientDetailsModal";
 import ProfileDetailsModal from "./Profile Pages/ProfileDetailsModal"; // Import useNavigate for routing
@@ -224,7 +224,7 @@ const Search = () => {
                     zIndex: '0'
                 }}
             >
-                <HomeButton color={themeColors.primary7} />
+                <HomeButtonUser color={themeColors.primary7} />
                 <ButterflyIcon color={themeColors.primary3} />
 
                 <Title level={2} style={{ color: themeColors.primary10, marginBottom: '2vw' }}>

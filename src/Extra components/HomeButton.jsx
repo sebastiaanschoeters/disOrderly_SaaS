@@ -1,19 +1,19 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "antd"; // Using Ant Design for styling (optional)
+import { Button } from "antd"; // Using Ant Design for styling
 import { HomeOutlined } from "@ant-design/icons"; // Ant Design home icon
 
-const HomeButton = () => {
+const HomeButton = ({ navigateTo }) => {
     const navigate = useNavigate();
 
     const goToHome = () => {
-        navigate("/home"); // Adjust the route to match your home page path
+        navigate(navigateTo); // Use the dynamic path passed via props
     };
 
     return (
         <Button
             type="primary"
-            icon={<HomeOutlined style={{ fontSize:'2rem' }}/>}
+            icon={<HomeOutlined style={{ fontSize: "2rem" }} />}
             onClick={goToHome}
             style={{
                 position: "fixed",

@@ -2,10 +2,8 @@ import React, {useEffect, useState} from 'react';
 import {Avatar, Button, ConfigProvider, Divider, Select, Switch, Upload} from 'antd';
 import {
     BgColorsOutlined,
-    CodeOutlined,
     MailOutlined,
     PhoneOutlined,
-    TeamOutlined,
     UploadOutlined
 } from '@ant-design/icons';
 import 'antd/dist/reset.css';

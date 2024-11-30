@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import { Form, Input, Button, Checkbox, Card, ConfigProvider } from 'antd';
+import { Form, Input, Button, Card, ConfigProvider } from 'antd';
 import 'antd/dist/reset.css';
 import '../../CSS/AntDesignOverride.css';
 import { antThemeTokens, ButterflyIcon, themes} from '../../Extra components/themes';
@@ -10,7 +10,7 @@ import {createClient} from "@supabase/supabase-js"; // Path to the image
 
 
 const LoginPage = () => {
-    const [theme, setTheme] = useState('default');
+    const theme = 'blauw'
     const [isTransitioning, setIsTransitioning] = useState(false); // To handle transition state
     const themeColors = themes[theme] || themes.blauw;
     const navigate = useNavigate();
@@ -102,7 +102,7 @@ const LoginPage = () => {
         }
     };
 
-    const getTheme = async (user_id, setTheme) => {
+    const getTheme = async (user_id) => {
         try {
             const { data, error } = await supabase
                 .from('User information')
@@ -184,15 +184,15 @@ const LoginPage = () => {
         }
 
         // Navigate to the home page after resolving all async operations
-        if (userType == 'user') {
+        if (userType === 'user') {
             setIsTransitioning(true);
             setTimeout(() => navigate('/home'), 500);
         }
-        else if (userType == 'caretaker') {
+        else if (userType === 'caretaker') {
             setIsTransitioning(true);
             setTimeout(() => navigate('/clientOverview'), 500);
         }
-        else if (userType == 'admin') {
+        else if (userType === 'admin') {
             setIsTransitioning(true);
             setTimeout(() => navigate('/admin'), 500);
         }

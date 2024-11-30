@@ -164,6 +164,17 @@ const ClientOverview = () => {
     const theme = profileData.theme || "blauw";
     const themeColors = themes[theme] || themes.blauw;
 
+    const applyThemeToCSS = (themeColors) => {
+        const root = document.documentElement;
+        Object.entries(themeColors).forEach(([key, value]) => {
+            root.style.setProperty(`--${key}`, value);
+        });
+    };
+
+    useEffect(() => {
+        applyThemeToCSS(themeColors); // Apply the selected theme
+    }, [themeColors]);
+
     const [localClients, setLocalClients] = useState(clients);
     const [pageSize, setPageSize] = useState(10);
     const [selectedClient, setSelectedClient] = useState(null);

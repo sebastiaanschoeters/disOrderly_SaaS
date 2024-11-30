@@ -93,6 +93,17 @@ const ProfileCard = ({ actCode }) => {
     const theme = profileData.theme || 'blauw';
     const themeColors = themes[theme] || themes.blauw;
 
+    const applyThemeToCSS = (themeColors) => {
+        const root = document.documentElement;
+        Object.entries(themeColors).forEach(([key, value]) => {
+            root.style.setProperty(`--${key}`, value);
+        });
+    };
+
+    useEffect(() => {
+        applyThemeToCSS(themeColors); // Apply the selected theme
+    }, [themeColors]);
+
     // Profile picture
     const profilePicture = profileData.profile_picture
         ? `${profileData.profile_picture}?t=${new Date().getTime()}`

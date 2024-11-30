@@ -37,6 +37,17 @@ const Search = () => {
 
     const { Title } = Typography;
 
+    const applyThemeToCSS = (themeColors) => {
+        const root = document.documentElement;
+        Object.entries(themeColors).forEach(([key, value]) => {
+            root.style.setProperty(`--${key}`, value);
+        });
+    };
+
+    useEffect(() => {
+        applyThemeToCSS(themeColors); // Apply the selected theme
+    }, [themeColors]);
+
     useEffect(() => {
         if (darkModeFlag){
             setThemeColors(themes[`${themeName}_donker`] || themes.blauw_donker)

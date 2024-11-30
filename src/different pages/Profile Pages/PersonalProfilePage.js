@@ -11,6 +11,7 @@ import {antThemeTokens, ButterflyIcon, themes} from '../../Extra components/them
 import { createClient } from '@supabase/supabase-js';
 import HomeButtonUser from "../../Extra components/HomeButtonUser";
 import {calculateAge} from "../../Utils/utils";
+import {saveField} from "../../Api/Utils";
 
 const supabase = createClient(
     'https://flsogkmerliczcysodjt.supabase.co',
@@ -177,34 +178,17 @@ const ProfileCard = () => {
         }
     }, [profileData]);
 
-    console.log(profileData)
-
-    // Define async save functions
-    const saveField = async (field, value) => {
-        try {
-            const { data, error } = await supabase
-                .from('User information')
-                .update({ [field]: value })
-                .eq('user_id', profileData.id);
-            if (error) throw error;
-
-            console.log(`${field} saved successfully with value ${value}`);
-        } catch (error) {
-            console.error(`Error saving ${field}:`, error);
-        }
-    };
-
     const debouncedSaveTheme = debounce(async (newTheme, darkModeFlag) => {
         try {
             const themeData = [newTheme, darkModeFlag]; // Ensure both theme and dark mode flag are saved together
-            await saveField('theme', JSON.stringify(themeData));
+            await saveField(profileData.id, 'theme', JSON.stringify(themeData));
             localStorage.setItem('theme',JSON.stringify(themeData))// Save it as a stringified JSON array
         } catch (error) {
             console.error('Error saving theme:', error);
         }
     }, 500);
 
-    const debouncedSaveSexuality = debounce((value) => saveField('sexuality', value), 1000);
+    const debouncedSaveSexuality = debounce((value) => saveField(profileData.id,'sexuality', value), 1000);
 
     const handleAccessLevelChange = async (caretakerId, clientId, newAccessLevel) => {
         try {

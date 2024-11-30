@@ -9,17 +9,19 @@ import {Form, Input, Button, Card, message, ConfigProvider, DatePicker, Radio, S
 import { antThemeTokens, themes } from '../../Extra components/themes';
 import { createClient } from "@supabase/supabase-js";
 import CryptoJS from 'crypto-js';
+import useLocations from "../../UseHooks/useLocations";
 
 const ActivationPage = () => {
     const { activationCodeLink } = useParams();
-    const [locations, setLocations] = useState([]); // For location dropdown
     const [searchValue, setSearchValue] = useState(""); // For search functionality
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
     const [userData, setUserData] = useState({});
     const [form] = Form.useForm();
+
     const theme = 'blauw'
     const themeColors = themes[theme] || themes.blauw;
+
     const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q");
 
     const applyThemeToCSS = (themeColors) => {
@@ -40,23 +42,7 @@ const ActivationPage = () => {
         }
     }, [activationCodeLink, form]);
 
-    useEffect(() => {
-        const fetchLocations = async (searchTerm = "") => {
-            const { data, error } = await supabase
-                .from("Location")
-                .select("id, Gemeente")
-                .ilike("Gemeente", `%${searchTerm}%`) // Match search term
-                .limit(10); // Limit results for performance
-
-            if (error) {
-                console.error("Error fetching locations:", error.message);
-            } else {
-                setLocations(data || []);
-            }
-        };
-
-        fetchLocations(searchValue);
-    }, [searchValue]);
+    const {locations } = useLocations(searchValue);
 
     const handleSearch = (value) => {
         setSearchValue(value); // Trigger new fetch based on search

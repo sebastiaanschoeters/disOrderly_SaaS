@@ -24,6 +24,8 @@ import '../../CSS/EditableProfilePage.css';
 import HomeButtonUser from "../../Extra components/HomeButtonUser";
 import useFetchProfileData from "../../UseHooks/useFetchProfileData";
 import {calculateAge, calculateSlidesToShow} from "../../Utils/utils";
+import useLocations from "../../UseHooks/useLocations";
+import {saveField} from "../../Api/Utils";
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
 
@@ -91,8 +93,8 @@ const ProfileCard = () => {
     const [newInterest, setNewInterest] = useState('');
     const [interestOptions, setInterestOptions] = useState([])
     const [lookingForArray, setLookingForArray] = useState([])
-    const [locations, setLocations] = useState([])
     const [searchValue, setSearchValue] = useState(""); // For search functionality
+
     const { pictures} = useFetchPicturesData(localStorage.getItem('user_id'));
     const { profileData, isLoading, error, interest} = useFetchProfileData(localStorage.getItem('user_id'), { fetchAllInterests: true});
 
@@ -174,49 +176,18 @@ const ProfileCard = () => {
         return () => window.removeEventListener('resize', handleResize);
     }, [images.length]);
 
-    useEffect(() => {
-        const fetchLocations = async (searchTerm = "") => {
-            const { data, error } = await supabase
-                .from("Location")
-                .select("id, Gemeente")
-                .ilike("Gemeente", `%${searchTerm}%`) // Match search term
-                .limit(10); // Limit results for performance
-
-            if (error) {
-                console.error("Error fetching locations:", error.message);
-            } else {
-                setLocations(data || []);
-            }
-        };
-
-        fetchLocations(searchValue);
-    }, [searchValue]);
+    const { locations } = useLocations(searchValue);
 
     const handleSearch = (value) => {
         setSearchValue(value); // Trigger new fetch based on search
     };
 
-    // Define async save functions
-    const saveField = async (field, value) => {
-        try {
-            const { data, error } = await supabase
-                .from('User information')
-                .update({ [field]: value })
-                .eq('user_id', profileData.id);
-            if (error) throw error;
-
-            console.log(`${field} saved successfully with value ${value}`);
-        } catch (error) {
-            console.error(`Error saving ${field}:`, error);
-        }
-    };
-
     // Debounced save functions
-    const debouncedSaveBiography = debounce((value) => saveField('bio', value), 1000);
-    const debouncedSaveLocation = debounce((value) => saveField('location', value), 1000);
-    const debouncedSaveGender = debounce((value) => saveField('gender', value), 1000);
-    const debouncedSaveLivingSituation = debounce((value) => saveField('living_situation', value), 1000)
-    const debouncedSaveMobility = debounce((value) => saveField('mobility', value), 1000)
+    const debouncedSaveBiography = debounce((value) => saveField(profileData.id, 'bio', value), 1000);
+    const debouncedSaveLocation = debounce((value) => saveField(profileData.id, 'location', value), 1000);
+    const debouncedSaveGender = debounce((value) => saveField(profileData.id, 'gender', value), 1000);
+    const debouncedSaveLivingSituation = debounce((value) => saveField(profileData.id, 'living_situation', value), 1000)
+    const debouncedSaveMobility = debounce((value) => saveField(profileData.id, 'mobility', value), 1000)
     const debouncedSaveLookingFor = debounce(async (updatedLookingFor) => {
         try {
             const { data, error } = await supabase

@@ -100,3 +100,17 @@ export const getUserEmailById = async (userId) => {
         return null;
     }
 };
+
+export const saveField = async (userId, field, value) => {
+    try {
+        const { data, error } = await supabase
+            .from('User information')
+            .update({ [field]: value })
+            .eq('user_id', userId);  // Use dynamic userId passed as argument
+        if (error) throw error;
+
+        console.log(`${field} saved successfully with value ${value}`);
+    } catch (error) {
+        console.error(`Error saving ${field}:`, error);
+    }
+};

@@ -4,7 +4,7 @@ import ProfileCard from '../Profile Pages/ProfilePage';
 import ContactsOverview from "./ClientContacts";
 import {createClient} from "@supabase/supabase-js";
 import {useNavigate} from "react-router-dom";
-import {getName, getPfp, getTheme, getUserEmailById} from "../../Api/apiUtils";
+import {getName, getPfp, getTheme, getUserEmailById} from "../../Api/Utils";
 
 const ClientDetailsModal = ({ visible, onClose, clientData }) => {
     const [isViewingContactList, setIsViewingContactList] = useState(false);

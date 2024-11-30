@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 //import LocalStorageViewer from '../../Extra components/LocalStorageViewer';
 import forestImage from '../../Media/forest.jpg';
 import {createClient} from "@supabase/supabase-js";
-import {getName, getTheme, getPfp} from "../../Api/apiUtils"; // Path to the image
+import {getName, getTheme, getPfp} from "../../Api/Utils"; // Path to the image
 
 
 const LoginPage = () => {

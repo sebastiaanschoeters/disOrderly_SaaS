@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Avatar, Divider, Select, ConfigProvider, Switch, Spin } from 'antd';
+import {Avatar, Divider, Select, ConfigProvider, Switch, Spin, message} from 'antd';
 import {
     UserSwitchOutlined,
     BgColorsOutlined,
@@ -16,9 +16,26 @@ const supabase = createClient(
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q'
 );
 
-// Initial list of caretakers
-const initialCaretakers =
-    { id: 1, name: 'John Doe', accessLevel: 'Volledige toegang', picture: 'https://i.pravatar.cc/150?img=1' };
+const fetchPendingRequests = async (caretakerId) => {
+    try {
+        const { data, error } = await supabase
+            .from('Notifications')
+            .select('recipient_id, details')
+            .eq('requester_id', caretakerId)
+            .eq('type', 'ACCESS_LEVEL_CHANGE');
+
+        if (error) throw error;
+
+        // Map the data to a format usable by the state
+        return data.reduce((acc, request) => {
+            acc[request.recipient_id] = request.details.requested_access_level;
+            return acc;
+        }, {});
+    } catch (error) {
+        console.error('Error fetching pending requests:', error.message);
+        return {};
+    }
+};
 
 const debounce = (func, delay) => {
     let timer;
@@ -75,12 +92,12 @@ const useFetchProfileData = (actCode) => {
 
                     const {data: caretakerInfo, error: cartakerInfoError}= await supabase
                         .from('Caretaker')
-                        .select('name, profile_picture')
+                        .select('name, profile_picture, id')
                         .eq('id', user.caretaker)
 
                     if (caretakerInfo.length > 0){
                         const caretaker = caretakerInfo[0];
-                        user.caretaker = {name: caretaker.name, profilePicture: caretaker.profile_picture, accessLevel: user.access_level}
+                        user.caretaker = {id: caretaker.id, name: caretaker.name, profilePicture: caretaker.profile_picture, accessLevel: user.access_level}
                     }
 
                     // Set the user profile data with the theme
@@ -108,6 +125,7 @@ const ProfileCard = () => {
     const [isDarkMode, setIsDarkMode] = useState(false);
     const themeKey = isDarkMode ? `${theme}_donker` : theme;
     const themeColors = themes[themeKey] || themes.blauw;
+    const [pendingRequests, setPendingRequests] = useState({});
     const [profilePicture, setProfilePicture] = useState('https://example.com/photo.jpg');
     const [caretaker, setCaretaker] = useState({});
     const [sexuality, setSexuality] = useState('');
@@ -123,6 +141,16 @@ const ProfileCard = () => {
         applyThemeToCSS(themeColors); // Apply the selected theme
     }, [themeColors]);
 
+    useEffect(() => {
+        const initializeNotifications = async () => {
+            if (profileData?.id) {
+                const pending = await fetchPendingRequests(profileData.id);
+                setPendingRequests(pending);
+            }
+        };
+
+        initializeNotifications();
+    }, [profileData]);
 
     // Set theme and dark mode when profileData changes
     useEffect(() => {
@@ -177,12 +205,30 @@ const ProfileCard = () => {
 
     const debouncedSaveSexuality = debounce((value) => saveField('sexuality', value), 1000);
 
-    const handleAccessLevelChange = (value, id) => {
-        setCaretaker((prevCaretakers) =>
-            prevCaretakers.map((caretaker) =>
-                caretaker.id === id ? { ...caretaker, accessLevel: value } : caretaker
-            )
-        );
+    const handleAccessLevelChange = async (caretakerId, clientId, newAccessLevel) => {
+        try {
+            setPendingRequests((prev) => ({ ...prev, [clientId]: newAccessLevel })); // Mark as pending
+
+            const { error } = await supabase
+                .from('Notifications')
+                .insert([{
+                    requester_id: caretakerId,
+                    recipient_id: clientId,
+                    type: 'ACCESS_LEVEL_CHANGE',
+                    details: { requested_access_level: newAccessLevel },
+                }]);
+
+            if (error) throw error;
+
+            message.success("Toegangsniveau wijziging verzoek verzonden!");
+        } catch (error) {
+            message.error("Fout bij het verzenden van toegangsniveau wijziging verzoek: " + error.message);
+            setPendingRequests((prev) => {
+                const updated = { ...prev };
+                delete updated[clientId]; // Remove pending status on error
+                return updated;
+            });
+        }
     };
 
     const handleThemeChange = (value) => {
@@ -228,32 +274,32 @@ const ProfileCard = () => {
                     zIndex: '0'
                 }}
             >
-                <HomeButton color={themeColors.primary7} />
-                <ButterflyIcon color={themeColors.primary3} />
+                <HomeButton color={themeColors.primary7}/>
+                <ButterflyIcon color={themeColors.primary3}/>
 
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
                     <Avatar
                         src={profilePicture || "https://example.com/photo.jpg"} // Fallback to default avatar
                         alt={profileData.name || "No Name"}
-                        style ={{
+                        style={{
                             minWidth: '200px',
                             minHeight: '200px',
                             borderRadius: '50%'
                         }}
                     />
-                    <h2 style={{ margin: '0', textAlign: 'center' }}>
+                    <h2 style={{margin: '0', textAlign: 'center'}}>
                         {profileData.name || 'Naam'}, {calculateAge(profileData.birthdate) || 'Leeftijd'}
                     </h2>
-                    <Divider />
+                    <Divider/>
                 </div>
 
-                <p style={{ display: 'flex', alignItems: 'center', gap: '2%' }}>
-                    <strong style={{ width: '20%', minWidth: '150px' }}>
-                        <BgColorsOutlined /> Kies een kleur:
+                <p style={{display: 'flex', alignItems: 'center', gap: '2%'}}>
+                    <strong style={{width: '20%', minWidth: '150px'}}>
+                        <BgColorsOutlined/> Kies een kleur:
                     </strong>
-                    <div style={{ display: 'flex', flexGrow: 1, alignItems: 'center' }}>
+                    <div style={{display: 'flex', flexGrow: 1, alignItems: 'center'}}>
                         <Select
-                            style={{ flexGrow: 1, marginRight: '10px' }}
+                            style={{flexGrow: 1, marginRight: '10px'}}
                             placeholder="Selecteer een kleur"
                             options={Object.keys(themes)
                                 .filter((key) => !key.endsWith('_donker'))
@@ -269,58 +315,65 @@ const ProfileCard = () => {
                             onChange={handleThemeToggle} // When dark mode is toggled, update it
                             checkedChildren={<span>Donker</span>}
                             unCheckedChildren={<span>Licht</span>}
-                            style={{ marginLeft: 'auto' }}
+                            style={{marginLeft: 'auto'}}
                         />
                     </div>
                 </p>
 
-                <Divider />
+                <Divider/>
 
                 <p>
                     <strong>
-                        <UserSwitchOutlined /> Begeleiding met toegang:
+                        <UserSwitchOutlined/> Begeleiding met toegang:
                     </strong>
                 </p>
 
-                <p style={{ display: 'flex', alignItems: 'center', gap: '2%', marginBottom: '20px' }}>
-                    <div style={{ width: '20%', minWidth: '150px' }}>
-                        <Avatar src={caretaker.profilePicture} style={{ width: '40px', height: '40px', objectFit: 'cover', marginRight: '15px' }} />
+                <p style={{display: 'flex', alignItems: 'center', gap: '2%', marginBottom: '20px'}}>
+                    <div style={{width: '20%', minWidth: '150px'}}>
+                        <Avatar src={caretaker.profilePicture}
+                                style={{width: '40px', height: '40px', objectFit: 'cover', marginRight: '15px'}}/>
                         <span>{caretaker.name}</span>
                     </div>
 
                     <Select
                         style={{flex: 1, minWidth: '200px'}}
+                        onChange={(value) => handleAccessLevelChange(profileData.id, profileData.caretaker.id, value)}
                         value={caretaker.accessLevel}
-                        onChange={(value) => handleAccessLevelChange(value, caretaker.id)}
-                    >
-                        <Select.Option value="Volledige toegang">Volledige toegang</Select.Option>
-                        <Select.Option value="Gesprekken">Gesprekken</Select.Option>
-                        <Select.Option value="Contacten">Contacten</Select.Option>
-                        <Select.Option value="Publiek profiel">Publiek profiel</Select.Option>
-                    </Select>
+                        options={[
+                            {value: 'Volledige toegang', label: 'Volledige toegang'},
+                            {value: 'Gesprekken', label: 'Gesprekken'},
+                            {value: 'Contacten', label: 'Contacten'},
+                            {value: 'Publiek profiel', label: 'Publiek profiel'},
+                        ]}
+                    />
+                    {pendingRequests[caretaker.id] && (
+                        <p style={{color: themeColors.primary9, marginTop: '5px'}}>
+                            Wijziging in behandeling: {pendingRequests[caretaker.id]}
+                        </p>
+                    )}
                 </p>
 
-                <Divider />
+                <Divider/>
 
-                <p style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '2%' }}>
-                    <strong style={{ width: '20%', minWidth: '150px' }}>
-                        <HeartOutlined /> Ik ben geïntereseerd in:
+                <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
+                    <strong style={{width: '20%', minWidth: '150px'}}>
+                        <HeartOutlined/> Ik ben geïntereseerd in:
                     </strong>
                     <Select
                         style={{flex: 1, minWidth: '200px'}}
                         placeholder="Selecteer seksualiteit"
                         value={sexuality}
                         options={[
-                            { value: 'Mannen', label: 'Mannen' },
-                            { value: 'Vrouwen', label: 'Vrouwen' },
-                            { value: 'Beide', label: 'Beide' },
+                            {value: 'Mannen', label: 'Mannen'},
+                            {value: 'Vrouwen', label: 'Vrouwen'},
+                            {value: 'Beide', label: 'Beide'},
                         ]}
                         onChange={handleSexualityChange}
 
                     />
                 </p>
 
-                <Divider />
+                <Divider/>
             </div>
         </ConfigProvider>
     );

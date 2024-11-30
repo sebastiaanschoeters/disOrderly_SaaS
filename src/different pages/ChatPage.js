@@ -25,6 +25,17 @@ const ChatPage = () => {
     const [themeColors, setThemeColors] = useState(themes[themeName] || themes.blauw);
     const [isModalVisible, setIsModalVisible] = useState(false);
 
+    const applyThemeToCSS = (themeColors) => {
+        const root = document.documentElement;
+        Object.entries(themeColors).forEach(([key, value]) => {
+            root.style.setProperty(`--${key}`, value);
+        });
+    };
+
+    useEffect(() => {
+        applyThemeToCSS(themeColors); // Apply the selected theme
+    }, [themeColors]);
+
     useEffect(() => {
         if (darkModeFlag) {
             setThemeColors(themes[`${themeName}_donker`] || themes.blauw_donker)

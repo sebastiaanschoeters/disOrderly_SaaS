@@ -6,11 +6,23 @@ import { MessageOutlined, SearchOutlined, SettingOutlined, PoweroffOutlined } fr
 import React, { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
 import { createClient } from "@supabase/supabase-js";
+import NotificationModal from "./NotifiactionModal";
 
 const HomePage = () => {
     // Load theme from localStorage
     const [themeName, darkModeFlag] = JSON.parse(localStorage.getItem('theme')) || ['blauw', false];
     const [themeColors, setThemeColors] = useState(themes[themeName] || themes.blauw);
+
+    const applyThemeToCSS = (themeColors) => {
+        const root = document.documentElement;
+        Object.entries(themeColors).forEach(([key, value]) => {
+            root.style.setProperty(`--${key}`, value);
+        });
+    };
+
+    useEffect(() => {
+        applyThemeToCSS(themeColors); // Apply the selected theme
+    }, [themeColors]);
 
     const navigate = useNavigate();
     const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co", "YOUR_SUPABASE_KEY");
@@ -52,7 +64,10 @@ const HomePage = () => {
                     zIndex: '0',
                 }}
             >
+                {/* Always show the NotificationModal globally for logged-in users */}
+                <NotificationModal />
                 <ButterflyIcon color={themeColors.primary3} />
+
                 <div style={{
                     display: 'flex',
                     rowGap: '20px', // Vertical gap between stacked buttons

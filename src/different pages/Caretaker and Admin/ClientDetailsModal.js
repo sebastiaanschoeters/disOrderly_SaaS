@@ -5,6 +5,7 @@ import ContactsOverview from "./ClientContacts";
 import {createClient} from "@supabase/supabase-js";
 import {useNavigate} from "react-router-dom";
 import {getName, getPfp, getTheme, getUserEmailById} from "../../Api/Utils";
+import {storeUserSession} from "../../Utils/sessionHelpers";
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q");
 
@@ -28,49 +29,13 @@ const ClientDetailsModal = ({ visible, onClose, clientData }) => {
             user: { email },
         };
 
-
         // Save user session to localStorage
         localStorage.setItem('sessionToken', LoginResponse.token);
         localStorage.setItem('userEmail', LoginResponse.user.email);
 
-        const theme = await getTheme(clientId);
-        const name = await getName(clientId);
-        const pfp = await getPfp(clientId);
-        localStorage.setItem('userType', 'user');
-
-        if (clientId) {
-            localStorage.setItem('user_id', clientId);
-            console.log('Fetched and stored user_id:', clientId);
-        } else {
-            console.error('Failed to fetch user_id');
-        }
-
-        if (theme) {
-            localStorage.setItem('theme', theme);
-            console.log('Fetched and stored theme:', theme);
-        } else {
-            console.error('Failed to fetch theme',);
-        }
-
-        if (name) {
-            localStorage.setItem('name', name);
-            console.log('Fetched and stored name:', name);
-        } else {
-            console.error('Failed to fetch name',);
-        }
-
-        if (pfp) {
-            localStorage.setItem('profile_picture', pfp);
-            console.log('Fetched and stored pfp:', pfp);
-        } else {
-            console.error('Failed to fetch pfp',);
-        }
-
-        setIsTransitioning(true);
-        setTimeout(() => navigate('/home'), 500);
-
-    }
-
+        // Call the storeUserSession helper function
+        storeUserSession(clientId, 'user', setIsTransitioning, navigate);
+    };
 
     const renderContentByAccessLevel = (accessLevel) => {
         switch (accessLevel) {

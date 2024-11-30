@@ -8,7 +8,8 @@ import { useNavigate } from 'react-router-dom';
 import forestImage from '../../Media/forest.jpg';
 import {createClient} from "@supabase/supabase-js";
 import {getName, getTheme, getPfp} from "../../Api/Utils";
-import useThemeOnCSS from "../../UseHooks/useThemeOnCSS"; // Path to the image
+import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
+import {storeUserSession} from "../../Utils/sessionHelpers"; // Path to the image
 
 
 const LoginPage = () => {
@@ -58,60 +59,15 @@ const LoginPage = () => {
         localStorage.setItem('sessionToken', LoginResponse.token);
         localStorage.setItem('userEmail', LoginResponse.user.email);
 
-        const user_data = await getUserIdByEmail(LoginResponse.user.email)
+        const user_data = await getUserIdByEmail(LoginResponse.user.email);
         const userId = user_data[0].user_id;
         const userType = user_data[0].type;
-        const theme = await getTheme(userId);
-        const name = await getName(userId);
-        const pfp = await getPfp(userId);
 
-        if (userId) {
-            localStorage.setItem('user_id', userId);
-            console.log('Fetched and stored user_id:', userId);
+        // Call the helper function with `setIsTransitioning` passed in
+        if (userId && userType) {
+            storeUserSession(userId, userType, setIsTransitioning, navigate);
         } else {
-            console.error('Failed to fetch user_id');
-        }
-
-        if (userType) {
-            localStorage.setItem('userType', userType);
-            console.log('Fetched and stored userType:', userType);
-        } else {
-            console.error('Failed to fetch userType');
-        }
-
-        if (theme) {
-            localStorage.setItem('theme', theme);
-            console.log('Fetched and stored theme:', theme);
-        } else {
-            console.error('Failed to fetch theme',);
-        }
-
-        if (name) {
-            localStorage.setItem('name', name);
-            console.log('Fetched and stored name:', name);
-        } else {
-            console.error('Failed to fetch name',);
-        }
-
-        if (pfp) {
-            localStorage.setItem('profile_picture', pfp);
-            console.log('Fetched and stored pfp:', pfp);
-        } else {
-            console.error('Failed to fetch pfp',);
-        }
-
-        // Navigate to the home page after resolving all async operations
-        if (userType === 'user') {
-            setIsTransitioning(true);
-            setTimeout(() => navigate('/home'), 500);
-        }
-        else if (userType === 'caretaker') {
-            setIsTransitioning(true);
-            setTimeout(() => navigate('/clientOverview'), 500);
-        }
-        else if (userType === 'admin') {
-            setIsTransitioning(true);
-            setTimeout(() => navigate('/admin'), 500);
+            console.error('Failed to fetch user details');
         }
     };
 

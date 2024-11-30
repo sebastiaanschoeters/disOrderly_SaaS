@@ -7,7 +7,7 @@ const useFetchProfileData = (actCode, options = { fetchAllInterests: false }) =>
     const [profileData, setProfileData] = useState({});
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [interests, setInterests] = useState([]);
+    const [interest, setInterests] = useState([]);
 
     useEffect(() => {
         // Fetch global list of interests if requested
@@ -25,7 +25,6 @@ const useFetchProfileData = (actCode, options = { fetchAllInterests: false }) =>
 
         fetchAllInterests();
     }, [options.fetchAllInterests]);
-
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -129,7 +128,7 @@ const useFetchProfileData = (actCode, options = { fetchAllInterests: false }) =>
         fetchData();
     }, [actCode]);
 
-    return { profileData, isLoading, error, interests };
+    return { profileData, isLoading, error, interest };
 };
 
 export default useFetchProfileData;

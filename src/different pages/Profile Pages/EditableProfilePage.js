@@ -158,7 +158,6 @@ const ProfileCard = () => {
             }
         }
         setImages(list_of_images);
-        console.log(list_of_images)
     }, [pictures]);
 
     // Simplified slides calculation

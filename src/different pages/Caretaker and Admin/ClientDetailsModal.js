@@ -6,10 +6,11 @@ import {createClient} from "@supabase/supabase-js";
 import {useNavigate} from "react-router-dom";
 import {getName, getPfp, getTheme, getUserEmailById} from "../../Api/Utils";
 
+const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q");
+
 const ClientDetailsModal = ({ visible, onClose, clientData }) => {
     const [isViewingContactList, setIsViewingContactList] = useState(false);
     const [isTransitioning, setIsTransitioning] = useState(false);
-    const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q");
     const navigate = useNavigate();
 
     if (!clientData) return null; // Guard for no data

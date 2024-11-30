@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { createClient } from "@supabase/supabase-js";
 import NotificationModal from "./NotifiactionModal";
 import useTheme from "../UseHooks/useTheme";
+import useThemeOnCSS from "../UseHooks/useThemeOnCSS";
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co", "YOUR_SUPABASE_KEY");
 
@@ -15,16 +16,7 @@ const HomePage = () => {
     const [themeName, darkModeFlag] = JSON.parse(localStorage.getItem('theme')) || ['blauw', false];
     const { themeColors, setThemeName, setDarkModeFlag } = useTheme(themeName, darkModeFlag);
 
-    const applyThemeToCSS = (themeColors) => {
-        const root = document.documentElement;
-        Object.entries(themeColors).forEach(([key, value]) => {
-            root.style.setProperty(`--${key}`, value);
-        });
-    };
-
-    useEffect(() => {
-        applyThemeToCSS(themeColors); // Apply the selected theme
-    }, [themeColors]);
+    useThemeOnCSS(themeColors);
 
     const navigate = useNavigate();
 

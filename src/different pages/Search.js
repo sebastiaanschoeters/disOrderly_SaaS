@@ -9,7 +9,8 @@ import HomeButtonUser from '../Extra components/HomeButtonUser'
 import { useNavigate } from 'react-router-dom';
 import ClientDetailsModal from "./Caretaker and Admin/ClientDetailsModal";
 import ProfileDetailsModal from "./Profile Pages/ProfileDetailsModal";
-import useTheme from "../UseHooks/useTheme"; // Import useNavigate for routing
+import useTheme from "../UseHooks/useTheme";
+import useThemeOnCSS from "../UseHooks/useThemeOnCSS"; // Import useNavigate for routing
 
 
 // Initialize Supabase client
@@ -39,16 +40,7 @@ const Search = () => {
     const [themeName, darkModeFlag] = JSON.parse(localStorage.getItem('theme')) || ['blauw', false];
     const { themeColors, setThemeName, setDarkModeFlag } = useTheme(themeName, darkModeFlag);
 
-    const applyThemeToCSS = (themeColors) => {
-        const root = document.documentElement;
-        Object.entries(themeColors).forEach(([key, value]) => {
-            root.style.setProperty(`--${key}`, value);
-        });
-    };
-
-    useEffect(() => {
-        applyThemeToCSS(themeColors); // Apply the selected theme
-    }, [themeColors]);
+    useThemeOnCSS(themeColors);
 
     // Helper function to calculate age from birthdate
     const calculateAge = (birthdate) => {

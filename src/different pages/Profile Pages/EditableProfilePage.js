@@ -26,6 +26,7 @@ import useFetchProfileData from "../../UseHooks/useFetchProfileData";
 import {calculateAge, calculateSlidesToShow} from "../../Utils/utils";
 import useLocations from "../../UseHooks/useLocations";
 import {debounce, saveField} from "../../Api/Utils";
+import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
 
@@ -89,16 +90,7 @@ const ProfileCard = () => {
     const { pictures} = useFetchPicturesData(localStorage.getItem('user_id'));
     const { profileData, isLoading, error, interest} = useFetchProfileData(localStorage.getItem('user_id'), { fetchAllInterests: true});
 
-    const applyThemeToCSS = (themeColors) => {
-        const root = document.documentElement;
-        Object.entries(themeColors).forEach(([key, value]) => {
-            root.style.setProperty(`--${key}`, value);
-        });
-    };
-
-    useEffect(() => {
-        applyThemeToCSS(themeColors); // Apply the selected theme
-    }, [themeColors]);
+    useThemeOnCSS(themeColors);
 
     useEffect(() => {
         if (profileData.theme) {

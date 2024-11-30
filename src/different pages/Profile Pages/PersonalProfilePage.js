@@ -13,6 +13,7 @@ import HomeButtonUser from "../../Extra components/HomeButtonUser";
 import {calculateAge} from "../../Utils/utils";
 import {saveField} from "../../Api/Utils";
 import ThemeSelector from "../../Extra components/ThemeSelector";
+import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
 
 const supabase = createClient(
     'https://flsogkmerliczcysodjt.supabase.co',
@@ -133,16 +134,7 @@ const ProfileCard = () => {
     const [caretaker, setCaretaker] = useState({});
     const [sexuality, setSexuality] = useState('');
 
-    const applyThemeToCSS = (themeColors) => {
-        const root = document.documentElement;
-        Object.entries(themeColors).forEach(([key, value]) => {
-            root.style.setProperty(`--${key}`, value);
-        });
-    };
-
-    useEffect(() => {
-        applyThemeToCSS(themeColors); // Apply the selected theme
-    }, [themeColors]);
+    useThemeOnCSS(themeColors);
 
     useEffect(() => {
         const initializeNotifications = async () => {

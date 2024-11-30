@@ -23,7 +23,7 @@ import '../../CSS/AntDesignOverride.css';
 import '../../CSS/EditableProfilePage.css';
 import HomeButtonUser from "../../Extra components/HomeButtonUser";
 import useFetchProfileData from "../../UseHooks/useFetchProfileData";
-import {calculateAge, calculateSlidesToShow} from "../../Utils/utils";
+import {calculateAge, calculateSlidesToShow} from "../../Utils/calculations";
 import useLocations from "../../UseHooks/useLocations";
 import {debounce, saveField} from "../../Api/Utils";
 import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";

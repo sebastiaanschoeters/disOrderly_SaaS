@@ -15,7 +15,7 @@ import '../../CSS/AntDesignOverride.css';
 import { ButterflyIcon, antThemeTokens, themes } from '../../Extra components/themes';
 import {useLocation, useNavigate} from 'react-router-dom';
 import useFetchProfileData from "../../UseHooks/useFetchProfileData";
-import {calculateAge, calculateSlidesToShow} from "../../Utils/utils";
+import {calculateAge, calculateSlidesToShow} from "../../Utils/calculations";
 import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")

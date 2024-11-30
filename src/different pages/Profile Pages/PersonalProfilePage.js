@@ -10,7 +10,7 @@ import '../../CSS/AntDesignOverride.css';
 import {antThemeTokens, ButterflyIcon, themes} from '../../Extra components/themes';
 import { createClient } from '@supabase/supabase-js';
 import HomeButtonUser from "../../Extra components/HomeButtonUser";
-import {calculateAge} from "../../Utils/utils";
+import {calculateAge} from "../../Utils/calculations";
 import {debounce, saveField} from "../../Api/Utils";
 import ThemeSelector from "../../Extra components/ThemeSelector";
 import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";

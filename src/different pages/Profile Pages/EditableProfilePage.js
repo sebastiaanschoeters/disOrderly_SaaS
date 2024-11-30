@@ -63,18 +63,27 @@ const useFetchPicturesData = (actCode) => {
 };
 
 const ProfileCard = () => {
-    const [theme, setTheme] = useState('blauw');
+    const user_id = localStorage.getItem('user_id')
+    let [savedTheme, savedDarkMode] = JSON.parse(localStorage.getItem('theme'));
+    let theme
+    if (savedDarkMode) {
+        theme = savedDarkMode + "_donker";
+    } else {
+        theme = savedTheme;
+    }
     const themeColors = themes[theme] || themes.blauw;
-    const [profilePicture, setProfilePicture] = useState('https://example.com/photo.jpg');
+    const name = localStorage.getItem('name')
+
+    const savedProfilePicture = localStorage.getItem('profile_picture')
+    const [profilePicture, setProfilePicture] = useState(savedProfilePicture);
     const [uploading, setUploading] = useState(false);
+
     const [images, setImages] = useState([
         'https://i.pravatar.cc/150?img=1',
-        'https://i.pravatar.cc/150?img=2',
-        'https://i.pravatar.cc/150?img=3',
-        'https://i.pravatar.cc/150?img=4'
     ]);
     const [uploadingPicture, setUploadingPicture] = useState(false);
     const [removingPicture, setRemovingPicture] = useState(false);
+
     const [location, setLocation] = useState(null);
     const [gender, setGender] = useState('')
     const [biography, setBiography] = useState('');
@@ -87,15 +96,12 @@ const ProfileCard = () => {
     const [lookingForArray, setLookingForArray] = useState([])
     const [searchValue, setSearchValue] = useState(""); // For search functionality
 
-    const { pictures} = useFetchPicturesData(localStorage.getItem('user_id'));
-    const { profileData, isLoading, error, interest} = useFetchProfileData(localStorage.getItem('user_id'), { fetchAllInterests: true});
+    const { pictures} = useFetchPicturesData(user_id);
+    const { profileData, isLoading, error, interest} = useFetchProfileData(user_id, { fetchAllInterests: true});
 
     useThemeOnCSS(themeColors);
 
     useEffect(() => {
-        if (profileData.theme) {
-            setTheme(profileData.theme);
-        }
         if (profileData.profile_picture) {
             const imageUrlWithCacheBuster = `${profileData.profile_picture}?t=${new Date().getTime()}`;
             setProfilePicture(imageUrlWithCacheBuster);
@@ -166,17 +172,17 @@ const ProfileCard = () => {
     };
 
     // Debounced save functions
-    const debouncedSaveBiography = debounce((value) => saveField(profileData.id, 'bio', value), 1000);
-    const debouncedSaveLocation = debounce((value) => saveField(profileData.id, 'location', value), 1000);
-    const debouncedSaveGender = debounce((value) => saveField(profileData.id, 'gender', value), 1000);
-    const debouncedSaveLivingSituation = debounce((value) => saveField(profileData.id, 'living_situation', value), 1000)
-    const debouncedSaveMobility = debounce((value) => saveField(profileData.id, 'mobility', value), 1000)
+    const debouncedSaveBiography = debounce((value) => saveField(user_id, 'bio', value), 1000);
+    const debouncedSaveLocation = debounce((value) => saveField(user_id, 'location', value), 1000);
+    const debouncedSaveGender = debounce((value) => saveField(user_id, 'gender', value), 1000);
+    const debouncedSaveLivingSituation = debounce((value) => saveField(user_id, 'living_situation', value), 1000)
+    const debouncedSaveMobility = debounce((value) => saveField(user_id, 'mobility', value), 1000)
     const debouncedSaveLookingFor = debounce(async (updatedLookingFor) => {
         try {
             const { data, error } = await supabase
                 .from('User information')
                 .update({ looking_for: updatedLookingFor })
-                .eq('user_id', profileData.id);
+                .eq('user_id', user_id);
             if (error) throw error;
 
             console.log(`Looking for updated successfully width value ${updatedLookingFor}`);
@@ -224,7 +230,7 @@ const ProfileCard = () => {
 
                 // Step 2: Associate the interest with the current profile
                 await supabase.from('Interested in ').insert({
-                    ProfileId: profileData.id,
+                    ProfileId: user_id,
                     interestId: interestId
                 });
 
@@ -253,7 +259,7 @@ const ProfileCard = () => {
             const { data: existingInterests, error: existingError } = await supabase
                 .from('Interested in')
                 .select('interest_id')
-                .eq('user_id', profileData.id);
+                .eq('user_id', user_id);
 
             if (existingError) throw existingError;
 
@@ -276,7 +282,7 @@ const ProfileCard = () => {
             if (interestsToAdd.length > 0) {
                 await supabase
                     .from('Interested in')
-                    .insert(interestsToAdd.map((id) => ({ user_id: profileData.id, interest_id: id })));
+                    .insert(interestsToAdd.map((id) => ({ user_id: user_id, interest_id: id })));
             }
 
             // Remove deselected interests if any
@@ -284,7 +290,7 @@ const ProfileCard = () => {
                 await supabase
                     .from('Interested in')
                     .delete()
-                    .eq('user_id', profileData.id)
+                    .eq('user_id', user_id)
                     .in('interest_id', interestsToRemove);
             }
         } catch (error) {
@@ -397,7 +403,7 @@ const ProfileCard = () => {
 
             // Proceed with upload
             const uniqueSuffix = `${new Date().getTime()}-${Math.random().toString(36).substring(2, 9)}`;
-            const fileName = `${profileData.id}-${uniqueSuffix}-${croppedFile.name}`;
+            const fileName = `${user_id}-${uniqueSuffix}-${croppedFile.name}`;
 
             const { data, error: uploadError } = await supabase.storage
                 .from('extra-pictures')
@@ -416,7 +422,7 @@ const ProfileCard = () => {
 
             const { error: dbInsertError } = await supabase
                 .from('Pictures')
-                .insert({ User_id: profileData.id, picture_url: imageUrl });
+                .insert({ User_id: user_id, picture_url: imageUrl });
 
             if (dbInsertError) throw dbInsertError;
 
@@ -471,17 +477,17 @@ const ProfileCard = () => {
     const handleProfilePictureUpload = async ({ file }) => {
         try {
             setUploading(true);
-            const fileName = `${profileData.id}-profilePicture`;
+            const fileName = `${user_id}-profilePicture`;
 
             // Check if the file already exists and remove it before upload
             const { data: existingFiles, error: listError } = await supabase.storage
                 .from('profile-pictures')
-                .list('', { search: profileData.id });
+                .list('', { search: user_id });
 
             if (listError) {
                 console.error('Error checking existing files:', listError);
             } else {
-                const existingFile = existingFiles.find(item => item.name.startsWith(profileData.id));
+                const existingFile = existingFiles.find(item => item.name.startsWith(user_id));
                 if (existingFile) {
                     // Remove the existing file if it exists
                     const { error: deleteError } = await supabase.storage
@@ -512,13 +518,13 @@ const ProfileCard = () => {
 
             const imageUrlWithCacheBuster = `${imageUrl}?t=${new Date().getTime()}`;
             setProfilePicture(imageUrlWithCacheBuster);
-
+            localStorage.setItem('profile_picture', imageUrl);
 
             // Save the new image URL to the user's profile
             await supabase
                 .from('User')
                 .update({ profile_picture: imageUrl })
-                .eq('id', profileData.id);
+                .eq('id', user_id);
 
         } catch (error) {
             console.error('Error uploading profile picture:', error);
@@ -581,7 +587,7 @@ const ProfileCard = () => {
                     <div style={{display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '10px'}}>
                         <Avatar
                             src={profilePicture}
-                            alt={profileData.name}
+                            alt={name}
                             style={{
                                 minWidth: '200px',
                                 minHeight: '200px',
@@ -590,7 +596,7 @@ const ProfileCard = () => {
                         />
                         <div>
                             <h2 style={{margin: '0', textAlign: 'center'}}>
-                                {profileData.name || 'Naam'}, {calculateAge(profileData.birthdate) || 'Leeftijd'}
+                                {name || 'Naam'}, {calculateAge(profileData.birthdate) || 'Leeftijd'}
                             </h2>
                             <div style={{marginTop: '10px', marginBottom: '20px'}}>
                                 <Upload showUploadList={false} beforeUpload={() => false}

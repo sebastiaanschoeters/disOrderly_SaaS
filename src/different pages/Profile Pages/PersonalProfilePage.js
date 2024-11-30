@@ -124,13 +124,20 @@ const useFetchProfileData = (actCode) => {
 };
 
 const ProfileCard = () => {
-    const { profileData, isLoading, error } = useFetchProfileData(localStorage.getItem('user_id'));
-    const [theme, setTheme] = useState('blauw');
-    const [isDarkMode, setIsDarkMode] = useState(false);
+    const user_id = localStorage.getItem('user_id')
+
+    const name = localStorage.getItem('name')
+
+    const profilePicture = localStorage.getItem('profile_picture')
+
+    let [savedTheme, savedDarkMode] = JSON.parse(localStorage.getItem('theme'));
+    const { profileData, isLoading, error } = useFetchProfileData(user_id);
+    const [theme, setTheme] = useState(savedTheme);
+    const [isDarkMode, setIsDarkMode] = useState(savedDarkMode);
     const themeKey = isDarkMode ? `${theme}_donker` : theme;
     const themeColors = themes[themeKey] || themes.blauw;
+
     const [pendingRequests, setPendingRequests] = useState({});
-    const [profilePicture, setProfilePicture] = useState('https://example.com/photo.jpg');
     const [caretaker, setCaretaker] = useState({});
     const [sexuality, setSexuality] = useState('');
 
@@ -138,8 +145,8 @@ const ProfileCard = () => {
 
     useEffect(() => {
         const initializeNotifications = async () => {
-            if (profileData?.id) {
-                const pending = await fetchPendingRequests(profileData.id);
+            if (user_id) {
+                const pending = await fetchPendingRequests(user_id);
                 setPendingRequests(pending);
             }
         };
@@ -159,10 +166,6 @@ const ProfileCard = () => {
             }
         }
 
-        if (profileData.profile_picture) {
-            const imageUrlWithCacheBuster = `${profileData.profile_picture}?t=${new Date().getTime()}`;
-            setProfilePicture(imageUrlWithCacheBuster);
-        }
         if (profileData.sexuality) {
             setSexuality(profileData.sexuality);
         }
@@ -174,14 +177,14 @@ const ProfileCard = () => {
     const debouncedSaveTheme = debounce(async (newTheme, darkModeFlag) => {
         try {
             const themeData = [newTheme, darkModeFlag]; // Ensure both theme and dark mode flag are saved together
-            await saveField(profileData.id, 'theme', JSON.stringify(themeData));
+            await saveField(user_id, 'theme', JSON.stringify(themeData));
             localStorage.setItem('theme',JSON.stringify(themeData))// Save it as a stringified JSON array
         } catch (error) {
             console.error('Error saving theme:', error);
         }
     }, 500);
 
-    const debouncedSaveSexuality = debounce((value) => saveField(profileData.id,'sexuality', value), 1000);
+    const debouncedSaveSexuality = debounce((value) => saveField(user_id,'sexuality', value), 1000);
 
     const handleAccessLevelChange = async (caretakerId, clientId, newAccessLevel) => {
         try {
@@ -273,7 +276,7 @@ const ProfileCard = () => {
                 <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
                     <Avatar
                         src={profilePicture || "https://example.com/photo.jpg"} // Fallback to default avatar
-                        alt={profileData.name || "No Name"}
+                        alt={name || "No Name"}
                         style={{
                             minWidth: '200px',
                             minHeight: '200px',
@@ -281,7 +284,7 @@ const ProfileCard = () => {
                         }}
                     />
                     <h2 style={{margin: '0', textAlign: 'center'}}>
-                        {profileData.name || 'Naam'}, {calculateAge(profileData.birthdate) || 'Leeftijd'}
+                        {name || 'Naam'}, {calculateAge(profileData.birthdate) || 'Leeftijd'}
                     </h2>
                     <Divider/>
                 </div>
@@ -310,7 +313,7 @@ const ProfileCard = () => {
 
                     <Select
                         style={{flex: 1, minWidth: '200px'}}
-                        onChange={(value) => handleAccessLevelChange(profileData.id, profileData.caretaker.id, value)}
+                        onChange={(value) => handleAccessLevelChange(user_id, profileData.caretaker.id, value)}
                         value={caretaker.accessLevel}
                         options={[
                             {value: 'Volledige toegang', label: 'Volledige toegang'},

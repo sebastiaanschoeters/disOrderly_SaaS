@@ -164,32 +164,47 @@ const ActivationPage = () => {
         setStep(6)
     };
 
-    const saveCaretaker = async (values) => {
-        setLoading(true);
-        const {vname, aname} = values;
-        let caretakerName = vname + ' ' + aname;
-        const hashedPassword = CryptoJS.SHA256(values.password).toString();
-
+    const checkEmailExistence = async (email) => {
         try {
             const { data, error } = await supabase
                 .from("Credentials")
                 .select("email")
-                .eq("email", values.email)
+                .eq("email", email)
                 .single();
 
             if (error && error.code !== "PGRST116") {
                 console.error("Error checking email existence:", error.message);
                 message.error("Er is iets misgegaan tijdens de validatie van uw e-mailadres.");
-                setLoading(false);
-                return;
+                return true;  // Return true if there's an error
             }
 
             if (data) {
                 message.error("Dit e-mailadres is al geregistreerd. Probeer een ander e-mailadres.");
-                setLoading(false);
-                return;
+                return true;  // Return true if email is already taken
             }
 
+            return false;  // Return false if email is available
+        } catch (err) {
+            console.error("Unexpected error during email validation:", err);
+            message.error("Er is iets misgegaan. Probeer het later opnieuw.");
+            return true;  // Return true if an unexpected error occurs
+        }
+    };
+
+
+    const saveCaretaker = async (values) => {
+        setLoading(true);
+        const { vname, aname } = values;
+        const caretakerName = vname + ' ' + aname;
+        const hashedPassword = CryptoJS.SHA256(values.password).toString();
+
+        const emailExists = await checkEmailExistence(values.email);
+        if (emailExists) {
+            setLoading(false);
+            return;
+        }
+
+        try {
             const { error: careError } = await supabase
                 .from("Caretaker")
                 .insert({
@@ -197,7 +212,7 @@ const ActivationPage = () => {
                     name: caretakerName,
                     phone_number: values.phone,
                     email: values.email
-                })
+                });
 
             if (careError) throw careError;
 
@@ -208,13 +223,18 @@ const ActivationPage = () => {
                     email: values.email,
                     password: hashedPassword,
                     type: 'caretaker'
-                })
+                });
 
             if (credError) throw credError;
+
+            message.success("Caretaker successfully saved!");
+
         } catch (error) {
             console.error("something went wrong");
+        } finally {
+            setLoading(false);
         }
-    }
+    };
 
     const saveUserProfile = async (userData) => {
         let insertedCredentialId = null; // Track inserted IDs for rollback
@@ -320,21 +340,8 @@ const ActivationPage = () => {
     const EmailAndPassword = async (values) => {
         setLoading(true);
         try {
-            const { data, error } = await supabase
-                .from("Credentials")
-                .select("email")
-                .eq("email", values.email)
-                .single();
-
-            if (error && error.code !== "PGRST116") {
-                console.error("Error checking email existence:", error.message);
-                message.error("Er is iets misgegaan tijdens de validatie van uw e-mailadres.");
-                setLoading(false);
-                return;
-            }
-
-            if (data) {
-                message.error("Dit e-mailadres is al geregistreerd. Probeer een ander e-mailadres.");
+            const emailExists = await checkEmailExistence(values.email);
+            if (emailExists) {
                 setLoading(false);
                 return;
             }

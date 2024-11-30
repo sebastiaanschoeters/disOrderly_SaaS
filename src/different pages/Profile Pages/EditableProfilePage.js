@@ -23,6 +23,7 @@ import '../../CSS/AntDesignOverride.css';
 import '../../CSS/EditableProfilePage.css';
 import HomeButtonUser from "../../Extra components/HomeButtonUser";
 import useFetchProfileData from "../../UseHooks/useFetchProfileData";
+import {calculateAge, calculateSlidesToShow} from "../../Utils/utils";
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
 
@@ -159,20 +160,6 @@ const ProfileCard = () => {
         }
         setImages(list_of_images);
     }, [pictures]);
-
-    // Simplified slides calculation
-    const calculateSlidesToShow = (imageCount) => {
-        const width = window.innerWidth;
-        let slides = 5.5;
-
-        if (width < 700) slides = 1;
-        else if (width < 1100) slides = 1.5;
-        else if (width < 1500) slides = 2.5;
-        else if (width < 2000) slides = 3.5;
-        else if (width < 3000) slides = 4.5;
-
-        return Math.min(slides, imageCount);
-    };
 
     const [slidesToShow, setSlidesToShow] = useState(calculateSlidesToShow(images.length+1))
 
@@ -584,18 +571,6 @@ const ProfileCard = () => {
         } finally {
             setUploading(false);
         }
-    };
-
-    const calculateAge = (birthdate) => {
-        if (!birthdate) return 'Onbekend';
-        const birthDate = new Date(birthdate);
-        const today = new Date();
-        let age = today.getFullYear() - birthDate.getFullYear();
-        const monthDifference = today.getMonth() - birthDate.getMonth();
-        if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
-            age--;
-        }
-        return age;
     };
 
     const CustomPrevArrow = ({ onClick }) => (

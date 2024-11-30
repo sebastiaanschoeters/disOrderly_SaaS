@@ -15,6 +15,7 @@ import '../../CSS/AntDesignOverride.css';
 import { ButterflyIcon, antThemeTokens, themes } from '../../Extra components/themes';
 import {useLocation, useNavigate} from 'react-router-dom';
 import useFetchProfileData from "../../UseHooks/useFetchProfileData";
+import {calculateAge, calculateSlidesToShow} from "../../Utils/utils";
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
 
@@ -142,20 +143,6 @@ const ProfileCard = (profileToShow) => {
         .filter(picture => picture.picture_url)
         .map(picture => picture.picture_url);
 
-    // Simplified slides calculation
-    const calculateSlidesToShow = (imageCount) => {
-        const width = window.innerWidth;
-        let slides = 5.5;
-
-        if (width < 700) slides = 1;
-        else if (width < 1100) slides = 1.5;
-        else if (width < 1500) slides = 2.5;
-        else if (width < 2000) slides = 3.5;
-        else if (width < 3000) slides = 4.5;
-
-        return Math.min(slides, imageCount);
-    };
-
     const [slidesToShow, setSlidesToShow] = useState(calculateSlidesToShow(imageUrls.length))
 
     useEffect(() => {
@@ -168,19 +155,6 @@ const ProfileCard = (profileToShow) => {
         // Cleanup on unmount
         return () => window.removeEventListener('resize', handleResize);
     }, [imageUrls.length]);
-
-    // Calculate age
-    const calculateAge = (birthdate) => {
-        if (!birthdate) return 'Onbekend';
-        const birthDate = new Date(birthdate);
-        const today = new Date();
-        let age = today.getFullYear() - birthDate.getFullYear();
-        const monthDifference = today.getMonth() - birthDate.getMonth();
-        if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
-            age--;
-        }
-        return age;
-    };
 
     // Distance calculation
     const calculateDistance = (lat1, lon1, lat2, lon2) => {

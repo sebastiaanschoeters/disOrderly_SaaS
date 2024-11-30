@@ -10,6 +10,7 @@ import '../../CSS/AntDesignOverride.css';
 import {antThemeTokens, ButterflyIcon, themes} from '../../Extra components/themes';
 import { createClient } from '@supabase/supabase-js';
 import HomeButtonUser from "../../Extra components/HomeButtonUser";
+import {calculateAge} from "../../Utils/utils";
 
 const supabase = createClient(
     'https://flsogkmerliczcysodjt.supabase.co',
@@ -244,18 +245,6 @@ const ProfileCard = () => {
     const handleSexualityChange = (value) => {
         setSexuality(value);
         debouncedSaveSexuality(value);
-    };
-
-    const calculateAge = (birthdate) => {
-        if (!birthdate) return 'Onbekend';
-        const birthDate = new Date(birthdate);
-        const today = new Date();
-        let age = today.getFullYear() - birthDate.getFullYear();
-        const monthDifference = today.getMonth() - birthDate.getMonth();
-        if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
-            age--;
-        }
-        return age;
     };
 
     if (isLoading) return <Spin tip="Profiel laden..." />;

@@ -4,6 +4,7 @@ import ProfileCard from '../Profile Pages/ProfilePage';
 import ContactsOverview from "./ClientContacts";
 import {createClient} from "@supabase/supabase-js";
 import {useNavigate} from "react-router-dom";
+import {getName, getPfp, getTheme, getUserEmailById} from "../../Api/apiUtils";
 
 const ClientDetailsModal = ({ visible, onClose, clientData }) => {
     const [isViewingContactList, setIsViewingContactList] = useState(false);
@@ -16,107 +17,6 @@ const ClientDetailsModal = ({ visible, onClose, clientData }) => {
 
     const handleToggleView = () => {
         setIsViewingContactList((prevState) => !prevState);
-    };
-
-    const getUserEmailById = async (userId) => {
-        try {
-            const { data, error } = await supabase
-                .from('Credentials')
-                .select('email')
-                .eq('user_id', userId)
-
-            if (error) {
-                console.error('Error fetching email:', error.message);
-                return null;
-            }
-
-            if (data.length === 0) {
-                console.log('No user found with the provided userid.');
-                return null;
-            }
-
-            console.log('Fetched dataaaaaa:', data);
-            return data;
-        } catch (err) {
-            console.error('Unexpected error:', err);
-            return null;
-        }
-    };
-
-    const getPfp = async (user_id) => {
-        try {
-            const { data, error } = await supabase
-                .from('User')
-                .select('profile_picture')
-                .eq('id', user_id);
-
-            if (error) {
-                console.error('Error fetching pfp:', error.message);
-                return null;
-            }
-
-            if (data.length === 0) {
-                console.log('No user found with the provided email.');
-                return null;
-            }
-
-            console.log('Fetched pfp:', data[0].profile_picture);
-            return data[0].profile_picture; // Ensure it's a string
-        } catch (err) {
-            console.error('Unexpected error:', err);
-            return null;
-        }
-    };
-
-    const getName = async (user_id) => {
-        try {
-            const { data, error } = await supabase
-                .from('User')
-                .select('name')
-                .eq('id', user_id);
-
-            if (error) {
-                console.error('Error fetching user_id:', error.message);
-                return null;
-            }
-
-            if (data.length === 0) {
-                console.log('No user found with the provided email.');
-                return null;
-            }
-
-            console.log('Fetched name:', data[0].name);
-            return data[0].name; // Ensure it's a string
-        } catch (err) {
-            console.error('Unexpected error:', err);
-            return null;
-        }
-    };
-
-    const getTheme = async (user_id, setTheme) => {
-        try {
-            const { data, error } = await supabase
-                .from('User information')
-                .select('theme')
-                .eq('user_id', user_id);
-
-            if (error) {
-                console.error('Error fetching user theme:', error.message);
-                return;
-            }
-
-            if (data.length === 0) {
-                console.log('No user found with the provided user ID.');
-                return;
-            }
-            return data[0].theme;
-            const fetchedTheme = data[0].theme; // Ensure it's a string
-            console.log('Fetched themea:', fetchedTheme);
-
-
-        } catch (err) {
-            console.error('Unexpected error:', err);
-        }
     };
 
     const logInAs = async (clientId) => {

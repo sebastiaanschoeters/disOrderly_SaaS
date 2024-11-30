@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Button, message } from 'antd';
 import { createClient } from '@supabase/supabase-js';
+import useHandleRequest from "../UseHooks/useHandleRequest";
 
 // Supabase client initialization
 const supabase = createClient(
@@ -59,51 +60,15 @@ const NotificationModal = () => {
         loadNotification();
     }, [userId]);
 
-    const handleAcceptRequest = async () => {
-        try {
-            console.log(notification)
-            // Update the client's access level based on the accepted request
-            const { error: accessLevelError } = await supabase
-                .from('User')
-                .update({ access_level: notification.details.requested_access_level })
-                .eq('id', userId);
-
-            if (accessLevelError) throw accessLevelError;
-
-            const { error: deleteError } = await supabase
-                .from('Notifications')
-                .delete()
-                .eq('id', notification.id);
-
-            if (deleteError) throw deleteError;
-
+    const { handleRequest } = useHandleRequest(
+        (notification, action) => {
             setNotification(null);
             setIsVisible(false);
-
-            message.success(`Wijziging van ${notification.requesterName} geaccepteerd!`);
-        } catch (error) {
-            message.error("Fout bij het accepteren van de wijziging: " + error.message);
         }
-    };
+    )
 
-
-    const handleDenyRequest = async () => {
-        try {
-            const { error: deleteError } = await supabase
-                .from('Notifications')
-                .delete()
-                .eq('id', notification.id);
-
-            if (deleteError) throw deleteError;
-
-            setNotification(null);
-            setIsVisible(false);
-
-            message.success(`Wijziging van ${notification.requesterName} geweigerd!`);
-        } catch (error) {
-            message.error("Fout bij het weigeren van de wijziging: " + error.message);
-        }
-    };
+    const handleAcceptRequest = (notification) => handleRequest(notification, 'accept');
+    const handleDenyRequest = (notification) => handleRequest(notification, 'deny');
 
     return (
         <Modal

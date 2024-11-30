@@ -8,6 +8,7 @@ import ClientDetailsModal from "./ClientDetailsModal";
 import 'antd/dist/reset.css';
 import '../../CSS/AntDesignOverride.css';
 import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
+import useHandleRequest from "../../UseHooks/useHandleRequest";
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q");
 
@@ -303,48 +304,15 @@ const ClientOverview = () => {
         </Menu>
     );
 
-    const handleRequest = async (notification, action) => {
-        try {
-            if (action === 'accept') {
-                const { error: accessLevelError } = await supabase
-                    .from('User')
-                    .update({ access_level: notification.details.requested_access_level })
-                    .eq('id', notification.requester_id);
-
-                if (accessLevelError) throw accessLevelError;
-            }
-
-            const { error: deleteError } = await supabase
-                .from('Notifications')
-                .delete()
-                .eq('id', notification.id);
-
-            if (deleteError) throw deleteError;
-
+    const { handleRequest } = useHandleRequest(
+        (notification, action) => {
             setNotifications((prev) => prev.filter((n) => n.id !== notification.id));
             setUnreadCount((prev) => prev - 1);
-
-            const successMessage =
-                action === 'accept'
-                    ? `Wijziging van ${notification.requesterName} geaccepteerd!`
-                    : `Wijziging van ${notification.requesterName} geweigerd!`;
-            message.success(successMessage);
-        } catch (error) {
-            const errorMessage =
-                action === 'accept'
-                    ? "Fout bij het accepteren van de wijziging: "
-                    : "Fout bij het weigeren van de wijziging: ";
-            message.error(errorMessage + error.message);
         }
-    };
+    )
 
-    const handleAcceptRequest = (notification) => {
-        handleRequest(notification, 'accept');
-    };
-
-    const handleDenyRequest = (notification) => {
-        handleRequest(notification, 'deny');
-    };
+    const handleAcceptRequest = (notification) => handleRequest(notification, 'accept');
+    const handleDenyRequest = (notification) => handleRequest(notification, 'deny');
 
     const handleClientClick = (client) => {
         setSelectedClient(client);

@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Avatar, ConfigProvider, Select, Table, Button, message } from "antd";
+import {Avatar, ConfigProvider, Select, Table, Button, message, Menu, Badge, Dropdown} from "antd";
 import { antThemeTokens, ButterflyIcon, themes } from "../../Extra components/themes";
 import { createClient } from "@supabase/supabase-js";
-import { DeleteOutlined } from "@ant-design/icons";
+import {BellOutlined, DeleteOutlined} from "@ant-design/icons";
 import { useNavigate } from 'react-router-dom';
 import ClientDetailsModal from "./ClientDetailsModal";
 import 'antd/dist/reset.css';
@@ -168,8 +168,59 @@ const ClientOverview = () => {
     const [pageSize, setPageSize] = useState(10);
     const [selectedClient, setSelectedClient] = useState(null);
     const [isModalVisible, setIsModalVisible] = useState(false);
+    const [pendingRequests, setPendingRequests] = useState({});
+
+    const [notifications, setNotifications] = useState([]);
+    const [unreadCount, setUnreadCount] = useState(0);
 
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const fetchNotifications = async () => {
+            try {
+                // Fetch notifications
+                const { data: notificationData, error: notificationError } = await supabase
+                    .from('Notifications')
+                    .select('*') // Fetch notifications
+                    .eq('recipient_id', profileData?.id || null);
+
+                if (notificationError) throw notificationError;
+
+                // If there are notifications, fetch the related caretaker data
+                if (notificationData.length > 0) {
+                    // Loop over the notifications to get the caretaker's name
+                    const updatedNotifications = await Promise.all(notificationData.map(async (notification) => {
+                        // Fetch the caretaker data based on the request_id in the notification
+                        const { data: clientData, error: clientError } = await supabase
+                            .from('User')
+                            .select('name')
+                            .eq('id', notification.requester_id)
+                            .single(); // Only one result
+
+                        if (clientError) throw clientError;
+
+                        // Add the caretaker name to the notification object
+                        return {
+                            ...notification,
+                            requesterName: clientData?.name || 'Onbekend', // Default to 'Unknown Caretaker' if not found
+                        };
+                    }));
+                    console.log(updatedNotifications)
+                    // Set the notifications state with updated data
+                    setNotifications(updatedNotifications);
+                }
+
+                // Set unread count based on notifications
+                setUnreadCount(notificationData.filter((n) => !n.read).length);
+
+            } catch (error) {
+                console.error("Error fetching notifications:", error.message);
+            }
+        };
+
+        fetchNotifications();
+    }, [profileData]); // Re-run when profileData changes
+
 
     useEffect(() => {
         setLocalClients(clients);
@@ -198,6 +249,105 @@ const ClientOverview = () => {
         };
     }, []);
 
+    useEffect(() => {
+        const initializeData = async () => {
+            if (profileData?.id) {
+                await fetchPendingRequests(profileData.id); // Fetch pending requests
+            }
+        };
+
+        initializeData();
+    }, [profileData]);
+
+    const notificationMenu = (
+        <Menu>
+            {notifications.length > 0 ? (
+                <>
+                    {notifications.map((notification, index) => {
+                        const requesterName = notification.requesterName || "Onbekend";
+                        const requestedAccessLevel = notification.details?.requested_access_level || "Onbekend toegangsniveau";
+                        const notificationMessage = `${requesterName} heeft een wijziging in toegangsniveau aangevraagd: ${requestedAccessLevel}`;
+
+                        return (
+                            <Menu.Item key={index}>
+                                <div>
+                                    <p>{notificationMessage}</p>
+                                    <div style={{ display: "flex", justifyContent: "space-between" }}>
+                                        <Button
+                                            onClick={() => handleAcceptRequest(notification)}
+                                            type="default"
+                                            size="small"
+                                        >
+                                            Accepteren
+                                        </Button>
+                                        <Button
+                                            onClick={() => handleDenyRequest(notification)}
+                                            type="default"
+                                            size="small"
+                                        >
+                                            Weigeren
+                                        </Button>
+                                    </div>
+                                </div>
+                            </Menu.Item>
+                        );
+                    })}
+                    <Menu.Divider />
+                </>
+            ) : (
+                <Menu.Item>Geen nieuwe meldingen</Menu.Item>
+            )}
+        </Menu>
+    );
+
+    const handleAcceptRequest = async (notification) => {
+        try {
+            // Update the client's access level based on the accepted request
+            const { error: accessLevelError } = await supabase
+                .from('User')
+                .update({ access_level: notification.details.requested_access_level })
+                .eq('id', notification.requester_id);
+
+            if (accessLevelError) throw accessLevelError;
+
+            const { error: deleteError } = await supabase
+                .from('Notifications')
+                .delete()
+                .eq('id', notification.id);
+
+            if (deleteError) throw deleteError;
+
+            // Optionally update the notifications state (if needed)
+            setNotifications((prev) => prev.filter((n) => n.id !== notification.id));
+            setUnreadCount((prev) => prev - 1); // Decrease unread count
+
+            message.success(`Wijziging van ${notification.requesterName} geaccepteerd!`);
+        } catch (error) {
+            message.error("Fout bij het accepteren van de wijziging: " + error.message);
+        }
+    };
+
+
+    const handleDenyRequest = async (notification) => {
+        try {
+            const { error: deleteError } = await supabase
+                .from('Notifications')
+                .delete()
+                .eq('id', notification.id);
+
+            if (deleteError) throw deleteError;
+
+            // Optionally update the notifications state (if needed)
+            setNotifications((prev) => prev.filter((n) => n.id !== notification.id));
+            setUnreadCount((prev) => prev - 1); // Decrease unread count
+
+            message.success(`Wijziging van ${notification.requesterName} geweigerd!`);
+        } catch (error) {
+            message.error("Fout bij het weigeren van de wijziging: " + error.message);
+        }
+    };
+
+
     const handleClientClick = (client) => {
         setSelectedClient(client);
         console.log(client)
@@ -209,8 +359,32 @@ const ClientOverview = () => {
         setIsModalVisible(false);
     };
 
-    const handleAccessLevelChange = (id, value) => {
-        console.log(`Klant ID: ${id}, Nieuw Toegangsniveau: ${value}`);
+    const handleAccessLevelChange = async (caretakerId, clientId, newAccessLevel) => {
+        try {
+            setPendingRequests((prev) => ({ ...prev, [clientId]: newAccessLevel })); // Mark as pending
+
+            const { error } = await supabase
+                .from('Notifications')
+                .insert([
+                    {
+                        requester_id: caretakerId,
+                        recipient_id: clientId,
+                        type: 'ACCESS_LEVEL_CHANGE',
+                        details: { requested_access_level: newAccessLevel },
+                    },
+                ]);
+
+            if (error) throw error;
+
+            message.success("Toegangsniveau wijziging verzoek verzonden!");
+        } catch (error) {
+            message.error("Fout bij het verzenden van toegangsniveau wijziging verzoek: " + error.message);
+            setPendingRequests((prev) => {
+                const updated = { ...prev };
+                delete updated[clientId]; // Remove pending status on error
+                return updated;
+            });
+        }
     };
 
     const handleDelete = (clientId) => {
@@ -243,6 +417,28 @@ const ClientOverview = () => {
         }
     };
 
+    const fetchPendingRequests = async (caretakerId) => {
+        try {
+            const { data, error } = await supabase
+                .from('Notifications')
+                .select('recipient_id, details')
+                .eq('requester_id', caretakerId)
+                .eq('type', 'ACCESS_LEVEL_CHANGE');
+
+            if (error) throw error;
+
+            // Map the data to a format usable by the state
+            const pending = data.reduce((acc, request) => {
+                acc[request.recipient_id] = request.details.requested_access_level;
+                return acc;
+            }, {});
+
+            setPendingRequests(pending); // Update the pending requests state
+        } catch (error) {
+            console.error('Error fetching pending requests:', error.message);
+        }
+    };
+
     const columns = [
         {
             dataIndex: "client_info",
@@ -264,18 +460,25 @@ const ClientOverview = () => {
             dataIndex: "access_level",
             key: "access_level",
             render: (accessLevel, record) => (
-                <Select
-                    defaultValue={accessLevel}
-                    onChange={(value) => handleAccessLevelChange(record.id, value)}
-                    style={{ width: "90%", maxWidth: '400px' }}
-                    className="prevent-row-click" // Prevent row click
-                    options={[
-                        { value: "Volledige toegang", label: "Volledige toegang" },
-                        { value: "Gesprekken", label: "Gesprekken" },
-                        { value: "Contacten", label: "Contacten" },
-                        { value: "Publiek Profiel", label: "Publiek Profiel" },
-                    ]}
-                />
+                <div>
+                    <Select
+                        defaultValue={accessLevel}
+                        onChange={(value) => handleAccessLevelChange(profileData.id, record.id, value)}
+                        style={{ width: "90%", maxWidth: '400px' }}
+                        className="prevent-row-click"
+                        options={[
+                            { value: "Volledige toegang", label: "Volledige toegang" },
+                            { value: "Gesprekken", label: "Gesprekken" },
+                            { value: "Contacten", label: "Contacten" },
+                            { value: "Publiek Profiel", label: "Publiek Profiel" },
+                        ]}
+                    />
+                    {pendingRequests[record.id] && (
+                        <p style={{ color: themeColors.primary9, marginTop: "5px" }}>
+                            Wijziging in behandeling: {pendingRequests[record.id]}
+                        </p>
+                    )}
+                </div>
             ),
         },
         {
@@ -333,6 +536,29 @@ const ClientOverview = () => {
                 }}
             >
                 <ButterflyIcon color={themeColors.primary3} />
+
+                {/* Notification Button */}
+                <div
+                    style={{
+                        position: "absolute",
+                        top: "2%",
+                        right: "2%",
+                        display: "flex",
+                        alignItems: "center",
+                    }}
+                >
+                    <Dropdown overlay={notificationMenu} trigger={['click']}>
+                        <Badge count={unreadCount} size="large">
+                            <BellOutlined
+                                style={{
+                                    fontSize: "1.8rem",
+                                    cursor: "pointer",
+                                    color: themeColors.primary10,
+                                }}
+                            />
+                        </Badge>
+                    </Dropdown>
+                </div>
 
                 <h2 style={{ marginTop: '100px' }}>Clienten overzicht: </h2>
 

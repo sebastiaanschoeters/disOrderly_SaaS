@@ -27,6 +27,7 @@ import {calculateAge, calculateSlidesToShow} from "../../Utils/utils";
 import useLocations from "../../UseHooks/useLocations";
 import {debounce, saveField} from "../../Api/Utils";
 import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
+import {uploadProfilePicture} from "../../Utils/uploadProfilePicture";
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
 
@@ -477,53 +478,15 @@ const ProfileCard = () => {
     const handleProfilePictureUpload = async ({ file }) => {
         try {
             setUploading(true);
-            const fileName = `${user_id}-profilePicture`;
 
-            // Check if the file already exists and remove it before upload
-            const { data: existingFiles, error: listError } = await supabase.storage
-                .from('profile-pictures')
-                .list('', { search: user_id });
+            const imageUrlWithCacheBuster = await uploadProfilePicture(user_id, file, 'profile-pictures');
 
-            if (listError) {
-                console.error('Error checking existing files:', listError);
-            } else {
-                const existingFile = existingFiles.find(item => item.name.startsWith(user_id));
-                if (existingFile) {
-                    // Remove the existing file if it exists
-                    const { error: deleteError } = await supabase.storage
-                        .from('profile-pictures')
-                        .remove([existingFile.name]);
-                    if (deleteError) {
-                        throw deleteError;
-                    }
-                }
-            }
-
-            // Upload the new file
-            const { data, error: uploadError } = await supabase.storage
-                .from('profile-pictures')
-                .upload(fileName, file, { upsert: true }); // upsert ensures replacement if file exists
-            if (uploadError) {
-                throw uploadError;
-            }
-
-            const { data: fileData, error: urlError } = supabase.storage
-                .from('profile-pictures')
-                .getPublicUrl(fileName);
-            if (urlError) {
-                throw urlError;
-            }
-
-            const imageUrl = fileData.publicUrl;
-
-            const imageUrlWithCacheBuster = `${imageUrl}?t=${new Date().getTime()}`;
             setProfilePicture(imageUrlWithCacheBuster);
-            localStorage.setItem('profile_picture', imageUrl);
+            localStorage.setItem('profile_picture', imageUrlWithCacheBuster);
 
-            // Save the new image URL to the user's profile
             await supabase
                 .from('User')
-                .update({ profile_picture: imageUrl })
+                .update({ profile_picture: imageUrlWithCacheBuster })
                 .eq('id', user_id);
 
         } catch (error) {

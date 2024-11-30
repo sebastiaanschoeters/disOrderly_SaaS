@@ -1,11 +1,13 @@
+import {getName, getPfp, getTheme} from "../Api/Utils";
+
 export const storeUserSession = async (userId, userType, setIsTransitioning, navigate) => {
     const theme = await getTheme(userId);
     const name = await getName(userId);
     const pfp = await getPfp(userId);
 
     // Store data in localStorage
-    localStorage.setItem('sessionToken', 'fake-session-token');
-    localStorage.setItem('userEmail', email); // Email can be passed dynamically
+    // localStorage.setItem('sessionToken', 'fake-session-token');
+    // localStorage.setItem('userEmail', email); // Email can be passed dynamically
     localStorage.setItem('user_id', userId);
     localStorage.setItem('userType', userType);
     localStorage.setItem('theme', theme);

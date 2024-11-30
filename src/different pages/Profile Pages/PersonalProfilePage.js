@@ -11,7 +11,7 @@ import {antThemeTokens, ButterflyIcon, themes} from '../../Extra components/them
 import { createClient } from '@supabase/supabase-js';
 import HomeButtonUser from "../../Extra components/HomeButtonUser";
 import {calculateAge} from "../../Utils/utils";
-import {saveField} from "../../Api/Utils";
+import {debounce, saveField} from "../../Api/Utils";
 import ThemeSelector from "../../Extra components/ThemeSelector";
 import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
 
@@ -39,14 +39,6 @@ const fetchPendingRequests = async (caretakerId) => {
         console.error('Error fetching pending requests:', error.message);
         return {};
     }
-};
-
-const debounce = (func, delay) => {
-    let timer;
-    return (...args) => {
-        clearTimeout(timer);
-        timer = setTimeout(() => func(...args), delay);
-    };
 };
 
 const useFetchProfileData = (actCode) => {

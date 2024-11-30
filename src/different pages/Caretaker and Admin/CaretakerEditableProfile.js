@@ -14,17 +14,10 @@ import TextArea from "antd/es/input/TextArea";
 import {createClient} from "@supabase/supabase-js";
 import HomeButton from '../../Extra components/HomeButtonCaretaker'
 import useFetchCaretakerData from "../../UseHooks/useFetchCaretakerData";
+import ThemeSelector from "../../Extra components/ThemeSelector";
+import {debounce} from "../../Api/Utils";
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
-
-// Debounce utility function
-const debounce = (func, delay) => {
-    let timer;
-    return (...args) => {
-        clearTimeout(timer);
-        timer = setTimeout(() => func(...args), delay);
-    };
-};
 
 const ProfileCard = () => {
     // const { profileData, isLoading, error, interest} = useFetchProfileData(localStorage.getItem('user_id'));
@@ -228,32 +221,12 @@ const ProfileCard = () => {
 
                 <Divider/>
 
-                <p style={{display: 'flex', alignItems: 'center', gap: '2%'}}>
-                    <strong style={{width: '20%', minWidth: '150px'}}>
-                        <BgColorsOutlined/> Kies een kleur:
-                    </strong>
-                    <div style={{display: 'flex', flexGrow: 1, alignItems: 'center'}}>
-                        <Select
-                            style={{flexGrow: 1, marginRight: '10px'}}
-                            placeholder="Selecteer een kleur"
-                            options={Object.keys(themes)
-                                .filter((key) => !key.endsWith('_donker'))
-                                .map((themeKey) => ({
-                                    value: themeKey,
-                                    label: themeKey.charAt(0).toUpperCase() + themeKey.slice(1),
-                                }))}
-                            value={theme}
-                            onChange={handleThemeChange} // When theme is selected, update it
-                        />
-                        <Switch
-                            checked={isDarkMode}
-                            onChange={handleThemeToggle} // When dark mode is toggled, update it
-                            checkedChildren={<span>Donker</span>}
-                            unCheckedChildren={<span>Licht</span>}
-                            style={{marginLeft: 'auto'}}
-                        />
-                    </div>
-                </p>
+                <ThemeSelector
+                    theme={theme}
+                    isDarkMode={isDarkMode}
+                    handleThemeChange={handleThemeChange}
+                    handleThemeToggle={handleThemeToggle}
+                />
 
                 <Divider/>
 

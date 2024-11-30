@@ -5,6 +5,7 @@ import {themes, antThemeTokens, ButterflyIcon} from '../Extra components/themes'
 import '../CSS/ChatSuggestionPage.css';
 import { createClient } from "@supabase/supabase-js";
 import HomeButtonUser from "../Extra components/HomeButtonUser";
+import useTheme from "../UseHooks/useTheme";
 
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
@@ -21,9 +22,10 @@ const ChatSuggestionPage = () => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [editedMessage, setEditedMessage] = useState('');
     const userId = localStorage.getItem('user_id');
-    const [themeName, darkModeFlag] = JSON.parse(localStorage.getItem('theme')) || ['blauw', false];
-    const [themeColors, setThemeColors] = useState(themes[themeName] || themes.blauw);
 
+    const [themeName, darkModeFlag] = JSON.parse(localStorage.getItem('theme')) || ['blauw', false];
+    const { themeColors, setThemeName, setDarkModeFlag } = useTheme(themeName, darkModeFlag);
+    
     const applyThemeToCSS = (themeColors) => {
         const root = document.documentElement;
         Object.entries(themeColors).forEach(([key, value]) => {
@@ -34,15 +36,6 @@ const ChatSuggestionPage = () => {
     useEffect(() => {
         applyThemeToCSS(themeColors); // Apply the selected theme
     }, [themeColors]);
-
-    useEffect(() => {
-        if (darkModeFlag){
-            setThemeColors(themes[`${themeName}_donker`] || themes.blauw_donker)
-        }
-        else{
-            setThemeColors(themes[themeName] || themes.blauw);
-        }
-    }, [themeName, darkModeFlag]);
 
     const fetchMessages = async (chatroomId) => {
         const { data, error } = await supabase

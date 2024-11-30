@@ -7,11 +7,13 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
 import { createClient } from "@supabase/supabase-js";
 import NotificationModal from "./NotifiactionModal";
+import useTheme from "../UseHooks/useTheme";
+
+const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co", "YOUR_SUPABASE_KEY");
 
 const HomePage = () => {
-    // Load theme from localStorage
     const [themeName, darkModeFlag] = JSON.parse(localStorage.getItem('theme')) || ['blauw', false];
-    const [themeColors, setThemeColors] = useState(themes[themeName] || themes.blauw);
+    const { themeColors, setThemeName, setDarkModeFlag } = useTheme(themeName, darkModeFlag);
 
     const applyThemeToCSS = (themeColors) => {
         const root = document.documentElement;
@@ -25,17 +27,6 @@ const HomePage = () => {
     }, [themeColors]);
 
     const navigate = useNavigate();
-    const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co", "YOUR_SUPABASE_KEY");
-
-    // Update theme colors if theme changes
-    useEffect(() => {
-        if (darkModeFlag){
-            setThemeColors(themes[`${themeName}_donker`] || themes.blauw_donker)
-        }
-        else{
-            setThemeColors(themes[themeName] || themes.blauw);
-        }
-    }, [themeName, darkModeFlag]);
 
     const handleLogout = () => {
         localStorage.clear();

@@ -25,18 +25,9 @@ import HomeButtonUser from "../../Extra components/HomeButtonUser";
 import useFetchProfileData from "../../UseHooks/useFetchProfileData";
 import {calculateAge, calculateSlidesToShow} from "../../Utils/utils";
 import useLocations from "../../UseHooks/useLocations";
-import {saveField} from "../../Api/Utils";
+import {debounce, saveField} from "../../Api/Utils";
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
-
-// Debounce utility function
-const debounce = (func, delay) => {
-    let timer;
-    return (...args) => {
-        clearTimeout(timer);
-        timer = setTimeout(() => func(...args), delay);
-    };
-};
 
 const useFetchPicturesData = (actCode) => {
     const [pictures, setPictures] = useState({});

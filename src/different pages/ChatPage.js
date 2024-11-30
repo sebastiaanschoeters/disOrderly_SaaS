@@ -7,6 +7,7 @@ import { createClient } from "@supabase/supabase-js";
 import '../CSS/ChatPage.css';
 import HomeButtonUser from "../Extra components/HomeButtonUser";
 import HangmanGame from "./Hangman";
+import useTheme from "../UseHooks/useTheme";
 
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
@@ -16,14 +17,17 @@ const ChatPage = () => {
     const {profileData} = location.state || {};
     const {name, profilePicture, chatroomId, otherUserId} = profileData || {};
     const navigate = useNavigate();
+
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState("");
     const userId = parseInt(localStorage.getItem('user_id'), 10);
+
     const localTime = new Date();
 
-    const [themeName, darkModeFlag] = JSON.parse(localStorage.getItem('theme')) || ['blauw', false];
-    const [themeColors, setThemeColors] = useState(themes[themeName] || themes.blauw);
     const [isModalVisible, setIsModalVisible] = useState(false);
+
+    const [themeName, darkModeFlag] = JSON.parse(localStorage.getItem('theme')) || ['blauw', false];
+    const { themeColors, setThemeName, setDarkModeFlag } = useTheme(themeName, darkModeFlag);
 
     const applyThemeToCSS = (themeColors) => {
         const root = document.documentElement;
@@ -35,14 +39,6 @@ const ChatPage = () => {
     useEffect(() => {
         applyThemeToCSS(themeColors); // Apply the selected theme
     }, [themeColors]);
-
-    useEffect(() => {
-        if (darkModeFlag) {
-            setThemeColors(themes[`${themeName}_donker`] || themes.blauw_donker)
-        } else {
-            setThemeColors(themes[themeName] || themes.blauw);
-        }
-    }, [themeName, darkModeFlag]);
 
     const dummyRef = useRef(null);
     const [isScrolledToBottom, setIsScrolledToBottom] = useState(true); // Track if at bottom

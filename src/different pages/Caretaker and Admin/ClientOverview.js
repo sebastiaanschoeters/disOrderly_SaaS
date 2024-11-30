@@ -311,15 +311,16 @@ const ClientOverview = () => {
         </Menu>
     );
 
-    const handleAcceptRequest = async (notification) => {
+    const handleRequest = async (notification, action) => {
         try {
-            // Update the client's access level based on the accepted request
-            const { error: accessLevelError } = await supabase
-                .from('User')
-                .update({ access_level: notification.details.requested_access_level })
-                .eq('id', notification.requester_id);
+            if (action === 'accept') {
+                const { error: accessLevelError } = await supabase
+                    .from('User')
+                    .update({ access_level: notification.details.requested_access_level })
+                    .eq('id', notification.requester_id);
 
-            if (accessLevelError) throw accessLevelError;
+                if (accessLevelError) throw accessLevelError;
+            }
 
             const { error: deleteError } = await supabase
                 .from('Notifications')
@@ -328,36 +329,30 @@ const ClientOverview = () => {
 
             if (deleteError) throw deleteError;
 
-            // Optionally update the notifications state (if needed)
             setNotifications((prev) => prev.filter((n) => n.id !== notification.id));
-            setUnreadCount((prev) => prev - 1); // Decrease unread count
+            setUnreadCount((prev) => prev - 1);
 
-            message.success(`Wijziging van ${notification.requesterName} geaccepteerd!`);
+            const successMessage =
+                action === 'accept'
+                    ? `Wijziging van ${notification.requesterName} geaccepteerd!`
+                    : `Wijziging van ${notification.requesterName} geweigerd!`;
+            message.success(successMessage);
         } catch (error) {
-            message.error("Fout bij het accepteren van de wijziging: " + error.message);
+            const errorMessage =
+                action === 'accept'
+                    ? "Fout bij het accepteren van de wijziging: "
+                    : "Fout bij het weigeren van de wijziging: ";
+            message.error(errorMessage + error.message);
         }
     };
 
-
-    const handleDenyRequest = async (notification) => {
-        try {
-            const { error: deleteError } = await supabase
-                .from('Notifications')
-                .delete()
-                .eq('id', notification.id);
-
-            if (deleteError) throw deleteError;
-
-            // Optionally update the notifications state (if needed)
-            setNotifications((prev) => prev.filter((n) => n.id !== notification.id));
-            setUnreadCount((prev) => prev - 1); // Decrease unread count
-
-            message.success(`Wijziging van ${notification.requesterName} geweigerd!`);
-        } catch (error) {
-            message.error("Fout bij het weigeren van de wijziging: " + error.message);
-        }
+    const handleAcceptRequest = (notification) => {
+        handleRequest(notification, 'accept');
     };
 
+    const handleDenyRequest = (notification) => {
+        handleRequest(notification, 'deny');
+    };
 
     const handleClientClick = (client) => {
         setSelectedClient(client);

@@ -8,7 +8,8 @@ import React, { useState, useEffect } from "react";
 import HomeButtonUser from '../Extra components/HomeButtonUser'
 import { useNavigate } from 'react-router-dom';
 import ClientDetailsModal from "./Caretaker and Admin/ClientDetailsModal";
-import ProfileDetailsModal from "./Profile Pages/ProfileDetailsModal"; // Import useNavigate for routing
+import ProfileDetailsModal from "./Profile Pages/ProfileDetailsModal";
+import useTheme from "../UseHooks/useTheme"; // Import useNavigate for routing
 
 
 // Initialize Supabase client
@@ -18,8 +19,6 @@ const supabase = createClient(
 );
 
 const Search = () => {
-    const [themeName, darkModeFlag] = JSON.parse(localStorage.getItem('theme')) || ['blauw', false];
-    const [themeColors, setThemeColors] = useState(themes[themeName] || themes.blauw);
     const [users, setUsers] = useState([]);
     const [filteredUsers, setFilteredUsers] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -37,6 +36,9 @@ const Search = () => {
 
     const { Title } = Typography;
 
+    const [themeName, darkModeFlag] = JSON.parse(localStorage.getItem('theme')) || ['blauw', false];
+    const { themeColors, setThemeName, setDarkModeFlag } = useTheme(themeName, darkModeFlag);
+
     const applyThemeToCSS = (themeColors) => {
         const root = document.documentElement;
         Object.entries(themeColors).forEach(([key, value]) => {
@@ -47,15 +49,6 @@ const Search = () => {
     useEffect(() => {
         applyThemeToCSS(themeColors); // Apply the selected theme
     }, [themeColors]);
-
-    useEffect(() => {
-        if (darkModeFlag){
-            setThemeColors(themes[`${themeName}_donker`] || themes.blauw_donker)
-        }
-        else{
-            setThemeColors(themes[themeName] || themes.blauw);
-        }
-    }, [themeName, darkModeFlag]);
 
     // Helper function to calculate age from birthdate
     const calculateAge = (birthdate) => {

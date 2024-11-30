@@ -12,6 +12,7 @@ import { createClient } from '@supabase/supabase-js';
 import HomeButtonUser from "../../Extra components/HomeButtonUser";
 import {calculateAge} from "../../Utils/utils";
 import {saveField} from "../../Api/Utils";
+import ThemeSelector from "../../Extra components/ThemeSelector";
 
 const supabase = createClient(
     'https://flsogkmerliczcysodjt.supabase.co',
@@ -194,20 +195,46 @@ const ProfileCard = () => {
         try {
             setPendingRequests((prev) => ({ ...prev, [clientId]: newAccessLevel })); // Mark as pending
 
-            const { error } = await supabase
+            // Check if a pending request already exists
+            const { data: existingRequests, error: fetchError } = await supabase
                 .from('Notifications')
-                .insert([{
-                    requester_id: caretakerId,
-                    recipient_id: clientId,
-                    type: 'ACCESS_LEVEL_CHANGE',
-                    details: { requested_access_level: newAccessLevel },
-                }]);
+                .select('id')
+                .eq('requester_id', caretakerId)
+                .eq('recipient_id', clientId)
+                .eq('type', 'ACCESS_LEVEL_CHANGE');
 
-            if (error) throw error;
+            if (fetchError) throw fetchError;
 
-            message.success("Toegangsniveau wijziging verzoek verzonden!");
+            if (existingRequests.length > 0) {
+                // If a request exists, update it
+                const { error: updateError } = await supabase
+                    .from('Notifications')
+                    .update({
+                        details: { requested_access_level: newAccessLevel },
+                    })
+                    .eq('id', existingRequests[0].id);
+
+                if (updateError) throw updateError;
+
+                message.success("Toegangsniveau wijziging verzoek bijgewerkt!");
+            } else {
+                // If no request exists, insert a new one
+                const { error: insertError } = await supabase
+                    .from('Notifications')
+                    .insert([{
+                        requester_id: caretakerId,
+                        recipient_id: clientId,
+                        type: 'ACCESS_LEVEL_CHANGE',
+                        details: { requested_access_level: newAccessLevel },
+                    }]);
+
+                if (insertError) throw insertError;
+
+                message.success("Toegangsniveau wijziging verzoek verzonden!");
+            }
         } catch (error) {
-            message.error("Fout bij het verzenden van toegangsniveau wijziging verzoek: " + error.message);
+            message.error("Fout bij het verzenden of bijwerken van toegangsniveau wijziging verzoek: " + error.message);
+
             setPendingRequests((prev) => {
                 const updated = { ...prev };
                 delete updated[clientId]; // Remove pending status on error
@@ -215,6 +242,7 @@ const ProfileCard = () => {
             });
         }
     };
+
 
     const handleThemeChange = (value) => {
         setTheme(value);
@@ -266,32 +294,12 @@ const ProfileCard = () => {
                     <Divider/>
                 </div>
 
-                <p style={{display: 'flex', alignItems: 'center', gap: '2%'}}>
-                    <strong style={{width: '20%', minWidth: '150px'}}>
-                        <BgColorsOutlined/> Kies een kleur:
-                    </strong>
-                    <div style={{display: 'flex', flexGrow: 1, alignItems: 'center'}}>
-                        <Select
-                            style={{flexGrow: 1, marginRight: '10px'}}
-                            placeholder="Selecteer een kleur"
-                            options={Object.keys(themes)
-                                .filter((key) => !key.endsWith('_donker'))
-                                .map((themeKey) => ({
-                                    value: themeKey,
-                                    label: themeKey.charAt(0).toUpperCase() + themeKey.slice(1),
-                                }))}
-                            value={theme}
-                            onChange={handleThemeChange} // When theme is selected, update it
-                        />
-                        <Switch
-                            checked={isDarkMode}
-                            onChange={handleThemeToggle} // When dark mode is toggled, update it
-                            checkedChildren={<span>Donker</span>}
-                            unCheckedChildren={<span>Licht</span>}
-                            style={{marginLeft: 'auto'}}
-                        />
-                    </div>
-                </p>
+                <ThemeSelector
+                    theme={theme}
+                    isDarkMode={isDarkMode}
+                    handleThemeChange={handleThemeChange}
+                    handleThemeToggle={handleThemeToggle}
+                />
 
                 <Divider/>
 

@@ -57,7 +57,8 @@ const Search = () => {
     // Fetch users from Supabase
     const fetchUsers = async () => {
         try {
-            const { data, error } = await supabase
+            // Fetch user data with related "User information"
+            const { data: userData, error: userError } = await supabase
                 .from('User')
                 .select(`
                 id,
@@ -67,13 +68,13 @@ const Search = () => {
                 "User information" (gender, looking_for, mobility)
             `);
 
-            if (error) {
-                console.error("Supabase Error:", error);
-                throw error;
+            if (userError) {
+                console.error("Supabase Error:", userError);
+                throw userError;
             }
 
-            // If no data is returned, log it
-            if (!data || data.length === 0) {
+            // If no user data is returned, log it
+            if (!userData || userData.length === 0) {
                 console.log("No users found.");
                 return;
             }
@@ -81,12 +82,11 @@ const Search = () => {
             // Retrieve the logged-in user's ID from localStorage
             const loggedInUserId = parseInt(localStorage.getItem('user_id'), 10); // Convert to integer
 
-            // Filter out the user whose ID matches the logged-in user's ID
-            const filteredData = data.filter(user => user.id !== loggedInUserId);
-            console.log(loggedInUserId);
-            console.log(filteredData);
+            // Filter out the logged-in user
+            const filteredUserData = userData.filter(user => user.id !== loggedInUserId);
+
             // Add calculated age and user information to the result
-            const usersWithDetails = filteredData.map((user) => {
+            const usersWithDetails = filteredUserData.map((user) => {
                 const age = calculateAge(user.birthdate); // Calculate age based on birthdate
                 const { gender, looking_for, mobility } = user["User information"] || {}; // Handle missing user_information
 
@@ -99,8 +99,47 @@ const Search = () => {
                 };
             });
 
-            setUsers(usersWithDetails); // Set the users with their details
-            setFilteredUsers(usersWithDetails); // Set filtered users based on the fetched data
+            // Fetch chatroom data
+            const { data: chatroomData, error: chatroomError } = await supabase
+                .from('Chatroom')
+                .select(`
+                sender_id,
+                receiver_id
+            `);
+
+            if (chatroomError) {
+                console.error("Supabase Chatroom Error:", chatroomError);
+                throw chatroomError;
+            }
+
+            // Log chatroom data for debugging
+            console.log("Chatroom Data:", chatroomData);
+
+            // Create a set of excluded user IDs based on chatroom logic
+            const excludedUserIds = new Set();
+
+            chatroomData.forEach(chat => {
+                if (chat.sender_id === loggedInUserId) {
+                    // If logged-in user is the sender, exclude the receiver
+                    excludedUserIds.add(chat.receiver_id);
+                }
+                if (chat.receiver_id === loggedInUserId) {
+                    // If logged-in user is the receiver, exclude the sender
+                    excludedUserIds.add(chat.sender_id);
+                }
+            });
+
+            console.log("Excluded User IDs:", [...excludedUserIds]);
+
+            // Filter out excluded users from the fetched user data
+            const finalFilteredUserData = usersWithDetails.filter(user => !excludedUserIds.has(user.id));
+
+            // Optional: Log the final filtered data for debugging
+            console.log("Final Filtered Users:", finalFilteredUserData);
+
+            // Set the enriched user data
+            setUsers(finalFilteredUserData); // Set the users with their details
+            setFilteredUsers(finalFilteredUserData); // Optionally, only show users with chat history
 
         } catch (error) {
             console.error('Error fetching users:', error);
@@ -108,6 +147,9 @@ const Search = () => {
             setLoading(false); // Set loading state to false after fetching
         }
     };
+
+
+
 
 
 

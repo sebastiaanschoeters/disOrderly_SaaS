@@ -1,14 +1,16 @@
 import 'antd/dist/reset.css'; // Import Ant Design styles
 import '../CSS/AntDesignOverride.css';
-import { ButterflyIcon, antThemeTokens, themes } from '../themes';
+import { ButterflyIcon, antThemeTokens, themes } from '../Extra components/themes';
 import { Avatar, ConfigProvider, Input, List, Typography, Modal, Button, Slider, Radio, Checkbox } from 'antd';
 import { FilterOutlined } from "@ant-design/icons";
 import { createClient } from "@supabase/supabase-js";
 import React, { useState, useEffect } from "react";
-import HomeButton from '../Extra components/HomeButton'
+import HomeButtonUser from '../Extra components/HomeButtonUser'
 import { useNavigate } from 'react-router-dom';
-import ClientDetailsModal from "./ClientDetailsModal";
-import ProfileDetailsModal from "./ProfileDetailsModal"; // Import useNavigate for routing
+import ClientDetailsModal from "./Caretaker and Admin/ClientDetailsModal";
+import ProfileDetailsModal from "./Profile Pages/ProfileDetailsModal";
+import useTheme from "../UseHooks/useTheme";
+import useThemeOnCSS from "../UseHooks/useThemeOnCSS"; // Import useNavigate for routing
 
 
 // Initialize Supabase client
@@ -18,8 +20,6 @@ const supabase = createClient(
 );
 
 const Search = () => {
-    const [themeName, darkModeFlag] = JSON.parse(localStorage.getItem('theme')) || ['blauw', false];
-    const [themeColors, setThemeColors] = useState(themes[themeName] || themes.blauw);
     const [users, setUsers] = useState([]);
     const [filteredUsers, setFilteredUsers] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -37,14 +37,10 @@ const Search = () => {
 
     const { Title } = Typography;
 
-    useEffect(() => {
-        if (darkModeFlag){
-            setThemeColors(themes[`${themeName}_donker`] || themes.blauw_donker)
-        }
-        else{
-            setThemeColors(themes[themeName] || themes.blauw);
-        }
-    }, [themeName, darkModeFlag]);
+    const [themeName, darkModeFlag] = JSON.parse(localStorage.getItem('theme')) || ['blauw', false];
+    const { themeColors, setThemeName, setDarkModeFlag } = useTheme(themeName, darkModeFlag);
+
+    useThemeOnCSS(themeColors);
 
     // Helper function to calculate age from birthdate
     const calculateAge = (birthdate) => {
@@ -213,7 +209,7 @@ const Search = () => {
                     zIndex: '0'
                 }}
             >
-                <HomeButton color={themeColors.primary7} />
+                <HomeButtonUser color={themeColors.primary7} />
                 <ButterflyIcon color={themeColors.primary3} />
 
                 <Title level={2} style={{ color: themeColors.primary10, marginBottom: '2vw' }}>

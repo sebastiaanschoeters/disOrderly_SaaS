@@ -7,77 +7,14 @@ import {
 } from '@ant-design/icons';
 import { createClient } from "@supabase/supabase-js";
 import 'antd/dist/reset.css';
-import '../CSS/AntDesignOverride.css';
-import { ButterflyIcon, antThemeTokens, themes } from '../themes';
+import '../../CSS/AntDesignOverride.css';
+import { ButterflyIcon, antThemeTokens, themes } from '../../Extra components/themes';
 import { useLocation } from 'react-router-dom';
+import useFetchCaretakerData from "../../UseHooks/useFetchCaretakerData";
+import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
 
-const useFetchProfileData = (actCode) => {
-    const [profileData, setProfileData] = useState({});
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState(null);
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                // Fetch user data
-                const { data: userData, error: userError } = await supabase
-                    .from('Caretaker')
-                    .select('*')
-                    .eq('id', actCode);
-
-                if (userError) throw userError;
-
-                if (userData.length > 0) {
-                    const user = userData[0];
-
-                    let parsedTheme = 'blauw';
-                    let isDarkMode = false;
-
-                    if (user.theme) {
-                        try {
-                            const [themeName, darkModeFlag] = JSON.parse(user.theme);
-                            parsedTheme = themeName;
-                            isDarkMode = darkModeFlag;
-                        } catch (error) {
-                            console.error('Error parsing theme', error);
-                        }
-                    }
-
-                    // Fetch user information
-                    const { data: userOrganization, error: userOrganizationError } = await supabase
-                        .from('Activation')
-                        .select('organization')
-                        .eq('code', user.id);
-
-                    if (userOrganizationError) throw userOrganizationError;
-
-                    if (userOrganization && userOrganization.length > 0) {
-                        const userOrganizationData = userOrganization[0];
-                        user.organization = userOrganizationData.organization;
-                    }
-
-                    console.log(user)
-                    // Set the user profile data with the theme
-                    setProfileData({
-                        ...user,
-                        theme: isDarkMode ? `${parsedTheme}_donker` : parsedTheme
-                    });
-                }
-            } catch (error) {
-                setError(error.message);
-            } finally {
-                console.log("user element: ", profileData)
-                setIsLoading(false);
-            }
-        };
-
-        fetchData();
-    }, [actCode]);
-
-    return { profileData, isLoading, error };
-};
 
 const ProfileDetail = ({ label, value, icon }) => (
     <p style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '5px'}}>
@@ -86,14 +23,14 @@ const ProfileDetail = ({ label, value, icon }) => (
     </p>
 );
 
-const ProfileCard = () => {
-    // const { state } = location;
-
-    // const { profileData, isLoading, error } = useFetchProfileData(state.user_id);
-    const { profileData, isLoading, error } = useFetchProfileData(1111)
+const ProfileCard = ({ actCode }) => {
+    console.log(actCode)
+    const { profileData, isLoading, error } = useFetchCaretakerData(actCode)
     // Derive theme colors
     const theme = profileData.theme || 'blauw';
     const themeColors = themes[theme] || themes.blauw;
+
+    useThemeOnCSS(themeColors);
 
     // Profile picture
     const profilePicture = profileData.profile_picture
@@ -107,14 +44,11 @@ const ProfileCard = () => {
                     padding: '20px',
                     position: 'relative',
                     minWidth: '100%',
-                    minHeight: '100vh',
                     backgroundColor: themeColors.primary2,
                     color: themeColors.primary10,
                     zIndex: '0'
                 }}
             >
-                <ButterflyIcon color={themeColors.primary3} />
-
                 {/* Header section with profile picture, name, age, and biography */}
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingBottom: '20px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '10px' }}>

@@ -1,19 +1,25 @@
-import React, { useState } from 'react';
-import { Form, Input, Button, Checkbox, Card, ConfigProvider } from 'antd';
+import React, {useEffect, useState} from 'react';
+import { Form, Input, Button, Card, ConfigProvider } from 'antd';
 import 'antd/dist/reset.css';
-import '../CSS/AntDesignOverride.css';
-import { antThemeTokens, ButterflyIcon, themes } from '../themes';
+import '../../CSS/AntDesignOverride.css';
+import { antThemeTokens, ButterflyIcon, themes} from '../../Extra components/themes';
 import { useNavigate } from 'react-router-dom';
-import forestImage from '../Media/forest.jpg';
-import {createClient} from "@supabase/supabase-js"; // Path to the image
+//import LocalStorageViewer from '../../Extra components/LocalStorageViewer';
+import forestImage from '../../Media/forest.jpg';
+import {createClient} from "@supabase/supabase-js";
+import {getName, getTheme, getPfp} from "../../Api/Utils";
+import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
+import {storeUserSession} from "../../Utils/sessionHelpers"; // Path to the image
 
 
 const LoginPage = () => {
-    const [theme, setTheme] = useState('default');
+    const theme = 'blauw'
     const [isTransitioning, setIsTransitioning] = useState(false); // To handle transition state
     const themeColors = themes[theme] || themes.blauw;
     const navigate = useNavigate();
     const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q");
+
+    useThemeOnCSS(themeColors);
 
     const getUserIdByEmail = async (email) => {
         try {
@@ -40,82 +46,6 @@ const LoginPage = () => {
         }
     };
 
-    const getPfp = async (user_id) => {
-        try {
-            const { data, error } = await supabase
-                .from('User')
-                .select('profile_picture')
-                .eq('id', user_id);
-
-            if (error) {
-                console.error('Error fetching pfp:', error.message);
-                return null;
-            }
-
-            if (data.length === 0) {
-                console.log('No user found with the provided email.');
-                return null;
-            }
-
-            console.log('Fetched pfp:', data[0].profile_picture);
-            return data[0].profile_picture; // Ensure it's a string
-        } catch (err) {
-            console.error('Unexpected error:', err);
-            return null;
-        }
-    };
-
-    const getName = async (user_id) => {
-        try {
-            const { data, error } = await supabase
-                .from('User')
-                .select('name')
-                .eq('id', user_id);
-
-            if (error) {
-                console.error('Error fetching user_id:', error.message);
-                return null;
-            }
-
-            if (data.length === 0) {
-                console.log('No user found with the provided email.');
-                return null;
-            }
-
-            console.log('Fetched name:', data[0].name);
-            return data[0].name; // Ensure it's a string
-        } catch (err) {
-            console.error('Unexpected error:', err);
-            return null;
-        }
-    };
-
-    const getTheme = async (user_id, setTheme) => {
-        try {
-            const { data, error } = await supabase
-                .from('User information')
-                .select('theme')
-                .eq('user_id', user_id);
-
-            if (error) {
-                console.error('Error fetching user theme:', error.message);
-                return;
-            }
-
-            if (data.length === 0) {
-                console.log('No user found with the provided user ID.');
-                return;
-            }
-            return data[0].theme;
-            const fetchedTheme = data[0].theme; // Ensure it's a string
-            console.log('Fetched themea:', fetchedTheme);
-
-
-        } catch (err) {
-            console.error('Unexpected error:', err);
-        }
-    };
-
     const handleLogin = async (values) => {
         const { email, password } = values;
 
@@ -129,56 +59,15 @@ const LoginPage = () => {
         localStorage.setItem('sessionToken', LoginResponse.token);
         localStorage.setItem('userEmail', LoginResponse.user.email);
 
-        const user_data = await getUserIdByEmail(LoginResponse.user.email)
+        const user_data = await getUserIdByEmail(LoginResponse.user.email);
         const userId = user_data[0].user_id;
         const userType = user_data[0].type;
-        const theme = await getTheme(userId);
-        const name = await getName(userId);
-        const pfp = await getPfp(userId);
 
-        if (userId) {
-            localStorage.setItem('user_id', userId);
-            console.log('Fetched and stored user_id:', userId);
+        // Call the helper function with `setIsTransitioning` passed in
+        if (userId && userType) {
+            storeUserSession(userId, userType, setIsTransitioning, navigate);
         } else {
-            console.error('Failed to fetch user_id');
-        }
-
-        if (userType) {
-            localStorage.setItem('userType', userType);
-            console.log('Fetched and stored userType:', userType);
-        } else {
-            console.error('Failed to fetch userType');
-        }
-
-        if (theme) {
-            localStorage.setItem('theme', theme);
-            console.log('Fetched and stored theme:', theme);
-        } else {
-            console.error('Failed to fetch theme',);
-        }
-
-        if (name) {
-            localStorage.setItem('name', name);
-            console.log('Fetched and stored name:', name);
-        } else {
-            console.error('Failed to fetch name',);
-        }
-
-        if (pfp) {
-            localStorage.setItem('profile_picture', pfp);
-            console.log('Fetched and stored pfp:', pfp);
-        } else {
-            console.error('Failed to fetch pfp',);
-        }
-
-        // Navigate to the home page after resolving all async operations
-        if (userType == 'user') {
-            setIsTransitioning(true);
-            setTimeout(() => navigate('/home'), 500);
-        }
-        else if (userType == 'caretaker') {
-            setIsTransitioning(true);
-            setTimeout(() => navigate('/clientOverview'), 500);
+            console.error('Failed to fetch user details');
         }
     };
 
@@ -212,7 +101,6 @@ const LoginPage = () => {
                         zIndex: -1,
                     }}
                 ></div>
-
                 <ButterflyIcon color="rgba(255, 255, 255, 0.2)" />
                 <Button
                     type="link"
@@ -256,11 +144,6 @@ const LoginPage = () => {
                         >
                             <Input.Password />
                         </Form.Item>
-
-                        <Form.Item name="remember" valuePropName="checked">
-                            <Checkbox>Remember me</Checkbox>
-                        </Form.Item>
-
                         <Form.Item>
                             <Button
                                 type="primary"

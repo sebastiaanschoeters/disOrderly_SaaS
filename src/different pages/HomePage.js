@@ -1,29 +1,24 @@
 import 'antd/dist/reset.css'; // Import Ant Design styles
 import '../CSS/AntDesignOverride.css';
-import { antThemeTokens, ButterflyIcon, themes } from '../themes';
+import { antThemeTokens, ButterflyIcon, themes } from '../Extra components/themes';
 import { Button, ConfigProvider, Avatar } from 'antd';
 import { MessageOutlined, SearchOutlined, SettingOutlined, PoweroffOutlined } from "@ant-design/icons";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
 import { createClient } from "@supabase/supabase-js";
+import NotificationModal from "./NotifiactionModal";
+import useTheme from "../UseHooks/useTheme";
+import useThemeOnCSS from "../UseHooks/useThemeOnCSS";
+
+const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co", "YOUR_SUPABASE_KEY");
 
 const HomePage = () => {
-    // Load theme from localStorage
     const [themeName, darkModeFlag] = JSON.parse(localStorage.getItem('theme')) || ['blauw', false];
-    const [themeColors, setThemeColors] = useState(themes[themeName] || themes.blauw);
+    const { themeColors, setThemeName, setDarkModeFlag } = useTheme(themeName, darkModeFlag);
+
+    useThemeOnCSS(themeColors);
 
     const navigate = useNavigate();
-    const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co", "YOUR_SUPABASE_KEY");
-
-    // Update theme colors if theme changes
-    useEffect(() => {
-        if (darkModeFlag){
-            setThemeColors(themes[`${themeName}_donker`] || themes.blauw_donker)
-        }
-        else{
-            setThemeColors(themes[themeName] || themes.blauw);
-        }
-    }, [themeName, darkModeFlag]);
 
     const handleLogout = () => {
         localStorage.clear();
@@ -52,7 +47,10 @@ const HomePage = () => {
                     zIndex: '0',
                 }}
             >
+                {/* Always show the NotificationModal globally for logged-in users */}
+                <NotificationModal />
                 <ButterflyIcon color={themeColors.primary3} />
+
                 <div style={{
                     display: 'flex',
                     rowGap: '20px', // Vertical gap between stacked buttons

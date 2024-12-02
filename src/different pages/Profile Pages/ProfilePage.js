@@ -11,120 +11,14 @@ import {
 } from '@ant-design/icons';
 import { createClient } from "@supabase/supabase-js";
 import 'antd/dist/reset.css';
-import '../CSS/AntDesignOverride.css';
-import { ButterflyIcon, antThemeTokens, themes } from '../themes';
+import '../../CSS/AntDesignOverride.css';
+import { ButterflyIcon, antThemeTokens, themes } from '../../Extra components/themes';
 import {useLocation, useNavigate} from 'react-router-dom';
+import useFetchProfileData from "../../UseHooks/useFetchProfileData";
+import {calculateAge, calculateSlidesToShow} from "../../Utils/calculations";
+import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
-
-const useFetchProfileData = (actCode) => {
-    const [profileData, setProfileData] = useState({});
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState(null);
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                // Fetch user data
-                const { data: userData, error: userError } = await supabase
-                    .from('User')
-                    .select('*')
-                    .eq('id', actCode);
-
-                if (userError) throw userError;
-                if (userData.length > 0) {
-                    const user = userData[0];
-
-                    // Fetch user information
-                    const { data: userInfoData, error: userInfoError } = await supabase
-                        .from('User information')
-                        .select('*')
-                        .eq('user_id', user.id);
-
-                    if (userInfoError) throw userInfoError;
-
-                    let parsedTheme = 'blauw';
-                    let isDarkMode = false;
-
-                    if (userInfoData && userInfoData.length > 0) {
-                        const userInfo = userInfoData[0];
-                        user.bio = userInfo.bio;
-                        user.location = userInfo.location;
-                        user.looking_for = userInfo.looking_for;
-                        user.living_situation = userInfo.living_situation;
-                        user.mobility = userInfo.mobility;
-                        user.theme = userInfo.theme;
-                        user.sexuality = userInfo.sexuality;
-                        user.gender = userInfo.gender;
-
-                        if (userInfo.theme) {
-                            try {
-                                const [themeName, darkModeFlag] = JSON.parse(userInfo.theme);
-                                parsedTheme = themeName;
-                                isDarkMode = darkModeFlag;
-                            } catch (error) {
-                                console.error('Error parsing theme', error);
-                            }
-                        }
-
-                        // Fetch location details using location ID
-                        if (userInfo.location) {
-                            const { data: locationData, error: locationError } = await supabase
-                                .from('Location')
-                                .select('Gemeente, Longitude, Latitude')
-                                .eq('id', userInfo.location);
-
-                            if (locationError) throw locationError;
-
-                            // If locationData is fetched, add it to user
-                            if (locationData && locationData.length > 0) {
-                                const location = locationData[0];
-                                user.locationData = {
-                                    gemeente: location.Gemeente,
-                                    latitude: location.Latitude,
-                                    longitude: location.Longitude,
-                                };
-                            }
-                        }
-                    }
-
-                    // Fetch interests related to the user
-                    const { data: interestedInData, error: interestedInError } = await supabase
-                        .from('Interested in')
-                        .select('interest_id')
-                        .eq('user_id', user.id);
-
-                    if (interestedInError) throw interestedInError;
-
-                    if (interestedInData && interestedInData.length > 0) {
-                        const interestIds = interestedInData.map(item => item.interest_id);
-                        const { data: interestsData, error: fetchInterestsError } = await supabase
-                            .from('Interests')
-                            .select('Interest')
-                            .in('id', interestIds);
-
-                        if (fetchInterestsError) throw fetchInterestsError;
-                        user.interests = interestsData.map(interest => ({ interest_name: interest.Interest }));
-                    }
-
-                    // Set the user profile data with the theme
-                    setProfileData({
-                        ...user,
-                        theme: isDarkMode ? `${parsedTheme}_donker` : parsedTheme
-                    });
-                }
-            } catch (error) {
-                setError(error.message);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        fetchData();
-    }, [actCode]);
-
-    return { profileData, isLoading, error };
-};
 
 const useFetchPicturesData = (actCode) => {
     const [pictures, setPictures] = useState([]);
@@ -244,24 +138,11 @@ const ProfileCard = (profileToShow) => {
     const [newMessage, setNewMessage] = useState('');
     const [isChatroomExistent, setChatroomExistent] = useState(false); // State to track chatroom existence
     const navigate = useNavigate();
+    const localTime = new Date();
 
     const imageUrls = pictures
         .filter(picture => picture.picture_url)
         .map(picture => picture.picture_url);
-
-    // Simplified slides calculation
-    const calculateSlidesToShow = (imageCount) => {
-        const width = window.innerWidth;
-        let slides = 5.5;
-
-        if (width < 700) slides = 1;
-        else if (width < 1100) slides = 1.5;
-        else if (width < 1500) slides = 2.5;
-        else if (width < 2000) slides = 3.5;
-        else if (width < 3000) slides = 4.5;
-
-        return Math.min(slides, imageCount);
-    };
 
     const [slidesToShow, setSlidesToShow] = useState(calculateSlidesToShow(imageUrls.length))
 
@@ -275,19 +156,6 @@ const ProfileCard = (profileToShow) => {
         // Cleanup on unmount
         return () => window.removeEventListener('resize', handleResize);
     }, [imageUrls.length]);
-
-    // Calculate age
-    const calculateAge = (birthdate) => {
-        if (!birthdate) return 'Onbekend';
-        const birthDate = new Date(birthdate);
-        const today = new Date();
-        let age = today.getFullYear() - birthDate.getFullYear();
-        const monthDifference = today.getMonth() - birthDate.getMonth();
-        if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
-            age--;
-        }
-        return age;
-    };
 
     // Distance calculation
     const calculateDistance = (lat1, lon1, lat2, lon2) => {
@@ -323,17 +191,7 @@ const ProfileCard = (profileToShow) => {
     const theme = profileData.theme || 'blauw';
     const themeColors = themes[theme] || themes.blauw;
 
-
-    const applyThemeToCSS = (themeColors) => {
-        const root = document.documentElement;
-        Object.entries(themeColors).forEach(([key, value]) => {
-            root.style.setProperty(`--${key}`, value);
-        });
-    };
-
-    useEffect(() => {
-        applyThemeToCSS(themeColors); // Apply the selected theme
-    }, [themeColors]);
+    useThemeOnCSS(themeColors);
 
     // Current user location (with fallback)
     const currentUserLocation = locationData
@@ -372,6 +230,7 @@ const ProfileCard = (profileToShow) => {
                     receiver_id: receiverId,
                     acceptance: false,
                     last_sender_id: senderId
+
                 }])
                 .select('id')  // Specify the column(s) to return (in this case, 'id')
 
@@ -397,6 +256,7 @@ const ProfileCard = (profileToShow) => {
                     sender_id: senderId,
                     chatroom_id: chatroomId,
                     message_content: newMessage,
+                    created_at: localTime.toISOString()
                 }]);
 
             if (messageError) {

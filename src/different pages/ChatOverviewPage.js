@@ -1,8 +1,11 @@
 import React, { useState,useEffect } from 'react';
 import {List, Avatar, Typography, Input, ConfigProvider, Card, Button} from 'antd';
 import { useNavigate } from 'react-router-dom';
-import { antThemeTokens, themes } from '../themes';
+import {antThemeTokens, ButterflyIcon, themes} from '../Extra components/themes';
 import { createClient } from "@supabase/supabase-js";
+import HomeButtonUser from "../Extra components/HomeButtonUser";
+import useTheme from "../UseHooks/useTheme";
+import useThemeOnCSS from "../UseHooks/useThemeOnCSS";
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
 
@@ -15,15 +18,9 @@ const ChatOverviewPage = () => {
     const userID = parseInt(localStorage.getItem('user_id'), 10);
 
     const [themeName, darkModeFlag] = JSON.parse(localStorage.getItem('theme')) || ['blauw', false];
-    const [themeColors, setThemeColors] = useState(themes[themeName] || themes.blauw);
-    useEffect(() => {
-        if (darkModeFlag){
-            setThemeColors(themes[`${themeName}_donker`] || themes.blauw_donker)
-        }
-        else{
-            setThemeColors(themes[themeName] || themes.blauw);
-        }
-    }, [themeName, darkModeFlag]);
+    const { themeColors, setThemeName, setDarkModeFlag } = useTheme(themeName, darkModeFlag);
+
+    useThemeOnCSS(themeColors);
 
     const fetchChatrooms = async () => {
         const {data, error} = await supabase
@@ -120,6 +117,10 @@ const ChatOverviewPage = () => {
 
     return (
         <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
+
+            <HomeButtonUser color={themeColors.primary7} />
+            <ButterflyIcon color={themeColors.primary3} />
+
             <div style={styles.chatContainer}>
                 <div style={styles.titleButton}>
                     <Title level={2} style={styles.title}>Chat Overzicht</Title>

@@ -2,100 +2,28 @@ import React, {useEffect, useState} from 'react';
 import {Avatar, Button, ConfigProvider, Divider, Select, Switch, Upload} from 'antd';
 import {
     BgColorsOutlined,
-    CodeOutlined,
     MailOutlined,
     PhoneOutlined,
-    TeamOutlined,
     UploadOutlined
 } from '@ant-design/icons';
 import 'antd/dist/reset.css';
-import '../CSS/AntDesignOverride.css';
-import '../CSS/EditableProfilePage.css';
-import {antThemeTokens, ButterflyIcon, themes} from '../themes';
+import '../../CSS/AntDesignOverride.css';
+import '../../CSS/EditableProfilePage.css';
+import {antThemeTokens, ButterflyIcon, themes} from '../../Extra components/themes';
 import TextArea from "antd/es/input/TextArea";
 import {createClient} from "@supabase/supabase-js";
-import HomeButton from '../Extra components/HomeButtonCaretaker'
+import HomeButton from '../../Extra components/HomeButtonCaretaker'
+import useFetchCaretakerData from "../../UseHooks/useFetchCaretakerData";
+import ThemeSelector from "../../Extra components/ThemeSelector";
+import {debounce} from "../../Api/Utils";
+import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
+import {uploadProfilePicture} from "../../Utils/uploadProfilePicture";
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
 
-// Debounce utility function
-const debounce = (func, delay) => {
-    let timer;
-    return (...args) => {
-        clearTimeout(timer);
-        timer = setTimeout(() => func(...args), delay);
-    };
-};
-
-const useFetchProfileData = (actCode) => {
-    const [profileData, setProfileData] = useState({});
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState(null);
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                // Fetch user data
-                const { data: userData, error: userError } = await supabase
-                    .from('Caretaker')
-                    .select('*')
-                    .eq('id', actCode);
-
-                if (userError) throw userError;
-
-                if (userData.length > 0) {
-                    const user = userData[0];
-
-                    let parsedTheme = 'blauw';
-                    let isDarkMode = false;
-
-                    if (user.theme) {
-                        try {
-                            const [themeName, darkModeFlag] = JSON.parse(user.theme);
-                            parsedTheme = themeName;
-                            isDarkMode = darkModeFlag;
-                        } catch (error) {
-                            console.error('Error parsing theme', error);
-                        }
-                    }
-
-                    // Fetch user information
-                    const { data: userOrganization, error: userOrganizationError } = await supabase
-                        .from('Activation')
-                        .select('organization')
-                        .eq('code', user.id);
-
-                    if (userOrganizationError) throw userOrganizationError;
-
-                    if (userOrganization && userOrganization.length > 0) {
-                        const userOrganizationData = userOrganization[0];
-                        user.organization = userOrganizationData.organization;
-                    }
-
-                    console.log(user)
-                    // Set the user profile data with the theme
-                    setProfileData({
-                        ...user,
-                        theme: [parsedTheme, isDarkMode]
-                    });
-                }
-            } catch (error) {
-                setError(error.message);
-            } finally {
-                console.log("user element: ", profileData)
-                setIsLoading(false);
-            }
-        };
-
-        fetchData();
-    }, [actCode]);
-
-    return { profileData, isLoading, error };
-};
-
 const ProfileCard = () => {
     // const { profileData, isLoading, error, interest} = useFetchProfileData(localStorage.getItem('user_id'));
-    const { profileData, isLoading, error} = useFetchProfileData(1111)
+    const { profileData, isLoading, error} = useFetchCaretakerData(1111, { fetchOrganization: true})
     const [theme, setTheme] = useState('blauw');
     const [isDarkMode, setIsDarkMode] = useState(false);
     const themeKey = isDarkMode ? `${theme}_donker` : theme;
@@ -105,23 +33,20 @@ const ProfileCard = () => {
     const [phoneNumber, setPhoneNumber] = useState('')
     const [email, setEmail] = useState('')
 
-    const applyThemeToCSS = (themeColors) => {
-        const root = document.documentElement;
-        Object.entries(themeColors).forEach(([key, value]) => {
-            root.style.setProperty(`--${key}`, value);
-        });
-    };
-
-    useEffect(() => {
-        applyThemeToCSS(themeColors); // Apply the selected theme
-    }, [themeColors]);
+    useThemeOnCSS(themeColors);
 
     useEffect(() => {
         if (profileData.theme) {
             try {
-                const [savedTheme, darkModeFlag] = profileData.theme;
+                console.log(profileData.theme)
+                let savedTheme = profileData.theme;
+
+                if (savedTheme.endsWith('_donker')) {
+                    savedTheme = savedTheme.replace('_donker', '');
+                    setIsDarkMode(true);
+                }
+
                 setTheme(savedTheme);
-                setIsDarkMode(darkModeFlag);
             } catch (error) {
                 console.error('Error parsing theme data:', error);
             }
@@ -190,53 +115,14 @@ const ProfileCard = () => {
     const handleProfilePictureUpload = async ({ file }) => {
         try {
             setUploading(true);
-            const fileName = `${profileData.id}-profilePicture`;
 
-            // Check if the file already exists and remove it before upload
-            const { data: existingFiles, error: listError } = await supabase.storage
-                .from('profile-pictures-caretakers')
-                .list('', { search: profileData.id });
+            const imageUrlWithCacheBuster = await uploadProfilePicture(profileData.id, file, 'profile-pictures-caretakers');
 
-            if (listError) {
-                console.error('Error checking existing files:', listError);
-            } else {
-                const existingFile = existingFiles.find(item => item.name.startsWith(profileData.id));
-                if (existingFile) {
-                    // Remove the existing file if it exists
-                    const { error: deleteError } = await supabase.storage
-                        .from('profile-pictures-caretakers')
-                        .remove([existingFile.name]);
-                    if (deleteError) {
-                        throw deleteError;
-                    }
-                }
-            }
-
-            // Upload the new file
-            const { data, error: uploadError } = await supabase.storage
-                .from('profile-pictures-caretakers')
-                .upload(fileName, file, { upsert: true }); // upsert ensures replacement if file exists
-            if (uploadError) {
-                throw uploadError;
-            }
-
-            const { data: fileData, error: urlError } = supabase.storage
-                .from('profile-pictures-caretakers')
-                .getPublicUrl(fileName);
-            if (urlError) {
-                throw urlError;
-            }
-
-            const imageUrl = fileData.publicUrl;
-
-            const imageUrlWithCacheBuster = `${imageUrl}?t=${new Date().getTime()}`;
             setProfilePicture(imageUrlWithCacheBuster);
 
-
-            // Save the new image URL to the user's profile
             await supabase
                 .from('Caretaker')
-                .update({ profile_picture: imageUrl })
+                .update({ profile_picture: imageUrlWithCacheBuster })
                 .eq('id', profileData.id);
 
         } catch (error) {
@@ -289,32 +175,12 @@ const ProfileCard = () => {
 
                 <Divider/>
 
-                <p style={{display: 'flex', alignItems: 'center', gap: '2%'}}>
-                    <strong style={{width: '20%', minWidth: '150px'}}>
-                        <BgColorsOutlined/> Kies een kleur:
-                    </strong>
-                    <div style={{display: 'flex', flexGrow: 1, alignItems: 'center'}}>
-                        <Select
-                            style={{flexGrow: 1, marginRight: '10px'}}
-                            placeholder="Selecteer een kleur"
-                            options={Object.keys(themes)
-                                .filter((key) => !key.endsWith('_donker'))
-                                .map((themeKey) => ({
-                                    value: themeKey,
-                                    label: themeKey.charAt(0).toUpperCase() + themeKey.slice(1),
-                                }))}
-                            value={theme}
-                            onChange={handleThemeChange} // When theme is selected, update it
-                        />
-                        <Switch
-                            checked={isDarkMode}
-                            onChange={handleThemeToggle} // When dark mode is toggled, update it
-                            checkedChildren={<span>Donker</span>}
-                            unCheckedChildren={<span>Licht</span>}
-                            style={{marginLeft: 'auto'}}
-                        />
-                    </div>
-                </p>
+                <ThemeSelector
+                    theme={theme}
+                    isDarkMode={isDarkMode}
+                    handleThemeChange={handleThemeChange}
+                    handleThemeToggle={handleThemeToggle}
+                />
 
                 <Divider/>
 

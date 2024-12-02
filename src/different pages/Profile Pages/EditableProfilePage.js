@@ -15,144 +15,21 @@ import {
     UploadOutlined,
     UserOutlined
 } from '@ant-design/icons';
-import {antThemeTokens, ButterflyIcon, themes} from '../themes';
+import {antThemeTokens, ButterflyIcon, themes} from '../../Extra components/themes';
 import TextArea from "antd/es/input/TextArea";
 import {createClient} from "@supabase/supabase-js";
 import 'antd/dist/reset.css';
-import '../CSS/AntDesignOverride.css';
-import '../CSS/EditableProfilePage.css';
+import '../../CSS/AntDesignOverride.css';
+import '../../CSS/EditableProfilePage.css';
+import HomeButtonUser from "../../Extra components/HomeButtonUser";
+import useFetchProfileData from "../../UseHooks/useFetchProfileData";
+import {calculateAge, calculateSlidesToShow} from "../../Utils/calculations";
+import useLocations from "../../UseHooks/useLocations";
+import {debounce, saveField} from "../../Api/Utils";
+import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
+import {uploadProfilePicture} from "../../Utils/uploadProfilePicture";
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
-
-// Debounce utility function
-const debounce = (func, delay) => {
-    let timer;
-    return (...args) => {
-        clearTimeout(timer);
-        timer = setTimeout(() => func(...args), delay);
-    };
-};
-
-const useFetchProfileData = (actCode) => {
-    const [profileData, setProfileData] = useState({});
-    const [interest, setInterests] = useState([])
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState(null);
-
-    useEffect(()=> {
-        const fetchInterests = async () => {
-            try{
-                const {data: interest, error} = await supabase.from('Interests').select('Interest');
-                if (error) throw error;
-                setInterests(interest)
-            } catch (error) {
-                console.error('Error fetching interests:', error);
-            }
-        };
-        fetchInterests();
-    }, []);
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const { data: userData, error: userError } = await supabase
-                    .from('User')
-                    .select('id, name, birthdate, profile_picture')
-                    .eq('id', actCode);
-
-                if (userError) throw userError;
-                if (userData.length > 0) {
-                    const user = userData[0];
-
-                    // Fetch user information
-                    const { data: userInfoData, error: userInfoError } = await supabase
-                        .from('User information')
-                        .select('*')
-                        .eq('user_id', user.id);
-
-                    if (userInfoError) throw userInfoError;
-
-                    let parsedTheme = 'blauw';
-                    let isDarkMode = false;
-
-                    if (userInfoData && userInfoData.length > 0) {
-                        const userInfo = userInfoData[0];
-                        user.bio = userInfo.bio;
-                        user.location = userInfo.location;
-                        user.looking_for = userInfo.looking_for;
-                        user.living_situation = userInfo.living_situation;
-                        user.mobility = userInfo.mobility;
-                        user.theme = userInfo.theme;
-                        user.gender = userInfo.gender;
-
-                        if (userInfo.theme) {
-                            try {
-                                const [themeName, darkModeFlag] = JSON.parse(userInfo.theme);
-                                parsedTheme = themeName;
-                                isDarkMode = darkModeFlag;
-                            } catch (error) {
-                                console.error('Error parsing theme', error);
-                            }
-                        }
-
-                        // Fetch location details using location ID
-                        if (userInfo.location) {
-                            const { data: locationData, error: locationError } = await supabase
-                                .from('Location')
-                                .select('Gemeente, Longitude, Latitude')
-                                .eq('id', userInfo.location);
-
-                            if (locationError) throw locationError;
-
-                            // If locationData is fetched, add it to user
-                            if (locationData && locationData.length > 0) {
-                                const location = locationData[0];
-                                user.locationData = {
-                                    gemeente: location.Gemeente,
-                                    latitude: location.Latitude,
-                                    longitude: location.Longitude,
-                                };
-                            }
-                        }
-                    }
-
-                    // Fetch interests related to the user
-                    const { data: interestedInData, error: interestedInError } = await supabase
-                        .from('Interested in')
-                        .select('interest_id')
-                        .eq('user_id', user.id);
-
-                    if (interestedInError) throw interestedInError;
-
-                    if (interestedInData && interestedInData.length > 0) {
-                        const interestIds = interestedInData.map(item => item.interest_id);
-                        const { data: interestsData, error: fetchInterestsError } = await supabase
-                            .from('Interests')
-                            .select('Interest')
-                            .in('id', interestIds);
-
-                        if (fetchInterestsError) throw fetchInterestsError;
-                        user.interests = interestsData.map(interest => ({ interest_name: interest.Interest }));
-                    }
-
-                    // Set the user profile data with the theme
-                    setProfileData({
-                        ...user,
-                        theme: isDarkMode ? `${parsedTheme}_donker` : parsedTheme
-                    });
-                }
-            } catch (error) {
-                setError(error.message);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        fetchData();
-    }, [actCode]);
-
-    return { profileData, isLoading, error, interest };
-};
 
 const useFetchPicturesData = (actCode) => {
     const [pictures, setPictures] = useState({});
@@ -187,18 +64,27 @@ const useFetchPicturesData = (actCode) => {
 };
 
 const ProfileCard = () => {
-    const [theme, setTheme] = useState('blauw');
+    const user_id = localStorage.getItem('user_id')
+    let [savedTheme, savedDarkMode] = JSON.parse(localStorage.getItem('theme'));
+    let theme
+    if (savedDarkMode) {
+        theme = savedDarkMode + "_donker";
+    } else {
+        theme = savedTheme;
+    }
     const themeColors = themes[theme] || themes.blauw;
-    const [profilePicture, setProfilePicture] = useState('https://example.com/photo.jpg');
+    const name = localStorage.getItem('name')
+
+    const savedProfilePicture = localStorage.getItem('profile_picture')
+    const [profilePicture, setProfilePicture] = useState(savedProfilePicture);
     const [uploading, setUploading] = useState(false);
+
     const [images, setImages] = useState([
         'https://i.pravatar.cc/150?img=1',
-        'https://i.pravatar.cc/150?img=2',
-        'https://i.pravatar.cc/150?img=3',
-        'https://i.pravatar.cc/150?img=4'
     ]);
     const [uploadingPicture, setUploadingPicture] = useState(false);
     const [removingPicture, setRemovingPicture] = useState(false);
+
     const [location, setLocation] = useState(null);
     const [gender, setGender] = useState('')
     const [biography, setBiography] = useState('');
@@ -209,26 +95,14 @@ const ProfileCard = () => {
     const [newInterest, setNewInterest] = useState('');
     const [interestOptions, setInterestOptions] = useState([])
     const [lookingForArray, setLookingForArray] = useState([])
-    const [locations, setLocations] = useState([])
     const [searchValue, setSearchValue] = useState(""); // For search functionality
-    const { pictures} = useFetchPicturesData(localStorage.getItem('user_id'));
-    const { profileData, isLoading, error, interest} = useFetchProfileData(localStorage.getItem('user_id'));
 
-    const applyThemeToCSS = (themeColors) => {
-        const root = document.documentElement;
-        Object.entries(themeColors).forEach(([key, value]) => {
-            root.style.setProperty(`--${key}`, value);
-        });
-    };
+    const { pictures} = useFetchPicturesData(user_id);
+    const { profileData, isLoading, error, interest} = useFetchProfileData(user_id, { fetchAllInterests: true});
+
+    useThemeOnCSS(themeColors);
 
     useEffect(() => {
-        applyThemeToCSS(themeColors); // Apply the selected theme
-    }, [themeColors]);
-
-    useEffect(() => {
-        if (profileData.theme) {
-            setTheme(profileData.theme);
-        }
         if (profileData.profile_picture) {
             const imageUrlWithCacheBuster = `${profileData.profile_picture}?t=${new Date().getTime()}`;
             setProfilePicture(imageUrlWithCacheBuster);
@@ -277,22 +151,7 @@ const ProfileCard = () => {
             }
         }
         setImages(list_of_images);
-        console.log(list_of_images)
     }, [pictures]);
-
-    // Simplified slides calculation
-    const calculateSlidesToShow = (imageCount) => {
-        const width = window.innerWidth;
-        let slides = 5.5;
-
-        if (width < 700) slides = 1;
-        else if (width < 1100) slides = 1.5;
-        else if (width < 1500) slides = 2.5;
-        else if (width < 2000) slides = 3.5;
-        else if (width < 3000) slides = 4.5;
-
-        return Math.min(slides, imageCount);
-    };
 
     const [slidesToShow, setSlidesToShow] = useState(calculateSlidesToShow(images.length+1))
 
@@ -307,55 +166,24 @@ const ProfileCard = () => {
         return () => window.removeEventListener('resize', handleResize);
     }, [images.length]);
 
-    useEffect(() => {
-        const fetchLocations = async (searchTerm = "") => {
-            const { data, error } = await supabase
-                .from("Location")
-                .select("id, Gemeente")
-                .ilike("Gemeente", `%${searchTerm}%`) // Match search term
-                .limit(10); // Limit results for performance
-
-            if (error) {
-                console.error("Error fetching locations:", error.message);
-            } else {
-                setLocations(data || []);
-            }
-        };
-
-        fetchLocations(searchValue);
-    }, [searchValue]);
+    const { locations } = useLocations(searchValue);
 
     const handleSearch = (value) => {
         setSearchValue(value); // Trigger new fetch based on search
     };
 
-    // Define async save functions
-    const saveField = async (field, value) => {
-        try {
-            const { data, error } = await supabase
-                .from('User information')
-                .update({ [field]: value })
-                .eq('user_id', profileData.id);
-            if (error) throw error;
-
-            console.log(`${field} saved successfully with value ${value}`);
-        } catch (error) {
-            console.error(`Error saving ${field}:`, error);
-        }
-    };
-
     // Debounced save functions
-    const debouncedSaveBiography = debounce((value) => saveField('bio', value), 1000);
-    const debouncedSaveLocation = debounce((value) => saveField('location', value), 1000);
-    const debouncedSaveGender = debounce((value) => saveField('gender', value), 1000);
-    const debouncedSaveLivingSituation = debounce((value) => saveField('living_situation', value), 1000)
-    const debouncedSaveMobility = debounce((value) => saveField('mobility', value), 1000)
+    const debouncedSaveBiography = debounce((value) => saveField(user_id, 'bio', value), 1000);
+    const debouncedSaveLocation = debounce((value) => saveField(user_id, 'location', value), 1000);
+    const debouncedSaveGender = debounce((value) => saveField(user_id, 'gender', value), 1000);
+    const debouncedSaveLivingSituation = debounce((value) => saveField(user_id, 'living_situation', value), 1000)
+    const debouncedSaveMobility = debounce((value) => saveField(user_id, 'mobility', value), 1000)
     const debouncedSaveLookingFor = debounce(async (updatedLookingFor) => {
         try {
             const { data, error } = await supabase
                 .from('User information')
                 .update({ looking_for: updatedLookingFor })
-                .eq('user_id', profileData.id);
+                .eq('user_id', user_id);
             if (error) throw error;
 
             console.log(`Looking for updated successfully width value ${updatedLookingFor}`);
@@ -403,7 +231,7 @@ const ProfileCard = () => {
 
                 // Step 2: Associate the interest with the current profile
                 await supabase.from('Interested in ').insert({
-                    ProfileId: profileData.id,
+                    ProfileId: user_id,
                     interestId: interestId
                 });
 
@@ -432,7 +260,7 @@ const ProfileCard = () => {
             const { data: existingInterests, error: existingError } = await supabase
                 .from('Interested in')
                 .select('interest_id')
-                .eq('user_id', profileData.id);
+                .eq('user_id', user_id);
 
             if (existingError) throw existingError;
 
@@ -455,7 +283,7 @@ const ProfileCard = () => {
             if (interestsToAdd.length > 0) {
                 await supabase
                     .from('Interested in')
-                    .insert(interestsToAdd.map((id) => ({ user_id: profileData.id, interest_id: id })));
+                    .insert(interestsToAdd.map((id) => ({ user_id: user_id, interest_id: id })));
             }
 
             // Remove deselected interests if any
@@ -463,7 +291,7 @@ const ProfileCard = () => {
                 await supabase
                     .from('Interested in')
                     .delete()
-                    .eq('user_id', profileData.id)
+                    .eq('user_id', user_id)
                     .in('interest_id', interestsToRemove);
             }
         } catch (error) {
@@ -576,7 +404,7 @@ const ProfileCard = () => {
 
             // Proceed with upload
             const uniqueSuffix = `${new Date().getTime()}-${Math.random().toString(36).substring(2, 9)}`;
-            const fileName = `${profileData.id}-${uniqueSuffix}-${croppedFile.name}`;
+            const fileName = `${user_id}-${uniqueSuffix}-${croppedFile.name}`;
 
             const { data, error: uploadError } = await supabase.storage
                 .from('extra-pictures')
@@ -595,7 +423,7 @@ const ProfileCard = () => {
 
             const { error: dbInsertError } = await supabase
                 .from('Pictures')
-                .insert({ User_id: profileData.id, picture_url: imageUrl });
+                .insert({ User_id: user_id, picture_url: imageUrl });
 
             if (dbInsertError) throw dbInsertError;
 
@@ -650,72 +478,22 @@ const ProfileCard = () => {
     const handleProfilePictureUpload = async ({ file }) => {
         try {
             setUploading(true);
-            const fileName = `${profileData.id}-profilePicture`;
 
-            // Check if the file already exists and remove it before upload
-            const { data: existingFiles, error: listError } = await supabase.storage
-                .from('profile-pictures')
-                .list('', { search: profileData.id });
+            const imageUrlWithCacheBuster = await uploadProfilePicture(user_id, file, 'profile-pictures');
 
-            if (listError) {
-                console.error('Error checking existing files:', listError);
-            } else {
-                const existingFile = existingFiles.find(item => item.name.startsWith(profileData.id));
-                if (existingFile) {
-                    // Remove the existing file if it exists
-                    const { error: deleteError } = await supabase.storage
-                        .from('profile-pictures')
-                        .remove([existingFile.name]);
-                    if (deleteError) {
-                        throw deleteError;
-                    }
-                }
-            }
-
-            // Upload the new file
-            const { data, error: uploadError } = await supabase.storage
-                .from('profile-pictures')
-                .upload(fileName, file, { upsert: true }); // upsert ensures replacement if file exists
-            if (uploadError) {
-                throw uploadError;
-            }
-
-            const { data: fileData, error: urlError } = supabase.storage
-                .from('profile-pictures')
-                .getPublicUrl(fileName);
-            if (urlError) {
-                throw urlError;
-            }
-
-            const imageUrl = fileData.publicUrl;
-
-            const imageUrlWithCacheBuster = `${imageUrl}?t=${new Date().getTime()}`;
             setProfilePicture(imageUrlWithCacheBuster);
+            localStorage.setItem('profile_picture', imageUrlWithCacheBuster);
 
-
-            // Save the new image URL to the user's profile
             await supabase
                 .from('User')
-                .update({ profile_picture: imageUrl })
-                .eq('id', profileData.id);
+                .update({ profile_picture: imageUrlWithCacheBuster })
+                .eq('id', user_id);
 
         } catch (error) {
             console.error('Error uploading profile picture:', error);
         } finally {
             setUploading(false);
         }
-    };
-
-    const calculateAge = (birthdate) => {
-        if (!birthdate) return 'Onbekend';
-        const birthDate = new Date(birthdate);
-        const today = new Date();
-        let age = today.getFullYear() - birthDate.getFullYear();
-        const monthDifference = today.getMonth() - birthDate.getMonth();
-        if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
-            age--;
-        }
-        return age;
     };
 
     const CustomPrevArrow = ({ onClick }) => (
@@ -765,13 +543,14 @@ const ProfileCard = () => {
                 color: themeColors.primary10,
                 zIndex: '0'
             }}>
+                <HomeButtonUser color={themeColors.primary7} />
                 <ButterflyIcon color={themeColors.primary3}/>
 
                 <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', paddingBottom: '20px'}}>
                     <div style={{display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '10px'}}>
                         <Avatar
                             src={profilePicture}
-                            alt={profileData.name}
+                            alt={name}
                             style={{
                                 minWidth: '200px',
                                 minHeight: '200px',
@@ -780,7 +559,7 @@ const ProfileCard = () => {
                         />
                         <div>
                             <h2 style={{margin: '0', textAlign: 'center'}}>
-                                {profileData.name || 'Naam'}, {calculateAge(profileData.birthdate) || 'Leeftijd'}
+                                {name || 'Naam'}, {calculateAge(profileData.birthdate) || 'Leeftijd'}
                             </h2>
                             <div style={{marginTop: '10px', marginBottom: '20px'}}>
                                 <Upload showUploadList={false} beforeUpload={() => false}

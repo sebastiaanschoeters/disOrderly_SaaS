@@ -25,7 +25,7 @@ import {
 import tinycolor from 'tinycolor2';
 
 import React from 'react';
-import './App.css'; // Import the CSS file
+//import '../App.css'; // Import the CSS file
 
 // Your custom SVG icon component
 export const ButterflyIcon = ({ color }) => (

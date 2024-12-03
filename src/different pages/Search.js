@@ -65,7 +65,7 @@ const Search = () => {
                 name,
                 birthdate,
                 profile_picture,
-                "User information" (gender, looking_for, mobility)
+                "User information" (gender, looking_for, mobility, sexuality)
             `);
 
             if (userError) {
@@ -88,14 +88,15 @@ const Search = () => {
             // Add calculated age and user information to the result
             const usersWithDetails = filteredUserData.map((user) => {
                 const age = calculateAge(user.birthdate); // Calculate age based on birthdate
-                const { gender, looking_for, mobility } = user["User information"] || {}; // Handle missing user_information
+                const { gender, looking_for, mobility, sexuality } = user["User information"] || {}; // Handle missing user_information
 
                 return {
                     ...user,
                     age,
                     gender: gender || '',
                     looking_for: looking_for || [],
-                    mobility: mobility || null
+                    mobility: mobility || null,
+                    sexuality: sexuality || '',
                 };
             });
 
@@ -149,21 +150,55 @@ const Search = () => {
     };
 
 
+    const fetchLoggedInUserInfo = async () => {
+        try {
+            // Get logged-in user ID from localStorage
+            const loggedInUserId = parseInt(localStorage.getItem('user_id'), 10);
+
+            if (isNaN(loggedInUserId)) {
+                console.error("Invalid or missing user_id in localStorage");
+                return;
+            }
+
+            // Query the User table for the logged-in user's information
+            const { data: userInfo, error } = await supabase
+                .from('User')
+                .select(`
+                "User information" (gender, sexuality)
+            `)
+                .eq('id', loggedInUserId)
+                .single(); // Fetch a single row
+
+            if (error) {
+                console.error("Supabase Error Fetching Logged-In User Info:", error);
+                return;
+            }
+
+            if (!userInfo || !userInfo["User information"]) {
+                console.error("No user information found for the logged-in user");
+                return;
+            }
+
+            const { gender, sexuality } = userInfo["User information"];
+
+            // Optionally store these values in localStorage
+            localStorage.setItem('user_gender', gender || '');
+            localStorage.setItem('user_sexuality', sexuality || '');
+
+            console.log("Fetched logged-in user info:", { gender, sexuality });
+
+            return { gender, sexuality };
+        } catch (error) {
+            console.error("Error fetching logged-in user information:", error);
+        }
+    };
 
 
-
-
-    // Filter Users Based on Criteria
     const applyFilters = () => {
         let filtered = [...users];
 
         // Filter by age range
         filtered = filtered.filter((user) => user.age >= ageRange[0] && user.age <= ageRange[1]);
-
-        // Filter by gender (if selected)
-        if (gender) {
-            filtered = filtered.filter((user) => user.gender === gender);
-        }
 
         // Filter by looking_for options
         if (lookingFor.length > 0) {
@@ -177,8 +212,63 @@ const Search = () => {
             filtered = filtered.filter((user) => user.mobility === mobility);
         }
 
+        // Handle the "Relatie" filter logic
+        if (lookingFor.includes("Relatie")) {
+            const loggedInGender = localStorage.getItem('user_gender'); // Example: 'Vrouw'
+            const loggedInSexuality = localStorage.getItem('user_sexuality'); // Example: 'Mannen'
+
+            if (loggedInGender && loggedInSexuality) {
+                let validGenders = [];
+                let validSexualities = [];
+
+                // Logic to determine valid genders and sexualities based on logged-in user
+                if (loggedInGender === "Vrouw" && loggedInSexuality === "Mannen") {
+                    validGenders = ["Man"];
+                    validSexualities = ["Vrouwen", "Beide"];
+                } else if (loggedInGender === "Vrouw" && loggedInSexuality === "Vrouwen") {
+                    validGenders = ["Vrouw"];
+                    validSexualities = ["Vrouwen", "Beide"];
+                } else if (loggedInGender === "Vrouw" && loggedInSexuality === "Beide") {
+                    validGenders = ["Man", "Vrouw"];
+                    validSexualities = ["Vrouwen", "Beide"];
+                } else if (loggedInGender === "Man" && loggedInSexuality === "Vrouwen") {
+                    validGenders = ["Vrouw"];
+                    validSexualities = ["Man", "Beide"];
+                } else if (loggedInGender === "Man" && loggedInSexuality === "Mannen") {
+                    validGenders = ["Man"];
+                    validSexualities = ["Man", "Beide"];
+                } else if (loggedInGender === "Man" && loggedInSexuality === "Beide") {
+                    validGenders = ["Man", "Vrouw"];
+                    validSexualities = ["Man", "Beide"];
+                }
+
+                // 1. Filter by valid genders first
+                filtered = filtered.filter(user => validGenders.includes(user.gender));
+
+                // 2. Then filter by valid sexualities
+                filtered = filtered.filter(user => validSexualities.includes(user.sexuality));
+
+                // Optionally exclude non-binary users (if needed)
+                filtered = filtered.filter(user => user.gender !== "Non-binair");
+            } else {
+                console.error("Logged-in user's gender or sexuality is missing");
+            }
+        } else {
+            // If "Relatie" is not selected, apply gender filter (if gender is specified)
+            if (gender) {
+                filtered = filtered.filter((user) => user.gender === gender);
+            }
+        }
+
+        // Update the filtered users
         setFilteredUsers(filtered);
+
+        // Debugging: Log the filtered results
+        console.log("Filtered Users:", filtered);
     };
+
+
+
 
     // Handle changes for the age slider
     const handleAgeChange = (value) => {
@@ -188,15 +278,28 @@ const Search = () => {
 
     // Handle gender filter change
     const handleGenderChange = (e) => {
-        setGender(e.target.value);
+        // If "Relatie" is selected, don't change the gender filter
+        if (!lookingFor.includes("Relatie")) {
+            setGender(e.target.value); // Update gender if "Relatie" is not selected
+        } else {
+            setGender(''); // Reset gender filter when "Relatie" is selected
+        }
         applyFilters(); // Reapply filters whenever the gender changes
     };
+
 
     // Handle looking_for checkbox change
     const handleLookingForChange = (checkedValues) => {
         setLookingFor(checkedValues);
+
+        // If "Relatie" is selected, reset the gender filter
+        if (checkedValues.includes("Relatie")) {
+            setGender('');  // Remove any gender filter
+        }
         applyFilters(); // Reapply filters whenever the looking_for options change
     };
+
+
 
     // Handle mobility filter change
     const handleMobilityChange = (e) => {
@@ -385,9 +488,9 @@ const Search = () => {
                     onCancel={handleModalClose}
                     footer={null}  // Remove the footer buttons
                 >
-                    <div style={{ marginBottom: '1vw' }}>
+                    <div style={{marginBottom: '1vw'}}>
                         {/* Age Range Text */}
-                        <p style={{ fontWeight: 'bold' }}>
+                        <p style={{fontWeight: 'bold'}}>
                             Leeftijd {ageRange[0]} - {ageRange[1]}
                         </p>
                         <Slider
@@ -399,22 +502,26 @@ const Search = () => {
                             value={ageRange}
                         />
                     </div>
-                    <div style={{ marginBottom: '1vw' }}>
-                        <p style={{ fontWeight: 'bold' }} >Geslacht</p>
-                        <Radio.Group onChange={handleGenderChange} value={gender} style={{ display: 'flex', flexDirection: 'row' }}>
-                            <Radio value="Man">
-                                <Typography.Text>Man</Typography.Text>
-                            </Radio>
-                            <Radio value="Vrouw">
-                                <Typography.Text>Vrouw</Typography.Text>
-                            </Radio>
-                            <Radio value="">
-                                <Typography.Text>Maakt niet uit</Typography.Text>
-                            </Radio>
-                        </Radio.Group>
+                    <div style={{marginBottom: '1vw'}}>
+                        <p style={{fontWeight: 'bold'}}>Geslacht</p>
+                        {/* Only show gender filter if "Relatie" is not selected */}
+                        {!lookingFor.includes("Relatie") && (
+                            <Radio.Group onChange={handleGenderChange} value={gender}
+                                         style={{display: 'flex', flexDirection: 'row'}}>
+                                <Radio value="Man">
+                                    <Typography.Text>Man</Typography.Text>
+                                </Radio>
+                                <Radio value="Vrouw">
+                                    <Typography.Text>Vrouw</Typography.Text>
+                                </Radio>
+                                <Radio value="">
+                                    <Typography.Text>Maakt niet uit</Typography.Text>
+                                </Radio>
+                            </Radio.Group>
+                        )}
                     </div>
-                    <div style={{ marginBottom: '1vw' }}>
-                        <p style={{ fontWeight: 'bold' }}>Zoekt naar</p>
+                    <div style={{marginBottom: '1vw'}}>
+                        <p style={{fontWeight: 'bold'}}>Zoekt naar</p>
                         <Checkbox.Group
                             options={['Relatie', 'Vrienden', 'Intieme ontmoeting']}
                             value={lookingFor}
@@ -425,9 +532,10 @@ const Search = () => {
                             }}
                         />
                     </div>
-                    <div style={{ marginBottom: '1vw' }}>
-                        <p style={{fontWeight: 'bold' }}>Kan zich zelfstanding verplaatsen</p>
-                        <Radio.Group onChange={handleMobilityChange} value={mobility} style={{ display: 'flex', flexDirection: 'row' }}>
+                    <div style={{marginBottom: '1vw'}}>
+                        <p style={{fontWeight: 'bold'}}>Kan zich zelfstanding verplaatsen</p>
+                        <Radio.Group onChange={handleMobilityChange} value={mobility}
+                                     style={{display: 'flex', flexDirection: 'row'}}>
                             <Radio value={true}>
                                 <Typography.Text>Ja</Typography.Text>
                             </Radio>

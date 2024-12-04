@@ -3,10 +3,11 @@ import {Avatar, Divider, Select, ConfigProvider, Switch, Spin, message} from 'an
 import {
     UserSwitchOutlined,
     BgColorsOutlined,
-    HeartOutlined,
+    HeartOutlined, TrophyOutlined,
 } from '@ant-design/icons';
 import 'antd/dist/reset.css';
 import '../../CSS/AntDesignOverride.css';
+import '../../CSS/PersonalProfilePage.css';
 import {antThemeTokens, ButterflyIcon, themes} from '../../Extra components/themes';
 import { createClient } from '@supabase/supabase-js';
 import HomeButtonUser from "../../Extra components/HomeButtonUser";
@@ -45,6 +46,7 @@ const useFetchProfileData = (actCode) => {
     const [profileData, setProfileData] = useState({});
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [themeTrophyEarned, setThemeTrophyEarned] = useState(false)
 
     useEffect(() => {
         const fetchData = async () => {
@@ -80,6 +82,11 @@ const useFetchProfileData = (actCode) => {
                                 const [themeName, darkModeFlag] = JSON.parse(userInfo.theme);
                                 parsedTheme = themeName;
                                 isDarkMode = darkModeFlag;
+
+                                if (themeName !== "blauw" || isDarkMode !== false){
+                                    setThemeTrophyEarned(true);
+                                }
+
                             } catch (error) {
                                 console.error('Error parsing theme', error);
                             }
@@ -112,7 +119,7 @@ const useFetchProfileData = (actCode) => {
         fetchData();
     }, [actCode]);
 
-    return { profileData, isLoading, error };
+    return { profileData, isLoading, error, themeTrophyEarned };
 };
 
 const ProfileCard = () => {
@@ -123,7 +130,7 @@ const ProfileCard = () => {
     const profilePicture = localStorage.getItem('profile_picture')
 
     let [savedTheme, savedDarkMode] = JSON.parse(localStorage.getItem('theme'));
-    const { profileData, isLoading, error } = useFetchProfileData(user_id);
+    const { profileData, isLoading, error, themeTrophyEarned } = useFetchProfileData(user_id);
     const [theme, setTheme] = useState(savedTheme);
     const [isDarkMode, setIsDarkMode] = useState(savedDarkMode);
     const themeKey = isDarkMode ? `${theme}_donker` : theme;
@@ -133,7 +140,133 @@ const ProfileCard = () => {
     const [caretaker, setCaretaker] = useState({});
     const [sexuality, setSexuality] = useState('');
 
+    const [trophies, setTrophies] = useState([
+        { id: 8, title: "Hangman Winner", earned: false, count: 0 },
+        { id: 1, title: "First Message Sent", earned: false },
+        { id: 2, title: "First Message Received", earned: false },
+        { id: 3, title: "Added Interests", earned: false, count: 0 },
+        { id: 4, title: "Added Extra Pictures", earned: false },
+        { id: 5, title: "Profile Picture Added", earned: false },
+        { id: 6, title: "Bio Added", earned: false },
+        { id: 7, title: "Theme Updated", earned: themeTrophyEarned },
+        ]);
+
+    const checkMessageSentTrophy = async (userId) => {
+        const { data, error } = await supabase
+            .from('Chatroom')
+            .select('id, sender_id, receiver_id')
+            .eq('sender_id', userId)
+
+        if (error) throw error;
+
+        if (data.length > 0) updateTrophyStatus(1);
+    }
+
+    const checkMessageReceivedTrophy = async (userId) => {
+        const { data, error } = await supabase
+            .from('Chatroom')
+            .select('id, sender_id, receiver_id')
+            .eq('receiver_id', userId)
+
+        if (error) throw error;
+
+        if (data.length > 0) updateTrophyStatus(2);
+    }
+
+    const checkInterestsTrophy = async (userId) => {
+        const { data, error } = await supabase
+            .from('Interested in')
+            .select('id')
+            .eq('user_id', userId);
+
+        console.log("InterestsTrophies: ", data);
+        if (error) throw error;
+
+        const interestsCount = data.length;
+        if (interestsCount >= 3) {
+            updateTrophyStatus(3,{count:  interestsCount} ); // Interests Added, with count
+        }
+    };
+
+    const checkPicturesTrophy = async (userId) => {
+        const { data, error } = await supabase
+            .from('Pictures')
+            .select('id')
+            .eq('User_id', userId);
+
+        console.log("PicturesTrophies: ", data);
+        if (error) throw error;
+
+        if (data.length > 1) updateTrophyStatus(4); // Added Extra Pictures
+    };
+
+    const checkProfilePictureTrophy = async (userId) => {
+        const { data, error } = await supabase
+            .from('User')
+            .select('profile_picture')
+            .eq('id', userId)
+            .single();
+
+        console.log("Profile Picture Trophies: ", data);
+        if (error) throw error;
+
+        if (data.profile_picture) updateTrophyStatus(5); // Profile Picture Added
+    };
+
+    const checkBioTrophy = async (userId) => {
+        const { data, error } = await supabase
+            .from('User information')
+            .select('bio')
+            .eq('user_id', userId)
+            .single();
+
+        console.log("BioTrophies: ", data);
+        if (error) throw error;
+
+        if (data.bio) updateTrophyStatus(6); // Bio Added
+    };
+
+    const checkHangmanWinsTrophy = async (userId) => {
+        const { data, error } = await supabase
+            .from('User information')
+            .select('hangman_wins')
+            .eq('user_id', userId)
+            .single();
+
+        console.log("HangmanTrophies: ", data);
+        if (error) throw error;
+
+        if (data) {
+            updateTrophyStatus(8, { count: data.hangman_wins });
+        }
+    };
+
     useThemeOnCSS(themeColors);
+
+    const updateTrophyStatus = (trophyId, additionalData = {}) => {
+        setTrophies((prevTrophies) =>
+            prevTrophies.map((trophy) =>
+                trophy.id === trophyId
+                    ? { ...trophy, earned: true, ...additionalData }
+                    : trophy
+            )
+        );
+    };
+
+    useEffect(() => {
+        const checkTrophies = async () => {
+            await checkMessageSentTrophy(user_id);
+            await checkMessageReceivedTrophy(user_id)
+            await checkInterestsTrophy(user_id);
+            await checkPicturesTrophy(user_id);
+            await checkProfilePictureTrophy(user_id);
+            await checkBioTrophy(user_id);
+            await checkHangmanWinsTrophy(user_id);
+        };
+
+        checkTrophies();
+    }, [user_id]);
+
 
     useEffect(() => {
         const initializeNotifications = async () => {
@@ -153,6 +286,9 @@ const ProfileCard = () => {
                 const [savedTheme, darkModeFlag] = profileData.theme;
                 setTheme(savedTheme);
                 setIsDarkMode(darkModeFlag);
+                if (savedTheme !== "blauw" || darkModeFlag !== false){
+                    updateTrophyStatus(7);
+                }
             } catch (error) {
                 console.error('Error parsing theme data:', error);
             }
@@ -171,6 +307,9 @@ const ProfileCard = () => {
             const themeData = [newTheme, darkModeFlag]; // Ensure both theme and dark mode flag are saved together
             await saveField(user_id, 'theme', JSON.stringify(themeData));
             localStorage.setItem('theme',JSON.stringify(themeData))// Save it as a stringified JSON array
+            if (newTheme !== "blauw" || darkModeFlag !== false) {
+                updateTrophyStatus(7);
+            }
         } catch (error) {
             console.error('Error saving theme:', error);
         }
@@ -250,7 +389,7 @@ const ProfileCard = () => {
     if (error) return <p>Failed to load profile: {error}</p>;
 
     return (
-        <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
+        <ConfigProvider theme={{token: antThemeTokens(themeColors)}}>
             <div
                 style={{
                     padding: '20px',
@@ -270,11 +409,15 @@ const ProfileCard = () => {
                         src={profilePicture || "https://example.com/photo.jpg"} // Fallback to default avatar
                         alt={name || "No Name"}
                         style={{
-                            minWidth: '200px',
-                            minHeight: '200px',
+                            minWidth: '150px',
+                            width: '12vw',
+                            minHeight: '150px',
+                            height: '12vw',
                             borderRadius: '50%'
                         }}
-                    />
+                    >
+                        <h2>{name[0]}</h2>
+                    </Avatar>
                     <h2 style={{margin: '0', textAlign: 'center'}}>
                         {name || 'Naam'}, {calculateAge(profileData.birthdate) || 'Leeftijd'}
                     </h2>
@@ -342,9 +485,38 @@ const ProfileCard = () => {
                 </p>
 
                 <Divider/>
+
+                <p>
+                    <strong>
+                        <TrophyOutlined/> Trofeeën
+                    </strong>
+                </p>
+                <div style={{display: 'flex', flexDirection: 'column', gap: '15px'}}>
+                    {trophies.map((trophy) => (
+                        <div key={trophy.id} style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
+                            <div style={{display: 'flex', alignItems: 'center'}}>
+                                <div className={trophy.earned ? "sparkle-icon" : ""}>
+                                    <TrophyOutlined
+                                        style={{
+                                            fontSize: '2rem',
+                                            color: trophy.earned ? themeColors.primary7 : themeColors.primary1,
+                                            transition: 'color 0.3s',
+                                        }}
+                                    />
+                                </div>
+                            </div>
+                            <div>
+                                <h4>{trophy.title}</h4>
+                                {trophy.id === 8 && <p>Wins: {trophy.count}</p>}
+                                {trophy.id === 3 && <p>{trophy.count}/3</p>}
+                            </div>
+                        </div>
+                    ))}
+                </div>
             </div>
         </ConfigProvider>
-    );
+    )
+        ;
 };
 
 export default ProfileCard;

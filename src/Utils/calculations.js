@@ -3,7 +3,7 @@ export const calculateSlidesToShow = (imageCount) => {
     let slides = 5.5;
 
     if (width < 700) slides = 1;
-    else if (width < 1100) slides = 1.5;
+    else if (width < 950) slides = 1.5;
     else if (width < 1500) slides = 2.5;
     else if (width < 2000) slides = 3.5;
     else if (width < 3000) slides = 4.5;

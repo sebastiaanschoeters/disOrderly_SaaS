@@ -130,7 +130,9 @@ const useFetchCaretakers = (organizationId) => {
                 const { data: activationData, error: idError } = await supabase
                     .from("Activation")
                     .select("code")
-                    .eq("organization", organizationId);
+                    .eq("organisation", organizationId);
+
+                console.log(activationData)
 
                 if (idError) throw new Error(`Fout bij het ophalen van activatiecodes: ${idError.message}`);
                 if (!activationData || activationData.length === 0) {
@@ -161,7 +163,7 @@ const useFetchCaretakers = (organizationId) => {
 
 const ClientOverview = () => {
     const { clients, error: fetchClientsError } = useFetchClients(1111);
-    const { caretakers } = useFetchCaretakers("KUL");
+    const { caretakers } = useFetchCaretakers("25");
     const { profileData } = useFetchProfileData(1111);
     const theme = profileData.theme || "blauw";
     const themeColors = themes[theme] || themes.blauw;

@@ -461,7 +461,7 @@ const ProfileCard = (profileToShow) => {
                 {!viewedByCaretaker && (
                     <Modal
                         title={`Chat met ${profileData.name || 'de gebruiker'}`}
-                        visible={isModalVisible}
+                        open={isModalVisible}
                         onCancel={handleCancel}
                         footer={[
                             <Button key="send" type="primary" onClick={handleSendMessage} >

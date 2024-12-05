@@ -130,7 +130,9 @@ const useFetchCaretakers = (organizationId) => {
                 const { data: activationData, error: idError } = await supabase
                     .from("Activation")
                     .select("code")
-                    .eq("organisation", organizationId);
+                    .eq("organisation", organizationId)
+                    .eq("usable", false)
+                    .eq("type", "caretaker");
 
                 console.log(activationData)
 

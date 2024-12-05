@@ -22,6 +22,8 @@ const ChatPage = () => {
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState("");
     const userId = parseInt(localStorage.getItem('user_id'), 10);
+    const [loading, setLoading] = useState(false);
+    const [loadingMore, setLoadingMore] = useState(false);
 
     const localTime = new Date();
 
@@ -33,22 +35,35 @@ const ChatPage = () => {
     useThemeOnCSS(themeColors);
 
     const dummyRef = useRef(null);
-    const [isScrolledToBottom, setIsScrolledToBottom] = useState(true); // Track if at bottom
+    const [isScrolledToBottom, setIsScrolledToBottom] = useState(true);
     const messageListRef = useRef(null);
 
-    const fetchMessages = async () => {
+    const fetchMessages = async (limit = 10, start = 0) => {
+        if (loadingMore) return; // Prevent multiple fetches
+
+        setLoadingMore(true);
         const {data, error} = await supabase
             .from('Messages')
             .select('id, sender_id, created_at, message_content')
             .eq('chatroom_id', chatroomId)
-            .order('created_at', {ascending: true});
+            .order('created_at', {ascending: false})
+            .range(start, start + limit - 1);
 
         if (error) {
             console.error("Error fetching messages:", error);
+            setLoadingMore(false);
             return;
         }
-        console.log("Fetched messages:", data);
-        setMessages(data || []);
+        if (data) {
+            setMessages((prevMessages) => {
+                const uniqueMessages = [...data, ...prevMessages].filter(
+                    (msg, index, self) =>
+                        index === self.findIndex((m) => m.id === msg.id)
+                );
+                return uniqueMessages.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+            });
+        }
+        setLoadingMore(false);
     };
 
     useEffect(() => {
@@ -70,7 +85,7 @@ const ChatPage = () => {
 
     useEffect(() => {
         if (isScrolledToBottom) {
-            scrollToBottom(); // Scroll only if user is near bottom
+            scrollToBottom();
         }
     }, [messages]);
 
@@ -83,18 +98,20 @@ const ChatPage = () => {
             // Calculate the distance from the bottom
             const distanceFromBottom = scrollHeight - (scrollTop + clientHeight);
 
-            // Show the button only if the user is more than 150px away from the bottom
-            if (distanceFromBottom > 150) {
-                setIsScrolledToBottom(false);  // Show the button
+            if (distanceFromBottom > 77) {
+                setIsScrolledToBottom(false);
             } else {
-                setIsScrolledToBottom(true);  // Hide the button
+                setIsScrolledToBottom(true);
             }
         }
     };
 
     const scrollToBottom = () => {
-        if (dummyRef.current ) {
-            dummyRef.current.scrollIntoView({behavior: 'smooth'});
+        if (messageListRef.current) {
+            messageListRef.current.scrollTo({
+                top: messageListRef.current.scrollHeight,
+                behavior: 'instant'
+            });
         }
     };
 
@@ -121,11 +138,7 @@ const ChatPage = () => {
             .eq('id', chatroomId);
 
         setNewMessage("");
-
-
-        setTimeout(() => {
-            scrollToBottom();
-        }, 100);
+        scrollToBottom();
     };
 
     // Function to group messages by date
@@ -146,6 +159,10 @@ const ChatPage = () => {
 
     const groupedMessages = groupMessagesByDate(messages);
 
+    const handleLoadMore = () => {
+        fetchMessages(10, messages.length);
+    };
+
     // Function to handle when the "Start Game" button is clicked
     const handleHangman = () => {
         setIsModalVisible(true);
@@ -162,7 +179,7 @@ const ChatPage = () => {
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            backgroundColor: themeColors.primary2, // Background color for the entire screen
+            backgroundColor: themeColors.primary2,
         },
         card: {
             width: '90%',
@@ -279,6 +296,21 @@ const ChatPage = () => {
                             </h2>
                         </div>
                         <div style={styles.messageList} ref={messageListRef} onScroll={handleScroll}>
+                            {!loadingMore && (
+                                <p
+                                    onClick={handleLoadMore}
+                                    style={{
+                                        textAlign: 'center',
+                                        color: themeColors.primary8,
+                                        cursor: 'pointer',
+                                        padding: '10px',
+                                        marginTop: '5px',
+                                    }}
+                                >
+                                    <strong>Load More</strong>
+                                </p>
+
+                            )}
                             {Object.keys(groupedMessages).map((date) => (
                                 <div key={date}>
                                     <div style={{
@@ -286,7 +318,7 @@ const ChatPage = () => {
                                         margin: '10px 0',
                                         color: themeColors.primary8
                                     }}>
-                                        <strong>{date}</strong>
+                                    <strong>{date}</strong>
                                     </div>
                                     {groupedMessages[date].map((message) => {
                                         const isSender = message.sender_id === userId;

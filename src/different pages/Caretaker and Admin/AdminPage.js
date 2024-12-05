@@ -32,6 +32,7 @@ const AdminPage = () => {
     const [isCaretakerVisible, setCaretakerVisible] = useState(false);
     const [isOrganisationVisible, setIsOrganisationVisible] = useState(false);
     const [names, setNames] = useState([]);
+    const [generatedOrganisation, setGeneratedOrganisation] = useState('');
     const [generatedCode, setGeneratedCode] = useState('');
     const [selectedOrganisation, setSelectedOrganisation] = useState({
         id: 0,
@@ -88,15 +89,16 @@ const AdminPage = () => {
     };
 
     const fetchNames = async () => {
-        const {data, error} = await supabase.from("User").select("id, name");
+        const {data, error} = await supabase.from("Caretaker").select("id, name, Activation(type)");
         const mappedData = data.map((user) => ({
             id: user.id,
             name: user.name,
+            role: user.Activation.type,
         }))
 
+        console.log(mappedData[0]);
 
         setNames(mappedData);
-        console.log("Mapped Data: ", mappedData)
     }
 
     const showCaretaker = () => {
@@ -185,7 +187,7 @@ const AdminPage = () => {
             } else {
                 console.log("Organisation updated successfully!");
             }
-            fetchData();
+            await fetchData();
             handleCloseOrganisation();
 
         } catch (err) {
@@ -233,11 +235,25 @@ const AdminPage = () => {
         });
     };
 
+    const handleDeleteOrganisation = async () => {
+        const {error} = await supabase.from("Organisations").delete().eq("id", selectedOrganisation.id);
+        if (error) {
+            console.error("Error deleting organisation:", error);
+        } else {
+            console.log("Organisation deleted successfully!");
+        }
+        fetchData();
+    };
 
     const handleGenerateCode = async () => {
-        const {data, error} = await supabase.from("Activation").insert({"usable": true, "type": "caretaker"}).select();
+        console.log("Organization picked: ",generatedOrganisation)
+        const {data, error} = await supabase.from("Activation").insert({"usable": true, "type": "caretaker", "organisation": generatedOrganisation}).select();
         await setGeneratedCode(data[0].code);
         console.log("Generated code: ", data[0]["code"]);
+    }
+
+    const handleGeneratedOrganisation = (organisation) => {
+        setGeneratedOrganisation(organisation);
     }
 
     const styles = {
@@ -277,10 +293,19 @@ const AdminPage = () => {
             width: '90%',
             maxWidth: '400px',
             height: 'auto',
+        },
+        saveButton: {
+            position: 'absolute',
+            left: '1px',
+            bottom: '2px'
+        },
+        deleteButton: {
+            position: 'absolute',
+            right: '1px',
+            bottom: '2px',
+            backgroundColor: 'red'
         }
     }
-
-
 
     return (<ConfigProvider theme={{token: antThemeTokens(themeColors)}}>
 
@@ -546,8 +571,12 @@ const AdminPage = () => {
 
 
                         <Form.Item>
-                            <Button type="primary" htmlType="submit" onClick={handleUpdateOrganisation}>
+                            <Button type="primary" htmlType="submit" onClick={handleUpdateOrganisation} style={styles.saveButton}>
                                 Opslaan
+                            </Button>
+
+                            <Button type="primary" htmlType="submit" onClick={handleDeleteOrganisation} style={styles.deleteButton}>
+                                Verwijder organisatie
                             </Button>
                         </Form.Item>
                     </Form>
@@ -560,7 +589,20 @@ const AdminPage = () => {
                     style={{padding: '10px'}}
                 >
                     <div>
-                        <h3>Code voor de nieuwe caretaker:</h3>
+                        <Select
+                            style={{ width: "95%" }}
+                            placeholder="Kies een organisatie"
+                            onChange={handleGeneratedOrganisation}
+                            value={generatedOrganisation}
+                            allowClear
+                        >
+                            {Organisations.map((organisation) => (
+                                <Select.Option key={organisation.name} value={organisation.name}>
+                                    {organisation.name}
+                                </Select.Option>
+                            ))}
+                        </Select>
+                        <h3>Code voor de nieuwe begeleider:</h3>
                         <h2>{generatedCode}</h2>
                     </div>
                     <div>

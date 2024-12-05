@@ -19,6 +19,7 @@ const ActivationPage = () => {
     const [loading, setLoading] = useState(false);
     const [userData, setUserData] = useState({});
     const [form] = Form.useForm();
+    const [userType, setUserType] = useState('');
 
     const theme = 'blauw'
     const themeColors = themes[theme] || themes.blauw;
@@ -91,8 +92,9 @@ const ActivationPage = () => {
                 ...prevData,
                 activationKey: values.activationKey,
             }));
+            setUserType(data.type);
             if(data.type === 'user'){setStep(2);}
-            if(data.type === 'caretaker'){setStep(7);}
+            if((data.type === 'caretaker') || (data.type === 'responsible')){setStep(7);}
 
         } catch (err) {
             console.error("Unexpected error during activation code validation:", err);
@@ -199,7 +201,7 @@ const ActivationPage = () => {
                     user_id: userData.activationKey,
                     email: values.email,
                     password: hashedPassword,
-                    type: 'caretaker'
+                    type: userType
                 });
 
             if (credError) throw credError;

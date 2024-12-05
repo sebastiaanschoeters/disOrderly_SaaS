@@ -3,7 +3,6 @@ import {createClient} from "@supabase/supabase-js";
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
 
-
 const useFetchCaretakerData = (actCode, options = { fetchOrganization: true }) => {
     const [profileData, setProfileData] = useState({});
     const [isLoading, setIsLoading] = useState(true);
@@ -41,13 +40,14 @@ const useFetchCaretakerData = (actCode, options = { fetchOrganization: true }) =
                     if (options.fetchOrganization) {
                         const { data: userOrganization, error: userOrganizationError } = await supabase
                             .from("Activation")
-                            .select("organization")
-                            .eq("code", user.id);
+                            .select("Organization: organisation(name)")
+                            .eq("code", actCode);
+                        console.log(userOrganization[0].Organization.name)
 
                         if (userOrganizationError) throw userOrganizationError;
 
                         if (userOrganization && userOrganization.length > 0) {
-                            user.organization = userOrganization[0].organization;
+                            user.organization = userOrganization[0].Organization.name;
                         }
                     }
 

@@ -4,10 +4,8 @@ import 'antd/dist/reset.css';
 import '../../CSS/AntDesignOverride.css';
 import { antThemeTokens, ButterflyIcon, themes} from '../../Extra components/themes';
 import { useNavigate } from 'react-router-dom';
-//import LocalStorageViewer from '../../Extra components/LocalStorageViewer';
 import forestImage from '../../Media/forest.jpg';
 import {createClient} from "@supabase/supabase-js";
-import {getName, getTheme, getPfp} from "../../Api/Utils";
 import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
 import {storeUserSession} from "../../Utils/sessionHelpers"; // Path to the image
 
@@ -103,18 +101,20 @@ const LoginPage = () => {
                 ></div>
                 <ButterflyIcon color="rgba(255, 255, 255, 0.2)" />
                 <Button
-                    type="link"
+                    type="primary"
+                    onClick={navigate('/home')}
                     style={{
-                        position: 'absolute',
-                        top: 20,
-                        right: 20,
-                        fontWeight: 'bold',
-                        color: themeColors.primary6,
+                        position: "fixed",
+                        right: "20px",
+                        top: "20px",
+                        zIndex: 1000,
+                        borderRadius: "12px",
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        fontSize: "1rem"
                     }}
-                    onClick={() => navigate('/activate')}
-                >
-                    Activate
-                </Button>
+                >Activate</Button>
 
                 <Card style={{ width: 300 }} title="Login" bordered={false}>
                     <Form

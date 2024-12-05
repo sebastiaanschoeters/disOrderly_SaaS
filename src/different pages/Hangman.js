@@ -137,8 +137,11 @@ const HangmanGame = ({ isModalVisible, setIsModalVisible, player1Id, player2Id, 
         }
 
         setGameId(data[0].id)
+        setIsModalVisible(false)
         setStep(2)
+        handleSendMessage("ButterflyIcon0 " + localStorage.getItem('name') + " heeft een nieuw spel gestart!Klik lings inderaan op de + om te spelen")
         return data;  // Return the new game data
+
     };
 
     const handleAnswer = async (gameId, answer) => {
@@ -153,37 +156,45 @@ const HangmanGame = ({ isModalVisible, setIsModalVisible, player1Id, player2Id, 
         if (error) {
             console.error('Error saving answer:', error);
         }
+        setIsModalVisible(false)
+        handleSendMessage("ButterflyIcon0 " + localStorage.getItem('name') + " heeft de vraag beantwoord!Klik lings inderaan op de + om te spelen")
         setStep(3)
         return answer
     };
 
+// handleGuess function - simplified
     const handleGuess = (letter) => {
-        // Prevent duplicate guesses
+        // If the letter has already been guessed, do nothing
         if (guessedLetters.includes(letter)) return;
 
         // Update the guessed letters
-        setGuessedLetters([...guessedLetters, letter]);
+        setGuessedLetters((prevGuessedLetters) => [...prevGuessedLetters, letter]);
+    };
 
-        // Check if the guess is correct
+// useEffect to respond to state change in guessedLetters
+    useEffect(() => {
+        if (guessedLetters.length === 0) return;
+
+        const letter = guessedLetters[guessedLetters.length - 1];  // Get the most recent guessed letter
+
+        // Check if the guessed letter is correct or not
         if (answer.toUpperCase().includes(letter)) {
-            // Correct guess message
             if (handleSendMessage) {
                 handleSendMessage(`ButterflyIcon${wrongGuesses} ${letter.toUpperCase()} is juist!` + renderWord());
             }
         } else {
-            // Increment wrong guesses
             const newWrongGuesses = wrongGuesses + 1;
             setWrongGuesses(newWrongGuesses);
 
-            // Incorrect guess message
             if (handleSendMessage) {
-                handleSendMessage(`ButterflyIcon${newWrongGuesses} ${letter.toUpperCase()} is fout!`+ renderWord());
+                handleSendMessage(`ButterflyIcon${newWrongGuesses} ${letter.toUpperCase()} is fout!` + renderWord());
             }
         }
 
-        // Update guess data in the database
+        // Update database with the new state
         handleGuessInDatabase(gameId, guessedLetters, wrongGuesses);
-    };
+    }, [guessedLetters]); // Trigger when guessedLetters changes
+
 
     const handleGuessInDatabase = async (gameId, guessedLetters, currentWrongGuesses) => {
         const { data, error } = await supabase

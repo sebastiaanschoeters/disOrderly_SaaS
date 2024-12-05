@@ -45,10 +45,6 @@ const ChatPage = () => {
     const [isScrolledToBottom, setIsScrolledToBottom] = useState(true);
     const messageListRef = useRef(null);
 
-    const handleSendButterfly = () => {
-        handleSendMessage("ButterflyIcon");
-    };
-
     const fetchMessages = async (limit = 10, start = 0) => {
         if (loadingMore) return; // Prevent multiple fetches
 
@@ -444,7 +440,6 @@ const ChatPage = () => {
                             <div ref={dummyRef}/>
                         </div>
                         <div style={styles.inputContainer}>
-                            <Button onClick={handleSendButterfly}>Send Butterfly</Button>
                             <Button type="primary"
                                     style={styles.sendButton}
                                     icon={<PlusOutlined/>}

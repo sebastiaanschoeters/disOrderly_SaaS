@@ -315,8 +315,8 @@ const ClientOverview = () => {
         }
     )
 
-    const handleAcceptRequest = (notification) => handleRequest(notification, 'accept');
-    const handleDenyRequest = (notification) => handleRequest(notification, 'deny');
+    const handleAcceptRequest = (notification) => handleRequest(notification, 'accept', true);
+    const handleDenyRequest = (notification) => handleRequest(notification, 'deny',true);
 
     const handleClientClick = (client) => {
         setSelectedClient(client);

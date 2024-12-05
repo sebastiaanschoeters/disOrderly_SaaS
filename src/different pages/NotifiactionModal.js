@@ -67,8 +67,8 @@ const NotificationModal = () => {
         }
     )
 
-    const handleAcceptRequest = (notification) => handleRequest(notification, 'accept');
-    const handleDenyRequest = (notification) => handleRequest(notification, 'deny');
+    const handleAcceptRequest = (notification) => {handleRequest(notification, 'accept', false);};
+    const handleDenyRequest = (notification) => {handleRequest(notification, 'deny', false);};
 
     return (
         <Modal
@@ -88,10 +88,10 @@ const NotificationModal = () => {
                         }`}
                     </p>
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <Button onClick={handleAcceptRequest} type="default" size="large">
+                        <Button onClick={() => handleAcceptRequest(notification)} type="default" size="large">
                             Accepteren
                         </Button>
-                        <Button onClick={handleDenyRequest} type="default" size="large">
+                        <Button onClick={() => handleDenyRequest(notification)} type="default" size="large">
                             Weigeren
                         </Button>
                     </div>

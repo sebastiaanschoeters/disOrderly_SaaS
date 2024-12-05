@@ -2,13 +2,14 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Avatar, Input, Button, Modal, ConfigProvider, Card, Typography, Space } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {ArrowDownOutlined, PlusOutlined, SendOutlined} from '@ant-design/icons';
-import {antThemeTokens, ButterflyIcon, themes} from '../Extra components/themes';
+import {antThemeTokens, ButterflyIcon, ButterflyIconSmall, themes} from '../Extra components/themes';
 import { createClient } from "@supabase/supabase-js";
 import '../CSS/ChatPage.css';
 import HomeButtonUser from "../Extra components/HomeButtonUser";
 import HangmanGame from "./Hangman";
 import useTheme from "../UseHooks/useTheme";
 import useThemeOnCSS from "../UseHooks/useThemeOnCSS";
+import Forest from '../Media/forest.jpg';
 
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
@@ -37,6 +38,10 @@ const ChatPage = () => {
     const dummyRef = useRef(null);
     const [isScrolledToBottom, setIsScrolledToBottom] = useState(true);
     const messageListRef = useRef(null);
+
+    const handleSendButterfly = () => {
+        handleSendMessage("ButterflyIcon");
+    };
 
     const fetchMessages = async (limit = 10, start = 0) => {
         if (loadingMore) return; // Prevent multiple fetches
@@ -116,6 +121,7 @@ const ChatPage = () => {
     };
 
     const handleSendMessage = async () => {
+
         if (newMessage.trim() === "") return;
 
         const {error} = await supabase
@@ -335,14 +341,30 @@ const ChatPage = () => {
                                                     style={{
                                                         ...styles.bubble,
                                                         ...(isSender ? styles.senderBubble : styles.receiverBubble),
+                                                        display: "flex",
+                                                        justifyContent: "center",
+                                                        alignItems: "center",
                                                     }}
                                                 >
-                                                    <p style={{margin: 0}}>{message.message_content}</p>
+                                                    {message.message_content === "ButterflyIcon" ? (
+                                                        <img
+                                                            src={Forest} // Update this to the actual local image path
+                                                            alt="Butterfly Icon"
+                                                            style={{
+                                                                width: "50px",
+                                                                height: "50px",
+                                                            }}
+                                                        />
+                                                    ) : (
+                                                        <p style={{margin: 0}}>{message.message_content}</p>
+                                                    )}
                                                 </div>
-                                                <span style={{
-                                                    ...styles.timestamp,
-                                                    alignSelf: isSender ? 'flex-end' : 'flex-start',
-                                                }}>
+                                                <span
+                                                    style={{
+                                                        ...styles.timestamp,
+                                                        alignSelf: isSender ? 'flex-end' : 'flex-start',
+                                                    }}
+                                                >
                                                     {new Date(message.created_at).toLocaleTimeString([], {
                                                         hour: '2-digit',
                                                         minute: '2-digit',
@@ -351,6 +373,7 @@ const ChatPage = () => {
                                             </div>
                                         );
                                     })}
+
                                 </div>
                             ))}
                             <Button
@@ -362,6 +385,7 @@ const ChatPage = () => {
                             <div ref={dummyRef}/>
                         </div>
                         <div style={styles.inputContainer}>
+                            <Button onClick={handleSendButterfly}>Send Butterfly</Button>
                             <Button type="primary"
                                     style={styles.sendButton}
                                     icon={<PlusOutlined/>}

@@ -160,6 +160,8 @@ const ProfileCard = () => {
             setSlidesToShow(calculateSlidesToShow(images.length+1));
         };
 
+        handleResize();
+
         window.addEventListener('resize', handleResize);
 
         // Cleanup on unmount

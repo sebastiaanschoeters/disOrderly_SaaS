@@ -137,7 +137,6 @@ const ProfileCard = (profileToShow) => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [newMessage, setNewMessage] = useState('');
     const [isChatroomExistent, setChatroomExistent] = useState(false); // State to track chatroom existence
-    const navigate = useNavigate();
     const localTime = new Date();
 
     const imageUrls = pictures
@@ -150,6 +149,8 @@ const ProfileCard = (profileToShow) => {
         const handleResize = () => {
             setSlidesToShow(calculateSlidesToShow(imageUrls.length));
         };
+
+        handleResize();
 
         window.addEventListener('resize', handleResize);
 

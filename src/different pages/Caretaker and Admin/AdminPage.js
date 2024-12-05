@@ -7,15 +7,14 @@ import React, {useEffect, useState} from "react";
 import { useNavigate } from 'react-router-dom';
 import { createClient } from "@supabase/supabase-js";
 import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
+import useLocations from "../../UseHooks/useLocations";
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q");
 
 const AdminPage = () => {
     const theme = 'blauw'
     const themeColors = themes[theme] || themes.blauw;
-
     useThemeOnCSS(themeColors);
-
     const navigate = useNavigate();
     const [Organisations, setOrganisations] = useState([]);
     const [isModalVisible, setIsModalVisible] = useState(false);
@@ -24,6 +23,7 @@ const AdminPage = () => {
     const [names, setNames] = useState([]);
     const [generatedOrganisation, setGeneratedOrganisation] = useState('');
     const [generatedCode, setGeneratedCode] = useState('');
+    const [oldResponsible, setOldResponsible] = useState(0);
     const [selectedOrganisation, setSelectedOrganisation] = useState({
         id: 0,
         name: undefined,
@@ -50,7 +50,6 @@ const AdminPage = () => {
             console.error(error);
         }
         setOrganisations(mappedData);
-
         fetchNames();
     }
 
@@ -71,7 +70,7 @@ const AdminPage = () => {
                 return null;
             }
 
-            return data[0].id; // Return the first matching location ID
+            return data[0].id;
         } catch (err) {
             console.error("Error:", err);
             return null;
@@ -79,15 +78,12 @@ const AdminPage = () => {
     };
 
     const fetchNames = async () => {
-        const {data, error} = await supabase.from("Caretaker").select("id, name, Activation(type)");
+        const {data, error} = await supabase.from("Caretaker").select("id, name, Activation(type)").order("name");
         const mappedData = data.map((user) => ({
             id: user.id,
             name: user.name,
             role: user.Activation.type,
         }))
-
-        console.log(mappedData[0]);
-
         setNames(mappedData);
     }
 
@@ -116,27 +112,23 @@ const AdminPage = () => {
                 .select("id")
                 .eq("Gemeente", organisation.locationName);
 
-            if (error) {
-                console.error(error);
-                return;
-            }
-
             const locationCode = data.length > 0 ? data[0].id : 0;
-
             setSelectedOrganisation({
                 ...organisation,
                 location: locationCode, // Use the resolved location name
             });
-
-            setIsOrganisationVisible(true);
         } catch (error) {
             console.error("Error fetching organisation details:", error);
         }
+
+
+
+            setIsOrganisationVisible(true);
+
     }
 
     const handleUpdateOrganisation = async () => {
         try {
-            console.log(selectedOrganisation);
             const {error } = await supabase
                 .from("Organisations")
                 .update({
@@ -162,7 +154,6 @@ const AdminPage = () => {
 
     const handleNewOrganisation = async () => {
         try {
-            console.log(selectedOrganisation);
             const {error } = await supabase
                 .from("Organisations")
                 .insert({
@@ -213,7 +204,6 @@ const AdminPage = () => {
     };
 
     const handleCloseOrganisation = () => {
-        console.log(selectedOrganisation);
         setIsOrganisationVisible(false);
         setSelectedOrganisation({
             id: 0,
@@ -236,14 +226,39 @@ const AdminPage = () => {
     };
 
     const handleGenerateCode = async () => {
-        console.log("Organization picked: ",generatedOrganisation)
         const {data, error} = await supabase.from("Activation").insert({"usable": true, "type": "caretaker", "organisation": generatedOrganisation}).select();
         await setGeneratedCode(data[0].code);
-        console.log("Generated code: ", data[0]["code"]);
     }
 
     const handleGeneratedOrganisation = (organisation) => {
         setGeneratedOrganisation(organisation);
+    }
+
+    const handleNewResponsible = async (newResponsible) => {
+        const responsibleName = names.find(name => name.id === newResponsible).name;
+        setSelectedOrganisation(prev => ({
+            ...prev,
+            responsible: newResponsible,
+            responsibleName,
+        }));
+
+        try {
+            const {error} = await supabase
+                .from("Organisations")
+                .update({
+                    responsible: newResponsible,
+                })
+                .eq("id", selectedOrganisation.id);
+
+            if (error) {
+                console.error("Error updating organisation:", error);
+            } else {
+                console.log("Organisation updated successfully!");
+            }
+        }
+        catch (err) {
+                console.error("Update failed:", err);
+            }
     }
 
     const styles = {
@@ -463,8 +478,19 @@ const AdminPage = () => {
                                 name="contactPerson"
                                 rules={[{required: true}]}>
 
-                                <Input placeholder="Naam"
-                                       onChange={(e) => handleFieldChange("responsible", e.target.value)}/>
+                                <Select
+                                    style={{ width: "95%" }}
+                                    placeholder="Kies een verantwoordelijke"
+                                    onChange={handleNewResponsible}
+                                    value={generatedOrganisation}
+                                    allowClear
+                                >
+                                    {names.map((name) => (
+                                        <Select.Option key={name.name} value={name.name}>
+                                            {name.name}
+                                        </Select.Option>
+                                    ))}
+                                </Select>
 
                             </Form.Item>
 
@@ -526,10 +552,20 @@ const AdminPage = () => {
                         <Form.Item
                             label="Contactpersoon"
                             name="contactPerson">
-                            <Input
+
+                            <Select
+                                style={{ width: "95%" }}
+                                placeholder="Kies een contactpersoon"
+                                onChange={(newResponsible) => handleNewResponsible(newResponsible)}
                                 value={selectedOrganisation.responsible}
-                                onChange={(e) => handleFieldChange("responsible", e.target.value)}
-                            />
+                                allowClear
+                            >
+                                {names.map((name) => (
+                                    <Select.Option key={name.name} value={name.id}>
+                                        {name.name}
+                                    </Select.Option>
+                                ))}
+                            </Select>
                             <div/>
                         </Form.Item>
 

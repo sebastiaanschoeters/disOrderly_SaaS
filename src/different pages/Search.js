@@ -6,11 +6,11 @@ import { FilterOutlined } from "@ant-design/icons";
 import { createClient } from "@supabase/supabase-js";
 import React, { useState, useEffect } from "react";
 import HomeButtonUser from '../Extra components/HomeButtonUser'
-import { useNavigate } from 'react-router-dom';
-import ClientDetailsModal from "./Caretaker and Admin/ClientDetailsModal";
 import ProfileDetailsModal from "./Profile Pages/ProfileDetailsModal";
 import useTheme from "../UseHooks/useTheme";
-import useThemeOnCSS from "../UseHooks/useThemeOnCSS"; // Import useNavigate for routing
+import useThemeOnCSS from "../UseHooks/useThemeOnCSS";
+import {calculateAge, calculateDistance} from "../Utils/calculations";
+import useFetchProfileData from "../UseHooks/useFetchProfileData"; // Import useNavigate for routing
 
 
 // Initialize Supabase client
@@ -25,6 +25,7 @@ const Search = () => {
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [isModalVisible, setIsModalVisible] = useState(false)
+    const [sortCriteria, setSortCriteria] = useState('distance');
 
     const [selectedClient, setSelectedClient] = useState({});
     const [isModalProfileVisible, setIsModalProfileVisible] = useState(false);
@@ -40,18 +41,134 @@ const Search = () => {
     const [themeName, darkModeFlag] = JSON.parse(localStorage.getItem('theme')) || ['blauw', false];
     const { themeColors, setThemeName, setDarkModeFlag } = useTheme(themeName, darkModeFlag);
 
+    const user_id = localStorage.getItem('user_id');
+    const { profileData, isLoading, error} = useFetchProfileData(user_id);
+
     useThemeOnCSS(themeColors);
 
-    // Helper function to calculate age from birthdate
-    const calculateAge = (birthdate) => {
-        const birthDateObj = new Date(birthdate);
-        const today = new Date();
-        let age = today.getFullYear() - birthDateObj.getFullYear();
-        const month = today.getMonth();
-        if (month < birthDateObj.getMonth() || (month === birthDateObj.getMonth() && today.getDate() < birthDateObj.getDate())) {
-            age--;
+    const sortUsers = (users) => {
+        if (sortCriteria === 'distance' && profileData.locationData) {
+            const { latitude: userLat, longitude: userLon } = profileData.locationData;
+
+            return [...users].sort((a, b) => {
+                const distanceA = a.locationData.latitude && a.locationData.longitude
+                    ? calculateDistance(userLat, userLon, a.locationData.latitude, a.locationData.longitude)
+                    : Infinity;
+                const distanceB = b.locationData.latitude && b.locationData.longitude
+                    ? calculateDistance(userLat, userLon, b.locationData.latitude, b.locationData.longitude)
+                    : Infinity;
+
+                return distanceA - distanceB;
+            });
         }
-        return age;
+
+        if (sortCriteria === 'age') {
+            const profileAge = calculateAge(profileData.birthdate)
+            return [...users].sort((a, b) => Math.abs(a.age - profileAge) - Math.abs(b.age - profileAge));
+        }
+
+        return users;
+    };
+
+
+    const fetchProfileData = async (userId) => {
+        try {
+            // Fetch user data from 'User' table
+            const { data: userData, error: userError } = await supabase
+                .from('User')
+                .select('id, name, birthdate, profile_picture')
+                .eq('id', userId);
+
+            if (userError) throw userError;
+
+            if (userData.length === 0) {
+                return { profileData: null, error: 'User not found' };
+            }
+
+            const user = userData[0];
+
+            // Fetch additional user info from 'User information'
+            const { data: userInfoData, error: userInfoError } = await supabase
+                .from('User information')
+                .select('*')
+                .eq('user_id', user.id);
+
+            if (userInfoError) throw userInfoError;
+
+            if (userInfoData && userInfoData.length > 0) {
+                const userInfo = userInfoData[0];
+                user.bio = userInfo.bio;
+                user.location = userInfo.location;
+                user.looking_for = userInfo.looking_for;
+                user.living_situation = userInfo.living_situation;
+                user.mobility = userInfo.mobility;
+                user.theme = userInfo.theme;
+                user.gender = userInfo.gender;
+
+                // Handle theme parsing
+                let parsedTheme = "blauw";
+                let isDarkMode = false;
+                if (userInfo.theme) {
+                    try {
+                        const [themeName, darkModeFlag] = JSON.parse(userInfo.theme);
+                        parsedTheme = themeName;
+                        isDarkMode = darkModeFlag;
+                    } catch (err) {
+                        console.error('Error parsing theme', err);
+                    }
+                }
+
+                user.theme = isDarkMode ? `${parsedTheme}_donker` : parsedTheme;
+            }
+
+            // Fetch user's location details from 'Location' table if available
+            if (user.location) {
+                const { data: locationData, error: locationError } = await supabase
+                    .from('Location')
+                    .select('Gemeente, Longitude, Latitude')
+                    .eq('id', user.location);
+
+                if (locationError) throw locationError;
+
+                if (locationData && locationData.length > 0) {
+                    const location = locationData[0];
+                    user.locationData = {
+                        gemeente: location.Gemeente,
+                        latitude: location.Latitude,
+                        longitude: location.Longitude,
+                    };
+                }
+            }
+
+            // Fetch user's interests from 'Interested in' and 'Interests' table
+            const { data: interestedInData, error: interestedInError } = await supabase
+                .from('Interested in')
+                .select('interest_id')
+                .eq('user_id', user.id);
+
+            if (interestedInError) throw interestedInError;
+
+            if (interestedInData && interestedInData.length > 0) {
+                const interestIds = interestedInData.map((item) => item.interest_id);
+                const { data: interestsData, error: fetchInterestsError } = await supabase
+                    .from('Interests')
+                    .select('Interest')
+                    .in('id', interestIds);
+
+                if (fetchInterestsError) throw fetchInterestsError;
+
+                user.interests = interestsData.map((interest) => ({
+                    interest_name: interest.Interest,
+                }));
+            }
+
+            // Return the profile data
+            return { profileData: user, error: null };
+
+        } catch (error) {
+            console.error('Error fetching profile data for user:', userId, error);
+            return { profileData: null, error: error.message };
+        }
     };
 
     // Fetch users from Supabase
@@ -60,19 +177,14 @@ const Search = () => {
             // Fetch user data with related "User information"
             const { data: userData, error: userError } = await supabase
                 .from('User')
-                .select(`
-                id,
-                name,
-                birthdate,
-                profile_picture,
-                "User information" (gender, looking_for, mobility)
-            `);
+                .select(`id`);
 
             if (userError) {
                 console.error("Supabase Error:", userError);
                 throw userError;
             }
 
+            console.log(userData)
             // If no user data is returned, log it
             if (!userData || userData.length === 0) {
                 console.log("No users found.");
@@ -87,15 +199,8 @@ const Search = () => {
 
             // Add calculated age and user information to the result
             const usersWithDetails = filteredUserData.map((user) => {
-                const age = calculateAge(user.birthdate); // Calculate age based on birthdate
-                const { gender, looking_for, mobility } = user["User information"] || {}; // Handle missing user_information
-
                 return {
                     ...user,
-                    age,
-                    gender: gender || '',
-                    looking_for: looking_for || [],
-                    mobility: mobility || null
                 };
             });
 
@@ -137,9 +242,32 @@ const Search = () => {
             // Optional: Log the final filtered data for debugging
             console.log("Final Filtered Users:", finalFilteredUserData);
 
+            // Array to store all users' profile data
+            let users = [];
+
+            // Iterate over each user ID and fetch profile data
+            for (let i = 0; i < finalFilteredUserData.length; i++) {
+                const userId = finalFilteredUserData[i].id;
+
+                // Fetch profile data for each user
+                const { profileData, isLoading, error } = await fetchProfileData(userId); // Assume `fetchProfileData` is a function that mimics `useFetchProfileData`
+
+                if (error) {
+                    console.error(`Error fetching profile data for user ${userId}:`, error);
+                    continue; // Skip to the next user on error
+                }
+
+                // Add the profile data to the users array
+                users.push(profileData);
+            }
+
+            const transformedUsers = transformUserData(users);
+
+            console.log(transformedUsers)
+
             // Set the enriched user data
-            setUsers(finalFilteredUserData); // Set the users with their details
-            setFilteredUsers(finalFilteredUserData); // Optionally, only show users with chat history
+            setUsers(transformedUsers); // Set the users with their details
+            setFilteredUsers(transformedUsers); // Optionally, only show users with chat history
 
         } catch (error) {
             console.error('Error fetching users:', error);
@@ -148,8 +276,32 @@ const Search = () => {
         }
     };
 
+    const transformUserData = (data) => {
+        const loggedInUserLocation = profileData?.locationData;
 
+        return data.map(user => {
+            let distance = null;
 
+            if (loggedInUserLocation && user.locationData?.latitude && user.locationData?.longitude) {
+                distance = calculateDistance(
+                    loggedInUserLocation.latitude,
+                    loggedInUserLocation.longitude,
+                    user.locationData.latitude,
+                    user.locationData.longitude
+                );
+            }
+
+            return {
+                ...user,
+                age: calculateAge(new Date(user.birthdate)), // Add calculated age
+                looking_for: user.looking_for ? JSON.parse(user.looking_for) : [], // Parse looking_for
+                profile_picture: user.profile_picture || '/default-avatar.png', // Fallback avatar
+                locationData: user.locationData || { gemeente: 'Onbekend', latitude: null, longitude: null }, // Fallback for location
+                bio: user.bio || 'Geen beschrijving beschikbaar', // Fallback for bio
+                distance: distance, // Add calculated distance (or null if not calculable)
+            };
+        });
+    };
 
 
 
@@ -177,7 +329,8 @@ const Search = () => {
             filtered = filtered.filter((user) => user.mobility === mobility);
         }
 
-        setFilteredUsers(filtered);
+        const sortedUsers = sortUsers(filtered)
+        setFilteredUsers(sortedUsers);
     };
 
     // Handle changes for the age slider
@@ -226,11 +379,11 @@ const Search = () => {
 
     useEffect(() => {
         fetchUsers(); // Fetch users when the component mounts
-    }, []);
+    }, [profileData]);
 
     useEffect(() => {
-        applyFilters(); // Apply filters when users data is loaded
-    }, [users, ageRange, gender, lookingFor, mobility]); // Apply filters when users or filters change
+        applyFilters(); // Reapply filters and sorting when users, filters, or sort criteria change
+    }, [users, ageRange, gender, lookingFor, mobility, sortCriteria]);
 
     return (
         <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
@@ -251,10 +404,10 @@ const Search = () => {
                     zIndex: '0'
                 }}
             >
-                <HomeButtonUser color={themeColors.primary7} />
-                <ButterflyIcon color={themeColors.primary3} />
+                <HomeButtonUser color={themeColors.primary7}/>
+                <ButterflyIcon color={themeColors.primary3}/>
 
-                <Title level={2} style={{ color: themeColors.primary10, marginBottom: '2vw' }}>
+                <Title level={2} style={{color: themeColors.primary10, marginBottom: '2vw'}}>
                     Gebruikers
                 </Title>
 
@@ -270,7 +423,7 @@ const Search = () => {
                     }}
                 >
                     {/* Search Bar and Filter Button */}
-                    <div style={{ flex: 1, display: 'flex', position: 'relative' }}>
+                    <div style={{flex: 1, display: 'flex', position: 'relative'}}>
                         <Input
                             placeholder="Zoek gebruikers..."
                             style={{
@@ -283,7 +436,7 @@ const Search = () => {
                         />
                         {/* Filter Icon Inside the Search Bar */}
                         <Button
-                            icon={<FilterOutlined />}
+                            icon={<FilterOutlined/>}
                             style={{
                                 position: 'absolute',
                                 right: '10px',
@@ -300,6 +453,23 @@ const Search = () => {
                         />
                     </div>
                 </div>
+
+                <div style={{marginBottom: '1vw', display: 'flex', flexDirection: 'row', gap: '1rem'}}>
+                    <p style={{fontWeight: 'bold'}}>Sorteren op:</p>
+                    <Radio.Group
+                        onChange={(e) => {
+                            setSortCriteria(e.target.value);
+                            applyFilters();
+                        }}
+                        value={sortCriteria}
+                        style={{ marginBottom: '1vw', display: 'flex', flexDirection: 'row', gap: '1rem' }}
+                    >
+                        <Radio value="distance">Afstand</Radio>
+                        <Radio value="age">Leeftijd</Radio>
+                    </Radio.Group>
+
+                </div>
+
 
                 {loading ? (
                     <div>Loading...</div>
@@ -329,7 +499,7 @@ const Search = () => {
                                     key={item.id}
 
                                     onClick={() => handleProfileClick(item.id)}
-                                        // Navigate to dynamic user link
+                                    // Navigate to dynamic user link
                                     style={{
                                         display: 'flex',
                                         flexDirection: 'row',
@@ -353,12 +523,13 @@ const Search = () => {
                                     >
                                         {item.name[0]}
                                     </Avatar>
-                                    <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>
-                                        <div style={{ textAlign: 'right' }}>
-                                            <p style={{ fontWeight: 'bold' }}>
+                                    <div style={{flex: 1, display: 'flex', justifyContent: 'flex-end'}}>
+                                        <div style={{textAlign: 'right'}}>
+                                            <p style={{fontWeight: 'bold'}}>
                                                 {item.name}
                                             </p>
                                             <p>Leeftijd: {item.age}</p>
+                                            <p>Afstand: {item.distance}km</p>
                                         </div>
                                     </div>
                                 </List.Item>
@@ -385,9 +556,9 @@ const Search = () => {
                     onCancel={handleModalClose}
                     footer={null}  // Remove the footer buttons
                 >
-                    <div style={{ marginBottom: '1vw' }}>
+                    <div style={{marginBottom: '1vw'}}>
                         {/* Age Range Text */}
-                        <p style={{ fontWeight: 'bold' }}>
+                        <p style={{fontWeight: 'bold'}}>
                             Leeftijd {ageRange[0]} - {ageRange[1]}
                         </p>
                         <Slider
@@ -399,22 +570,26 @@ const Search = () => {
                             value={ageRange}
                         />
                     </div>
-                    <div style={{ marginBottom: '1vw' }}>
-                        <p style={{ fontWeight: 'bold' }} >Geslacht</p>
-                        <Radio.Group onChange={handleGenderChange} value={gender} style={{ display: 'flex', flexDirection: 'row' }}>
+                    <div style={{marginBottom: '1vw'}}>
+                        <p style={{fontWeight: 'bold'}}>Geslacht</p>
+                        <Radio.Group onChange={handleGenderChange} value={gender}
+                                     style={{display: 'flex', flexDirection: 'row'}}>
                             <Radio value="Man">
                                 <Typography.Text>Man</Typography.Text>
                             </Radio>
                             <Radio value="Vrouw">
                                 <Typography.Text>Vrouw</Typography.Text>
                             </Radio>
+                            <Radio value="Non-binair">
+                                <Typography.Text>Non-binair</Typography.Text>
+                            </Radio>
                             <Radio value="">
                                 <Typography.Text>Maakt niet uit</Typography.Text>
                             </Radio>
                         </Radio.Group>
                     </div>
-                    <div style={{ marginBottom: '1vw' }}>
-                        <p style={{ fontWeight: 'bold' }}>Zoekt naar</p>
+                    <div style={{marginBottom: '1vw'}}>
+                        <p style={{fontWeight: 'bold'}}>Zoekt naar</p>
                         <Checkbox.Group
                             options={['Relatie', 'Vrienden', 'Intieme ontmoeting']}
                             value={lookingFor}
@@ -425,9 +600,10 @@ const Search = () => {
                             }}
                         />
                     </div>
-                    <div style={{ marginBottom: '1vw' }}>
-                        <p style={{fontWeight: 'bold' }}>Kan zich zelfstanding verplaatsen</p>
-                        <Radio.Group onChange={handleMobilityChange} value={mobility} style={{ display: 'flex', flexDirection: 'row' }}>
+                    <div style={{marginBottom: '1vw'}}>
+                        <p style={{fontWeight: 'bold'}}>Kan zich zelfstanding verplaatsen</p>
+                        <Radio.Group onChange={handleMobilityChange} value={mobility}
+                                     style={{display: 'flex', flexDirection: 'row'}}>
                             <Radio value={true}>
                                 <Typography.Text>Ja</Typography.Text>
                             </Radio>

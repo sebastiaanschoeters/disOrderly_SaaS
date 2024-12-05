@@ -1,19 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import {Tag, Avatar, Button,Input, Modal, Divider, ConfigProvider, Spin, Carousel} from 'antd';
-import {
-    MessageOutlined,
-    EnvironmentOutlined,
-    UserOutlined,
-    HeartOutlined,
-    StarOutlined,
-    HomeOutlined,
-    CarOutlined, LeftOutlined, RightOutlined, PictureOutlined
-} from '@ant-design/icons';
+import { MessageOutlined, EnvironmentOutlined, UserOutlined, HeartOutlined, StarOutlined, HomeOutlined, CarOutlined, LeftOutlined, RightOutlined } from '@ant-design/icons';
 import { createClient } from "@supabase/supabase-js";
 import 'antd/dist/reset.css';
 import '../../CSS/AntDesignOverride.css';
-import { ButterflyIcon, antThemeTokens, themes } from '../../Extra components/themes';
-import {useLocation, useNavigate} from 'react-router-dom';
+import { antThemeTokens, themes } from '../../Extra components/themes';
 import useFetchProfileData from "../../UseHooks/useFetchProfileData";
 import {calculateAge, calculateSlidesToShow} from "../../Utils/calculations";
 import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";

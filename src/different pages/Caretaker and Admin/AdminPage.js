@@ -1,16 +1,7 @@
 import 'antd/dist/reset.css'; // Import Ant Design styles
 import '../../CSS/AntDesignOverride.css'
 import { antThemeTokens, themes } from '../../Extra components/themes';
-import {
-    Button,
-    Card,
-    ConfigProvider,
-    Form,
-    Input,
-    List,
-    Modal,
-    Select
-} from 'antd';
+import { Button, Card, ConfigProvider, Form, Input, List, Modal, Select } from 'antd';
 import {PlusOutlined, RedoOutlined} from "@ant-design/icons";
 import React, {useEffect, useState} from "react";
 import { useNavigate } from 'react-router-dom';
@@ -18,7 +9,6 @@ import { createClient } from "@supabase/supabase-js";
 import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q");
-
 
 const AdminPage = () => {
     const theme = 'blauw'

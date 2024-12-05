@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Button, message } from 'antd';
+import { Modal, Button } from 'antd';
 import { createClient } from '@supabase/supabase-js';
 import useHandleRequest from "../UseHooks/useHandleRequest";
 

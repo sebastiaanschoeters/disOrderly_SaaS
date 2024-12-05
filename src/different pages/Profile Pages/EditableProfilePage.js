@@ -1,20 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {Avatar, Button, Carousel, Checkbox, ConfigProvider, Divider, message, Select, Spin, Upload} from 'antd';
-import {
-    BookOutlined,
-    CarOutlined,
-    DeleteOutlined,
-    EnvironmentOutlined,
-    HeartOutlined,
-    HomeOutlined,
-    LeftOutlined,
-    PictureOutlined,
-    PlusCircleOutlined,
-    RightOutlined,
-    StarOutlined,
-    UploadOutlined,
-    UserOutlined
-} from '@ant-design/icons';
+import { BookOutlined, CarOutlined, DeleteOutlined, EnvironmentOutlined, HeartOutlined, HomeOutlined, LeftOutlined, PictureOutlined, PlusCircleOutlined, RightOutlined, StarOutlined, UploadOutlined, UserOutlined } from '@ant-design/icons';
 import {antThemeTokens, ButterflyIcon, themes} from '../../Extra components/themes';
 import TextArea from "antd/es/input/TextArea";
 import {createClient} from "@supabase/supabase-js";

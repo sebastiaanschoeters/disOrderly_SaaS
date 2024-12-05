@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Avatar, Input, Button, Modal, ConfigProvider, Card, Typography, Space } from 'antd';
+import { Avatar, Input, Button, ConfigProvider, Card } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {ArrowDownOutlined, PlusOutlined, SendOutlined} from '@ant-design/icons';
 import {antThemeTokens, ButterflyIcon, themes} from '../Extra components/themes';

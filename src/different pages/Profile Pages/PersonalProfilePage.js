@@ -141,15 +141,15 @@ const ProfileCard = () => {
     const [sexuality, setSexuality] = useState('');
 
     const [trophies, setTrophies] = useState([
-        { id: 8, title: "Hangman Winner", earned: false, count: 0 },
-        { id: 1, title: "First Message Sent", earned: false },
-        { id: 2, title: "First Message Received", earned: false },
-        { id: 3, title: "Added Interests", earned: false, count: 0 },
-        { id: 4, title: "Added Extra Pictures", earned: false },
-        { id: 5, title: "Profile Picture Added", earned: false },
-        { id: 6, title: "Bio Added", earned: false },
-        { id: 7, title: "Theme Updated", earned: themeTrophyEarned },
-        ]);
+        { id: 8, title: "Hangman Winnaar", earned: false, count: 0 },
+        { id: 1, title: "Eerste Bericht Verstuurd", earned: false },
+        { id: 2, title: "Eerste Bericht Ontvangen", earned: false },
+        { id: 3, title: "Geïnteresseerd Toegevoegd", earned: false, count: 0 },
+        { id: 4, title: "Extra Foto's Toegevoegd", earned: false },
+        { id: 5, title: "Profielfoto Toegevoegd", earned: false },
+        { id: 6, title: "Bio Toegevoegd", earned: false },
+        { id: 7, title: "Thema Geüpdatet", earned: themeTrophyEarned },
+    ]);
 
     const checkMessageSentTrophy = async (userId) => {
         const { data, error } = await supabase
@@ -236,7 +236,7 @@ const ProfileCard = () => {
         console.log("HangmanTrophies: ", data);
         if (error) throw error;
 
-        if (data) {
+        if (data && data.hangman_wins>0) {
             updateTrophyStatus(8, { count: data.hangman_wins });
         }
     };

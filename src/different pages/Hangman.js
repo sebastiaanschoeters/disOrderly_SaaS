@@ -67,7 +67,7 @@ const generateConversationStarter = async () => {
 };
 
 
-const HangmanGame = ({ isModalVisible, setIsModalVisible, player1Id, player2Id }) => {
+const HangmanGame = ({ isModalVisible, setIsModalVisible, player1Id, player2Id, handleSendMessage }) => {
     const [gameId, setGameId] = useState(null);
     const [step, setStep] = useState(null); // 1: Question, 2: Answer, 3: Hangman Game
     const [question, setQuestion] = useState('');
@@ -158,13 +158,31 @@ const HangmanGame = ({ isModalVisible, setIsModalVisible, player1Id, player2Id }
     };
 
     const handleGuess = (letter) => {
+        // Prevent duplicate guesses
         if (guessedLetters.includes(letter)) return;
+
+        // Update the guessed letters
         setGuessedLetters([...guessedLetters, letter]);
 
-        if (!answer.toUpperCase().includes(letter)) {
-            setWrongGuesses(wrongGuesses + 1);
+        // Check if the guess is correct
+        if (answer.toUpperCase().includes(letter)) {
+            // Correct guess message
+            if (handleSendMessage) {
+                handleSendMessage(`ButterflyIcon${wrongGuesses} ${letter.toUpperCase()} is juist!` + renderWord());
+            }
+        } else {
+            // Increment wrong guesses
+            const newWrongGuesses = wrongGuesses + 1;
+            setWrongGuesses(newWrongGuesses);
+
+            // Incorrect guess message
+            if (handleSendMessage) {
+                handleSendMessage(`ButterflyIcon${newWrongGuesses} ${letter.toUpperCase()} is fout!`+ renderWord());
+            }
         }
-        handleGuessInDatabase(gameId, guessedLetters, wrongGuesses)
+
+        // Update guess data in the database
+        handleGuessInDatabase(gameId, guessedLetters, wrongGuesses);
     };
 
     const handleGuessInDatabase = async (gameId, guessedLetters, currentWrongGuesses) => {

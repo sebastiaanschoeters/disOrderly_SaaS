@@ -32,6 +32,8 @@ export const storeUserSession = async (userId, userType, setIsTransitioning, nav
             navigate('/clientOverview');
         } else if (userType === 'admin') {
             navigate('/admin');
+        } else if (userType === 'responsible') {
+            navigate('/organisationDashboard');
         }
     }, 500);
 };

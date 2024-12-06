@@ -1,10 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import {Avatar, Divider, Select, ConfigProvider, Switch, Spin, message} from 'antd';
-import {
-    UserSwitchOutlined,
-    BgColorsOutlined,
-    HeartOutlined, TrophyOutlined,
-} from '@ant-design/icons';
+import {Avatar, Divider, Select, ConfigProvider, Spin, message} from 'antd';
+import { UserSwitchOutlined, HeartOutlined, TrophyOutlined } from '@ant-design/icons';
 import 'antd/dist/reset.css';
 import '../../CSS/AntDesignOverride.css';
 import '../../CSS/PersonalProfilePage.css';

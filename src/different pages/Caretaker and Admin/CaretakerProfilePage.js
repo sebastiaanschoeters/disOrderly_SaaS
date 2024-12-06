@@ -1,20 +1,10 @@
-import React, { useState, useEffect } from 'react';
 import {Avatar, Divider, ConfigProvider} from 'antd';
-import {
-    PhoneOutlined,
-    MailOutlined,
-    TeamOutlined
-} from '@ant-design/icons';
-import { createClient } from "@supabase/supabase-js";
+import { PhoneOutlined, MailOutlined, TeamOutlined } from '@ant-design/icons';
 import 'antd/dist/reset.css';
 import '../../CSS/AntDesignOverride.css';
-import { ButterflyIcon, antThemeTokens, themes } from '../../Extra components/themes';
-import { useLocation } from 'react-router-dom';
+import { antThemeTokens, themes } from '../../Extra components/themes';
 import useFetchCaretakerData from "../../UseHooks/useFetchCaretakerData";
 import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
-
-const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
-
 
 const ProfileDetail = ({ label, value, icon }) => (
     <p style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '5px'}}>
@@ -29,6 +19,8 @@ const ProfileCard = ({ actCode }) => {
     // Derive theme colors
     const theme = profileData.theme || 'blauw';
     const themeColors = themes[theme] || themes.blauw;
+
+    console.log(profileData)
 
     useThemeOnCSS(themeColors);
 

@@ -1,21 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import {Tag, Avatar, Button,Input, Modal, Divider, ConfigProvider, Spin, Carousel} from 'antd';
-import {
-    MessageOutlined,
-    EnvironmentOutlined,
-    UserOutlined,
-    HeartOutlined,
-    StarOutlined,
-    HomeOutlined,
-    CarOutlined, LeftOutlined, RightOutlined, PictureOutlined
-} from '@ant-design/icons';
+import { MessageOutlined, EnvironmentOutlined, UserOutlined, HeartOutlined, StarOutlined, HomeOutlined, CarOutlined, LeftOutlined, RightOutlined } from '@ant-design/icons';
 import { createClient } from "@supabase/supabase-js";
 import 'antd/dist/reset.css';
 import '../../CSS/AntDesignOverride.css';
-import { ButterflyIcon, antThemeTokens, themes } from '../../Extra components/themes';
-import {useLocation, useNavigate} from 'react-router-dom';
+import { antThemeTokens, themes } from '../../Extra components/themes';
 import useFetchProfileData from "../../UseHooks/useFetchProfileData";
-import {calculateAge, calculateSlidesToShow} from "../../Utils/calculations";
+import {calculateAge, calculateDistance, calculateSlidesToShow} from "../../Utils/calculations";
 import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
@@ -137,7 +128,6 @@ const ProfileCard = (profileToShow) => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [newMessage, setNewMessage] = useState('');
     const [isChatroomExistent, setChatroomExistent] = useState(false); // State to track chatroom existence
-    const navigate = useNavigate();
     const localTime = new Date();
 
     const imageUrls = pictures
@@ -151,28 +141,13 @@ const ProfileCard = (profileToShow) => {
             setSlidesToShow(calculateSlidesToShow(imageUrls.length));
         };
 
+        handleResize();
+
         window.addEventListener('resize', handleResize);
 
         // Cleanup on unmount
         return () => window.removeEventListener('resize', handleResize);
     }, [imageUrls.length]);
-
-    // Distance calculation
-    const calculateDistance = (lat1, lon1, lat2, lon2) => {
-        const R = 6371;
-        const φ1 = lat1 * Math.PI / 180;
-        const φ2 = lat2 * Math.PI / 180;
-        const Δφ = (lat2 - lat1) * Math.PI / 180;
-        const Δλ = (lon2 - lon1) * Math.PI / 180;
-
-        const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-            Math.cos(φ1) * Math.cos(φ2) *
-            Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        const distance = R * c;
-
-        return Math.round(distance);
-    };
 
     // Parse looking for array
     const parseLookingForArray = (lookingFor) => {

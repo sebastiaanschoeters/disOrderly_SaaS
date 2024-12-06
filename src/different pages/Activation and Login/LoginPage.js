@@ -230,8 +230,9 @@ const LoginPage = () => {
                             <Input
                                 onBlur={(e) => {
                                     const emailValue = e.target.value;
-                                    console.log('Current email:', emailValue);
-                                    emailUpdated(emailValue) // Call your function here
+                                    if(emailValue) {
+                                        emailUpdated(emailValue)
+                                    }
                                 }}
                             />
                         </Form.Item>

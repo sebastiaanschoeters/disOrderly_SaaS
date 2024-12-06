@@ -177,8 +177,8 @@ const ChatPage = () => {
 
     const styles = {
         background: {
-            width: '100vw',
-            height: '100vh',
+            width: '100dvw',
+            height: '100dvh',
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
@@ -195,7 +195,7 @@ const ChatPage = () => {
         },
         chatContainer: {
             padding: '20px',
-            height: '80vh',
+            height: '80dvh',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'flex-start',
@@ -289,7 +289,7 @@ const ChatPage = () => {
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'flex-start',
-                minHeight: '100vh',
+                minHeight: '100dvh',
                 backgroundColor: themeColors.primary2,
                 color: themeColors.primary10,
                 width: '100%',

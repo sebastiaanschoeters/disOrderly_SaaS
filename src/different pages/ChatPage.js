@@ -147,8 +147,13 @@ const ChatPage = () => {
     };
 
     const handleSendMessageArg = async (messageContent) => {
-        console.log("Sending message:", messageContent);
-        if (newMessage.trim() === "") return;
+        console.log("Sending messageaaa:", messageContent);
+        if (messageContent) {
+            if (messageContent.trim() === "") return; {
+            }
+        } else {
+            return;
+        }
 
         const { error } = await supabase
             .from('Messages')

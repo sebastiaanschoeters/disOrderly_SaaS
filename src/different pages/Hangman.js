@@ -234,7 +234,11 @@ const HangmanGame = ({ isModalVisible, setIsModalVisible, player1Id, player2Id, 
 
     useEffect(() => {
         if (isGameOver || isGameWon) {
-            handleSendMessage()
+            if (isGameWon) {
+                handleSendMessage(`ButterflyIcon${wrongGuesses} `+ localStorage.getItem('name') + " Heeft het antwoord geraden!" + renderWord());
+            } else {
+                handleSendMessage(`ButterflyIcon${wrongGuesses} `+ localStorage.getItem('name') + " Heeft het antwoord niet geraden!" + `Het juiste antwoord was ${answer}`);
+            }
             setGameEnded(true);
         }
     }, [isGameOver, isGameWon]);

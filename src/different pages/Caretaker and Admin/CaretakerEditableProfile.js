@@ -13,6 +13,7 @@ import ThemeSelector from "../../Extra components/ThemeSelector";
 import {debounce} from "../../Api/Utils";
 import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
 import {uploadProfilePicture} from "../../Utils/uploadProfilePicture";
+import {useNavigate} from "react-router-dom";
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
 
@@ -20,11 +21,14 @@ const ProfileCard = () => {
     const caretaker_id = localStorage.getItem('user_id');
     const name = localStorage.getItem('name')
     const savedProfilePicture = localStorage.getItem('profile_picture')
+    let [savedTheme, savedDarkMode] = JSON.parse(localStorage.getItem('theme'));
+
     const { profileData, isLoading, error} = useFetchCaretakerData(caretaker_id, { fetchOrganization: true})
-    const [theme, setTheme] = useState('blauw');
-    const [isDarkMode, setIsDarkMode] = useState(false);
+    const [theme, setTheme] = useState(savedTheme);
+    const [isDarkMode, setIsDarkMode] = useState(savedDarkMode);
     const themeKey = isDarkMode ? `${theme}_donker` : theme;
     const themeColors = themes[themeKey] || themes.blauw;
+
     const [profilePicture, setProfilePicture] = useState(savedProfilePicture);
     const [uploading, setUploading] = useState(false);
     const [phoneNumber, setPhoneNumber] = useState('')

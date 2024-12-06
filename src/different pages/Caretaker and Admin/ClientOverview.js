@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import {Avatar, ConfigProvider, Select, Table, Button, message, Menu, Badge, Dropdown} from "antd";
 import { antThemeTokens, ButterflyIcon, themes } from "../../Extra components/themes";
 import { createClient } from "@supabase/supabase-js";
-import {BellOutlined, DeleteOutlined} from "@ant-design/icons";
+import {BellOutlined, DeleteOutlined, PoweroffOutlined} from "@ant-design/icons";
 import { useNavigate } from 'react-router-dom';
 import ClientDetailsModal from "./ClientDetailsModal";
 import 'antd/dist/reset.css';
@@ -165,11 +165,6 @@ const useFetchCaretakers = (organizationId) => {
 };
 
 const ClientOverview = () => {
-    for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        const value = localStorage.getItem(key);
-        console.log(key, ": ", value);
-    }
     const caretaker_id = localStorage.getItem("user_id");
     let [savedTheme, savedDarkMode] = JSON.parse(localStorage.getItem('theme'));
     let theme
@@ -255,7 +250,7 @@ const ClientOverview = () => {
             const screenHeight = window.innerHeight;
             const rowHeight = 130; // Approximate row height
             const headerHeight = 160; // Approximate header and padding
-            const footerHeight = 30; // Approximate footer height
+            const footerHeight = 100; // Approximate footer height
             const availableHeight = screenHeight - headerHeight - footerHeight;
 
             return Math.max(1, Math.floor(availableHeight / rowHeight));
@@ -282,6 +277,11 @@ const ClientOverview = () => {
 
         initializeData();
     }, [profileData]);
+
+    const handleLogout = () => {
+        localStorage.clear();
+        navigate('/login');
+    };
 
     const notificationMenu = (
         <Menu>
@@ -521,7 +521,7 @@ const ClientOverview = () => {
                     zIndex: "0",
                 }}
             >
-                <ButterflyIcon color={themeColors.primary3} />
+                <ButterflyIcon color={themeColors.primary3}/>
 
                 {/* Notification Button */}
                 <div
@@ -546,7 +546,7 @@ const ClientOverview = () => {
                     </Dropdown>
                 </div>
 
-                <h2 style={{ marginTop: '100px' }}>Clienten overzicht: </h2>
+                <h2 style={{marginTop: '100px'}}>Clienten overzicht: </h2>
 
                 {fetchClientsError && <p>Fout: {fetchClientsError}</p>}
                 {clients.length > 0 ? (
@@ -555,7 +555,7 @@ const ClientOverview = () => {
                         columns={columns}
                         showHeader={false}
                         rowKey="id"
-                        pagination={{ pageSize: pageSize }}
+                        pagination={{pageSize: pageSize}}
                         style={{
                             marginTop: "20px",
                         }}
@@ -589,7 +589,7 @@ const ClientOverview = () => {
                 }}>
                     <Button
                         type="primary"
-                        style={{ marginTop: "20px" }}
+                        style={{marginTop: "20px"}}
                     >
                         Genereer nieuwe profiel code
                     </Button>
@@ -623,6 +623,14 @@ const ClientOverview = () => {
                         {name}
                     </p>
                 </div>
+                <Button
+                    type="secondary"
+                    icon={<PoweroffOutlined />}
+                    style={{ fontSize: '2rem' , position: 'absolute', bottom: '5%', right: '1%' }}
+                    onClick={()=>handleLogout()}
+                >
+                    Log uit
+                </Button>
             </div>
         </ConfigProvider>
     );

@@ -137,14 +137,13 @@ const ProfileCard = () => {
     const [sexuality, setSexuality] = useState('');
 
     const [trophies, setTrophies] = useState([
-        { id: 8, title: "Hangman Winnaar", earned: false, count: 0 },
-        { id: 1, title: "Eerste Bericht Verstuurd", earned: false },
-        { id: 2, title: "Eerste Bericht Ontvangen", earned: false },
-        { id: 3, title: "Geïnteresseerd Toegevoegd", earned: false, count: 0 },
-        { id: 4, title: "Extra Foto's Toegevoegd", earned: false },
-        { id: 5, title: "Profielfoto Toegevoegd", earned: false },
-        { id: 6, title: "Bio Toegevoegd", earned: false },
-        { id: 7, title: "Thema Geüpdatet", earned: themeTrophyEarned },
+        { id: 8, title: "Win je eerste spelletje galgje", earned: false, count: 0 },
+        { id: 1, title: "Verstuur als eerste een bericht", earned: false },
+        { id: 3, title: "Voeg drie interesses toe aan je profiel", earned: false, count: 0 },
+        { id: 4, title: "Voeg extra foto's toe aan je profiel", earned: false },
+        { id: 5, title: "Voeg een profielfoto toe", earned: false },
+        { id: 6, title: "Voeg een biografie toe aan je profiel", earned: false },
+        { id: 7, title: "Verander je thema van de standaard kleuren", earned: themeTrophyEarned },
     ]);
 
     const checkMessageSentTrophy = async (userId) => {
@@ -156,17 +155,6 @@ const ProfileCard = () => {
         if (error) throw error;
 
         if (data.length > 0) updateTrophyStatus(1);
-    }
-
-    const checkMessageReceivedTrophy = async (userId) => {
-        const { data, error } = await supabase
-            .from('Chatroom')
-            .select('id, sender_id, receiver_id')
-            .eq('receiver_id', userId)
-
-        if (error) throw error;
-
-        if (data.length > 0) updateTrophyStatus(2);
     }
 
     const checkInterestsTrophy = async (userId) => {
@@ -252,7 +240,6 @@ const ProfileCard = () => {
     useEffect(() => {
         const checkTrophies = async () => {
             await checkMessageSentTrophy(user_id);
-            await checkMessageReceivedTrophy(user_id)
             await checkInterestsTrophy(user_id);
             await checkPicturesTrophy(user_id);
             await checkProfilePictureTrophy(user_id);

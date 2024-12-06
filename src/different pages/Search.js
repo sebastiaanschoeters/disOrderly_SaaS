@@ -35,6 +35,7 @@ const Search = () => {
     const [gender, setGender] = useState('');  // Gender filter: '' for all, 'Man' or 'Vrouw'
     const [lookingFor, setLookingFor] = useState([]);  // Filter for "looking_for" options
     const [mobility, setMobility] = useState(null);  // Mobility filter: TRUE for "Ja", null for "Maakt niet uit"
+    const [selectedInterests, setSelectedInterests] = useState([]);
 
     const { Title } = Typography;
 
@@ -104,6 +105,7 @@ const Search = () => {
                 user.mobility = userInfo.mobility;
                 user.theme = userInfo.theme;
                 user.gender = userInfo.gender;
+                user.sexuality = userInfo.sexuality;
 
                 // Handle theme parsing
                 let parsedTheme = "blauw";
@@ -303,7 +305,23 @@ const Search = () => {
         });
     };
 
+    const isCompatibleForRelationship = (loggedInUser, otherUser) => {
+        if (!loggedInUser.gender || !loggedInUser.sexuality || !otherUser.gender || !otherUser.sexuality) {
+            return false;
+        }
 
+        const otherUserInterestedInLoggedInUser =
+            (loggedInUser.gender === 'Man' && otherUser.sexuality.includes('Mannen')) ||
+            (loggedInUser.gender === 'Vrouw' && otherUser.sexuality.includes('Vrouwen')) ||
+            otherUser.sexuality.includes('Beide');
+
+        const loggedInUserInterestedInOtherUser =
+            (otherUser.gender === 'Man' && loggedInUser.sexuality.includes('Mannen')) ||
+            (otherUser.gender === 'Vrouw' && loggedInUser.sexuality.includes('Vrouwen')) ||
+            loggedInUser.sexuality.includes('Beide');
+
+        return otherUserInterestedInLoggedInUser && loggedInUserInterestedInOtherUser
+    }
 
     // Filter Users Based on Criteria
     const applyFilters = () => {
@@ -322,11 +340,23 @@ const Search = () => {
             filtered = filtered.filter((user) =>
                 lookingFor.every(option => user.looking_for.includes(option))
             );
+
+            if (lookingFor.includes('Relatie')){
+                filtered = filtered.filter(user => isCompatibleForRelationship(profileData, user))
+            }
         }
 
         // Filter by mobility
         if (mobility !== null) {
             filtered = filtered.filter((user) => user.mobility === mobility);
+        }
+
+        if (selectedInterests.length > 0) {
+            filtered = filtered.filter(user =>
+                user.interests?.some(interest =>
+                    selectedInterests.includes(interest.interest_name)
+                )
+            );
         }
 
         const sortedUsers = sortUsers(filtered)
@@ -383,7 +413,7 @@ const Search = () => {
 
     useEffect(() => {
         applyFilters(); // Reapply filters and sorting when users, filters, or sort criteria change
-    }, [users, ageRange, gender, lookingFor, mobility, sortCriteria]);
+    }, [users, ageRange, gender, lookingFor, mobility, sortCriteria, selectedInterests]);
 
     return (
         <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
@@ -611,6 +641,26 @@ const Search = () => {
                                 <Typography.Text>Maakt niet uit</Typography.Text>
                             </Radio>
                         </Radio.Group>
+                    </div>
+                    <div style={{marginBottom: '1vw'}}>
+                        <p style={{fontWeight: 'bold'}}>Interesses</p>
+                        {profileData?.interests?.length > 0 ? (
+                            <Checkbox.Group
+                                options={profileData.interests.map(interest => interest.interest_name)}
+                                value={selectedInterests}
+                                onChange={setSelectedInterests}
+                                style={{
+                                    display: 'flex',
+                                    flexDirection: 'row',
+                                    flexWrap: 'wrap',
+                                    gap: '10px',
+                                }}
+                            />
+                        ) : (
+                            <p style={{fontStyle: 'italic'}}>
+                                Voeg eerst je eigen interesses toe.
+                            </p>
+                        )}
                     </div>
                 </Modal>
             </div>

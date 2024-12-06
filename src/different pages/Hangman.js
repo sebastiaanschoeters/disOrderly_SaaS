@@ -327,7 +327,7 @@ const HangmanGame = ({ isModalVisible, setIsModalVisible, player1Id, player2Id, 
             )}
 
 
-            {step === 3 && (
+            {step === 3 && isSender && (
                 <Modal
                     title={`Vraag: ${question} `}
                     open={step === 3} // Modal visibility controlled by state
@@ -384,6 +384,19 @@ const HangmanGame = ({ isModalVisible, setIsModalVisible, player1Id, player2Id, 
                     >
                         Opnieuw spelen
                     </Button>
+                </Modal>
+            )}
+
+            {step === 3 && !isSender && (
+                <Modal
+                    title={`Wachtende op het antwoord van de ander`}
+                    open={step === 2} // Modal visibility controlled by state
+                    onCancel={handleCancel}
+                    footer={null}
+                >
+                    <div style={{textAlign: 'center', marginTop: 20}}>
+                        <Spin size="large"/> {/* You can adjust the size if needed */}
+                    </div>
                 </Modal>
             )}
         </div>

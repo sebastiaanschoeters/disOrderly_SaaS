@@ -297,7 +297,6 @@ const Search = () => {
                 ...user,
                 age: calculateAge(new Date(user.birthdate)), // Add calculated age
                 looking_for: user.looking_for ? JSON.parse(user.looking_for) : [], // Parse looking_for
-                profile_picture: user.profile_picture || '/default-avatar.png', // Fallback avatar
                 locationData: user.locationData || { gemeente: 'Onbekend', latitude: null, longitude: null }, // Fallback for location
                 bio: user.bio || 'Geen beschrijving beschikbaar', // Fallback for bio
                 distance: distance, // Add calculated distance (or null if not calculable)
@@ -546,14 +545,14 @@ const Search = () => {
                                         src={item.profile_picture}
                                         style={{
                                             backgroundColor: themeColors.primary10,
-                                            marginRight: '1.5vw', // Reduced margin
-                                            width: '3rem', // Reduced avatar size
-                                            height: '3rem', // Reduced avatar size
+                                            marginLeft: '1vw',
+                                            width: '10vw', // Reduced avatar size
+                                            height: '10vw', // Reduced avatar size
                                         }}
                                     >
                                         {item.name[0]}
                                     </Avatar>
-                                    <div style={{flex: 1, display: 'flex', justifyContent: 'flex-end'}}>
+                                    <div style={{flex: 1, display: 'flex', justifyContent: 'flex-end', marginRight: '1vw'}}>
                                         <div style={{textAlign: 'right'}}>
                                             <p style={{fontWeight: 'bold'}}>
                                                 {item.name}

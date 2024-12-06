@@ -299,9 +299,25 @@ const ProfileCard = (profileToShow) => {
                     zIndex: '0'
                 }}
             >
+                {!viewedByCaretaker && (
+                    <Button
+                        type="primary"
+                        icon={<MessageOutlined />}
+                        style={{
+                            position: 'relative',
+                            top: '0%',
+                            left: '1%',
+                            zIndex: 1000
+                        }}
+                        disabled={isChatroomExistent}
+                        onClick={handleMessage}
+                    >
+                        {isChatroomExistent ? 'chat is al gestart' : `Chat met ${profileData?.name || 'de gebruiker'}`}
+                    </Button>
+                )}
 
                 {/* Header section with profile picture, name, age, and biography */}
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingBottom: '20px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingBottom: '20px'}}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '10px' }}>
                         <Avatar
                             src={profilePicture}
@@ -309,7 +325,8 @@ const ProfileCard = (profileToShow) => {
                             style ={{
                                 minWidth: '200px',
                                 minHeight: '200px',
-                                borderRadius: '50%'
+                                borderRadius: '50%',
+                                marginTop: '20px'
                             }}
                         />
                         <div>
@@ -376,23 +393,6 @@ const ProfileCard = (profileToShow) => {
                     value={profileData.mobility ? 'Ja' : 'Nee'}
                     icon={<CarOutlined />}
                 />
-
-                {!viewedByCaretaker && (
-                    <Button
-                        type="primary"
-                        icon={<MessageOutlined />}
-                        style={{
-                            position: 'fixed',
-                            top: '180px',
-                            right: '9%',
-                            zIndex: 1000
-                        }}
-                        disabled={isChatroomExistent}
-                        onClick={handleMessage}
-                    >
-                        {isChatroomExistent ? 'chat is al gestart' : `Chat met ${profileData?.name || 'de gebruiker'}`}
-                    </Button>
-                )}
 
                 <Divider/>
 

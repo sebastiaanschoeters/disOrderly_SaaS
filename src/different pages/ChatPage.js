@@ -123,7 +123,6 @@ const ChatPage = () => {
     };
 
     const handleSendMessage = async () => {
-        console.log("dsafkjnlkdfsjnlnkjdsfknjkdfsnj")
         if (newMessage.trim() === "") return;
 
         const {error} = await supabase

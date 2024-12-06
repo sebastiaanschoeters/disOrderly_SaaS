@@ -248,8 +248,9 @@ const LoginPage = () => {
                         >
                             <Input.Password
                                 onChange={(e) => {
+                                    const emailField = document.querySelector("#loginForm_email");
                                     if(!themeToSet) {
-                                        emailUpdated(emailValue)
+                                        emailUpdated(emailField.value)
                                     }
                                 }}
                             />

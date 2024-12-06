@@ -383,8 +383,8 @@ const ProfileCard = (profileToShow) => {
                         icon={<MessageOutlined />}
                         style={{
                             position: 'fixed',
-                            top: '20px',
-                            right: '20px',
+                            top: '180px',
+                            right: '9%',
                             zIndex: 1000
                         }}
                         disabled={isChatroomExistent}

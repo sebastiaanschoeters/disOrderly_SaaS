@@ -378,7 +378,7 @@ const ProfileCard = () => {
                     padding: '20px',
                     position: 'relative',
                     minWidth: '100%',
-                    minHeight: '100vh',
+                    minHeight: '100dvh',
                     backgroundColor: themeColors.primary2,
                     color: themeColors.primary10,
                     zIndex: '0'
@@ -393,9 +393,9 @@ const ProfileCard = () => {
                         alt={name || "No Name"}
                         style={{
                             minWidth: '150px',
-                            width: '12vw',
+                            width: '12dvw',
                             minHeight: '150px',
-                            height: '12vw',
+                            height: '12dvw',
                             borderRadius: '50%'
                         }}
                     >

@@ -53,12 +53,14 @@ export const getTheme = async (user_id, options={caretaker:false}) => {
             error = caretakerError;
         } else {
             const {data: userData, error: userError} = await supabase
-                .from('User')
+                .from('User information')
                 .select('theme')
-                .eq('id', user_id);
+                .eq('user_id', user_id);
             data = userData;
             error = userError;
         }
+
+        console.log(data)
 
         if (error) {
             console.error('Error fetching user theme:', error.message);

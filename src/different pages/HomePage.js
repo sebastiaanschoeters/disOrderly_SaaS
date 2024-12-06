@@ -14,11 +14,6 @@ const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbG
 
 
 const HomePage = () => {
-    for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        const value = localStorage.getItem(key);
-        console.log(key, ": " ,value);
-    }
     const [themeName, darkModeFlag] = JSON.parse(localStorage.getItem('theme')) || ['blauw', false];
     const {themeColors, setThemeName, setDarkModeFlag} = useTheme(themeName, darkModeFlag);
 

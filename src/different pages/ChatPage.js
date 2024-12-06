@@ -76,10 +76,10 @@ const ChatPage = () => {
     useEffect(() => {
         fetchMessages();
         const channel = supabase
-            .channel('realtime:Messages')
+            .channel(`realtime:Messages:${chatroomId}`)
             .on(
                 'postgres_changes',
-                { event: 'INSERT', schema: 'public', table: 'Messages' },
+                { event: 'INSERT', schema: 'public', table: 'Messages' , filter: `chatroom_id=eq.${chatroomId}`  },
                 (payload) => {
                     console.log("New message payload", payload);
                     setMessages(prevMessages => [...prevMessages,payload.new]);

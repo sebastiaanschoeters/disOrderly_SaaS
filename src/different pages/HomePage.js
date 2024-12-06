@@ -58,7 +58,7 @@ const HomePage = () => {
                     padding: '20px',
                     position: 'relative',
                     width: '100%',
-                    height: '100vh',
+                    height: '100dvh',
                     backgroundColor: themeColors.primary2,
                     color: themeColors.primary10,
                     display: 'flex',
@@ -182,8 +182,8 @@ const HomePage = () => {
                         flexDirection: 'column',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        width: '15vw',
-                        height: '12vw',
+                        width: '15dvw',
+                        height: '12dvh',
                         minWidth: '100px',
                         minHeight: '80px',
                         fontSize: '1.8rem',  // Increase text size for "Instellingen"
@@ -207,8 +207,8 @@ const HomePage = () => {
                         flexDirection: 'column',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        width: '15vw',
-                        height: '12vw',
+                        width: '15dvw',
+                        height: 'd12vh',
                         minWidth: '100px',
                         minHeight: '80px',
                         fontSize: '1.8rem',  // Increase text size for "Afmelden"
@@ -271,7 +271,7 @@ const HomePage = () => {
                 /* Prevent scrolling */
                 html, body {
                     overflow: hidden;
-                    height: 100%;
+                    height: 100% dvh;
                     margin: 0;
                 }
 

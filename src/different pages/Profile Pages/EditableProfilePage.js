@@ -523,7 +523,7 @@ const ProfileCard = () => {
                 padding: '20px',
                 position: 'relative',
                 minWidth: '100dvw',
-                minHeight: '100dvh',
+                minHeight: '100vh',
                 overflow: 'hidden',
                 backgroundColor: themeColors.primary2,
                 color: themeColors.primary10,

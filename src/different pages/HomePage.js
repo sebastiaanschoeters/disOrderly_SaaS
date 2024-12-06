@@ -208,7 +208,7 @@ const HomePage = () => {
                         alignItems: 'center',
                         justifyContent: 'center',
                         width: '15dvw',
-                        height: 'd12vh',
+                        height: '12dvh',
                         minWidth: '100px',
                         minHeight: '80px',
                         fontSize: '1.8rem',  // Increase text size for "Afmelden"

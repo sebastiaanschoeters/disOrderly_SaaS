@@ -276,9 +276,25 @@ const ChatPage = () => {
 
     return (
         <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
-            <HomeButtonUser color={themeColors.primary7} />
-            <ButterflyIcon color={themeColors.primary3} />
-            <div style={styles.background}>
+            <div style={{
+                padding: '20px',
+                position: 'relative',
+                minWidth: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'flex-start',
+                minHeight: '100vh',
+                backgroundColor: themeColors.primary2,
+                color: themeColors.primary10,
+                width: '100%',
+                boxSizing: 'border-box',
+                zIndex: '0'
+                }}
+            >
+                <HomeButtonUser color={themeColors.primary7} />
+                <ButterflyIcon color={themeColors.primary3} />
+
                 <Card style={styles.card} bordered>
                     <div style={styles.chatContainer}>
                         <div style={styles.header}>

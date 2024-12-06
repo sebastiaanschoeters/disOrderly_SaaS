@@ -2,14 +2,21 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Avatar, Input, Button, ConfigProvider, Card } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {ArrowDownOutlined, PlusOutlined, SendOutlined} from '@ant-design/icons';
-import {antThemeTokens, ButterflyIcon, themes} from '../Extra components/themes';
+import {antThemeTokens, ButterflyIcon, ButterflyIconSmall, themes} from '../Extra components/themes';
 import { createClient } from "@supabase/supabase-js";
 import '../CSS/ChatPage.css';
 import HomeButtonUser from "../Extra components/HomeButtonUser";
 import HangmanGame from "./Hangman";
 import useTheme from "../UseHooks/useTheme";
 import useThemeOnCSS from "../UseHooks/useThemeOnCSS";
+import butterfly0 from '../Media/butterfly0.png';
+import butterfly1 from '../Media/butterfly1.png';
+import butterfly2 from '../Media/butterfly2.png';
+import butterfly3 from '../Media/butterfly3.png';
+import butterfly4 from '../Media/butterfly4.png';
+import butterfly5 from '../Media/butterfly5.png';
 import ProfileDetailsModal from "./Profile Pages/ProfileDetailsModal";
+
 
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
@@ -76,10 +83,10 @@ const ChatPage = () => {
     useEffect(() => {
         fetchMessages();
         const channel = supabase
-            .channel('realtime:Messages')
+            .channel(`realtime:Messages:${chatroomId}`)
             .on(
                 'postgres_changes',
-                { event: 'INSERT', schema: 'public', table: 'Messages' },
+                { event: 'INSERT', schema: 'public', table: 'Messages' , filter: `chatroom_id=eq.${chatroomId}`  },
                 (payload) => {
                     console.log("New message payload", payload);
                     setMessages(prevMessages => [...prevMessages,payload.new]);
@@ -147,6 +154,39 @@ const ChatPage = () => {
         setNewMessage("");
         scrollToBottom();
     };
+
+    const handleSendMessageArg = async (messageContent) => {
+        console.log("Sending messageaaa:", messageContent);
+        if (messageContent) {
+            if (messageContent.trim() === "") return; {
+            }
+        } else {
+            return;
+        }
+
+        const { error } = await supabase
+            .from('Messages')
+            .insert([{
+                chatroom_id: chatroomId,
+                sender_id: userId,
+                message_content: messageContent, // Use the provided message content
+                created_at: localTime.toISOString(),
+            }]);
+
+        if (error) {
+            console.error("Error sending message:", error);
+            return;
+        }
+
+        await supabase
+            .from('Chatroom')
+            .update({ last_sender_id: userId })
+            .eq('id', chatroomId);
+
+        setNewMessage(""); // Clear the message input if applicable
+        scrollToBottom();  // Scroll to the bottom of the chat
+    };
+
 
     // Function to group messages by date
     const groupMessagesByDate = (messages) => {
@@ -365,14 +405,55 @@ const ChatPage = () => {
                                                     style={{
                                                         ...styles.bubble,
                                                         ...(isSender ? styles.senderBubble : styles.receiverBubble),
+                                                        display: "flex",
+                                                        justifyContent: "center",
+                                                        alignItems: "center",
                                                     }}
                                                 >
-                                                    <p style={{margin: 0}}>{message.message_content}</p>
+                                                    {message.message_content && typeof message.message_content === 'string' && message.message_content.startsWith("ButterflyIcon") ? (() => {
+                                                        const butterflyImages = [butterfly0, butterfly1, butterfly2, butterfly3, butterfly4, butterfly5]; // Add your local image paths
+                                                        const contentAfterIcon = message.message_content.slice(13).trim(); // Get everything after "ButterflyIcon"
+
+                                                        // Extract index and title
+                                                        const indexMatch = contentAfterIcon.match(/^(\d+)\s*(.*)$/); // Regex to extract number and text
+                                                        const index = indexMatch ? parseInt(indexMatch[1], 10) : NaN; // First part is the index
+                                                        const title = indexMatch ? indexMatch[2] : ""; // Rest is the title
+
+                                                        // Split title at "!" if exists
+                                                        const [mainTitle, extraContent] = title.split('!').map(part => part.trim());
+
+                                                        if (!isNaN(index) && index >= 0 && index < butterflyImages.length) {
+                                                            // Valid index: render title, image, and content after "!"
+                                                            return (
+                                                                <div style={{ textAlign: "center" }}>
+                                                                    {mainTitle && <p style={{ margin: 0, fontWeight: "bold" }}>{mainTitle + '!'}</p>}
+                                                                    <img
+                                                                        src={butterflyImages[index]}
+                                                                        alt={`Butterfly Icon ${index}`}
+                                                                        style={{
+                                                                            width: "100px",
+                                                                            height: "100px",
+                                                                            marginTop: mainTitle ? "5px" : "0",
+                                                                        }}
+                                                                    />
+                                                                    {extraContent && <p style={{ margin: 0, marginTop: "5px" }}>{extraContent}</p>}
+                                                                </div>
+                                                            );
+                                                        }
+
+                                                        // Invalid index or no number: display the plain text
+                                                        return <p style={{ margin: 0 }}>{message.message_content}</p>;
+                                                    })() : (
+                                                        // Default case: display plain text
+                                                        <p style={{ margin: 0 }}>{message.message_content}</p>
+                                                    )}
                                                 </div>
-                                                <span style={{
-                                                    ...styles.timestamp,
-                                                    alignSelf: isSender ? 'flex-end' : 'flex-start',
-                                                }}>
+                                                <span
+                                                    style={{
+                                                        ...styles.timestamp,
+                                                        alignSelf: isSender ? 'flex-end' : 'flex-start',
+                                                    }}
+                                                >
                                                     {new Date(message.created_at).toLocaleTimeString([], {
                                                         hour: '2-digit',
                                                         minute: '2-digit',
@@ -381,6 +462,7 @@ const ChatPage = () => {
                                             </div>
                                         );
                                     })}
+
                                 </div>
                             ))}
                             <Button
@@ -415,6 +497,7 @@ const ChatPage = () => {
                     setIsModalVisible={setIsModalVisible}
                     player1Id = {userId}
                     player2Id = {otherUserId}
+                    handleSendMessage = {handleSendMessageArg}
                 />
             )}
 

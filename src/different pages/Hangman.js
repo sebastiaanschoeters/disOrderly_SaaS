@@ -164,6 +164,7 @@ const HangmanGame = ({ isModalVisible, setIsModalVisible, player1Id, player2Id, 
 
 // handleGuess function - simplified
     const handleGuess = (letter) => {
+        console.log("handle guess functionnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn")
         // If the letter has already been guessed, do nothing
         if (guessedLetters.includes(letter)) return;
 
@@ -173,6 +174,9 @@ const HangmanGame = ({ isModalVisible, setIsModalVisible, player1Id, player2Id, 
 
 // useEffect to respond to state change in guessedLetters
     useEffect(() => {
+        if(!isSender){
+            return;
+        }
         if (guessedLetters.length === 0) return;
 
         const letter = guessedLetters[guessedLetters.length - 1];  // Get the most recent guessed letter
@@ -389,8 +393,8 @@ const HangmanGame = ({ isModalVisible, setIsModalVisible, player1Id, player2Id, 
 
             {step === 3 && !isSender && (
                 <Modal
-                    title={`Wachtende op het antwoord van de ander`}
-                    open={step === 2} // Modal visibility controlled by state
+                    title={`De andere persoon is jouw antwoord aan het zoeken`}
+                    open={step === 3} // Modal visibility controlled by state
                     onCancel={handleCancel}
                     footer={null}
                 >

@@ -246,7 +246,13 @@ const LoginPage = () => {
                                 { required: true, message: 'Please input your password!' },
                             ]}
                         >
-                            <Input.Password />
+                            <Input.Password
+                                onChange={(e) => {
+                                    if(!themeToSet) {
+                                        emailUpdated(emailValue)
+                                    }
+                                }}
+                            />
                         </Form.Item>
                         <Form.Item>
                             <Button

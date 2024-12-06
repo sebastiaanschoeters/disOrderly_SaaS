@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Avatar, Input, Button, Modal, ConfigProvider, Card, Typography, Space } from 'antd';
+import { Avatar, Input, Button, ConfigProvider, Card } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {ArrowDownOutlined, PlusOutlined, SendOutlined} from '@ant-design/icons';
 import {antThemeTokens, ButterflyIcon, ButterflyIconSmall, themes} from '../Extra components/themes';
@@ -44,9 +44,10 @@ const ChatPage = () => {
     const dummyRef = useRef(null);
     const [isScrolledToBottom, setIsScrolledToBottom] = useState(true);
     const messageListRef = useRef(null);
+    const [noMoreMessages,setNoMoreMessages] = useState(false);
 
     const fetchMessages = async (limit = 10, start = 0) => {
-        if (loadingMore) return; // Prevent multiple fetches
+        if (loadingMore) return;
 
         setLoadingMore(true);
         const {data, error} = await supabase
@@ -71,6 +72,7 @@ const ChatPage = () => {
             });
         }
         setLoadingMore(false);
+        setNoMoreMessages(data.length < limit);
     };
 
     useEffect(() => {
@@ -105,11 +107,7 @@ const ChatPage = () => {
             // Calculate the distance from the bottom
             const distanceFromBottom = scrollHeight - (scrollTop + clientHeight);
 
-            if (distanceFromBottom > 77) {
-                setIsScrolledToBottom(false);
-            } else {
-                setIsScrolledToBottom(true);
-            }
+            setIsScrolledToBottom(distanceFromBottom <= 80);
         }
     };
 
@@ -331,7 +329,7 @@ const ChatPage = () => {
                             </h2>
                         </div>
                         <div style={styles.messageList} ref={messageListRef} onScroll={handleScroll}>
-                            {!loadingMore && (
+                            {!loadingMore && !noMoreMessages && (
                                 <p
                                     onClick={handleLoadMore}
                                     style={{
@@ -353,7 +351,7 @@ const ChatPage = () => {
                                         margin: '10px 0',
                                         color: themeColors.primary8
                                     }}>
-                                    <strong>{date}</strong>
+                                        <strong>{date}</strong>
                                     </div>
                                     {groupedMessages[date].map((message) => {
                                         const isSender = message.sender_id === userId;

@@ -1,11 +1,6 @@
 import React, {useEffect, useState} from 'react';
-import {Avatar, Button, ConfigProvider, Divider, Select, Switch, Upload} from 'antd';
-import {
-    BgColorsOutlined,
-    MailOutlined,
-    PhoneOutlined,
-    UploadOutlined
-} from '@ant-design/icons';
+import {Avatar, Button, ConfigProvider, Divider, message, Upload} from 'antd';
+import { MailOutlined, PhoneOutlined, UploadOutlined } from '@ant-design/icons';
 import 'antd/dist/reset.css';
 import '../../CSS/AntDesignOverride.css';
 import '../../CSS/EditableProfilePage.css';
@@ -18,17 +13,23 @@ import ThemeSelector from "../../Extra components/ThemeSelector";
 import {debounce} from "../../Api/Utils";
 import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
 import {uploadProfilePicture} from "../../Utils/uploadProfilePicture";
+import {useNavigate} from "react-router-dom";
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
 
 const ProfileCard = () => {
-    // const { profileData, isLoading, error, interest} = useFetchProfileData(localStorage.getItem('user_id'));
-    const { profileData, isLoading, error} = useFetchCaretakerData(1111, { fetchOrganization: true})
-    const [theme, setTheme] = useState('blauw');
-    const [isDarkMode, setIsDarkMode] = useState(false);
+    const caretaker_id = localStorage.getItem('user_id');
+    const name = localStorage.getItem('name')
+    const savedProfilePicture = localStorage.getItem('profile_picture')
+    let [savedTheme, savedDarkMode] = JSON.parse(localStorage.getItem('theme'));
+
+    const { profileData, isLoading, error} = useFetchCaretakerData(caretaker_id, { fetchOrganization: true})
+    const [theme, setTheme] = useState(savedTheme);
+    const [isDarkMode, setIsDarkMode] = useState(savedDarkMode);
     const themeKey = isDarkMode ? `${theme}_donker` : theme;
     const themeColors = themes[themeKey] || themes.blauw;
-    const [profilePicture, setProfilePicture] = useState('https://example.com/photo.jpg');
+
+    const [profilePicture, setProfilePicture] = useState(savedProfilePicture);
     const [uploading, setUploading] = useState(false);
     const [phoneNumber, setPhoneNumber] = useState('')
     const [email, setEmail] = useState('')
@@ -65,6 +66,16 @@ const ProfileCard = () => {
 
     // Define async save functions
     const saveField = async (field, value) => {
+        let dutch_field = ''
+
+        if (field === "theme"){
+            dutch_field = "thema"
+        } else if (field === "phone_number"){
+            dutch_field = "gsm nummer"
+        } else if (field === "email"){
+            dutch_field = "email"
+        }
+
         try {
             const { data, error } = await supabase
                 .from('Caretaker')
@@ -72,8 +83,10 @@ const ProfileCard = () => {
                 .eq('id', profileData.id);
             if (error) throw error;
 
+            message.success(`${dutch_field} opgeslagen`)
             console.log(`${field} saved successfully with value ${value}`);
         } catch (error) {
+            message.error(`probleem bij het opslaan van ${dutch_field}`)
             console.error(`Error saving ${field}:`, error);
         }
     };
@@ -125,7 +138,9 @@ const ProfileCard = () => {
                 .update({ profile_picture: imageUrlWithCacheBuster })
                 .eq('id', profileData.id);
 
+            message.success("profiel foto opgeslagen")
         } catch (error) {
+            message.error("Probleem bij het uploaden van een niewe profiel foto")
             console.error('Error uploading profile picture:', error);
         } finally {
             setUploading(false);
@@ -151,7 +166,7 @@ const ProfileCard = () => {
                     <div style={{display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '10px'}}>
                         <Avatar
                             src={profilePicture}
-                            alt={profileData.name}
+                            alt={name}
                             style={{
                                 minWidth: '200px',
                                 minHeight: '200px',
@@ -160,7 +175,7 @@ const ProfileCard = () => {
                         />
                         <div>
                             <h2 style={{margin: '0', textAlign: 'center'}}>
-                                {profileData.name || 'Naam'}, {profileData.organization || 'Organizatie'}
+                                {name || 'Naam'}, {profileData.organization || 'Organizatie'}
                             </h2>
                             <div style={{marginTop: '10px', marginBottom: '20px'}}>
                                 <Upload showUploadList={false} beforeUpload={() => false}

@@ -2,13 +2,14 @@ import React, { useEffect, useState } from "react";
 import {Avatar, ConfigProvider, Select, Table, Button, message, Menu, Badge, Dropdown} from "antd";
 import { antThemeTokens, ButterflyIcon, themes } from "../../Extra components/themes";
 import { createClient } from "@supabase/supabase-js";
-import {BellOutlined, DeleteOutlined} from "@ant-design/icons";
+import {BellOutlined, DeleteOutlined, PoweroffOutlined} from "@ant-design/icons";
 import { useNavigate } from 'react-router-dom';
 import ClientDetailsModal from "./ClientDetailsModal";
 import 'antd/dist/reset.css';
 import '../../CSS/AntDesignOverride.css';
 import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
 import useHandleRequest from "../../UseHooks/useHandleRequest";
+import useFetchCaretakerData from "../../UseHooks/useFetchCaretakerData";
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q");
 
@@ -164,11 +165,21 @@ const useFetchCaretakers = (organizationId) => {
 };
 
 const ClientOverview = () => {
-    const { clients, error: fetchClientsError } = useFetchClients(1111);
-    const { caretakers } = useFetchCaretakers("25");
-    const { profileData } = useFetchProfileData(1111);
-    const theme = profileData.theme || "blauw";
+    const caretaker_id = localStorage.getItem("user_id");
+    let [savedTheme, savedDarkMode] = JSON.parse(localStorage.getItem('theme'));
+    let theme
+    if (savedDarkMode) {
+        theme = savedDarkMode + "_donker";
+    } else {
+        theme = savedTheme;
+    }
     const themeColors = themes[theme] || themes.blauw;
+    const name = localStorage.getItem('name')
+    const savedProfilePicture = localStorage.getItem('profile_picture')
+
+    const { clients, error: fetchClientsError } = useFetchClients(caretaker_id);
+    const { profileData } = useFetchCaretakerData(caretaker_id, {fetchOrganization: true});
+    const { caretakers } = useFetchCaretakers(profileData.organizationId);
 
     useThemeOnCSS(themeColors);
 
@@ -239,7 +250,7 @@ const ClientOverview = () => {
             const screenHeight = window.innerHeight;
             const rowHeight = 130; // Approximate row height
             const headerHeight = 160; // Approximate header and padding
-            const footerHeight = 30; // Approximate footer height
+            const footerHeight = 100; // Approximate footer height
             const availableHeight = screenHeight - headerHeight - footerHeight;
 
             return Math.max(1, Math.floor(availableHeight / rowHeight));
@@ -266,6 +277,11 @@ const ClientOverview = () => {
 
         initializeData();
     }, [profileData]);
+
+    const handleLogout = () => {
+        localStorage.clear();
+        navigate('/login');
+    };
 
     const notificationMenu = (
         <Menu>
@@ -315,8 +331,8 @@ const ClientOverview = () => {
         }
     )
 
-    const handleAcceptRequest = (notification) => handleRequest(notification, 'accept');
-    const handleDenyRequest = (notification) => handleRequest(notification, 'deny');
+    const handleAcceptRequest = (notification) => handleRequest(notification, 'accept', true);
+    const handleDenyRequest = (notification) => handleRequest(notification, 'deny',true);
 
     const handleClientClick = (client) => {
         setSelectedClient(client);
@@ -505,7 +521,7 @@ const ClientOverview = () => {
                     zIndex: "0",
                 }}
             >
-                <ButterflyIcon color={themeColors.primary3} />
+                <ButterflyIcon color={themeColors.primary3}/>
 
                 {/* Notification Button */}
                 <div
@@ -530,7 +546,7 @@ const ClientOverview = () => {
                     </Dropdown>
                 </div>
 
-                <h2 style={{ marginTop: '100px' }}>Clienten overzicht: </h2>
+                <h2 style={{marginTop: '100px'}}>Clienten overzicht: </h2>
 
                 {fetchClientsError && <p>Fout: {fetchClientsError}</p>}
                 {clients.length > 0 ? (
@@ -539,7 +555,7 @@ const ClientOverview = () => {
                         columns={columns}
                         showHeader={false}
                         rowKey="id"
-                        pagination={{ pageSize: pageSize }}
+                        pagination={{pageSize: pageSize}}
                         style={{
                             marginTop: "20px",
                         }}
@@ -573,7 +589,7 @@ const ClientOverview = () => {
                 }}>
                     <Button
                         type="primary"
-                        style={{ marginTop: "20px" }}
+                        style={{marginTop: "20px"}}
                     >
                         Genereer nieuwe profiel code
                     </Button>
@@ -595,18 +611,26 @@ const ClientOverview = () => {
                 >
                     <Avatar
                         size={60}
-                        src={profileData.profile_picture}
+                        src={savedProfilePicture}
                         style={{
                             backgroundColor: themeColors.primary4,
                             color: themeColors.primary10,
                         }}
                     >
-                        {profileData.name}
+                        {name[0]}
                     </Avatar>
                     <p style={{fontSize: '2rem'}}>
-                        {profileData.name}
+                        {name}
                     </p>
                 </div>
+                <Button
+                    type="secondary"
+                    icon={<PoweroffOutlined />}
+                    style={{ fontSize: '2rem' , position: 'absolute', bottom: '5%', right: '1%' }}
+                    onClick={()=>handleLogout()}
+                >
+                    Log uit
+                </Button>
             </div>
         </ConfigProvider>
     );

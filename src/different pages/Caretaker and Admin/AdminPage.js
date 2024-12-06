@@ -1,16 +1,7 @@
 import 'antd/dist/reset.css'; // Import Ant Design styles
 import '../../CSS/AntDesignOverride.css'
 import { antThemeTokens, themes } from '../../Extra components/themes';
-import {
-    Button,
-    Card,
-    ConfigProvider,
-    Form,
-    Input,
-    List,
-    Modal,
-    Select
-} from 'antd';
+import { Button, Card, ConfigProvider, Form, Input, List, Modal, Select } from 'antd';
 import {PlusOutlined, RedoOutlined} from "@ant-design/icons";
 import React, {useEffect, useState} from "react";
 import { useNavigate } from 'react-router-dom';

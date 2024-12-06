@@ -13,17 +13,23 @@ import ThemeSelector from "../../Extra components/ThemeSelector";
 import {debounce} from "../../Api/Utils";
 import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
 import {uploadProfilePicture} from "../../Utils/uploadProfilePicture";
+import {useNavigate} from "react-router-dom";
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
 
 const ProfileCard = () => {
-    // const { profileData, isLoading, error, interest} = useFetchProfileData(localStorage.getItem('user_id'));
-    const { profileData, isLoading, error} = useFetchCaretakerData(1111, { fetchOrganization: true})
-    const [theme, setTheme] = useState('blauw');
-    const [isDarkMode, setIsDarkMode] = useState(false);
+    const caretaker_id = localStorage.getItem('user_id');
+    const name = localStorage.getItem('name')
+    const savedProfilePicture = localStorage.getItem('profile_picture')
+    let [savedTheme, savedDarkMode] = JSON.parse(localStorage.getItem('theme'));
+
+    const { profileData, isLoading, error} = useFetchCaretakerData(caretaker_id, { fetchOrganization: true})
+    const [theme, setTheme] = useState(savedTheme);
+    const [isDarkMode, setIsDarkMode] = useState(savedDarkMode);
     const themeKey = isDarkMode ? `${theme}_donker` : theme;
     const themeColors = themes[themeKey] || themes.blauw;
-    const [profilePicture, setProfilePicture] = useState('https://example.com/photo.jpg');
+
+    const [profilePicture, setProfilePicture] = useState(savedProfilePicture);
     const [uploading, setUploading] = useState(false);
     const [phoneNumber, setPhoneNumber] = useState('')
     const [email, setEmail] = useState('')
@@ -160,7 +166,7 @@ const ProfileCard = () => {
                     <div style={{display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '10px'}}>
                         <Avatar
                             src={profilePicture}
-                            alt={profileData.name}
+                            alt={name}
                             style={{
                                 minWidth: '200px',
                                 minHeight: '200px',
@@ -169,7 +175,7 @@ const ProfileCard = () => {
                         />
                         <div>
                             <h2 style={{margin: '0', textAlign: 'center'}}>
-                                {profileData.name || 'Naam'}, {profileData.organization || 'Organizatie'}
+                                {name || 'Naam'}, {profileData.organization || 'Organizatie'}
                             </h2>
                             <div style={{marginTop: '10px', marginBottom: '20px'}}>
                                 <Upload showUploadList={false} beforeUpload={() => false}

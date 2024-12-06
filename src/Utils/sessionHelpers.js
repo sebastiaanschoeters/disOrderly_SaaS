@@ -1,9 +1,18 @@
-import {getName, getPfp, getTheme} from "../Api/Utils";
+import {getName, getPfp, getTheme, getThemeCaretaker} from "../Api/Utils";
 
 export const storeUserSession = async (userId, userType, setIsTransitioning, navigate) => {
-    const theme = await getTheme(userId);
-    const name = await getName(userId);
-    const pfp = await getPfp(userId);
+    let theme = [];
+    let name = "";
+    let pfp = "";
+    if (userType === 'caretaker') {
+        theme = await getTheme(userId, {caretaker:true}); // Fetch again if there's specific logic for caretakers
+        name = await getName(userId, {caretaker:true});
+        pfp = await getPfp(userId, {caretaker:true});
+    } else {
+        theme = await getTheme(userId);
+        name = await getName(userId);
+        pfp = await getPfp(userId);
+    }
 
     // Store data in localStorage
     // localStorage.setItem('sessionToken', 'fake-session-token');

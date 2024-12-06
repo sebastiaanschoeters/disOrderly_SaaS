@@ -534,7 +534,7 @@ const Search = () => {
                                         flexDirection: 'row',
                                         marginBottom: '1.5vw', // Reduced margin between items
                                         padding: '1vw', // Reduced padding for smaller list items
-                                        backgroundColor: themeColors.primary4,
+                                        backgroundColor: themeColors.primary1,
                                         borderRadius: '8px',
                                         boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
                                         justifyContent: 'space-between',

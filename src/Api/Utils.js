@@ -2,12 +2,25 @@ import {createClient} from "@supabase/supabase-js";
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q");
 
-export const getName = async (user_id) => {
+export const getName = async (user_id, options={caretaker: false}) => {
     try {
-        const { data, error } = await supabase
-            .from('User')
-            .select('name')
-            .eq('id', user_id);
+        let data = {};
+        let error = {};
+        if (options.caretaker){
+            const {data: caretakerData, error: caretakerError} = await supabase
+                .from('Caretaker')
+                .select('name')
+                .eq('id', user_id);
+            data = caretakerData;
+            error = caretakerError;
+        } else {
+            const {data: userData, error: userError} = await supabase
+                .from('User')
+                .select('name')
+                .eq('id', user_id);
+            data = userData;
+            error = userError;
+        }
 
         if (error) {
             console.error('Error fetching user_id:', error.message);
@@ -27,12 +40,25 @@ export const getName = async (user_id) => {
     }
 };
 
-export const getTheme = async (user_id) => {
+export const getTheme = async (user_id, options={caretaker:false}) => {
     try {
-        const { data, error } = await supabase
-            .from('User information')
-            .select('theme')
-            .eq('user_id', user_id);
+        let data = {};
+        let error = {};
+        if (options.caretaker){
+            const {data: caretakerData, error: caretakerError} = await supabase
+                .from('Caretaker')
+                .select('theme')
+                .eq('id', user_id);
+            data = caretakerData;
+            error = caretakerError;
+        } else {
+            const {data: userData, error: userError} = await supabase
+                .from('User')
+                .select('theme')
+                .eq('id', user_id);
+            data = userData;
+            error = userError;
+        }
 
         if (error) {
             console.error('Error fetching user theme:', error.message);
@@ -51,12 +77,25 @@ export const getTheme = async (user_id) => {
     }
 };
 
-export const getPfp = async (user_id) => {
+export const getPfp = async (user_id, options={caretaker:false}) => {
     try {
-        const { data, error } = await supabase
-            .from('User')
-            .select('profile_picture')
-            .eq('id', user_id);
+        let data = {};
+        let error = {};
+        if (options.caretaker){
+            const {data: caretakerData, error: caretakerError} = await supabase
+                .from('Caretaker')
+                .select('profile_picture')
+                .eq('id', user_id);
+            data = caretakerData;
+            error = caretakerError;
+        } else {
+            const {data: userData, error: userError} = await supabase
+                .from('User')
+                .select('profile_picture')
+                .eq('id', user_id);
+            data = userData;
+            error = userError;
+        }
 
         if (error) {
             console.error('Error fetching pfp:', error.message);

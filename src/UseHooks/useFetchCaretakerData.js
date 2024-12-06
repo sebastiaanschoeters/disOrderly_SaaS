@@ -40,14 +40,15 @@ const useFetchCaretakerData = (actCode, options = { fetchOrganization: true }) =
                     if (options.fetchOrganization) {
                         const { data: userOrganization, error: userOrganizationError } = await supabase
                             .from("Activation")
-                            .select("Organization: organisation(name)")
+                            .select("Organisation: organisation(name, id)")
                             .eq("code", actCode);
-                        console.log(userOrganization[0].Organization.name)
+                        console.log(userOrganization[0].Organisation.name)
 
                         if (userOrganizationError) throw userOrganizationError;
 
                         if (userOrganization && userOrganization.length > 0) {
-                            user.organization = userOrganization[0].Organization.name;
+                            user.organization = userOrganization[0].Organisation.name;
+                            user.organizationId = userOrganization[0].Organisation.id;
                         }
                     }
 

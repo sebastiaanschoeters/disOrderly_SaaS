@@ -74,7 +74,7 @@ const ClientDetailsModal = ({ visible, onClose, clientData }) => {
                             {isViewingContactList ? "Bekijk Profiel" : "Bekijk Contacten"}
                         </Button>
                         {isViewingContactList ? (
-                            <ContactsOverview id={clientData.id}/>
+                            <ContactsOverview id={clientData.id} conversations={true}/>
                         ) : (
                             <ProfileCard user_id={clientData.id} viewedByCareteaker={true}/>
                         )}

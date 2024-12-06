@@ -43,7 +43,7 @@ const useContacts = (userID) => {
     return { contacts };
 };
 
-const ContactsOverview = ({ id: userID }) => {
+const ContactsOverview = ({ id: userID , conversations: conversations}) => {
     const { contacts } = useContacts(userID);
     const [filteredContacts, setFilteredContacts] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');

@@ -546,10 +546,10 @@ const ActivationPage = () => {
                             <p>Selecteer de optie die het beste past bij jou en je begeleider</p>
                             <Form.Item name="niveau" rules={[{ required: true, message: 'Selecteer een optie' }]}>
                                 <Radio.Group>
-                                    <Radio value="Volledige Toegang">Begeleiding heeft volledige toegang en kan alles mee volgen en profiel aanpassen.</Radio>
+                                    <Radio value="Volledige toegang">Begeleiding heeft volledige toegang en kan alles mee volgen en profiel aanpassen</Radio>
                                     <Radio value="Gesprekken">Begeleiding kan enkel gesprekken lezen</Radio>
                                     <Radio value="Contacten">Begeleiding kan zien met wie jij contact hebt</Radio>
-                                    <Radio value="Publiek Profiel">Begeleiding kan zien wat jij op je profiel plaatst, net zoals andere gebruikers</Radio>
+                                    <Radio value="Publiek profiel">Begeleiding kan zien wat jij op je profiel plaatst, net zoals andere gebruikers</Radio>
                                 </Radio.Group>
                             </Form.Item>
                             <Form.Item>

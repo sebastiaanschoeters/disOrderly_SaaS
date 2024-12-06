@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import {Avatar, ConfigProvider, Select, Table, Button, message, Menu, Badge, Dropdown} from "antd";
+import {Avatar, ConfigProvider, Select, Table, Button, message, Menu, Badge, Dropdown, Tooltip, Radio} from "antd";
 import { antThemeTokens, ButterflyIcon, themes } from "../../Extra components/themes";
 import { createClient } from "@supabase/supabase-js";
-import {BellOutlined, DeleteOutlined, PoweroffOutlined} from "@ant-design/icons";
+import {BellOutlined, DeleteOutlined, PoweroffOutlined, QuestionCircleOutlined} from "@ant-design/icons";
 import { useNavigate } from 'react-router-dom';
 import ClientDetailsModal from "./ClientDetailsModal";
 import 'antd/dist/reset.css';
@@ -10,6 +10,7 @@ import '../../CSS/AntDesignOverride.css';
 import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
 import useHandleRequest from "../../UseHooks/useHandleRequest";
 import useFetchCaretakerData from "../../UseHooks/useFetchCaretakerData";
+import useTheme from "../../UseHooks/useTheme";
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q");
 
@@ -167,13 +168,8 @@ const useFetchCaretakers = (organizationId) => {
 const ClientOverview = () => {
     const caretaker_id = localStorage.getItem("user_id");
     let [savedTheme, savedDarkMode] = JSON.parse(localStorage.getItem('theme'));
-    let theme
-    if (savedDarkMode) {
-        theme = savedDarkMode + "_donker";
-    } else {
-        theme = savedTheme;
-    }
-    const themeColors = themes[theme] || themes.blauw;
+    const {themeColors, setThemeName, setDarkModeFlag} = useTheme(savedTheme, savedDarkMode)
+
     const name = localStorage.getItem('name')
     const savedProfilePicture = localStorage.getItem('profile_picture')
 
@@ -201,7 +197,7 @@ const ClientOverview = () => {
                 const { data: notificationData, error: notificationError } = await supabase
                     .from('Notifications')
                     .select('*') // Fetch notifications
-                    .eq('recipient_id', profileData?.id || null);
+                    .eq('recipient_id', caretaker_id || null);
 
                 if (notificationError) throw notificationError;
 
@@ -212,7 +208,7 @@ const ClientOverview = () => {
                         // Fetch the caretaker data based on the request_id in the notification
                         const { data: clientData, error: clientError } = await supabase
                             .from('User')
-                            .select('name')
+                            .select('name, access_level')
                             .eq('id', notification.requester_id)
                             .single(); // Only one result
 
@@ -221,7 +217,8 @@ const ClientOverview = () => {
                         // Add the caretaker name to the notification object
                         return {
                             ...notification,
-                            requesterName: clientData?.name || 'Onbekend', // Default to 'Unknown Caretaker' if not found
+                            requesterName: clientData?.name || 'Onbekend',
+                            currentAccessLevel: clientData?.access_level// Default to 'Unknown Caretaker' if not found
                         };
                     }));
                     console.log(updatedNotifications)
@@ -278,25 +275,55 @@ const ClientOverview = () => {
         initializeData();
     }, [profileData]);
 
+    const tooltips = {
+        "Volledige toegang": "Begeleiding heeft volledige toegang en kan alles mee volgen en profiel aanpassen",
+        "Gesprekken": "Begeleiding kan enkel gesprekken lezen",
+        "Contacten": "Begeleiding kan zien met wie jij contact hebt",
+        "Publiek profiel": "Begeleiding kan zien wat jij op je profiel plaatst, net zoals andere gebruikers",
+    };
+
     const handleLogout = () => {
         localStorage.clear();
         navigate('/login');
     };
 
     const notificationMenu = (
-        <Menu>
+        <Menu
+            style={{
+                minWidth: "50vw",
+                maxWidth: "400px",
+                overflowWrap: "break-word",
+            }}
+        >
             {notifications.length > 0 ? (
                 <>
                     {notifications.map((notification, index) => {
                         const requesterName = notification.requesterName || "Onbekend";
+                        const previousAccessLevel = notification.currentAccessLevel;
                         const requestedAccessLevel = notification.details?.requested_access_level || "Onbekend toegangsniveau";
-                        const notificationMessage = `${requesterName} heeft een wijziging in toegangsniveau aangevraagd: ${requestedAccessLevel}`;
 
                         return (
                             <Menu.Item key={index}>
                                 <div>
-                                    <p>{notificationMessage}</p>
-                                    <div style={{ display: "flex", justifyContent: "space-between" }}>
+                                    <p>
+                                        {requesterName} heeft een wijziging in toegangsniveau aangevraagd:
+                                        <Tooltip
+                                            title={tooltips[requestedAccessLevel] || "Geen informatie beschikbaar"}
+                                        >
+                                        <span style={{ textDecoration: "underline", cursor: "pointer", marginLeft: "5px" }}>
+                                            {requestedAccessLevel}
+                                        </span>
+                                        </Tooltip>.
+                                        Het vorige toegangsniveau was
+                                        <Tooltip
+                                            title={tooltips[previousAccessLevel] || "Geen informatie beschikbaar"}
+                                        >
+                                        <span style={{ textDecoration: "underline", cursor: "pointer", marginLeft: "5px" }}>
+                                            {previousAccessLevel}
+                                        </span>
+                                        </Tooltip>.
+                                    </p>
+                                    <div style={{ display: "flex", justifyContent: "space-between", marginTop: "10px" }}>
                                         <Button
                                             onClick={() => handleAcceptRequest(notification)}
                                             type="default"
@@ -445,27 +472,39 @@ const ClientOverview = () => {
             title: "Toegangsniveau",
             dataIndex: "access_level",
             key: "access_level",
-            render: (accessLevel, record) => (
-                <div>
-                    <Select
-                        defaultValue={accessLevel}
-                        onChange={(value) => handleAccessLevelChange(profileData.id, record.id, value)}
-                        style={{ width: "90%", maxWidth: '400px' }}
-                        className="prevent-row-click"
-                        options={[
-                            { value: "Volledige toegang", label: "Volledige toegang" },
-                            { value: "Gesprekken", label: "Gesprekken" },
-                            { value: "Contacten", label: "Contacten" },
-                            { value: "Publiek Profiel", label: "Publiek Profiel" },
-                        ]}
-                    />
-                    {pendingRequests[record.id] && (
-                        <p style={{ color: themeColors.primary9, marginTop: "5px" }}>
-                            Wijziging in behandeling: {pendingRequests[record.id]}
-                        </p>
-                    )}
-                </div>
-            ),
+            render: (accessLevel, record) => {
+                return (
+                    <div>
+                        <Select
+                            defaultValue={accessLevel}
+                            onChange={(value) => handleAccessLevelChange(profileData.id, record.id, value)}
+                            style={{ width: "90%", maxWidth: "400px" }}
+                            className="prevent-row-click"
+                            options={[
+                                { value: "Volledige toegang", label: "Volledige toegang" },
+                                { value: "Gesprekken", label: "Gesprekken" },
+                                { value: "Contacten", label: "Contacten" },
+                                { value: "Publiek profiel", label: "Publiek profiel" },
+                            ]}
+                        />
+                        <Tooltip title={tooltips[accessLevel] || "Geen informatie beschikbaar"}>
+                            <QuestionCircleOutlined
+                                style={{
+                                    marginLeft: "3px",
+                                    fontSize: "1.2rem",
+                                    color: "lightgrey",
+                                    cursor: "pointer",
+                                }}
+                            />
+                        </Tooltip>
+                        {pendingRequests[record.id] && (
+                            <p style={{ color: themeColors.primary9, marginTop: "5px" }}>
+                                Wijziging in behandeling: {pendingRequests[record.id]}
+                            </p>
+                        )}
+                    </div>
+                );
+            },
         },
         {
             title: "Acties",

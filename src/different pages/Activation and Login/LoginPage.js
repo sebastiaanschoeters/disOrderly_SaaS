@@ -39,6 +39,7 @@ const LoginPage = () => {
     const emailUpdated = async (email) => {
         console.log(email)
         const user_data = await getUserIdByEmail(email);
+        if(!user_data) {return;}
         const userId = user_data[0].user_id;
         const themeUser = await getThemeById(userId)
         console.log(themeUser)
@@ -245,7 +246,14 @@ const LoginPage = () => {
                                 { required: true, message: 'Please input your password!' },
                             ]}
                         >
-                            <Input.Password />
+                            <Input.Password
+                                onChange={(e) => {
+                                    const emailField = document.querySelector("#loginForm_email");
+                                    if(!themeToSet) {
+                                        emailUpdated(emailField.value)
+                                    }
+                                }}
+                            />
                         </Form.Item>
                         <Form.Item>
                             <Button

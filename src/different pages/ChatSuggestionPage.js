@@ -161,6 +161,7 @@ const ChatSuggestionPage = () => {
             borderRadius: '8px',
             marginBottom: '15px',
             position: 'relative',
+            cursor: 'pointer',
         },
         headerAvatar: {
             marginRight: '10px',
@@ -248,9 +249,8 @@ const ChatSuggestionPage = () => {
                 <HomeButtonUser color={themeColors.primary7} />
                 <ButterflyIcon color={themeColors.primary3} />
 
-                <div style={styles.header}>
+                <div style={styles.header} onClick={() => handleProfileClick(otherUserId)}>
                     <Avatar src={profilePicture || 'default-avatar.png'}
-                            onClick={() => handleProfileClick(otherUserId)}
                             style={styles.headerAvatar}>U</Avatar>
                     <Title level={2} style={{margin: 0, color: themeColors.primary10}} h2>{`${name}`}</Title>
                 </div>

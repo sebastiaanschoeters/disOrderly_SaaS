@@ -129,7 +129,7 @@ const ChatSuggestionPage = () => {
         container: {
             padding: '20px',
             width: '100%',
-            height: '100vh',
+            height: '100dvh',
             backgroundColor: themeColors.primary2,
             color: themeColors.primary10,
             display: 'flex',
@@ -213,13 +213,31 @@ const ChatSuggestionPage = () => {
 
     return (
         <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
-            <HomeButtonUser color={themeColors.primary7} />
-            <ButterflyIcon color={themeColors.primary3} />
+            <div
+                style={{
+                    padding: '20px',
+                    position: 'relative',
+                    minWidth: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'flex-start',
+                    minHeight: '100dvh',
+                    backgroundColor: themeColors.primary2,
+                    color: themeColors.primary10,
+                    width: '100%',
+                    boxSizing: 'border-box',
+                    zIndex: '0'
+                }}
+            >
+                <HomeButtonUser color={themeColors.primary7} />
+                <ButterflyIcon color={themeColors.primary3} />
 
-            <div style={styles.container}>
                 <div style={styles.header}>
-                    <Avatar src={profilePicture || 'default-avatar.png'} onClick={() => navigate(`/profile`, { state: { user_id: otherUserId} })} style={styles.headerAvatar}>U</Avatar>
-                    <Title level={2} style={{ margin: 0, color: themeColors.primary10 }}h2>{`${name}`}</Title>
+                    <Avatar src={profilePicture || 'default-avatar.png'}
+                            onClick={() => navigate(`/profile`, {state: {user_id: otherUserId}})}
+                            style={styles.headerAvatar}>U</Avatar>
+                    <Title level={2} style={{margin: 0, color: themeColors.primary10}} h2>{`${name}`}</Title>
                 </div>
                 <div style={styles.messageContainer}>
                     <p>{message}</p>
@@ -227,9 +245,12 @@ const ChatSuggestionPage = () => {
                 <div style={styles.buttonContainer}>
                     {!isSender && (
                         <>
-                            <Button className="ant-btn-accept" style={styles.button} onClick={handleAccept}>Accepteer</Button>
-                            <Button className="ant-btn-decline" style={styles.button} onClick={handleDecline}>Weiger</Button>
-                            <Button className="ant-btn-block" style={styles.button} onClick={handleBlock}>Blokkeer</Button>
+                            <Button className="ant-btn-accept" style={styles.button}
+                                    onClick={handleAccept}>Accepteer</Button>
+                            <Button className="ant-btn-decline" style={styles.button}
+                                    onClick={handleDecline}>Weiger</Button>
+                            <Button className="ant-btn-block" style={styles.button}
+                                    onClick={handleBlock}>Blokkeer</Button>
 
                         </>
                     )}
@@ -237,7 +258,7 @@ const ChatSuggestionPage = () => {
                 <div>
                     {isSender && (
                         <>
-                            <Button styles={styles.editButton} onClick={handleEdit} >Bewerken</Button>
+                            <Button styles={styles.editButton} onClick={handleEdit}>Bewerken</Button>
                         </>
                     )}
                 </div>
@@ -247,7 +268,7 @@ const ChatSuggestionPage = () => {
                     onOk={handleSave}
                     onCancel={handleCancel}
                     footer={[
-                        <Button key="send" type="primary" onClick={handleSave} >
+                        <Button key="send" type="primary" onClick={handleSave}>
                             Opslaan
                         </Button>,
                     ]}

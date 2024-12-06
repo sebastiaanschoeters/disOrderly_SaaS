@@ -1,7 +1,11 @@
-import {getName, getPfp, getTheme} from "../Api/Utils";
+import {getName, getPfp, getTheme, getThemeCaretaker} from "../Api/Utils";
 
 export const storeUserSession = async (userId, userType, setIsTransitioning, navigate) => {
-    const theme = await getTheme(userId);
+    let theme = await getTheme(userId);
+
+    if (userType === 'caretaker') {
+        theme = await getThemeCaretaker(userId); // Fetch again if there's specific logic for caretakers
+    }
     const name = await getName(userId);
     const pfp = await getPfp(userId);
 

@@ -27,6 +27,30 @@ export const getName = async (user_id) => {
     }
 };
 
+export const getThemeCaretaker = async (user_id) => {
+    try {
+        const { data, error } = await supabase
+            .from('Caretaker')
+            .select('theme')
+            .eq('id', user_id);
+
+        if (error) {
+            console.error('Error fetching user theme:', error.message);
+            return null;
+        }
+
+        if (data.length === 0) {
+            console.log('No user found with the provided user_id.');
+            return null;
+        }
+
+        return data[0].theme;
+    } catch (err) {
+        console.error('Unexpected error:', err);
+        return null;
+    }
+};
+
 export const getTheme = async (user_id) => {
     try {
         const { data, error } = await supabase

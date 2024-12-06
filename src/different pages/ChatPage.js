@@ -14,6 +14,7 @@ import useThemeOnCSS from "../UseHooks/useThemeOnCSS";
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
 
 const ChatPage = () => {
+    const caretaker = localStorage.getItem('controlling');
     const location = useLocation();
     const {profileData} = location.state || {};
     const {name, profilePicture, chatroomId, otherUserId} = profileData || {};
@@ -116,12 +117,16 @@ const ChatPage = () => {
     const handleSendMessage = async () => {
         if (newMessage.trim() === "") return;
 
+        const messageToSend = caretaker
+            ? "Verzonder door begeleiding: " + newMessage
+            : newMessage;
+
         const {error} = await supabase
             .from('Messages')
             .insert([{
                 chatroom_id: chatroomId,
                 sender_id: userId,
-                message_content: newMessage,
+                message_content: messageToSend,
                 created_at: localTime.toISOString()
             }]);
 

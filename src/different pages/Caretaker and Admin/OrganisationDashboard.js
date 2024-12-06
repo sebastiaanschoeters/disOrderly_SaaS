@@ -15,7 +15,9 @@ const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbG
 
 const OrganisationDashboard = () => {
     const [organisationId, setOrganisationId] = useState(null);
+    const [organisationName, setOrganizationName] = useState('')
     const userId = localStorage.getItem("user_id");
+    const navigate = useNavigate();
     const themeColors = themes["blauw"] || themes.blauw;
     const [caretakers, setCaretakers] = useState(undefined);
     const [caretakersList, setCaretakersList] = useState([])
@@ -28,22 +30,31 @@ const OrganisationDashboard = () => {
     });
 
     const fetchOrganisationId = async () => {
-        console.log("user Id: ", userId);
         const { data, error } = await supabase.from("Activation").select('organisation').eq("code", userId);
+        setOrganisationId(25);
         setOrganisationId(data[0].organisation)
+        console.log('User Id: ', userId ,'Organisation Id: ', data[0].organisation);
         if(error) {
             console.error(error);
         }
+
+    }
+
+    const fetchOrganisationName = async () => {
+        const {data, error} = await supabase.from('Organisations').select('name').eq('id', organisationId);
+
     }
 
     const fetchCaretakers = async () => {
         try {
-            const{data, error} = await supabase.from('Caretaker').select('id, Activation(organisation)');
-            const filteredData = data.filter(caretaker => (caretaker.Activation.organisation === organisationId));
-            console.log("Fetched data", data)
-            console.log("Filtered data", filteredData);
-            const mappedData = filteredData.map(caretaker => (caretaker.id));
-            console.log("Mapped data", mappedData)
+            const{data, error} = await supabase.from('Activation')
+                .select('code, organisation')
+                .eq('type', 'caretaker')
+                .eq('organisation', organisationId)
+                .eq('usable', 'TRUE');
+
+            const mappedData = data.map(caretaker => (caretaker.code));
+            console.log("All caretakers in the organisation", mappedData)
             setCaretakers(mappedData);
         }
         catch(error) {
@@ -51,26 +62,28 @@ const OrganisationDashboard = () => {
         }
     }
 
-    const handleReload = () => {
-        fetchOrganisationId();
-        fetchCaretakers();
-        fetchCaretakerInfo();
+    const handleReload = async () => {
+        await fetchOrganisationId();
+        await fetchCaretakers();
+        await fetchCaretakerInfo();
     }
 
     const fetchCaretakerInfo = async () => {
-        let caretakersList = [];
         try {
-            caretakers.map(async caretaker => {
-                    const {data, error} = await supabase.from("Caretaker").select().eq("id", caretaker)
-                console.log("fetch 2:", data)
-                caretakersList.push(data)
-                }
-            )
-            setCaretakersList(caretakersList);
-            console.log("List", caretakersList)
+            const caretakerPromises =  caretakers.map(async (caretaker) => {
+                    const {data, error} = await supabase.from("Caretaker").select().eq("id", caretaker);
+                    if(error) {
+                        console.error("Error fetching caretaker: ", error);
+                        return null;
+                    }
+                    return data.length > 0 ? data[0] : null;
+                })
+
+            const caretakerList = await Promise.all(caretakerPromises);
+            setCaretakersList(caretakerList.filter((caretaker) => caretaker !== null));
         }
         catch (error) {
-            console.log(error)
+            console.error(error)
         }
     }
 
@@ -84,9 +97,14 @@ const OrganisationDashboard = () => {
     }
 
     const handleClickCaretaker = (caretaker) => {
+        setTimeout(() => console.log("Clicked:  ", caretaker), 100)
+        setSelectedCaretaker(caretaker);
         setIsCaretakerVisible(true);
-        console.log("Clicked:  ", caretaker[0])
-        setSelectedCaretaker(caretaker[0]);
+    }
+
+    const handleDeleteCaretaker = async (caretaker) => {
+        const {error} = await supabase.from('caretaker').delete().eq("id", caretaker);
+
     }
 
     const styles = {
@@ -116,7 +134,7 @@ const OrganisationDashboard = () => {
         },
         deleteButton: {
             position: 'absolute',
-            top: '170px',
+            top: '165px',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -127,10 +145,83 @@ const OrganisationDashboard = () => {
         }}
 
     useEffect(() => {
+        // Step 1: Fetch the organisation ID
+        const fetchOrganisationId = async () => {
+            const { data, error } = await supabase
+                .from("Activation")
+                .select("organisation")
+                .eq("code", userId);
+
+            if (error) {
+                console.error("Error fetching organisation ID:", error);
+            } else if (data.length > 0) {
+                setOrganisationId(data[0].organisation);
+                console.log("Organisation ID fetched:", data[0].organisation);
+            }
+        };
+
         fetchOrganisationId();
-        fetchCaretakers();
-        fetchCaretakerInfo();
-    }, []);
+    }, [userId]);
+
+    useEffect(() => {
+        // Step 2: Fetch caretakers when organisationId is updated
+        if (organisationId) {
+            const fetchCaretakers = async () => {
+                try {
+                    const { data, error } = await supabase
+                        .from("Activation")
+                        .select("code, organisation")
+                        .eq("type", "caretaker")
+                        .eq("organisation", organisationId)
+                        .eq("usable", "TRUE");
+
+                    if (error) {
+                        console.error("Error fetching caretakers:", error);
+                    } else {
+                        const caretakerCodes = data.map((caretaker) => caretaker.code);
+                        console.log("Caretaker codes fetched:", caretakerCodes);
+                        setCaretakers(caretakerCodes);
+                    }
+                } catch (error) {
+                    console.error("Unexpected error fetching caretakers:", error);
+                }
+            };
+
+            fetchCaretakers();
+        }
+    }, [organisationId]);
+
+    useEffect(() => {
+        // Step 3: Fetch caretaker details when caretakers list is updated
+        if (caretakers && caretakers.length > 0) {
+            const fetchCaretakerInfo = async () => {
+                try {
+                    const caretakerPromises = caretakers.map(async (caretaker) => {
+                        const { data, error } = await supabase
+                            .from("Caretaker")
+                            .select()
+                            .eq("id", caretaker);
+
+                        if (error) {
+                            console.error("Error fetching caretaker info:", error);
+                            return null;
+                        }
+
+                        return data.length > 0 ? data[0] : null;
+                    });
+
+                    const caretakerList = await Promise.all(caretakerPromises);
+                    setCaretakersList(caretakerList.filter((caretaker) => caretaker !== null));
+                    console.log("Caretaker details fetched:", caretakerList);
+                } catch (error) {
+                    console.error("Error fetching caretaker details:", error);
+                }
+            };
+
+            fetchCaretakerInfo();
+        }
+    }, [caretakers]);
+
 
     return (<ConfigProvider theme={{token: antThemeTokens(themeColors)}}>
         <div
@@ -146,10 +237,48 @@ const OrganisationDashboard = () => {
                 alignItems: 'begin',
                 gap: '20px',
             }}>
-            <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', gap: '20px'}}>
-                <div
-                    style={{display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '20px',}}>
-                    <h1>Begeleiders: </h1>
+
+            <Button
+                type="primary"
+                style={{
+                    position: 'absolute',
+                    top: '20px',
+                    left: '20px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '120px',
+                    height: '100px',
+                }}
+                icon={<RedoOutlined/>}
+                onClick={handleReload}
+            >
+                <h6> Reload data </h6>
+            </Button>
+            <Button
+                type="primary"
+                style={{
+                    position: 'absolute',
+                    top: '20px',
+                    right: '20px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '120px',
+                    height: '100px',
+                }}
+                onClick={() => navigate('/login')}
+
+            >
+                <h2 style={{margin: '0', fontSize: '1rem'}}>Afmelden</h2>
+            </Button>
+            <div style={{display: 'flex', flexDirection:'column', gap: '20px', width: '100%', alignItems: 'center', paddingTop:'100px'}}>
+                <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', gap: '20px'}}>
+                    <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', gap:'20px',}} >
+                        <h1>Begeleiders: </h1>
+                    </div>
                 </div>
                 <List
                     itemLayout="horizontal"
@@ -159,16 +288,18 @@ const OrganisationDashboard = () => {
                         <List.Item>
                             <Card
                                 hoverable={true}
-                                onClick={() => handleClickCaretaker(caretaker)}
+                                onClick={() => setTimeout(() => handleClickCaretaker(caretaker), 100)}
                             >
                                 <Card.Meta
-                                    title={<span style={styles.card}><li>{caretaker[0].name}</li></span>}
+                                    title={<span style={styles.name}><li>{caretaker.name}</li></span>}
                                 />
                                 <p>{caretaker.email}</p>
                             </Card>
                         </List.Item>
                     )}
                 />
+            </div>
+            <div>
                 <Button onClick={handleReload}>
                     Reload
                 </Button>
@@ -180,11 +311,11 @@ const OrganisationDashboard = () => {
             footer={null}
             style={{padding: '10px', height: '200px'}}
             >
-                <div style={{padding: '20px'}}>
+                <div style={{padding: '25px'}}>
                     <Form>
-                        <h1>{selectedCaretaker.name}</h1>
-                        <h3>{selectedCaretaker.email}</h3>
-                        <p>{selectedCaretaker.phone_number}</p>
+                        <h2>{selectedCaretaker.name}</h2>
+                        <h5>{selectedCaretaker.email}</h5>
+                        <h5>{selectedCaretaker.phone_number}</h5>
                     </Form>
                     <Button
                         style={styles.deleteButton}>

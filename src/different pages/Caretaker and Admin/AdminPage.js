@@ -23,7 +23,6 @@ const AdminPage = () => {
     const [names, setNames] = useState([]);
     const [generatedOrganisation, setGeneratedOrganisation] = useState('');
     const [generatedCode, setGeneratedCode] = useState('');
-    const [oldResponsible, setOldResponsible] = useState(0);
     const [selectedOrganisation, setSelectedOrganisation] = useState({
         id: 0,
         name: undefined,
@@ -78,11 +77,11 @@ const AdminPage = () => {
     };
 
     const fetchNames = async () => {
-        const {data, error} = await supabase.from("Caretaker").select("id, name, Activation(type)").order("name");
+        const {data, error} = await supabase.from("Caretaker").select("id, name").order("name");
+        console.log(data)
         const mappedData = data.map((user) => ({
             id: user.id,
             name: user.name,
-            role: user.Activation.type,
         }))
         setNames(mappedData);
     }
@@ -623,7 +622,7 @@ const AdminPage = () => {
                             allowClear
                         >
                             {Organisations.map((organisation) => (
-                                <Select.Option key={organisation.name} value={organisation.name}>
+                                <Select.Option key={organisation.name} value={organisation.id}>
                                     {organisation.name}
                                 </Select.Option>
                             ))}

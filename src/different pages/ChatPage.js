@@ -15,6 +15,7 @@ import butterfly2 from '../Media/butterfly2.png';
 import butterfly3 from '../Media/butterfly3.png';
 import butterfly4 from '../Media/butterfly4.png';
 import butterfly5 from '../Media/butterfly5.png';
+import ProfileDetailsModal from "./Profile Pages/ProfileDetailsModal";
 
 
 
@@ -46,6 +47,9 @@ const ChatPage = () => {
     const [isScrolledToBottom, setIsScrolledToBottom] = useState(true);
     const messageListRef = useRef(null);
     const [noMoreMessages,setNoMoreMessages] = useState(false);
+
+    const [isModalProfileVisible, setIsModalProfileVisible] = useState(false);
+    const [selectedClient, setSelectedClient] = useState({});
 
     const fetchMessages = async (limit = 10, start = 0) => {
         if (loadingMore) return;
@@ -211,8 +215,15 @@ const ChatPage = () => {
         setIsModalVisible(true);
     };
 
-    const handleCloseModal = () => {
-        setIsModalVisible(false);
+    const handleProfileClick = (client) => {
+        console.log(client)
+        setSelectedClient({id: client});
+        setIsModalProfileVisible(true);
+    };
+
+    const handleModalProfileClose = () => {
+        setSelectedClient({});
+        setIsModalProfileVisible(false);
     };
 
     const styles = {
@@ -346,7 +357,7 @@ const ChatPage = () => {
                             <Avatar
                                 src={profilePicture || 'default-avatar.png'}
                                 style={styles.avatar}
-                                onClick={() => navigate(`/profile`, {state: {user_id: otherUserId}})}
+                                onClick={() => handleProfileClick(otherUserId)}
                             >
                                 U
                             </Avatar>
@@ -487,6 +498,14 @@ const ChatPage = () => {
                     player1Id = {userId}
                     player2Id = {otherUserId}
                     handleSendMessage = {handleSendMessageArg}
+                />
+            )}
+
+            {selectedClient && (
+                <ProfileDetailsModal
+                    visible={isModalProfileVisible}
+                    onClose={handleModalProfileClose}
+                    clientData={selectedClient}
                 />
             )}
         </ConfigProvider>

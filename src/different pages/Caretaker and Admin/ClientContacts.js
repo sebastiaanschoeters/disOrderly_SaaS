@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import {Avatar, Button, ConfigProvider, Modal, Select, Table, Input} from "antd";
-import {DeleteOutlined, ProfileOutlined, UserOutlined} from "@ant-design/icons";
+import {Avatar, Button, Modal, Table, Input} from "antd";
+import {UserOutlined} from "@ant-design/icons";
 import ProfileCard from "./CaretakerProfilePage";
 
 const supabase = createClient(

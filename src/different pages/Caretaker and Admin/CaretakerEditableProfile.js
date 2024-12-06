@@ -1,11 +1,6 @@
 import React, {useEffect, useState} from 'react';
-import {Avatar, Button, ConfigProvider, Divider, Select, Switch, Upload} from 'antd';
-import {
-    BgColorsOutlined,
-    MailOutlined,
-    PhoneOutlined,
-    UploadOutlined
-} from '@ant-design/icons';
+import {Avatar, Button, ConfigProvider, Divider, message, Upload} from 'antd';
+import { MailOutlined, PhoneOutlined, UploadOutlined } from '@ant-design/icons';
 import 'antd/dist/reset.css';
 import '../../CSS/AntDesignOverride.css';
 import '../../CSS/EditableProfilePage.css';
@@ -65,6 +60,16 @@ const ProfileCard = () => {
 
     // Define async save functions
     const saveField = async (field, value) => {
+        let dutch_field = ''
+
+        if (field === "theme"){
+            dutch_field = "thema"
+        } else if (field === "phone_number"){
+            dutch_field = "gsm nummer"
+        } else if (field === "email"){
+            dutch_field = "email"
+        }
+
         try {
             const { data, error } = await supabase
                 .from('Caretaker')
@@ -72,8 +77,10 @@ const ProfileCard = () => {
                 .eq('id', profileData.id);
             if (error) throw error;
 
+            message.success(`${dutch_field} opgeslagen`)
             console.log(`${field} saved successfully with value ${value}`);
         } catch (error) {
+            message.error(`probleem bij het opslaan van ${dutch_field}`)
             console.error(`Error saving ${field}:`, error);
         }
     };
@@ -125,7 +132,9 @@ const ProfileCard = () => {
                 .update({ profile_picture: imageUrlWithCacheBuster })
                 .eq('id', profileData.id);
 
+            message.success("profiel foto opgeslagen")
         } catch (error) {
+            message.error("Probleem bij het uploaden van een niewe profiel foto")
             console.error('Error uploading profile picture:', error);
         } finally {
             setUploading(false);

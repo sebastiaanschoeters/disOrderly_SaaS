@@ -6,11 +6,12 @@ import '../../CSS/AntDesignOverride.css'
 import '../../CSS/ActivationPage.css'
 import 'antd/dist/reset.css';
 import {Form, Input, Button, Card, message, ConfigProvider, DatePicker, Radio, Select, Checkbox} from 'antd';
-import { antThemeTokens, themes } from '../../Extra components/themes';
+import {antThemeTokens, ButterflyIcon, themes} from '../../Extra components/themes';
 import { createClient } from "@supabase/supabase-js";
 import CryptoJS from 'crypto-js';
 import useLocations from "../../UseHooks/useLocations";
 import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
+import forestImage from '../../Media/forest.jpg';
 
 const ActivationPage = () => {
     const { activationCodeLink } = useParams();
@@ -19,6 +20,7 @@ const ActivationPage = () => {
     const [loading, setLoading] = useState(false);
     const [userData, setUserData] = useState({});
     const [form] = Form.useForm();
+    const [userType, setUserType] = useState('');
 
     const theme = 'blauw'
     const themeColors = themes[theme] || themes.blauw;
@@ -91,8 +93,9 @@ const ActivationPage = () => {
                 ...prevData,
                 activationKey: values.activationKey,
             }));
+            setUserType(data.type);
             if(data.type === 'user'){setStep(2);}
-            if(data.type === 'caretaker'){setStep(7);}
+            if((data.type === 'caretaker') || (data.type === 'responsible')){setStep(7);}
 
         } catch (err) {
             console.error("Unexpected error during activation code validation:", err);
@@ -199,7 +202,7 @@ const ActivationPage = () => {
                     user_id: userData.activationKey,
                     email: values.email,
                     password: hashedPassword,
-                    type: 'caretaker'
+                    type: userType
                 });
 
             if (credError) throw credError;
@@ -269,7 +272,6 @@ const ActivationPage = () => {
                 throw new Error(`Error saving profile data: ${profileError.message}`);
             }
 
-            // Update the "usable" column in "ActivationKeys" table
             const { error: activationKeyError } = await supabase
                 .from("Activation")
                 .update({ usable: false })
@@ -326,14 +328,13 @@ const ActivationPage = () => {
             const hashedPassword = CryptoJS.SHA256(values.password).toString();
 
             const updatedUserData = {
-                ...userData, // Preserve existing user data
+                ...userData,
                 email: values.email,
                 password: hashedPassword,
             };
 
             console.log("User Data to Submit:", updatedUserData);
 
-            // Pass updated data to saveUserProfile
             await saveUserProfile(updatedUserData);
 
             message.success("Account aangemaakt! Je kan een profielfoto toevoegen bij je profiel.");
@@ -354,7 +355,8 @@ const ActivationPage = () => {
                     alignItems: 'center',
                     height: '100vh',
                     overflowY: 'auto',
-                    backgroundColor: themeColors.primary2,
+                    backgroundImage: `url(${forestImage})`,
+                    //backgroundColor: themeColors.primary2,
                     color: themeColors.primary10
                 }}
             >
@@ -741,7 +743,6 @@ const ActivationPage = () => {
                         </Form>
                     )}
                 </Card>
-
                 {/* User Data Display */}
                 <div
                     style={{

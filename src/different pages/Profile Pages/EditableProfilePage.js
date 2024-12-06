@@ -1,20 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {Avatar, Button, Carousel, Checkbox, ConfigProvider, Divider, message, Select, Spin, Upload} from 'antd';
-import {
-    BookOutlined,
-    CarOutlined,
-    DeleteOutlined,
-    EnvironmentOutlined,
-    HeartOutlined,
-    HomeOutlined,
-    LeftOutlined,
-    PictureOutlined,
-    PlusCircleOutlined,
-    RightOutlined,
-    StarOutlined,
-    UploadOutlined,
-    UserOutlined
-} from '@ant-design/icons';
+import { BookOutlined, CarOutlined, DeleteOutlined, EnvironmentOutlined, HeartOutlined, HomeOutlined, LeftOutlined, PictureOutlined, PlusCircleOutlined, RightOutlined, StarOutlined, UploadOutlined, UserOutlined } from '@ant-design/icons';
 import {antThemeTokens, ButterflyIcon, themes} from '../../Extra components/themes';
 import TextArea from "antd/es/input/TextArea";
 import {createClient} from "@supabase/supabase-js";
@@ -159,6 +145,8 @@ const ProfileCard = () => {
         const handleResize = () => {
             setSlidesToShow(calculateSlidesToShow(images.length+1));
         };
+
+        handleResize();
 
         window.addEventListener('resize', handleResize);
 
@@ -436,8 +424,6 @@ const ProfileCard = () => {
         }
     };
 
-
-
     const handlePictureRemove = async (imageUrlToRemove) => {
         try {
             setRemovingPicture(true);
@@ -552,11 +538,15 @@ const ProfileCard = () => {
                             src={profilePicture}
                             alt={name}
                             style={{
-                                minWidth: '200px',
-                                minHeight: '200px',
+                                minWidth: '150px',
+                                width: '10vw',
+                                minHeight: '150px',
+                                height: '10vw',
                                 borderRadius: '50%'
                             }}
-                        />
+                        >
+                            <h2>{name[0]}</h2>
+                        </Avatar>
                         <div>
                             <h2 style={{margin: '0', textAlign: 'center'}}>
                                 {name || 'Naam'}, {calculateAge(profileData.birthdate) || 'Leeftijd'}
@@ -761,7 +751,7 @@ const ProfileCard = () => {
                                 position: 'relative',
                                 height: '200px',
                             }}>
-                                Voeg nieuwe foto toe aan profiel
+                                Voeg foto toe aan profiel
                             </Button>
                         </Upload>
 

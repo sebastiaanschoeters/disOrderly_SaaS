@@ -4,14 +4,25 @@ import {createClient} from "@supabase/supabase-js";
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
 
 const useHandleRequest = (onSuccess = () => {}, onError = () => {}) => {
-    const handleRequest = async (notification, action) => {
+    const handleRequest = async (notification, action, acceptedByCaretaker) => {
+        console.log(notification)
+        console.log(action)
+        let idToUpdate
+        if (acceptedByCaretaker) {
+            idToUpdate = notification.requester_id
+        } else{
+            idToUpdate = notification.recipient_id
+        }
         try {
             // Update user access level if action is "accept"
             if (action === 'accept') {
                 const { error: accessLevelError } = await supabase
                     .from('User')
-                    .update({ access_level: notification.details.requested_access_level })
-                    .eq('id', notification.requester_id);
+                    .update( {access_level: notification.details.requested_access_level})
+                    .eq('id', idToUpdate);
+
+                console.log(notification.details.requested_access_level)
+                console.log(idToUpdate)
 
                 if (accessLevelError) throw accessLevelError;
             }

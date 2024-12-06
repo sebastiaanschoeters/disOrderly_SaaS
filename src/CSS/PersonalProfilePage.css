@@ -1,0 +1,24 @@
+@keyframes sparkle {
+    0% {
+        transform: scale(1);
+        opacity: 0.5;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0.5;
+    }
+}
+
+.sparkle-icon::after {
+    content: '\2605'; /* Unicode character for sparkle/star */
+    position: relative;
+    top: -3px;
+    left: -10px;
+    font-size: 1rem;
+    color: gold;
+    animation: sparkle 1s infinite;
+}

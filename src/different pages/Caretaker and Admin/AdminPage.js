@@ -1,38 +1,29 @@
 import 'antd/dist/reset.css'; // Import Ant Design styles
 import '../../CSS/AntDesignOverride.css'
 import { antThemeTokens, themes } from '../../Extra components/themes';
-import {
-    Button,
-    Card,
-    ConfigProvider,
-    Form,
-    Input,
-    List,
-    Modal,
-    Select
-} from 'antd';
+import { Button, Card, ConfigProvider, Form, Input, List, Modal, Select } from 'antd';
 import {PlusOutlined, RedoOutlined} from "@ant-design/icons";
 import React, {useEffect, useState} from "react";
 import { useNavigate } from 'react-router-dom';
 import { createClient } from "@supabase/supabase-js";
 import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
+import useLocations from "../../UseHooks/useLocations";
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q");
-
 
 const AdminPage = () => {
     const theme = 'blauw'
     const themeColors = themes[theme] || themes.blauw;
-
     useThemeOnCSS(themeColors);
-
     const navigate = useNavigate();
     const [Organisations, setOrganisations] = useState([]);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [isCaretakerVisible, setCaretakerVisible] = useState(false);
     const [isOrganisationVisible, setIsOrganisationVisible] = useState(false);
     const [names, setNames] = useState([]);
+    const [generatedOrganisation, setGeneratedOrganisation] = useState('');
     const [generatedCode, setGeneratedCode] = useState('');
+    const [oldResponsible, setOldResponsible] = useState(0);
     const [selectedOrganisation, setSelectedOrganisation] = useState({
         id: 0,
         name: undefined,
@@ -59,7 +50,6 @@ const AdminPage = () => {
             console.error(error);
         }
         setOrganisations(mappedData);
-
         fetchNames();
     }
 
@@ -80,7 +70,7 @@ const AdminPage = () => {
                 return null;
             }
 
-            return data[0].id; // Return the first matching location ID
+            return data[0].id;
         } catch (err) {
             console.error("Error:", err);
             return null;
@@ -88,15 +78,13 @@ const AdminPage = () => {
     };
 
     const fetchNames = async () => {
-        const {data, error} = await supabase.from("User").select("id, name");
+        const {data, error} = await supabase.from("Caretaker").select("id, name, Activation(type)").order("name");
         const mappedData = data.map((user) => ({
             id: user.id,
             name: user.name,
+            role: user.Activation.type,
         }))
-
-
         setNames(mappedData);
-        console.log("Mapped Data: ", mappedData)
     }
 
     const showCaretaker = () => {
@@ -124,27 +112,23 @@ const AdminPage = () => {
                 .select("id")
                 .eq("Gemeente", organisation.locationName);
 
-            if (error) {
-                console.error(error);
-                return;
-            }
-
             const locationCode = data.length > 0 ? data[0].id : 0;
-
             setSelectedOrganisation({
                 ...organisation,
                 location: locationCode, // Use the resolved location name
             });
-
-            setIsOrganisationVisible(true);
         } catch (error) {
             console.error("Error fetching organisation details:", error);
         }
+
+
+
+            setIsOrganisationVisible(true);
+
     }
 
     const handleUpdateOrganisation = async () => {
         try {
-            console.log(selectedOrganisation);
             const {error } = await supabase
                 .from("Organisations")
                 .update({
@@ -170,7 +154,6 @@ const AdminPage = () => {
 
     const handleNewOrganisation = async () => {
         try {
-            console.log(selectedOrganisation);
             const {error } = await supabase
                 .from("Organisations")
                 .insert({
@@ -185,7 +168,7 @@ const AdminPage = () => {
             } else {
                 console.log("Organisation updated successfully!");
             }
-            fetchData();
+            await fetchData();
             handleCloseOrganisation();
 
         } catch (err) {
@@ -221,7 +204,6 @@ const AdminPage = () => {
     };
 
     const handleCloseOrganisation = () => {
-        console.log(selectedOrganisation);
         setIsOrganisationVisible(false);
         setSelectedOrganisation({
             id: 0,
@@ -233,11 +215,50 @@ const AdminPage = () => {
         });
     };
 
+    const handleDeleteOrganisation = async () => {
+        const {error} = await supabase.from("Organisations").delete().eq("id", selectedOrganisation.id);
+        if (error) {
+            console.error("Error deleting organisation:", error);
+        } else {
+            console.log("Organisation deleted successfully!");
+        }
+        fetchData();
+    };
 
     const handleGenerateCode = async () => {
-        const {data, error} = await supabase.from("Activation").insert({"usable": true, "type": "caretaker"}).select();
+        const {data, error} = await supabase.from("Activation").insert({"usable": true, "type": "caretaker", "organisation": generatedOrganisation}).select();
         await setGeneratedCode(data[0].code);
-        console.log("Generated code: ", data[0]["code"]);
+    }
+
+    const handleGeneratedOrganisation = (organisation) => {
+        setGeneratedOrganisation(organisation);
+    }
+
+    const handleNewResponsible = async (newResponsible) => {
+        const responsibleName = names.find(name => name.id === newResponsible).name;
+        setSelectedOrganisation(prev => ({
+            ...prev,
+            responsible: newResponsible,
+            responsibleName,
+        }));
+
+        try {
+            const {error} = await supabase
+                .from("Organisations")
+                .update({
+                    responsible: newResponsible,
+                })
+                .eq("id", selectedOrganisation.id);
+
+            if (error) {
+                console.error("Error updating organisation:", error);
+            } else {
+                console.log("Organisation updated successfully!");
+            }
+        }
+        catch (err) {
+                console.error("Update failed:", err);
+            }
     }
 
     const styles = {
@@ -277,10 +298,19 @@ const AdminPage = () => {
             width: '90%',
             maxWidth: '400px',
             height: 'auto',
+        },
+        saveButton: {
+            position: 'absolute',
+            left: '1px',
+            bottom: '2px'
+        },
+        deleteButton: {
+            position: 'absolute',
+            right: '1px',
+            bottom: '2px',
+            backgroundColor: 'red'
         }
     }
-
-
 
     return (<ConfigProvider theme={{token: antThemeTokens(themeColors)}}>
 
@@ -448,8 +478,19 @@ const AdminPage = () => {
                                 name="contactPerson"
                                 rules={[{required: true}]}>
 
-                                <Input placeholder="Naam"
-                                       onChange={(e) => handleFieldChange("responsible", e.target.value)}/>
+                                <Select
+                                    style={{ width: "95%" }}
+                                    placeholder="Kies een verantwoordelijke"
+                                    onChange={handleNewResponsible}
+                                    value={generatedOrganisation}
+                                    allowClear
+                                >
+                                    {names.map((name) => (
+                                        <Select.Option key={name.name} value={name.name}>
+                                            {name.name}
+                                        </Select.Option>
+                                    ))}
+                                </Select>
 
                             </Form.Item>
 
@@ -511,10 +552,20 @@ const AdminPage = () => {
                         <Form.Item
                             label="Contactpersoon"
                             name="contactPerson">
-                            <Input
+
+                            <Select
+                                style={{ width: "95%" }}
+                                placeholder="Kies een contactpersoon"
+                                onChange={(newResponsible) => handleNewResponsible(newResponsible)}
                                 value={selectedOrganisation.responsible}
-                                onChange={(e) => handleFieldChange("responsible", e.target.value)}
-                            />
+                                allowClear
+                            >
+                                {names.map((name) => (
+                                    <Select.Option key={name.name} value={name.id}>
+                                        {name.name}
+                                    </Select.Option>
+                                ))}
+                            </Select>
                             <div/>
                         </Form.Item>
 
@@ -546,8 +597,12 @@ const AdminPage = () => {
 
 
                         <Form.Item>
-                            <Button type="primary" htmlType="submit" onClick={handleUpdateOrganisation}>
+                            <Button type="primary" htmlType="submit" onClick={handleUpdateOrganisation} style={styles.saveButton}>
                                 Opslaan
+                            </Button>
+
+                            <Button type="primary" htmlType="submit" onClick={handleDeleteOrganisation} style={styles.deleteButton}>
+                                Verwijder organisatie
                             </Button>
                         </Form.Item>
                     </Form>
@@ -560,7 +615,20 @@ const AdminPage = () => {
                     style={{padding: '10px'}}
                 >
                     <div>
-                        <h3>Code voor de nieuwe caretaker:</h3>
+                        <Select
+                            style={{ width: "95%" }}
+                            placeholder="Kies een organisatie"
+                            onChange={handleGeneratedOrganisation}
+                            value={generatedOrganisation}
+                            allowClear
+                        >
+                            {Organisations.map((organisation) => (
+                                <Select.Option key={organisation.name} value={organisation.name}>
+                                    {organisation.name}
+                                </Select.Option>
+                            ))}
+                        </Select>
+                        <h3>Code voor de nieuwe begeleider:</h3>
                         <h2>{generatedCode}</h2>
                     </div>
                     <div>

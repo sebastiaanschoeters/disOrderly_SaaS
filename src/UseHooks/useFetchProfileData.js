@@ -59,6 +59,7 @@ const useFetchProfileData = (actCode, options = { fetchAllInterests: false }) =>
                         user.mobility = userInfo.mobility;
                         user.theme = userInfo.theme;
                         user.gender = userInfo.gender;
+                        user.sexuality = userInfo.sexuality;
 
                         if (userInfo.theme) {
                             try {

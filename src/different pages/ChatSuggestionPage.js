@@ -129,7 +129,7 @@ const ChatSuggestionPage = () => {
         container: {
             padding: '20px',
             width: '100%',
-            height: '100vh',
+            height: '100dvh',
             backgroundColor: themeColors.primary2,
             color: themeColors.primary10,
             display: 'flex',
@@ -222,7 +222,7 @@ const ChatSuggestionPage = () => {
                     flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'flex-start',
-                    minHeight: '100vh',
+                    minHeight: '100dvh',
                     backgroundColor: themeColors.primary2,
                     color: themeColors.primary10,
                     width: '100%',

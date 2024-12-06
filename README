@@ -53,3 +53,16 @@ User metrics                "As an administrative user i want an overview for my
 
 **Supabase password**
 ezeHoEBOW8sWvQQm
+
+
+Placeholders vervangen als er geen data is
+northstarmetric in organisation en admin dashboard => user id in sender_id bij chatroom tabel
+email op gsm direct naar lowercase
+linken local storage van caretaker
+profile pages iets verbeteren op gsm
+media querries voor alle paginas
+Caretaker acces level met gesprekken implementeren
+Balkjes uit zoek en chatpagina hetzelfde
+Vlinder op chat pagina
+Testcode in cypress
+Hangman game win or lose message

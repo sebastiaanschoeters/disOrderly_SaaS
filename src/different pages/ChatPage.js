@@ -150,7 +150,7 @@ const ChatPage = () => {
 
     const handleSendMessageArg = async (messageContent) => {
         console.log("Sending message:", messageContent);
-        if (!messageContent.trim()) return;
+        if (newMessage.trim() === "") return;
 
         const { error } = await supabase
             .from('Messages')
@@ -375,7 +375,7 @@ const ChatPage = () => {
                                                         alignItems: "center",
                                                     }}
                                                 >
-                                                    {message.message_content.startsWith("ButterflyIcon") ? (() => {
+                                                    {message.message_content && typeof message.message_content === 'string' && message.message_content.startsWith("ButterflyIcon") ? (() => {
                                                         const butterflyImages = [butterfly0, butterfly1, butterfly2, butterfly3, butterfly4, butterfly5]; // Add your local image paths
                                                         const contentAfterIcon = message.message_content.slice(13).trim(); // Get everything after "ButterflyIcon"
 

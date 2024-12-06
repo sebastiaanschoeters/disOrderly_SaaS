@@ -234,6 +234,7 @@ const HangmanGame = ({ isModalVisible, setIsModalVisible, player1Id, player2Id, 
 
     useEffect(() => {
         if (isGameOver || isGameWon) {
+            handleSendMessage()
             setGameEnded(true);
         }
     }, [isGameOver, isGameWon]);

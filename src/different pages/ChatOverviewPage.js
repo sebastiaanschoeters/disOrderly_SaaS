@@ -103,7 +103,7 @@ const ChatOverviewPage = () => {
             position: 'absolute',
             top: '25px',
             height: '25px',
-            right: '25px',
+            right: '15px',
             backgroundColor: themeColors.primary8,
             color: themeColors.primary1,
             padding: '0px 5px',
@@ -168,13 +168,13 @@ const ChatOverviewPage = () => {
 
                                     {isSender && !chat.acceptance && (
                                         <div style={styles.newMessageIndicator}>
-                                            Bericht in behandeling
+                                            Wachten
                                         </div>
                                     )}
 
                                     {!isSender && !chat.acceptance && (
                                         <div style={styles.newMessageIndicator}>
-                                            Nieuwe Berichten
+                                            Nieuw
                                         </div>
                                     )}
                                 </Card>

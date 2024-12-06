@@ -183,7 +183,7 @@ const HomePage = () => {
                         alignItems: 'center',
                         justifyContent: 'center',
                         width: '15vw',
-                        height: '12vw',
+                        height: '12vh',
                         minWidth: '100px',
                         minHeight: '80px',
                         fontSize: '1.8rem',  // Increase text size for "Instellingen"
@@ -208,7 +208,7 @@ const HomePage = () => {
                         alignItems: 'center',
                         justifyContent: 'center',
                         width: '15vw',
-                        height: '12vw',
+                        height: '12vh',
                         minWidth: '100px',
                         minHeight: '80px',
                         fontSize: '1.8rem',  // Increase text size for "Afmelden"

@@ -7,6 +7,7 @@ import { createClient } from "@supabase/supabase-js";
 import HomeButtonUser from "../Extra components/HomeButtonUser";
 import useTheme from "../UseHooks/useTheme";
 import useThemeOnCSS from "../UseHooks/useThemeOnCSS";
+import ProfileDetailsModal from "./Profile Pages/ProfileDetailsModal";
 
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
@@ -27,6 +28,8 @@ const ChatSuggestionPage = () => {
     const [themeName, darkModeFlag] = JSON.parse(localStorage.getItem('theme')) || ['blauw', false];
     const { themeColors, setThemeName, setDarkModeFlag } = useTheme(themeName, darkModeFlag);
 
+    const [isModalProfileVisible, setIsModalProfileVisible] = useState(false);
+    const [selectedClient, setSelectedClient] = useState({});
 
     useThemeOnCSS(themeColors);
 
@@ -124,6 +127,18 @@ const ChatSuggestionPage = () => {
     useEffect(() => {
         fetchMessages(chatroomId);
     }, [chatroomId]);
+
+
+    const handleProfileClick = (client) => {
+        console.log(client)
+        setSelectedClient({id: client});
+        setIsModalProfileVisible(true);
+    };
+
+    const handleModalProfileClose = () => {
+        setSelectedClient({});
+        setIsModalProfileVisible(false);
+    };
 
     const styles = {
         container: {
@@ -235,7 +250,7 @@ const ChatSuggestionPage = () => {
 
                 <div style={styles.header}>
                     <Avatar src={profilePicture || 'default-avatar.png'}
-                            onClick={() => navigate(`/profile`, {state: {user_id: otherUserId}})}
+                            onClick={() => handleProfileClick(otherUserId)}
                             style={styles.headerAvatar}>U</Avatar>
                     <Title level={2} style={{margin: 0, color: themeColors.primary10}} h2>{`${name}`}</Title>
                 </div>
@@ -280,6 +295,13 @@ const ChatSuggestionPage = () => {
                     />
                 </Modal>
             </div>
+            {selectedClient && (
+                <ProfileDetailsModal
+                    visible={isModalProfileVisible}
+                    onClose={handleModalProfileClose}
+                    clientData={selectedClient}
+                />
+            )}
         </ConfigProvider>
     );
 };

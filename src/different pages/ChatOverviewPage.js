@@ -103,7 +103,7 @@ const ChatOverviewPage = () => {
             position: 'absolute',
             top: '25px',
             height: '25px',
-            right: '25px',
+            right: '15px',
             backgroundColor: themeColors.primary8,
             color: themeColors.primary1,
             padding: '0px 5px',
@@ -181,21 +181,21 @@ const ChatOverviewPage = () => {
                                     title={<span style={styles.name}>{`${chat.profileName}`}</span>}
                                 />
 
-                                {isSender && !chat.acceptance && (
-                                    <div style={styles.newMessageIndicator}>
-                                        Bericht in behandeling
-                                    </div>
-                                )}
+                                    {isSender && !chat.acceptance && (
+                                        <div style={styles.newMessageIndicator}>
+                                            Wachten
+                                        </div>
+                                    )}
 
-                                {!isSender && !chat.acceptance && (
-                                    <div style={styles.newMessageIndicator}>
-                                        Nieuwe Berichten
-                                    </div>
-                                )}
-                            </Card>
-                        );
-                    }}
-                />
+                                    {!isSender && !chat.acceptance && (
+                                        <div style={styles.newMessageIndicator}>
+                                            Nieuw
+                                        </div>
+                                    )}
+                                </Card>
+                            );
+                        }}
+                    />
             </div>
         </ConfigProvider>
     );

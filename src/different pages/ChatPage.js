@@ -37,6 +37,7 @@ const ChatPage = () => {
     const dummyRef = useRef(null);
     const [isScrolledToBottom, setIsScrolledToBottom] = useState(true);
     const messageListRef = useRef(null);
+    const [noMoreMessages,setNoMoreMessages] = useState(false);
 
     const fetchMessages = async (limit = 10, start = 0) => {
         if (loadingMore) return;
@@ -64,6 +65,7 @@ const ChatPage = () => {
             });
         }
         setLoadingMore(false);
+        setNoMoreMessages(data.length < limit);
     };
 
     useEffect(() => {
@@ -292,7 +294,7 @@ const ChatPage = () => {
                             </h2>
                         </div>
                         <div style={styles.messageList} ref={messageListRef} onScroll={handleScroll}>
-                            {!loadingMore && (
+                            {!loadingMore && !noMoreMessages && (
                                 <p
                                     onClick={handleLoadMore}
                                     style={{

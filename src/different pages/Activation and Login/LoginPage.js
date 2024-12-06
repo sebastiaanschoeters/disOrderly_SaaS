@@ -102,7 +102,7 @@ const LoginPage = () => {
                 <ButterflyIcon color="rgba(255, 255, 255, 0.2)" />
                 <Button
                     type="primary"
-                    onClick={navigate('/activate')}
+                    onClick={() =>navigate('/activate')}
                     style={{
                         position: "fixed",
                         right: "20px",

@@ -1,17 +1,21 @@
 import 'antd/dist/reset.css'; // Import Ant Design styles
 import '../CSS/AntDesignOverride.css';
 import { antThemeTokens, ButterflyIcon, themes } from '../Extra components/themes';
-import { Button, ConfigProvider, Avatar } from 'antd';
+import { Button, ConfigProvider, Avatar, Badge } from 'antd';
 import { MessageOutlined, SearchOutlined, SettingOutlined, PoweroffOutlined } from "@ant-design/icons";
-import React from "react";
+import React, {useState, useEffect} from "react";
 import { useNavigate } from 'react-router-dom';
 import NotificationModal from "./NotifiactionModal";
 import useTheme from "../UseHooks/useTheme";
 import useThemeOnCSS from "../UseHooks/useThemeOnCSS";
+import {createClient} from "@supabase/supabase-js";
+
+const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
+
 
 const HomePage = () => {
     const [themeName, darkModeFlag] = JSON.parse(localStorage.getItem('theme')) || ['blauw', false];
-    const { themeColors, setThemeName, setDarkModeFlag } = useTheme(themeName, darkModeFlag);
+    const {themeColors, setThemeName, setDarkModeFlag} = useTheme(themeName, darkModeFlag);
 
     useThemeOnCSS(themeColors);
 
@@ -26,6 +30,26 @@ const HomePage = () => {
     const userId = localStorage.getItem('user_id');
     const name = localStorage.getItem('name');
     const profile_picture = localStorage.getItem('profile_picture');
+    const [newRequestCount, setNewRequestCount] = useState(0);
+
+    const fetchnumber = async () => {
+        const {count, error} = await supabase
+            .from('Chatroom')
+            .select('id', { count: 'exact' })
+            .eq(`receiver_id`,userId)
+            .eq('acceptance', false);
+
+        if (error) {
+            console.error("Error fetching chatrooms:", error);
+        }
+        if (count > 0){
+            setNewRequestCount(count || 0);
+        }
+    };
+
+    useEffect(() => {
+        fetchnumber(); // Fetch the count on component mount
+    }, []);
 
     return (
         <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
@@ -77,26 +101,39 @@ const HomePage = () => {
                     >
                         <h2 style={{ margin: '0', minWidth: '20px', whiteSpace: 'nowrap' }}>Mensen vinden</h2>
                     </Button>
-
-                    <Button
-                        className="primary-button"  // Add class for targeting with CSS
-                        type="primary"
-                        icon={<MessageOutlined style={{ fontSize: '4rem' }} />}  // Increase icon size
-                        style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            width: '240px',
-                            height: '240px',
-                            fontSize: '2rem',
-                            textAlign: 'center',  // Ensure text is centered
-                            overflow: 'hidden',   // Prevent text overflow
-                        }}
-                        onClick={() => navigate('/chatoverview')}
+                    <Badge
+                        count={newRequestCount} // Dynamic count
+                                offset={[0, 10]} // Adjust badge position (horizontal, vertical)
+                                style={{
+                                    backgroundColor: 'orange', // Badge background color
+                                    color: 'white',           // Badge text color
+                                    fontSize: '2rem',
+                                    width: '32px',              // Width of the badge
+                                    height: '32px',             // Height of the badge
+                                    lineHeight: '32px',         // Line height to center the text
+                                    borderRadius: '50%', // Font size for badge
+                                }}
                     >
-                        <h2 style={{ margin: '0', minWidth: '20px', whiteSpace: 'nowrap' }}>Chats</h2>
-                    </Button>
+                        <Button
+                            className="primary-button"  // Add class for targeting with CSS
+                            type="primary"
+                            icon={<MessageOutlined style={{ fontSize: '4rem' }} />}  // Increase icon size
+                            style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                width: '240px',
+                                height: '240px',
+                                fontSize: '2rem',
+                                textAlign: 'center',  // Ensure text is centered
+                                overflow: 'hidden',   // Prevent text overflow
+                            }}
+                            onClick={() => navigate('/chatoverview')}
+                        >
+                            <h2 style={{ margin: '0', minWidth: '20px', whiteSpace: 'nowrap' }}>Chats</h2>
+                        </Button>
+                    </Badge>
                 </div>
 
                 <div

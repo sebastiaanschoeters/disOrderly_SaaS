@@ -9,6 +9,7 @@ import 'antd/dist/reset.css';
 import '../../CSS/AntDesignOverride.css';
 import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
 import useHandleRequest from "../../UseHooks/useHandleRequest";
+import useFetchCaretakerData from "../../UseHooks/useFetchCaretakerData";
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q");
 
@@ -164,11 +165,26 @@ const useFetchCaretakers = (organizationId) => {
 };
 
 const ClientOverview = () => {
-    const { clients, error: fetchClientsError } = useFetchClients(1111);
-    const { caretakers } = useFetchCaretakers("25");
-    const { profileData } = useFetchProfileData(1111);
-    const theme = profileData.theme || "blauw";
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        const value = localStorage.getItem(key);
+        console.log(key, ": ", value);
+    }
+    const caretaker_id = localStorage.getItem("user_id");
+    let [savedTheme, savedDarkMode] = JSON.parse(localStorage.getItem('theme'));
+    let theme
+    if (savedDarkMode) {
+        theme = savedDarkMode + "_donker";
+    } else {
+        theme = savedTheme;
+    }
     const themeColors = themes[theme] || themes.blauw;
+    const name = localStorage.getItem('name')
+    const savedProfilePicture = localStorage.getItem('profile_picture')
+
+    const { clients, error: fetchClientsError } = useFetchClients(caretaker_id);
+    const { profileData } = useFetchCaretakerData(caretaker_id, {fetchOrganization: true});
+    const { caretakers } = useFetchCaretakers(profileData.organizationId);
 
     useThemeOnCSS(themeColors);
 
@@ -595,16 +611,16 @@ const ClientOverview = () => {
                 >
                     <Avatar
                         size={60}
-                        src={profileData.profile_picture}
+                        src={savedProfilePicture}
                         style={{
                             backgroundColor: themeColors.primary4,
                             color: themeColors.primary10,
                         }}
                     >
-                        {profileData.name}
+                        {name[0]}
                     </Avatar>
                     <p style={{fontSize: '2rem'}}>
-                        {profileData.name}
+                        {name}
                     </p>
                 </div>
             </div>

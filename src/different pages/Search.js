@@ -360,6 +360,7 @@ const Search = () => {
 
         const sortedUsers = sortUsers(filtered)
         setFilteredUsers(sortedUsers);
+        console.log(sortedUsers)
     };
 
     // Handle changes for the age slider
@@ -501,8 +502,8 @@ const Search = () => {
 
 
                 {loading ? (
-                    <div>Loading...</div>
-                ) : filteredUsers.length > 0 ? (
+                    <div>Gebruikers aan het zoeken...</div>
+                ) : (
                     <div
                         style={{
                             display: 'flex',
@@ -511,63 +512,80 @@ const Search = () => {
                             width: '70%',
                         }}
                     >
-                        {/* User List */}
-                        <List
-                            style={{
-                                flex: 1,
-                                width: '70%',
-                                maxWidth: '100%',
-                            }}
-                            dataSource={filteredUsers.filter(
-                                (user) =>
-                                    user.name.toLowerCase().includes(searchQuery) ||
-                                    user.age.toString().includes(searchQuery)
-                            )}
-                            renderItem={(item) => (
-                                <List.Item
-                                    key={item.id}
-
-                                    onClick={() => handleProfileClick(item.id)}
-                                    // Navigate to dynamic user link
-                                    style={{
-                                        display: 'flex',
-                                        flexDirection: 'row',
-                                        marginBottom: '1.5vw', // Reduced margin between items
-                                        padding: '1vw', // Reduced padding for smaller list items
-                                        backgroundColor: themeColors.primary1,
-                                        borderRadius: '8px',
-                                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-                                        justifyContent: 'space-between',
-                                        cursor: 'pointer', // Add pointer cursor to indicate it's clickable
-                                    }}
-                                >
-                                    <Avatar
-                                        src={item.profile_picture}
+                        {/* Check if there are users to display */}
+                        {filteredUsers.filter(
+                            (user) =>
+                                user.name.toLowerCase().includes(searchQuery) ||
+                                user.age.toString().includes(searchQuery)
+                        ).length === 0 ? (
+                            <div
+                                style={{
+                                    textAlign: 'center',
+                                    marginTop: '2vw',
+                                }}
+                            >
+                                Geen gebruikers gevonden voor deze zoek criteria.<br/> Pas je filters aan en probeer opnieuw.
+                            </div>
+                        ) : (
+                            <List
+                                style={{
+                                    flex: 1,
+                                    width: '70%',
+                                    maxWidth: '100%',
+                                }}
+                                dataSource={filteredUsers.filter(
+                                    (user) =>
+                                        user.name.toLowerCase().includes(searchQuery) ||
+                                        user.age.toString().includes(searchQuery)
+                                )}
+                                renderItem={(item) => (
+                                    <List.Item
+                                        key={item.id}
+                                        onClick={() => handleProfileClick(item.id)}
                                         style={{
-                                            backgroundColor: themeColors.primary10,
-                                            marginLeft: '1vw',
-                                            width: '10vw', // Reduced avatar size
-                                            height: '10vw', // Reduced avatar size
+                                            display: 'flex',
+                                            flexDirection: 'row',
+                                            marginBottom: '1.5vw',
+                                            padding: '1vw',
+                                            backgroundColor: themeColors.primary1,
+                                            borderRadius: '8px',
+                                            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+                                            justifyContent: 'space-between',
+                                            cursor: 'pointer',
                                         }}
                                     >
-                                        {item.name[0]}
-                                    </Avatar>
-                                    <div style={{flex: 1, display: 'flex', justifyContent: 'flex-end', marginRight: '1vw'}}>
-                                        <div style={{textAlign: 'right'}}>
-                                            <p style={{fontWeight: 'bold'}}>
-                                                {item.name}
-                                            </p>
-                                            <p>Leeftijd: {item.age}</p>
-                                            <p>Afstand: {item.distance}km</p>
+                                        <Avatar
+                                            src={item.profile_picture}
+                                            style={{
+                                                backgroundColor: themeColors.primary10,
+                                                marginLeft: '1vw',
+                                                width: '10vw',
+                                                height: '10vw',
+                                            }}
+                                        >
+                                            {item.name[0]}
+                                        </Avatar>
+                                        <div
+                                            style={{
+                                                flex: 1,
+                                                display: 'flex',
+                                                justifyContent: 'flex-end',
+                                                marginRight: '1vw',
+                                            }}
+                                        >
+                                            <div style={{ textAlign: 'right' }}>
+                                                <p style={{ fontWeight: 'bold' }}>{item.name}</p>
+                                                <p>Leeftijd: {item.age}</p>
+                                                <p>Afstand: {item.distance}km</p>
+                                            </div>
                                         </div>
-                                    </div>
-                                </List.Item>
-                            )}
-                        />
+                                    </List.Item>
+                                )}
+                            />
+                        )}
                     </div>
-                ) : (
-                    <div>Geen gebruikers gevonden.</div>
                 )}
+
 
                 {selectedClient && (
                     <ProfileDetailsModal

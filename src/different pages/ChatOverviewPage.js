@@ -6,6 +6,7 @@ import { createClient } from "@supabase/supabase-js";
 import HomeButtonUser from "../Extra components/HomeButtonUser";
 import useTheme from "../UseHooks/useTheme";
 import useThemeOnCSS from "../UseHooks/useThemeOnCSS";
+import {PlusCircleOutlined, UserOutlined} from "@ant-design/icons";
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
 
@@ -170,32 +171,32 @@ const ChatOverviewPage = () => {
                                         chatroomId: chat.id,
                                     };
                                     if (chat.acceptance === true) {
-                                        navigate(`/chat`, {state: {profileData}});
+                                        navigate(`/chat`, { state: { profileData } });
                                     } else {
-                                        navigate(`/chatsuggestion`, {state: {profileData}});
+                                        navigate(`/chatsuggestion`, { state: { profileData } });
                                     }
                                 }}
                             >
                                 <Card.Meta
-                                    avatar={<Avatar src={chat.profilePicture || 'default-avatar.png'}/>}
+                                    avatar={<Avatar src={chat.profilePicture || 'default-avatar.png'} />}
                                     title={<span style={styles.name}>{`${chat.profileName}`}</span>}
                                 />
-
-                                    {isSender && !chat.acceptance && (
-                                        <div style={styles.newMessageIndicator}>
-                                            Wachten
-                                        </div>
-                                    )}
-
-                                    {!isSender && !chat.acceptance && (
-                                        <div style={styles.newMessageIndicator}>
-                                            Nieuw
-                                        </div>
-                                    )}
-                                </Card>
-                            );
-                        }}
-                    />
+                                {isSender && !chat.acceptance && (
+                                    <div style={styles.newMessageIndicator}>Wachten</div>
+                                )}
+                                {!isSender && !chat.acceptance && (
+                                    <div style={styles.newMessageIndicator}>Nieuw</div>
+                                )}
+                            </Card>
+                        );
+                    }}
+                >
+                    {filteredChats.length === 0 && (
+                        <div style={{ textAlign: 'center', marginTop: '20px', color: themeColors.primary9 }}>
+                            Geen chats gevonden voor deze zoek criteria
+                        </div>
+                    )}
+                </List>
             </div>
         </ConfigProvider>
     );

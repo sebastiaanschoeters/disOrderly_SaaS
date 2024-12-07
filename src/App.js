@@ -51,7 +51,7 @@ const App = () => {
                     path="/clientOverview"
                     element={
                         <ProtectedRoute allowedRoles={["caretaker, admin"]}>
-                            <Search />
+                            <ClientOverview />
                         </ProtectedRoute>
                     }
                 />

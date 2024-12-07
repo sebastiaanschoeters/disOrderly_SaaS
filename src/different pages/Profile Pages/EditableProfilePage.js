@@ -608,6 +608,13 @@ const ProfileCard = () => {
                             value: location.id, // Use ID as the value
                             label: location.Gemeente, // Display gemeente
                         }))}
+                        notFoundContent={
+                            <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+                                <span role="img" aria-label="no data"
+                                      style={{fontSize: '2rem'}}><EnvironmentOutlined/></span>
+                                <span>Locatie niet gevonden</span>
+                            </div>
+                        }
                     />
                 </p>
 

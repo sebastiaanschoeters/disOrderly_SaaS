@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import {Avatar, Divider, Select, ConfigProvider, Spin, message} from 'antd';
-import { UserSwitchOutlined, HeartOutlined, TrophyOutlined } from '@ant-design/icons';
+import {Avatar, Divider, Select, ConfigProvider, Spin, message, Tooltip} from 'antd';
+import {UserSwitchOutlined, HeartOutlined, TrophyOutlined, QuestionCircleOutlined} from '@ant-design/icons';
 import 'antd/dist/reset.css';
 import '../../CSS/AntDesignOverride.css';
 import '../../CSS/PersonalProfilePage.css';
@@ -368,6 +368,13 @@ const ProfileCard = () => {
         debouncedSaveSexuality(value);
     };
 
+    const tooltips = {
+        "Volledige toegang": "Begeleiding heeft volledige toegang en kan alles mee volgen en profiel aanpassen",
+        "Gesprekken": "Begeleiding kan enkel gesprekken lezen",
+        "Contacten": "Begeleiding kan zien met wie jij contact hebt",
+        "Publiek profiel": "Begeleiding kan zien wat jij op je profiel plaatst, net zoals andere gebruikers",
+    };
+
     if (isLoading) return <Spin tip="Profiel laden..." />;
     if (error) return <p>Failed to load profile: {error}</p>;
 
@@ -440,10 +447,31 @@ const ProfileCard = () => {
                             {value: 'Publiek profiel', label: 'Publiek profiel'},
                         ]}
                     />
+                    <Tooltip title={tooltips[caretaker.accessLevel] || "Geen informatie beschikbaar"}>
+                        <QuestionCircleOutlined
+                            style={{
+                                marginLeft: "3px",
+                                fontSize: "1.2rem",
+                                color: "lightgrey",
+                                cursor: "pointer",
+                            }}
+                        />
+                    </Tooltip>
                     {pendingRequests[caretaker.id] && (
                         <p style={{color: themeColors.primary9, marginTop: '5px'}}>
                             Wijziging in behandeling: {pendingRequests[caretaker.id]}
+                            <Tooltip title={tooltips[pendingRequests[caretaker.id]] || "Geen informatie beschikbaar"}>
+                                <QuestionCircleOutlined
+                                    style={{
+                                        marginLeft: "3px",
+                                        fontSize: "1.2rem",
+                                        color: "lightgrey",
+                                        cursor: "pointer",
+                                    }}
+                                />
+                            </Tooltip>
                         </p>
+
                     )}
                 </p>
 

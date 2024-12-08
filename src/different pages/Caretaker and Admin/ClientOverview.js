@@ -188,6 +188,8 @@ const ClientOverview = () => {
     const [notifications, setNotifications] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
 
+    const [isWideEnough, setIsWideEnough] = useState(window.innerWidth >= 800);
+
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -257,6 +259,7 @@ const ClientOverview = () => {
 
         const handleResize = () => {
             setPageSize(calculatePageSize());
+            setIsWideEnough(window.innerWidth >= 800);
         };
 
         window.addEventListener("resize", handleResize);
@@ -489,6 +492,7 @@ const ClientOverview = () => {
                         />
                         <Tooltip title={tooltips[accessLevel] || "Geen informatie beschikbaar"}>
                             <QuestionCircleOutlined
+                                className="prevent-row-click"
                                 style={{
                                     marginLeft: "3px",
                                     fontSize: "1.2rem",
@@ -548,130 +552,152 @@ const ClientOverview = () => {
     }));
 
     return (
-        <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
-            <div
-                style={{
-                    padding: "20px",
-                    position: "relative",
-                    minWidth: "100%",
-                    minHeight: "100vh",
-                    backgroundColor: themeColors.primary2,
-                    color: themeColors.primary10,
-                    zIndex: "0",
-                }}
-            >
-                <ButterflyIcon color={themeColors.primary3}/>
+        <div
+            style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                minHeight: "100vh",
+                textAlign: "center",
+            }}
+        >
+            {isWideEnough ? (
+                <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
+                    <div
+                        style={{
+                            padding: "20px",
+                            position: "relative",
+                            minWidth: "100%",
+                            minHeight: "100vh",
+                            backgroundColor: themeColors.primary2,
+                            color: themeColors.primary10,
+                            zIndex: "0",
+                        }}
+                    >
+                        <ButterflyIcon color={themeColors.primary3} />
 
-                {/* Notification Button */}
-                <div
-                    style={{
-                        position: "absolute",
-                        top: "2%",
-                        right: "2%",
-                        display: "flex",
-                        alignItems: "center",
-                    }}
-                >
-                    <Dropdown overlay={notificationMenu} trigger={['click']}>
-                        <Badge count={unreadCount} size="large">
-                            <BellOutlined
+                        {/* Notification Button */}
+                        <div
+                            style={{
+                                position: "absolute",
+                                top: "2%",
+                                right: "2%",
+                                display: "flex",
+                                alignItems: "center",
+                            }}
+                        >
+                            <Dropdown overlay={notificationMenu} trigger={["click"]}>
+                                <Badge count={unreadCount} size="large">
+                                    <BellOutlined
+                                        style={{
+                                            fontSize: "1.8rem",
+                                            cursor: "pointer",
+                                            color: themeColors.primary10,
+                                        }}
+                                    />
+                                </Badge>
+                            </Dropdown>
+                        </div>
+
+                        <h2 style={{ marginTop: "100px" }}>Clienten overzicht: </h2>
+
+                        {fetchClientsError && <p>Fout: {fetchClientsError}</p>}
+                        {clients.length > 0 ? (
+                            <Table
+                                dataSource={dataSource}
+                                columns={columns}
+                                showHeader={false}
+                                rowKey="id"
+                                pagination={{ pageSize: pageSize }}
                                 style={{
-                                    fontSize: "1.8rem",
-                                    cursor: "pointer",
+                                    marginTop: "20px",
+                                }}
+                                onRow={(record) => ({
+                                    onClick: (event) => {
+                                        // Prevent clicks on select and buttons from triggering row click
+                                        if (!event.target.closest(".prevent-row-click")) {
+                                            handleClientClick(record);
+                                        }
+                                    },
+                                })}
+                                rowClassName="clickable-row"
+                            />
+                        ) : (
+                            <p>Cliënten laden...</p>
+                        )}
+
+                        {/* Render the modal */}
+                        {selectedClient && (
+                            <ClientDetailsModal
+                                visible={isModalVisible}
+                                onClose={handleModalClose}
+                                clientData={selectedClient}
+                            />
+                        )}
+
+                        <div
+                            style={{
+                                display: "flex",
+                                justifyContent: "center",
+                            }}
+                        >
+                            <Button
+                                type="primary"
+                                style={{ marginTop: "20px" }}
+                            >
+                                Genereer nieuwe profiel code
+                            </Button>
+                        </div>
+
+                        <div
+                            style={{
+                                position: "absolute",
+                                top: "2%",
+                                left: "2%",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "15px",
+                                cursor: "pointer",
+                                padding: "10px",
+                            }}
+                            onClick={() => navigate("/caretakerProfileEdit")}
+                        >
+                            <Avatar
+                                size={60}
+                                src={savedProfilePicture}
+                                style={{
+                                    backgroundColor: themeColors.primary4,
                                     color: themeColors.primary10,
                                 }}
-                            />
-                        </Badge>
-                    </Dropdown>
+                            >
+                                {name[0]}
+                            </Avatar>
+                            <p style={{ fontSize: "2rem" }}>
+                                {name}
+                            </p>
+                        </div>
+                        <Button
+                            type="secondary"
+                            icon={<PoweroffOutlined />}
+                            style={{
+                                fontSize: "2rem",
+                                position: "absolute",
+                                bottom: "5%",
+                                right: "1%",
+                            }}
+                            onClick={() => handleLogout()}
+                        >
+                            Log uit
+                        </Button>
+                    </div>
+                </ConfigProvider>
+            ) : (
+                <div>
+                    <h1>Scherm te smal</h1>
+                    <p>Open deze pagina op een breder scherm (minimaal 800px).</p>
                 </div>
-
-                <h2 style={{marginTop: '100px'}}>Clienten overzicht: </h2>
-
-                {fetchClientsError && <p>Fout: {fetchClientsError}</p>}
-                {clients.length > 0 ? (
-                    <Table
-                        dataSource={dataSource}
-                        columns={columns}
-                        showHeader={false}
-                        rowKey="id"
-                        pagination={{pageSize: pageSize}}
-                        style={{
-                            marginTop: "20px",
-                        }}
-                        onRow={(record) => ({
-                            onClick: (event) => {
-                                // Prevent clicks on select and buttons from triggering row click
-                                if (!event.target.closest(".prevent-row-click")) {
-                                    handleClientClick(record);
-                                }
-                            },
-                        })}
-                        rowClassName="clickable-row"
-                    />
-
-                ) : (
-                    <p>Cliënten laden...</p>
-                )}
-
-                {/* Render the modal */}
-                {selectedClient && (
-                    <ClientDetailsModal
-                        visible={isModalVisible}
-                        onClose={handleModalClose}
-                        clientData={selectedClient}
-                    />
-                )}
-
-                <div style={{
-                    display: "flex",
-                    justifyContent: "center",
-                }}>
-                    <Button
-                        type="primary"
-                        style={{marginTop: "20px"}}
-                    >
-                        Genereer nieuwe profiel code
-                    </Button>
-                </div>
-
-
-                <div
-                    style={{
-                        position: 'absolute',
-                        top: '2%',
-                        left: '2%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '15px',
-                        cursor: 'pointer',
-                        padding: '10px',
-                    }}
-                    onClick={() => navigate('/caretakerProfileEdit')}
-                >
-                    <Avatar
-                        size={60}
-                        src={savedProfilePicture}
-                        style={{
-                            backgroundColor: themeColors.primary4,
-                            color: themeColors.primary10,
-                        }}
-                    >
-                        {name[0]}
-                    </Avatar>
-                    <p style={{fontSize: '2rem'}}>
-                        {name}
-                    </p>
-                </div>
-                <Button
-                    type="secondary"
-                    icon={<PoweroffOutlined />}
-                    style={{ fontSize: '2rem' , position: 'absolute', bottom: '5%', right: '1%' }}
-                    onClick={()=>handleLogout()}
-                >
-                    Log uit
-                </Button>
-            </div>
-        </ConfigProvider>
+            )}
+        </div>
     );
 };
 

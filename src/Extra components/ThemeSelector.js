@@ -13,7 +13,7 @@ const ThemeSelector = ({ theme, isDarkMode, handleThemeChange, handleThemeToggle
 
     return (
         <p style={{display: 'flex', alignItems: 'center', gap: '2%'}}>
-            <strong style={{width: '20%', minWidth: '150px'}}>
+            <strong style={{width: '15%', minWidth: '100px'}}>
                 <BgColorsOutlined/> Kies een kleur:
             </strong>
             <div style={{display: 'flex', flexGrow: 1, alignItems: 'center'}}>

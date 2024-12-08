@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {Avatar, Button, Carousel, Checkbox, ConfigProvider, Divider, message, Select, Spin, Upload} from 'antd';
 import { BookOutlined, CarOutlined, DeleteOutlined, EnvironmentOutlined, HeartOutlined, HomeOutlined, LeftOutlined, PictureOutlined, PlusCircleOutlined, RightOutlined, StarOutlined, UploadOutlined, UserOutlined } from '@ant-design/icons';
 import {antThemeTokens, ButterflyIcon, themes} from '../../Extra components/themes';
@@ -50,6 +50,7 @@ const useFetchPicturesData = (actCode) => {
 };
 
 const ProfileCard = () => {
+    const carouselRef = useRef(null);
     const user_id = localStorage.getItem('user_id')
     let [savedTheme, savedDarkMode] = JSON.parse(localStorage.getItem('theme'));
     let theme
@@ -415,7 +416,18 @@ const ProfileCard = () => {
 
             if (dbInsertError) throw dbInsertError;
 
-            setImages([...images, imageUrlWithCacheBuster])
+            setImages((prevImages) => {
+                const updatedImages = [...prevImages, imageUrlWithCacheBuster];
+
+                // Automatically scroll to the last image
+                setTimeout(() => {
+                    if (carouselRef.current) {
+                        carouselRef.current.goTo(updatedImages.length);
+                    }
+                }, 300);
+
+                return updatedImages;
+            });
 
         } catch (error) {
             message.error(error.message);
@@ -520,7 +532,9 @@ const ProfileCard = () => {
     return (
         <ConfigProvider theme={{token: antThemeTokens(themeColors)}}>
             <div style={{
-                padding: '20px',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
                 position: 'relative',
                 minWidth: '100dvw',
                 minHeight: '100vh',
@@ -529,19 +543,25 @@ const ProfileCard = () => {
                 color: themeColors.primary10,
                 zIndex: '0'
             }}>
+                <div
+                    style={{
+                        width: '80%',
+                        boxSizing: 'border-box',
+                    }}
+                >
                 <HomeButtonUser color={themeColors.primary7} />
                 <ButterflyIcon color={themeColors.primary3}/>
 
-                <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', paddingBottom: '20px'}}>
+                <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', paddingBottom: '20px', marginTop: '20px'}}>
                     <div style={{display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '10px'}}>
                         <Avatar
                             src={profilePicture}
                             alt={name}
                             style={{
-                                minWidth: '150px',
-                                width: '10dvw',
-                                minHeight: '150px',
-                                height: '10dvw',
+                                minHeight: '100px',
+                                minWidth: '100px',
+                                height: '15dvw',
+                                width: '15dvw',
                                 borderRadius: '50%'
                             }}
                         >
@@ -565,7 +585,7 @@ const ProfileCard = () => {
                 <Divider/>
 
                 <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
-                    <strong style={{width: '20%', minWidth: '150px'}}>
+                    <strong style={{width: '15%', minWidth: '100px'}}>
                         <BookOutlined/> Biografie:
                     </strong>
 
@@ -595,7 +615,7 @@ const ProfileCard = () => {
                 <Divider/>
 
                 <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
-                    <strong style={{width: '20%', minWidth: '150px'}}><EnvironmentOutlined/> Locatie: </strong>
+                    <strong style={{width: '15%', minWidth: '100px'}}><EnvironmentOutlined/> Locatie: </strong>
                     <Select
                         showSearch
                         style={{flex: 1, minWidth: '200px'}}
@@ -621,7 +641,7 @@ const ProfileCard = () => {
                 <Divider/>
 
                 <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
-                    <strong style={{width: '20%', minWidth: '150px'}}><UserOutlined/> Geslacht: </strong>
+                    <strong style={{width: '15%', minWidth: '100px'}}><UserOutlined/> Geslacht: </strong>
                     <Select
                         style={{flex: 1, minWidth: '200px'}}
                         placeholder="Selecteer geslacht"
@@ -638,7 +658,7 @@ const ProfileCard = () => {
                 <Divider/>
 
                 <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
-                    <strong style={{width: '20%', minWidth: '150px'}}><StarOutlined/> Interesses:</strong>
+                    <strong style={{width: '15%', minWidth: '100px'}}><StarOutlined/> Interesses:</strong>
                     <Select
                         mode="multiple"
                         allowClear
@@ -666,7 +686,7 @@ const ProfileCard = () => {
                 <Divider/>
 
                 <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
-                    <strong style={{width: '20%', minWidth: '150px'}}><HeartOutlined/> Is op zoek naar:</strong>
+                    <strong style={{width: '15%', minWidth: '100px'}}><HeartOutlined/> Is op zoek naar:</strong>
                     <div style={{
                         flex: 1,
                         display: 'flex',
@@ -699,7 +719,7 @@ const ProfileCard = () => {
                 <Divider/>
 
                 <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
-                    <strong style={{width: '20%', minWidth: '150px'}}><HomeOutlined/> Woonsituatie:</strong>
+                    <strong style={{width: '15%', minWidth: '100px'}}><HomeOutlined/> Woonsituatie:</strong>
                     <Select
                         placeholder="Selecteer jouw woonsituatie"
                         value={livingSituation}
@@ -719,7 +739,7 @@ const ProfileCard = () => {
                 <Divider/>
 
                 <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
-                    <strong style={{width: '20%', minWidth: '150px'}}><CarOutlined/> Kan zich zelfstanding verplaatsen:</strong>
+                    <strong style={{width: '15%', minWidth: '100px'}}><CarOutlined/> Kan zich zelfstanding verplaatsen:</strong>
                     <Select
                         value={mobility}
                         style={{flex: 1, minWidth: '200px'}}
@@ -735,11 +755,12 @@ const ProfileCard = () => {
 
                 <div style={{marginTop: '20px', marginBottom: '20px'}}>
                     <p>
-                        <strong style={{width: '40%', minWidth: '150px', flexShrink: 0}}>
+                        <strong style={{width: '40%', minWidth: '100px', flexShrink: 0}}>
                             <PictureOutlined/> Meer fotos van jezelf tonen:
                         </strong>
                     </p>
                     <Carousel
+                        ref={carouselRef}
                         prevArrow={<CustomPrevArrow />}
                         nextArrow={<CustomNextArrow />}
                         arrows
@@ -748,7 +769,7 @@ const ProfileCard = () => {
                         infinite={false}
                         style={{
                             maxWidth: '80%',
-                            height: '200px',
+                            height: '150px',
                             margin: '0 auto'
                         }}
                     >
@@ -756,7 +777,7 @@ const ProfileCard = () => {
                                 multiple>
                             <Button icon={<UploadOutlined/>} loading={uploadingPicture} style={{
                                 position: 'relative',
-                                height: '200px',
+                                height: '150px',
                             }}>
                                 Voeg foto toe aan profiel
                             </Button>
@@ -767,14 +788,14 @@ const ProfileCard = () => {
                                 key={index}
                                 style={{
                                     position: 'relative',
-                                    height: '200px',
+                                    height: '150px',
                                 }}
                             >
                                 <img
                                     src={imageUrl}
                                     alt={`carousel-image-${index}`}
                                     style={{
-                                        height: '200px',
+                                        height: '150px',
                                         width: 'auto',
                                         objectFit: 'cover',
                                         borderRadius: '10px',
@@ -786,10 +807,10 @@ const ProfileCard = () => {
                                         type="text"
                                         onClick={() => handlePictureRemove(imageUrl)}
                                         style={{
-                                            height: '200px',
-                                            width: '200px',
+                                            height: '150px',
+                                            width: '150px',
                                             position: 'relative',
-                                            top: `-100px`,
+                                            top: `-75px`,
                                             left: `50%`,
                                             transform: 'translate(-50%, -50%)',
                                             zIndex: 10,
@@ -806,6 +827,7 @@ const ProfileCard = () => {
                         ))}
                     </Carousel>
                 </div>
+            </div>
             </div>
         </ConfigProvider>
     );

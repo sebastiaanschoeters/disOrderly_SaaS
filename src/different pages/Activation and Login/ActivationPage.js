@@ -357,9 +357,12 @@ const ActivationPage = () => {
                     overflowY: 'auto',
                     backgroundImage: `url(${forestImage})`,
                     //backgroundColor: themeColors.primary2,
-                    color: themeColors.primary10
+                    color: themeColors.primary10,
+                    position: 'relative',
+                    zIndex: '0'
                 }}
             >
+                <ButterflyIcon color="rgba(255, 255, 255, 0.2)" />
                 <Card
                     style={{ width: 400 }}
                     title={

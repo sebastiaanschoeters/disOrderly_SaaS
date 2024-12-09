@@ -59,7 +59,6 @@ knoppen onderaan op home page niet afkappen -Alvero
 northstarmetric in organisation en admin dashboard => user id in sender_id bij chatroom tabel -seb
 profile pages iets verbeteren op gsm -Alvaro
 media querries voor alle paginas -iedreen zijn eigen paginas
-vilder op activate pagina -Alvaro
 Caretaker acces level met gesprekken implementeren -Lotte
 Testcode in cypress -Djeniz
 hangman win + -wout
@@ -69,7 +68,6 @@ summative user evaluation zie discord -donderdag
 lower case email  -wout
 vraag stellen zonder hang man  -wout
 improve chat direct ipv dubbel model window
--je kan deze chat terug vinden op de chat pagina ofzo
 chat klik op profiel heel de balk ipv alleen pfp -Djeniz
 titels -Wout
 trophy beter -wout

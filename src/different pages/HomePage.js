@@ -176,13 +176,13 @@ const HomePage = () => {
                     icon={<SettingOutlined />}
                     style={{
                         position: 'absolute',
-                        bottom: '1%',
+                        bottom: '2%',
                         left: '1%',
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        width: '15dvw',
+                        width: '20dvw',
                         height: '12dvh',
                         minWidth: '100px',
                         minHeight: '80px',
@@ -201,13 +201,13 @@ const HomePage = () => {
                     icon={<PoweroffOutlined />}
                     style={{
                         position: 'absolute',
-                        bottom: '1%',
+                        bottom: '2%',
                         right: '1%',
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        width: '15dvw',
+                        width: '20dvw',
                         height: '12dvh',
                         minWidth: '100px',
                         minHeight: '80px',
@@ -231,6 +231,7 @@ const HomePage = () => {
                     align-items: center;
                     justify-content: center;
                 }
+                
 
                 /* Media Query for Smaller Screens */
                 @media (max-width: 768px) {
@@ -279,6 +280,7 @@ const HomePage = () => {
                 #root {
                     height: 100%; /* Ensure the app takes the full viewport height */
                 }
+                
             `}</style>
         </ConfigProvider>
     );

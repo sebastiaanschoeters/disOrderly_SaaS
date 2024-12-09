@@ -312,7 +312,7 @@ const ProfileCard = (profileToShow) => {
                         disabled={isChatroomExistent}
                         onClick={handleMessage}
                     >
-                        {isChatroomExistent ? 'chat is al gestart' : `Chat met ${profileData?.name || 'de gebruiker'}`}
+                        {isChatroomExistent ? 'chat is al gestart' : `Stuur verzoek naar ${profileData?.name || 'de gebruiker'}`}
                     </Button>
                 )}
 

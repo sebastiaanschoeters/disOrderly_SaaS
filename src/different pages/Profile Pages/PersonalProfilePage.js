@@ -383,7 +383,6 @@ const ProfileCard = () => {
             <div style={{
                 display: 'flex',
                 justifyContent: 'center',
-                alignItems: 'center',
                 position: 'relative',
                 minWidth: '100dvw',
                 minHeight: '100vh',
@@ -472,7 +471,7 @@ const ProfileCard = () => {
                             <QuestionCircleOutlined
                                 style={{
                                     fontSize: '1.2rem',
-                                    color: 'lightgrey',
+                                    color: themeColors.primary8,
                                     cursor: 'pointer',
                                 }}
                             />
@@ -483,6 +482,7 @@ const ProfileCard = () => {
                             fontSize: '0.9rem',
                             color: themeColors.primary9,
                             marginTop: '5px',
+                            textAlign: 'right',
                         }}>
                             Wijziging in behandeling: {pendingRequests[caretaker.id]}
                             <Tooltip title={tooltips[pendingRequests[caretaker.id]] || "Geen informatie beschikbaar"}>
@@ -490,7 +490,7 @@ const ProfileCard = () => {
                                     style={{
                                         marginLeft: '3px',
                                         fontSize: '1rem',
-                                        color: 'lightgrey',
+                                        color: themeColors.primary8,
                                         cursor: 'pointer',
                                     }}
                                 />

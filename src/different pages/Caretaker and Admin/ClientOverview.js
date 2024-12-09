@@ -33,7 +33,8 @@ const useFetchClients = (actCode) => {
                     client.name,
                     client.access_level,
                     client.id
-                ]);
+                ])
+                .sort((a, b) => a[1].localeCompare(b[1]));
 
                 setClients(transformedClients);
             } catch (error) {
@@ -496,7 +497,7 @@ const ClientOverview = () => {
                                 style={{
                                     marginLeft: "3px",
                                     fontSize: "1.2rem",
-                                    color: "lightgrey",
+                                    color: themeColors.primary8,
                                     cursor: "pointer",
                                 }}
                             />

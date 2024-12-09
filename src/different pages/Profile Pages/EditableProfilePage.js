@@ -14,6 +14,7 @@ import useLocations from "../../UseHooks/useLocations";
 import {debounce, saveField} from "../../Api/Utils";
 import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
 import {uploadProfilePicture} from "../../Utils/uploadProfilePicture";
+import useTheme from "../../UseHooks/useTheme";
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
 
@@ -53,13 +54,9 @@ const ProfileCard = () => {
     const carouselRef = useRef(null);
     const user_id = localStorage.getItem('user_id')
     let [savedTheme, savedDarkMode] = JSON.parse(localStorage.getItem('theme'));
-    let theme
-    if (savedDarkMode) {
-        theme = savedDarkMode + "_donker";
-    } else {
-        theme = savedTheme;
-    }
-    const themeColors = themes[theme] || themes.blauw;
+
+    const { themeColors, setThemeName, setDarkModeFlag } = useTheme(savedTheme, savedDarkMode)
+
     const name = localStorage.getItem('name')
 
     const savedProfilePicture = localStorage.getItem('profile_picture')
@@ -175,8 +172,10 @@ const ProfileCard = () => {
                 .eq('user_id', user_id);
             if (error) throw error;
 
+            message.success("op zoek naar opgeslagen")
             console.log(`Looking for updated successfully width value ${updatedLookingFor}`);
         } catch (error) {
+            message.error("probleem bij het opslaan van op zoek naar")
             console.error('Error saving looking for:', error);
         }
     }, 1000);
@@ -219,9 +218,9 @@ const ProfileCard = () => {
                 }
 
                 // Step 2: Associate the interest with the current profile
-                await supabase.from('Interested in ').insert({
-                    ProfileId: user_id,
-                    interestId: interestId
+                await supabase.from('Interested in').insert({
+                    user_id: user_id,
+                    interest_id: interestId
                 });
 
                 // Check if the interest is already in the options list before adding
@@ -234,8 +233,10 @@ const ProfileCard = () => {
                 setInterests([...interests, capitalizedInterest]);
                 setSelectedInterests([...selectedInterests, capitalizedInterest]);
                 setNewInterest('');
+                message.success("nieuwe interesse opgeslagen")
             } catch (error) {
                 console.error('Error adding new interest:', error);
+                message.error("probleem bij het toevoegen van een nieuwe interesse")
             }
         }
     };
@@ -283,8 +284,10 @@ const ProfileCard = () => {
                     .eq('user_id', user_id)
                     .in('interest_id', interestsToRemove);
             }
+            message.success("interesse opgeslagen")
         } catch (error) {
             console.error('Error updating interests:', error);
+            message.error("probleem bij het opslaan van interesse")
         }
     };
 
@@ -431,8 +434,10 @@ const ProfileCard = () => {
 
         } catch (error) {
             message.error(error.message);
+            message.error("foto opgeslagen")
         } finally {
             setUploadingPicture(false);
+            message.success("foto opgeslagen")
         }
     };
 
@@ -468,8 +473,10 @@ const ProfileCard = () => {
             });
         } catch (error) {
             console.error('Error removing profile picture:', error);
+            message.error('probleem bij het verwijderen van de foto')
         } finally {
             setRemovingPicture(false);
+            message.success('foto verwijdert')
         }
     };
 
@@ -488,8 +495,10 @@ const ProfileCard = () => {
                 .eq('id', user_id);
 
         } catch (error) {
+            message.error("probleem bij het opslaan van profiel foto")
             console.error('Error uploading profile picture:', error);
         } finally {
+            message.success("profiel foto opgeslagen")
             setUploading(false);
         }
     };
@@ -635,6 +644,14 @@ const ProfileCard = () => {
                                 <span>Locatie niet gevonden</span>
                             </div>
                         }
+                        dropdownRender={(menu) => (
+                            <div
+                                onWheel={(e) => e.stopPropagation()} // Prevent scroll propagation
+                                style={{ maxHeight: 300 }}
+                            >
+                                {menu}
+                            </div>
+                        )}
                     />
                 </p>
 
@@ -680,6 +697,14 @@ const ProfileCard = () => {
                                 <span>Druk op enter om deze nieuwe interesse toe te voegen</span>
                             </div>
                         }
+                        dropdownRender={(menu) => (
+                            <div
+                                onWheel={(e) => e.stopPropagation()} // Prevent scroll propagation
+                                style={{ maxHeight: 300 }}
+                            >
+                                {menu}
+                            </div>
+                        )}
                     />
                 </p>
 

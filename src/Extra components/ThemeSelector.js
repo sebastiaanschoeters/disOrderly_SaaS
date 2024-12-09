@@ -23,6 +23,14 @@ const ThemeSelector = ({ theme, isDarkMode, handleThemeChange, handleThemeToggle
                     options={themeOptions} // Use the dynamically generated options
                     value={theme} // Selected theme value
                     onChange={handleThemeChange} // Trigger theme change
+                    dropdownRender={(menu) => (
+                        <div
+                            onWheel={(e) => e.stopPropagation()} // Prevent scroll propagation
+                            style={{ maxHeight: 300 }} // Only constrain dropdown height, no overflow here
+                        >
+                            {menu}
+                        </div>
+                    )}
                 />
                 <Switch
                     checked={isDarkMode}

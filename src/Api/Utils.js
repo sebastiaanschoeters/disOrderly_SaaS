@@ -1,4 +1,5 @@
 import {createClient} from "@supabase/supabase-js";
+import {message} from "antd";
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q");
 
@@ -149,10 +150,45 @@ export const saveField = async (userId, field, value) => {
             .update({ [field]: value })
             .eq('user_id', userId);  // Use dynamic userId passed as argument
         if (error) throw error;
+        let dutch_field = field
+        if (field === 'bio'){
+            dutch_field = "biografie"
+        } else if (field === 'location'){
+            dutch_field = "locatie"
+        } else if (field === 'gender'){
+            dutch_field = "geslacht"
+        } else if (field === 'living_situation'){
+            dutch_field = "woonsituatie"
+        } else if (field === 'mobility'){
+            dutch_field = "mobiliteit"
+        } else if (field === 'theme'){
+            dutch_field = "thema"
+        } else if (field === 'sexuality'){
+            dutch_field = "seksualiteit"
+        }
 
+        message.success(`${dutch_field} opgeslagen`);
         console.log(`${field} saved successfully with value ${value}`);
     } catch (error) {
-        console.error(`Error saving ${field}:`, error);
+        let dutch_field = field
+        if (field === 'bio'){
+            dutch_field = "biografie"
+        } else if (field === 'location'){
+            dutch_field = "locatie"
+        } else if (field === 'gender'){
+            dutch_field = "geslacht"
+        } else if (field === 'living_situation'){
+            dutch_field = "woonsituatie"
+        } else if (field === 'mobility'){
+            dutch_field = "mobiliteit"
+        } else if (field === 'theme'){
+            dutch_field = "thema"
+        } else if (field === 'sexuality'){
+            dutch_field = "seksualiteit"
+        }
+
+        message.error(`probleem bij het opslaan van ${field}`);
+        console.error(`Error saving ${dutch_field}:`, error);
     }
 };
 

@@ -438,7 +438,7 @@ const Search = () => {
                 <ButterflyIcon color={themeColors.primary3}/>
 
                 <Title level={2} style={{color: themeColors.primary10, marginBottom: '2vw'}}>
-                    Gebruikers
+                    Mensen vinden
                 </Title>
 
                 {/* Flex container for the search bar, filter button, and user list */}

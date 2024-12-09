@@ -1,5 +1,17 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {Avatar, Button, Carousel, Checkbox, ConfigProvider, Divider, message, Select, Spin, Upload} from 'antd';
+import {
+    Avatar,
+    Button,
+    Carousel,
+    Checkbox,
+    ConfigProvider,
+    Divider,
+    message,
+    Select,
+    Spin,
+    Typography,
+    Upload
+} from 'antd';
 import { BookOutlined, CarOutlined, DeleteOutlined, EnvironmentOutlined, HeartOutlined, HomeOutlined, LeftOutlined, PictureOutlined, PlusCircleOutlined, RightOutlined, StarOutlined, UploadOutlined, UserOutlined } from '@ant-design/icons';
 import {antThemeTokens, ButterflyIcon, themes} from '../../Extra components/themes';
 import TextArea from "antd/es/input/TextArea";
@@ -525,6 +537,19 @@ const ProfileCard = () => {
             }}
         />
     );
+    const { Title } = Typography;
+
+    const styles = {
+        title: {
+            flexGrow: 1,
+            textAlign: 'center',
+            margin: 0,
+            fontSize: '48px',
+            transform: 'scale(1.5)', // Scale the title up
+            paddingTop: '15px',
+        },
+    };
+
 
     if (isLoading) return <Spin tip="Profiel laden..." />;
     if (error) return <p>Failed to load profile: {error}</p>;
@@ -549,285 +574,295 @@ const ProfileCard = () => {
                         boxSizing: 'border-box',
                     }}
                 >
-                <HomeButtonUser color={themeColors.primary7} />
-                <ButterflyIcon color={themeColors.primary3}/>
-
-                <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', paddingBottom: '20px', marginTop: '20px'}}>
-                    <div style={{display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '10px'}}>
-                        <Avatar
-                            src={profilePicture}
-                            alt={name}
-                            style={{
-                                minHeight: '100px',
-                                minWidth: '100px',
-                                height: '15dvw',
-                                width: '15dvw',
-                                borderRadius: '50%'
-                            }}
-                        >
-                            <h2>{name[0]}</h2>
-                        </Avatar>
-                        <div>
-                            <h2 style={{margin: '0', textAlign: 'center'}}>
-                                {name || 'Naam'}, {calculateAge(profileData.birthdate) || 'Leeftijd'}
-                            </h2>
-                            <div style={{marginTop: '10px', marginBottom: '20px'}}>
-                                <Upload showUploadList={false} beforeUpload={() => false}
-                                        onChange={handleProfilePictureUpload}>
-                                    <Button icon={<UploadOutlined/>} loading={uploading}>Kies nieuwe
-                                        profielfoto</Button>
-                                </Upload>
-                            </div>
-                        </div>
+                    <div style={styles.titleButton}>
+                        <Title level={1} style={{...styles.title, fontSize: '64px'}}>Jouw profiel</Title>
                     </div>
-                </div>
+                    <HomeButtonUser color={themeColors.primary7}/>
+                    <ButterflyIcon color={themeColors.primary3}/>
 
-                <Divider/>
-
-                <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
-                    <strong style={{width: '15%', minWidth: '100px'}}>
-                        <BookOutlined/> Biografie:
-                    </strong>
-
-                    <div style={{position: 'relative', flex: 1, minWidth: '200px'}}>
-                        <TextArea
-                            style={{width: '100%', paddingBottom: '20px'}}
-                            rows={3}
-                            placeholder="Vertel iets over jezelf"
-                            value={biography}
-                            onChange={handleBiographyChange}
-                            maxLength={200}
-                        />
-                        <div
-                            style={{
-                                position: 'absolute',
-                                bottom: '5px',
-                                right: '10px',
-                                fontSize: '12px',
-                                background: 'transparent',
-                            }}
-                        >
-                            {biography.length}/200
-                        </div>
-                    </div>
-                </p>
-
-                <Divider/>
-
-                <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
-                    <strong style={{width: '15%', minWidth: '100px'}}><EnvironmentOutlined/> Locatie: </strong>
-                    <Select
-                        showSearch
-                        style={{flex: 1, minWidth: '200px'}}
-                        placeholder="Zoek en selecteer uw locatie"
-                        value={location}
-                        onChange={handleLocationChange}
-                        onSearch={handleSearch} // Trigger search
-                        filterOption={false} // Disable client-side filtering
-                        options={locations.map((location) => ({
-                            value: location.id, // Use ID as the value
-                            label: location.Gemeente, // Display gemeente
-                        }))}
-                        notFoundContent={
-                            <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
-                                <span role="img" aria-label="no data"
-                                      style={{fontSize: '2rem'}}><EnvironmentOutlined/></span>
-                                <span>Locatie niet gevonden</span>
-                            </div>
-                        }
-                    />
-                </p>
-
-                <Divider/>
-
-                <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
-                    <strong style={{width: '15%', minWidth: '100px'}}><UserOutlined/> Geslacht: </strong>
-                    <Select
-                        style={{flex: 1, minWidth: '200px'}}
-                        placeholder="Selecteer geslacht"
-                        value={gender}
-                        onChange={handleGenderChange}
-                        options={[
-                            {value: 'Man', label: 'Man'},
-                            {value: 'Vrouw', label: 'Vrouw'},
-                            {value: 'Non-binair', label: 'Non-binair'},
-                        ]}
-                    />
-                </p>
-
-                <Divider/>
-
-                <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
-                    <strong style={{width: '15%', minWidth: '100px'}}><StarOutlined/> Interesses:</strong>
-                    <Select
-                        mode="multiple"
-                        allowClear
-                        placeholder="Selecteer interesses of voeg toe"
-                        style={{flex: 1, minWidth: '200px'}}
-                        options={interestOptions}
-                        value={selectedInterests}
-                        onChange={handleInterestSelectChange}
-                        onSearch={(value) => setNewInterest(value)}
-                        onInputKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                                handleAddInterest();
-                            }
-                        }}
-                        notFoundContent={
-                            <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
-                                <span role="img" aria-label="no data"
-                                      style={{fontSize: '2rem'}}><PlusCircleOutlined/></span>
-                                <span>Druk op enter om deze nieuwe interesse toe te voegen</span>
-                            </div>
-                        }
-                    />
-                </p>
-
-                <Divider/>
-
-                <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
-                    <strong style={{width: '15%', minWidth: '100px'}}><HeartOutlined/> Is op zoek naar:</strong>
                     <div style={{
-                        flex: 1,
                         display: 'flex',
                         flexDirection: 'column',
-                        gap: '10px',
-                        minWidth: '200px'
+                        alignItems: 'center',
+                        paddingBottom: '20px',
+                        marginTop: '20px'
                     }}>
-                        <Checkbox
-                            checked={lookingForArray.includes('Vrienden')}
-                            onChange={() => handleCheckboxChange('Vrienden')}
-                        >
-                            Vrienden
-                        </Checkbox>
-                        <Checkbox
-                            checked={lookingForArray.includes('Relatie')}
-                            onChange={() => handleCheckboxChange('Relatie')}
-                        >
-                            Relatie
-                        </Checkbox>
-                        <Checkbox
-                            checked={lookingForArray.includes('Intieme ontmoeting')}
-                            onChange={() => handleCheckboxChange('Intieme ontmoeting')}
-                        >
-                            Intieme ontmoeting
-                        </Checkbox>
-                    </div>
-                </p>
-
-
-                <Divider/>
-
-                <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
-                    <strong style={{width: '15%', minWidth: '100px'}}><HomeOutlined/> Woonsituatie:</strong>
-                    <Select
-                        placeholder="Selecteer jouw woonsituatie"
-                        value={livingSituation}
-                        style={{flex: 1, minWidth: '200px'}}
-                        onChange={handleLivingChange}
-                        options={[
-                            {value: 'Woont alleen', label: 'Woont alleen'},
-                            {value: 'Begeleid wonen', label: 'Begeleid wonen'},
-                            {value: 'Woont in bij ouders', label: 'Woont in bij ouders'},
-                            {value: 'Woont in groepsverband', label: 'Woont in groepsverband'},
-                            {value: 'Woont in zorginstelling', label: 'Woont in zorginstelling'},
-                            {value: 'Andere', label: 'Andere'},
-                        ]}
-                    />
-                </p>
-
-                <Divider/>
-
-                <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
-                    <strong style={{width: '15%', minWidth: '100px'}}><CarOutlined/> Kan zich zelfstanding verplaatsen:</strong>
-                    <Select
-                        value={mobility}
-                        style={{flex: 1, minWidth: '200px'}}
-                        onChange={handleMobilityChange}
-                        options={[
-                            {value: 'True', label: 'Ja'},
-                            {value: 'False', label: 'Nee'},
-                        ]}
-                    />
-                </p>
-
-                <Divider/>
-
-                <div style={{marginTop: '20px', marginBottom: '20px'}}>
-                    <p>
-                        <strong style={{width: '40%', minWidth: '100px', flexShrink: 0}}>
-                            <PictureOutlined/> Meer fotos van jezelf tonen:
-                        </strong>
-                    </p>
-                    <Carousel
-                        ref={carouselRef}
-                        prevArrow={<CustomPrevArrow />}
-                        nextArrow={<CustomNextArrow />}
-                        arrows
-                        slidesToShow={slidesToShow}
-                        draggable
-                        infinite={false}
-                        style={{
-                            maxWidth: '80%',
-                            height: '150px',
-                            margin: '0 auto'
-                        }}
-                    >
-                        <Upload showUploadList={false} beforeUpload={() => false} onChange={handlePictureUpload}
-                                multiple>
-                            <Button icon={<UploadOutlined/>} loading={uploadingPicture} style={{
-                                position: 'relative',
-                                height: '150px',
-                            }}>
-                                Voeg foto toe aan profiel
-                            </Button>
-                        </Upload>
-
-                        {images.map((imageUrl, index) => (
-                            <div
-                                key={index}
+                        <div style={{display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '10px'}}>
+                            <Avatar
+                                src={profilePicture}
+                                alt={name}
                                 style={{
-                                    position: 'relative',
-                                    height: '150px',
+                                    minHeight: '100px',
+                                    minWidth: '100px',
+                                    height: '15dvw',
+                                    width: '15dvw',
+                                    borderRadius: '50%'
                                 }}
                             >
-                                <img
-                                    src={imageUrl}
-                                    alt={`carousel-image-${index}`}
+                                <h2>{name[0]}</h2>
+                            </Avatar>
+                            <div>
+                                <h2 style={{margin: '0', textAlign: 'center'}}>
+                                    {name || 'Naam'}, {calculateAge(profileData.birthdate) || 'Leeftijd'}
+                                </h2>
+                                <div style={{marginTop: '10px', marginBottom: '20px'}}>
+                                    <Upload showUploadList={false} beforeUpload={() => false}
+                                            onChange={handleProfilePictureUpload}>
+                                        <Button icon={<UploadOutlined/>} loading={uploading}>Kies nieuwe
+                                            profielfoto</Button>
+                                    </Upload>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <Divider/>
+
+                    <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
+                        <strong style={{width: '15%', minWidth: '100px'}}>
+                            <BookOutlined/> Biografie:
+                        </strong>
+
+                        <div style={{position: 'relative', flex: 1, minWidth: '200px'}}>
+                            <TextArea
+                                style={{width: '100%', paddingBottom: '20px'}}
+                                rows={3}
+                                placeholder="Vertel iets over jezelf"
+                                value={biography}
+                                onChange={handleBiographyChange}
+                                maxLength={200}
+                            />
+                            <div
+                                style={{
+                                    position: 'absolute',
+                                    bottom: '5px',
+                                    right: '10px',
+                                    fontSize: '12px',
+                                    background: 'transparent',
+                                }}
+                            >
+                                {biography.length}/200
+                            </div>
+                        </div>
+                    </p>
+
+                    <Divider/>
+
+                    <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
+                        <strong style={{width: '15%', minWidth: '100px'}}><EnvironmentOutlined/> Locatie: </strong>
+                        <Select
+                            showSearch
+                            style={{flex: 1, minWidth: '200px'}}
+                            placeholder="Zoek en selecteer uw locatie"
+                            value={location}
+                            onChange={handleLocationChange}
+                            onSearch={handleSearch} // Trigger search
+                            filterOption={false} // Disable client-side filtering
+                            options={locations.map((location) => ({
+                                value: location.id, // Use ID as the value
+                                label: location.Gemeente, // Display gemeente
+                            }))}
+                            notFoundContent={
+                                <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+                                <span role="img" aria-label="no data"
+                                      style={{fontSize: '2rem'}}><EnvironmentOutlined/></span>
+                                    <span>Locatie niet gevonden</span>
+                                </div>
+                            }
+                        />
+                    </p>
+
+                    <Divider/>
+
+                    <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
+                        <strong style={{width: '15%', minWidth: '100px'}}><UserOutlined/> Geslacht: </strong>
+                        <Select
+                            style={{flex: 1, minWidth: '200px'}}
+                            placeholder="Selecteer geslacht"
+                            value={gender}
+                            onChange={handleGenderChange}
+                            options={[
+                                {value: 'Man', label: 'Man'},
+                                {value: 'Vrouw', label: 'Vrouw'},
+                                {value: 'Non-binair', label: 'Non-binair'},
+                            ]}
+                        />
+                    </p>
+
+                    <Divider/>
+
+                    <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
+                        <strong style={{width: '15%', minWidth: '100px'}}><StarOutlined/> Interesses:</strong>
+                        <Select
+                            mode="multiple"
+                            allowClear
+                            placeholder="Selecteer interesses of voeg toe"
+                            style={{flex: 1, minWidth: '200px'}}
+                            options={interestOptions}
+                            value={selectedInterests}
+                            onChange={handleInterestSelectChange}
+                            onSearch={(value) => setNewInterest(value)}
+                            onInputKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    handleAddInterest();
+                                }
+                            }}
+                            notFoundContent={
+                                <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+                                <span role="img" aria-label="no data"
+                                      style={{fontSize: '2rem'}}><PlusCircleOutlined/></span>
+                                    <span>Druk op enter om deze nieuwe interesse toe te voegen</span>
+                                </div>
+                            }
+                        />
+                    </p>
+
+                    <Divider/>
+
+                    <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
+                        <strong style={{width: '15%', minWidth: '100px'}}><HeartOutlined/> Is op zoek naar:</strong>
+                        <div style={{
+                            flex: 1,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '10px',
+                            minWidth: '200px'
+                        }}>
+                            <Checkbox
+                                checked={lookingForArray.includes('Vrienden')}
+                                onChange={() => handleCheckboxChange('Vrienden')}
+                            >
+                                Vrienden
+                            </Checkbox>
+                            <Checkbox
+                                checked={lookingForArray.includes('Relatie')}
+                                onChange={() => handleCheckboxChange('Relatie')}
+                            >
+                                Relatie
+                            </Checkbox>
+                            <Checkbox
+                                checked={lookingForArray.includes('Intieme ontmoeting')}
+                                onChange={() => handleCheckboxChange('Intieme ontmoeting')}
+                            >
+                                Intieme ontmoeting
+                            </Checkbox>
+                        </div>
+                    </p>
+
+
+                    <Divider/>
+
+                    <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
+                        <strong style={{width: '15%', minWidth: '100px'}}><HomeOutlined/> Woonsituatie:</strong>
+                        <Select
+                            placeholder="Selecteer jouw woonsituatie"
+                            value={livingSituation}
+                            style={{flex: 1, minWidth: '200px'}}
+                            onChange={handleLivingChange}
+                            options={[
+                                {value: 'Woont alleen', label: 'Woont alleen'},
+                                {value: 'Begeleid wonen', label: 'Begeleid wonen'},
+                                {value: 'Woont in bij ouders', label: 'Woont in bij ouders'},
+                                {value: 'Woont in groepsverband', label: 'Woont in groepsverband'},
+                                {value: 'Woont in zorginstelling', label: 'Woont in zorginstelling'},
+                                {value: 'Andere', label: 'Andere'},
+                            ]}
+                        />
+                    </p>
+
+                    <Divider/>
+
+                    <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
+                        <strong style={{width: '15%', minWidth: '100px'}}><CarOutlined/> Kan zich zelfstanding
+                            verplaatsen:</strong>
+                        <Select
+                            value={mobility}
+                            style={{flex: 1, minWidth: '200px'}}
+                            onChange={handleMobilityChange}
+                            options={[
+                                {value: 'True', label: 'Ja'},
+                                {value: 'False', label: 'Nee'},
+                            ]}
+                        />
+                    </p>
+
+                    <Divider/>
+
+                    <div style={{marginTop: '20px', marginBottom: '20px'}}>
+                        <p>
+                            <strong style={{width: '40%', minWidth: '100px', flexShrink: 0}}>
+                                <PictureOutlined/> Meer fotos van jezelf tonen:
+                            </strong>
+                        </p>
+                        <Carousel
+                            ref={carouselRef}
+                            prevArrow={<CustomPrevArrow/>}
+                            nextArrow={<CustomNextArrow/>}
+                            arrows
+                            slidesToShow={slidesToShow}
+                            draggable
+                            infinite={false}
+                            style={{
+                                maxWidth: '80%',
+                                height: '150px',
+                                margin: '0 auto'
+                            }}
+                        >
+                            <Upload showUploadList={false} beforeUpload={() => false} onChange={handlePictureUpload}
+                                    multiple>
+                                <Button icon={<UploadOutlined/>} loading={uploadingPicture} style={{
+                                    position: 'relative',
+                                    height: '150px',
+                                }}>
+                                    Voeg foto toe aan profiel
+                                </Button>
+                            </Upload>
+
+                            {images.map((imageUrl, index) => (
+                                <div
+                                    key={index}
                                     style={{
+                                        position: 'relative',
                                         height: '150px',
-                                        width: 'auto',
-                                        objectFit: 'cover',
-                                        borderRadius: '10px',
-                                        margin: '0 auto'
                                     }}
-                                />
-                                {images[index] && (
-                                    <Button
-                                        type="text"
-                                        onClick={() => handlePictureRemove(imageUrl)}
+                                >
+                                    <img
+                                        src={imageUrl}
+                                        alt={`carousel-image-${index}`}
                                         style={{
                                             height: '150px',
-                                            width: '150px',
-                                            position: 'relative',
-                                            top: `-75px`,
-                                            left: `50%`,
-                                            transform: 'translate(-50%, -50%)',
-                                            zIndex: 10,
-                                            padding: '0',
-                                            cursor: 'pointer',
+                                            width: 'auto',
+                                            objectFit: 'cover',
+                                            borderRadius: '10px',
+                                            margin: '0 auto'
                                         }}
-                                        className='delete-button'
-                                        loading={removingPicture}
-                                    >
-                                        <DeleteOutlined/>
-                                    </Button>
-                                )}
-                            </div>
-                        ))}
-                    </Carousel>
+                                    />
+                                    {images[index] && (
+                                        <Button
+                                            type="text"
+                                            onClick={() => handlePictureRemove(imageUrl)}
+                                            style={{
+                                                height: '150px',
+                                                width: '150px',
+                                                position: 'relative',
+                                                top: `-75px`,
+                                                left: `50%`,
+                                                transform: 'translate(-50%, -50%)',
+                                                zIndex: 10,
+                                                padding: '0',
+                                                cursor: 'pointer',
+                                            }}
+                                            className='delete-button'
+                                            loading={removingPicture}
+                                        >
+                                            <DeleteOutlined/>
+                                        </Button>
+                                    )}
+                                </div>
+                            ))}
+                        </Carousel>
+                    </div>
                 </div>
-            </div>
             </div>
         </ConfigProvider>
     );

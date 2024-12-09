@@ -139,7 +139,7 @@ const ChatOverviewPage = () => {
                 <ButterflyIcon color={themeColors.primary3} />
 
                 <div style={styles.titleButton}>
-                    <Title level={2} style={styles.title}>Chat Overzicht</Title>
+                    <Title level={2} style={styles.title}>Chats</Title>
                 </div>
                 <Input.Search
                     placeholder="Zoek in chats..."

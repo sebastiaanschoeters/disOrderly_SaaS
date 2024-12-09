@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {Avatar, Divider, Select, ConfigProvider, Spin, message, Tooltip} from 'antd';
+import {Avatar, Divider, Select, ConfigProvider, Spin, message, Tooltip, Typography} from 'antd';
 import {UserSwitchOutlined, HeartOutlined, TrophyOutlined, QuestionCircleOutlined} from '@ant-design/icons';
 import 'antd/dist/reset.css';
 import '../../CSS/AntDesignOverride.css';
@@ -351,6 +351,18 @@ const ProfileCard = () => {
             });
         }
     };
+    const { Title } = Typography;
+
+    const styles = {
+        title: {
+            flexGrow: 1,
+            textAlign: 'center',
+            margin: 0,
+            fontSize: '48px',
+            transform: 'scale(1.5)', // Scale the title up
+            paddingTop: '15px',
+        },
+    };
 
 
     const handleThemeChange = (value) => {
@@ -394,6 +406,7 @@ const ProfileCard = () => {
                 boxSizing: 'border-box',
                 zIndex: '0'
             }}>
+
                 <div
                     style={{
                         width: '80%',
@@ -401,6 +414,10 @@ const ProfileCard = () => {
                 >
                     <HomeButtonUser color={themeColors.primary7}/>
                     <ButterflyIcon color={themeColors.primary3}/>
+
+                    <div style={styles.titleButton}>
+                        <Title level={1} style={{...styles.title, fontSize: '64px'}}>Instellingen</Title>
+                    </div>
 
                     <div style={{marginTop: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
                         <Avatar
@@ -433,7 +450,7 @@ const ProfileCard = () => {
 
                     <p>
                         <strong>
-                            <UserSwitchOutlined /> Begeleiding met toegang:
+                            <UserSwitchOutlined/> Begeleiding met toegang:
                         </strong>
                     </p>
                     <div

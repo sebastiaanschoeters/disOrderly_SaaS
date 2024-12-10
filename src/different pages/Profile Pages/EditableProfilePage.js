@@ -627,7 +627,7 @@ const ProfileCard = () => {
 
                     <Divider/>
 
-                    <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
+                    <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '5%'}}>
                         <strong style={{width: '15%', minWidth: '100px'}}>
                             <BookOutlined/> Biografie:
                         </strong>
@@ -657,7 +657,7 @@ const ProfileCard = () => {
 
                     <Divider/>
 
-                    <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
+                    <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '5%'}}>
                         <strong style={{width: '15%', minWidth: '100px'}}><EnvironmentOutlined/> Locatie: </strong>
                         <Select
                             showSearch
@@ -691,7 +691,7 @@ const ProfileCard = () => {
 
                     <Divider/>
 
-                    <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
+                    <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '5%'}}>
                         <strong style={{width: '15%', minWidth: '100px'}}><UserOutlined/> Geslacht: </strong>
                         <Select
                             style={{flex: 1, minWidth: '200px'}}
@@ -708,7 +708,7 @@ const ProfileCard = () => {
 
                     <Divider/>
 
-                    <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
+                    <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '5%'}}>
                         <strong style={{width: '15%', minWidth: '100px'}}><StarOutlined/> Interesses:</strong>
                         <Select
                             mode="multiple"
@@ -744,8 +744,8 @@ const ProfileCard = () => {
 
                     <Divider/>
 
-                    <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
-                        <strong style={{width: '15%', minWidth: '100px'}}><HeartOutlined/> Is op zoek naar:</strong>
+                    <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '5%'}}>
+                        <strong style={{width: '15%', minWidth: '100px'}}><HeartOutlined/> Ik zoek naar:</strong>
                         <div style={{
                             flex: 1,
                             display: 'flex',
@@ -777,7 +777,7 @@ const ProfileCard = () => {
 
                     <Divider/>
 
-                    <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
+                    <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '5%'}}>
                         <strong style={{width: '15%', minWidth: '100px'}}><HomeOutlined/> Woonsituatie:</strong>
                         <Select
                             placeholder="Selecteer jouw woonsituatie"
@@ -797,7 +797,7 @@ const ProfileCard = () => {
 
                     <Divider/>
 
-                    <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
+                    <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '5%'}}>
                         <strong style={{width: '15%', minWidth: '100px'}}><CarOutlined/> Kan zich zelfstanding
                             verplaatsen:</strong>
                         <Select

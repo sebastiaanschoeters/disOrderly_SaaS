@@ -33,10 +33,6 @@ const App = () => {
                 <Route path="/login" element={<LoginPage/>}/>
                 <Route path="/activate" element={<ActivationPage/>}/>
                 <Route path="/activate/:activationCodeLink" element={<ActivationPage />} />
-                <Route path="/hangman" element={<Hangman />} />
-                <Route path="/caretakerProfile" element={<CaretakerProfilePage />} />
-                <Route path="/caretakerProfileEdit" element={<CaretakerEditableProfile />} />
-                <Route path="/clientOverview" element={<ClientOverview />} />
 
                 {/* Protected routes */}
                 <Route
@@ -50,7 +46,7 @@ const App = () => {
                 <Route
                     path="/clientOverview"
                     element={
-                        <ProtectedRoute allowedRoles={["caretaker, admin"]}>
+                        <ProtectedRoute allowedRoles={["caretaker", "admin"]}>
                             <ClientOverview />
                         </ProtectedRoute>
                     }
@@ -58,16 +54,16 @@ const App = () => {
                 <Route
                     path="/caretakerProfile"
                     element={
-                        <ProtectedRoute allowedRoles={["caretaker, admin"]}>
-                            <Search />
+                        <ProtectedRoute allowedRoles={["caretaker", "admin"]}>
+                            <CaretakerProfilePage />
                         </ProtectedRoute>
                     }
                 />
                 <Route
                     path="/caretakerProfileEdit"
                     element={
-                        <ProtectedRoute allowedRoles={["caretaker, admin"]}>
-                            <Search />
+                        <ProtectedRoute allowedRoles={["caretaker", "admin"]}>
+                            <CaretakerEditableProfile />
                         </ProtectedRoute>
                     }
                 />
@@ -122,7 +118,7 @@ const App = () => {
                 <Route
                     path="/chatSuggestion"
                     element={
-                        <ProtectedRoute allowedRoles={["user"]}>
+                        <ProtectedRoute allowedRoles={["user", "caretaker"]}>
                             <ChatSuggestionPage />
                         </ProtectedRoute>
                     }

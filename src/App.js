@@ -5,15 +5,15 @@ import LoginPage from './different pages/Activation and Login/LoginPage';
 import HomePage from './different pages/HomePage';
 import ProfilePage from './different pages/Profile Pages/ProfilePage';
 import PersonalProfilePage from './different pages/Profile Pages/PersonalProfilePage';
-import ChatOverviewPage from './different pages/ChatOverviewPage';
-import ChatPage from './different pages/ChatPage';
-import ChatSuggestionPage from './different pages/ChatSuggestionPage';
+import ChatOverviewPage from './different pages/Chats Pages/ChatOverviewPage';
+import ChatPage from './different pages/Chats Pages/ChatPage';
+import ChatSuggestionPage from './different pages/Chats Pages/ChatSuggestionPage';
 import Search from './different pages/Search';
 import ProtectedRoute from './Extra components/ProtectedRoute'; // Import the ProtectedRoute component
 import {clarity} from "react-microsoft-clarity";
 
 import AdminPage from "./different pages/Caretaker and Admin/AdminPage";
-import Hangman from "./different pages/Hangman";
+import Hangman from "./different pages/Chats Pages/Hangman";
 import EditableProfilePage from "./different pages/Profile Pages/EditableProfilePage";
 import CaretakerProfilePage from "./different pages/Caretaker and Admin/CaretakerProfilePage";
 import CaretakerEditableProfile from "./different pages/Caretaker and Admin/CaretakerEditableProfile";

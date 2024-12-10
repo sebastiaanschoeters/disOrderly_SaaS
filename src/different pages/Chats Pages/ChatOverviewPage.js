@@ -1,11 +1,11 @@
 import React, { useState,useEffect } from 'react';
 import {List, Avatar, Typography, Input, ConfigProvider, Card } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import {antThemeTokens, ButterflyIcon, themes} from '../Extra components/themes';
+import {antThemeTokens, ButterflyIcon, themes} from '../../Extra components/themes';
 import { createClient } from "@supabase/supabase-js";
-import HomeButtonUser from "../Extra components/HomeButtonUser";
-import useTheme from "../UseHooks/useTheme";
-import useThemeOnCSS from "../UseHooks/useThemeOnCSS";
+import HomeButtonUser from "../../Extra components/HomeButtonUser";
+import useTheme from "../../UseHooks/useTheme";
+import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
 import {PlusCircleOutlined, UserOutlined} from "@ant-design/icons";
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")

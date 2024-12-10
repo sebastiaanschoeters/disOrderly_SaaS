@@ -2,20 +2,20 @@ import React, { useState, useRef, useEffect } from 'react';
 import {Avatar, Input, Button, ConfigProvider, Card, message} from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {ArrowDownOutlined, PlusOutlined, SendOutlined} from '@ant-design/icons';
-import {antThemeTokens, ButterflyIcon, ButterflyIconSmall, themes} from '../Extra components/themes';
+import {antThemeTokens, ButterflyIcon, ButterflyIconSmall, themes} from '../../Extra components/themes';
 import { createClient } from "@supabase/supabase-js";
-import '../CSS/ChatPage.css';
-import HomeButtonUser from "../Extra components/HomeButtonUser";
+import '../../CSS/ChatPage.css';
+import HomeButtonUser from "../../Extra components/HomeButtonUser";
 import HangmanGame from "./Hangman";
-import useTheme from "../UseHooks/useTheme";
-import useThemeOnCSS from "../UseHooks/useThemeOnCSS";
-import butterfly0 from '../Media/butterfly0.png';
-import butterfly1 from '../Media/butterfly1.png';
-import butterfly2 from '../Media/butterfly2.png';
-import butterfly3 from '../Media/butterfly3.png';
-import butterfly4 from '../Media/butterfly4.png';
-import butterfly5 from '../Media/butterfly5.png';
-import ProfileDetailsModal from "./Profile Pages/ProfileDetailsModal";
+import useTheme from "../../UseHooks/useTheme";
+import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
+import butterfly0 from '../../Media/butterfly0.png';
+import butterfly1 from '../../Media/butterfly1.png';
+import butterfly2 from '../../Media/butterfly2.png';
+import butterfly3 from '../../Media/butterfly3.png';
+import butterfly4 from '../../Media/butterfly4.png';
+import butterfly5 from '../../Media/butterfly5.png';
+import ProfileDetailsModal from "../Profile Pages/ProfileDetailsModal";
 
 
 

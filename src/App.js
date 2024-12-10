@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import ActivationPage from './different pages/Activation and Login/ActivationPage';
 import LoginPage from './different pages/Activation and Login/LoginPage';
+import NotFoundPage from './different pages/Activation and Login/NotFoundPage';
 import HomePage from './different pages/HomePage';
 import ProfilePage from './different pages/Profile Pages/ProfilePage';
 import PersonalProfilePage from './different pages/Profile Pages/PersonalProfilePage';
@@ -139,6 +140,9 @@ const App = () => {
                         </ProtectedRoute>
                     }
                 />
+
+                {/* Catch-all route for invalid paths */}
+                <Route path="*" element={<NotFoundPage />} />
             </Routes>
         </Router>
     );

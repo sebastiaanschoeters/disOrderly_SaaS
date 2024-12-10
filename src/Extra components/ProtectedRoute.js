@@ -19,7 +19,6 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
     }
 
     const userRole = getUserRole();
-
     if (!allowedRoles.includes(userRole)) {
         localStorage.clear();
         message.error("U hebt geen toegang tot deze pagina")

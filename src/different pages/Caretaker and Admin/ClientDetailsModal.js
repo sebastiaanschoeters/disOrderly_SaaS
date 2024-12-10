@@ -7,6 +7,14 @@ import {getUserEmailById} from "../../Api/Utils";
 import {storeUserSession} from "../../Utils/sessionHelpers";
 
 const ClientDetailsModal = ({ visible, onClose, clientData }) => {
+    function printLocalStorage() {
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            const value = localStorage.getItem(key);
+            console.log(key, ": ", value);
+        }
+    }
+    printLocalStorage()
     const [isViewingContactList, setIsViewingContactList] = useState(false);
     const [isTransitioning, setIsTransitioning] = useState(false);
     const navigate = useNavigate();

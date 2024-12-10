@@ -423,7 +423,6 @@ const ProfileCard = () => {
             if (urlError) throw urlError;
 
             const imageUrl = fileData.publicUrl;
-            const imageUrlWithCacheBuster = `${imageUrl}?t=${new Date().getTime()}`;
 
             const { error: dbInsertError } = await supabase
                 .from('Pictures')
@@ -432,7 +431,7 @@ const ProfileCard = () => {
             if (dbInsertError) throw dbInsertError;
 
             setImages((prevImages) => {
-                const updatedImages = [...prevImages, imageUrlWithCacheBuster];
+                const updatedImages = [...prevImages, imageUrl];
 
                 // Automatically scroll to the last image
                 setTimeout(() => {
@@ -455,6 +454,7 @@ const ProfileCard = () => {
 
     const handlePictureRemove = async (imageUrlToRemove) => {
         try {
+            console.log('attempting to remove: ', imageUrlToRemove)
             setRemovingPicture(true);
 
             const fileName = imageUrlToRemove.split('/').pop().split('?')[0];

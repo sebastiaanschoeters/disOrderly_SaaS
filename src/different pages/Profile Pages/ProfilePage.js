@@ -262,15 +262,15 @@ const ProfileCard = (profileToShow) => {
                     .from('Chatroom')
                     .select('id')
                     .or(`and(sender_id.eq.${senderId},receiver_id.eq.${receiverId}),and(sender_id.eq.${receiverId},receiver_id.eq.${senderId})`)
-                    .single();
 
-                if (error) {
-                    console.error('Error fetching chatroom:', error);
-                    return;
+                if (error) throw error
+
+                if (chatroomData.length === 0){
+                    setChatroomExistent(false)
+                } else {
+                    setChatroomExistent(true)
                 }
 
-                // If chatroomData is found, set the state to true
-                setChatroomExistent(!!chatroomData);
             } catch (error) {
                 console.error('Error checking chatroom:', error);
             }

@@ -23,14 +23,17 @@ const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbG
 
 const ChatPage = () => {
     const caretaker = localStorage.getItem('controlling');
+    const userType = localStorage.getItem('userType');
+    console.log("usertype:", userType)
     const location = useLocation();
     const {profileData} = location.state || {};
-    const {name, profilePicture, chatroomId, otherUserId} = profileData || {};
+    const {name, profilePicture, chatroomId, otherUserId, user_id} = profileData || {};
     const navigate = useNavigate();
 
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState("");
-    const userId = parseInt(localStorage.getItem('user_id'), 10);
+    const userId = user_id
+    // const userId = parseInt(localStorage.getItem('user_id'), 10);
     const [loading, setLoading] = useState(false);
     const [loadingMore, setLoadingMore] = useState(false);
 
@@ -348,7 +351,8 @@ const ChatPage = () => {
                 zIndex: '0'
                 }}
             >
-                <HomeButtonUser color={themeColors.primary7} />
+                {userType !== "caretaker" && (<HomeButtonUser color={themeColors.primary7} />)}
+
                 <ButterflyIcon color={themeColors.primary3} />
 
                 <Card style={styles.card} bordered>
@@ -473,21 +477,24 @@ const ChatPage = () => {
                             />
                             <div ref={dummyRef}/>
                         </div>
-                        <div style={styles.inputContainer}>
-                            <Button type="primary"
-                                    style={styles.sendButton}
-                                    icon={<PlusOutlined/>}
-                                    onClick={handleHangman}/>
-                            <Input
-                                style={styles.input}
-                                placeholder="Type hier..."
-                                value={newMessage}
-                                onChange={(e) => setNewMessage(e.target.value)}
-                                onPressEnter={handleSendMessage}
-                            />
-                            <Button type="primary" style={styles.sendButton} icon={<SendOutlined/>}
-                                    onClick={handleSendMessage}/>
-                        </div>
+                        {userType !== "caretaker" && (
+                            <div style={styles.inputContainer}>
+                                <Button type="primary"
+                                        style={styles.sendButton}
+                                        icon={<PlusOutlined/>}
+                                        onClick={handleHangman}/>
+                                <Input
+                                    style={styles.input}
+                                    placeholder="Type hier..."
+                                    value={newMessage}
+                                    onChange={(e) => setNewMessage(e.target.value)}
+                                    onPressEnter={handleSendMessage}
+                                />
+                                <Button type="primary" style={styles.sendButton} icon={<SendOutlined/>}
+                                        onClick={handleSendMessage}/>
+                            </div>
+                        )}
+
                     </div>
                 </Card>
             </div>

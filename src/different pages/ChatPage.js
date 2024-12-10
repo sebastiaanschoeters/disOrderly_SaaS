@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Avatar, Input, Button, ConfigProvider, Card } from 'antd';
+import {Avatar, Input, Button, ConfigProvider, Card, message} from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {ArrowDownOutlined, PlusOutlined, SendOutlined} from '@ant-design/icons';
 import {antThemeTokens, ButterflyIcon, ButterflyIconSmall, themes} from '../Extra components/themes';
@@ -50,6 +50,20 @@ const ChatPage = () => {
 
     const [isModalProfileVisible, setIsModalProfileVisible] = useState(false);
     const [selectedClient, setSelectedClient] = useState({});
+
+    if(!chatroomId){
+        if(localStorage.getItem('userType') == "user"){
+            navigate("/home");
+            message.error("deze pagina is niet beschikbaar via deze link");
+        }
+        else if(localStorage.getItem('userType') == "caretaker"){
+            navigate("/clientOverview");
+            message.error("deze pagina is niet beschikbaar via deze link");
+        }
+        else {
+            navigate("/login");
+        }
+    }
 
     const fetchMessages = async (limit = 10, start = 0) => {
         if (loadingMore) return;

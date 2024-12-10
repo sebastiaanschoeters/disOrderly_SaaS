@@ -12,12 +12,10 @@ import useThemeOnCSS from "../UseHooks/useThemeOnCSS";
 import {calculateAge, calculateDistance} from "../Utils/calculations";
 import useFetchProfileData from "../UseHooks/useFetchProfileData"; // Import useNavigate for routing
 
+const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
+const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
-// Initialize Supabase client
-const supabase = createClient(
-    "https://flsogkmerliczcysodjt.supabase.co",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q"
-);
 
 const Search = () => {
     const [users, setUsers] = useState([]);

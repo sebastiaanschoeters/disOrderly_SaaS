@@ -150,19 +150,27 @@ const ProfileCard = () => {
     return (
         <ConfigProvider theme={{token: antThemeTokens(themeColors)}}>
             <div style={{
-                padding: '20px',
+                display: 'flex',
+                justifyContent: 'center',
                 position: 'relative',
-                minWidth: '100vw',
+                minWidth: '100dvw',
                 minHeight: '100vh',
                 overflow: 'hidden',
+                overflowX: 'hidden',
                 backgroundColor: themeColors.primary2,
                 color: themeColors.primary10,
                 zIndex: '0'
             }}>
+                <div
+                    style={{
+                        width: '80%'
+                    }}
+                >
+
                 <HomeButton color={themeColors.primary7} />
                 <ButterflyIcon color={themeColors.primary3}/>
 
-                <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', paddingBottom: '20px'}}>
+                <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', paddingBottom: '20px', marginTop: '20px'}}>
                     <div style={{display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '10px'}}>
                         <Avatar
                             src={profilePicture}
@@ -200,7 +208,7 @@ const ProfileCard = () => {
                 <Divider/>
 
                 <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
-                    <strong style={{width: '20%', minWidth: '150px'}}>
+                    <strong style={{width: '15%', minWidth: '100px'}}>
                         <PhoneOutlined/> Telefoon nummer:
                     </strong>
                     <TextArea
@@ -214,7 +222,7 @@ const ProfileCard = () => {
                 <Divider/>
 
                 <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
-                    <strong style={{width: '20%', minWidth: '150px'}}>
+                    <strong style={{width: '15%', minWidth: '100px'}}>
                         <MailOutlined/> E-mail:
                     </strong>
                     <TextArea
@@ -225,7 +233,7 @@ const ProfileCard = () => {
                     />
                 </p>
 
-                <Divider/>
+            </div>
             </div>
         </ConfigProvider>
     );

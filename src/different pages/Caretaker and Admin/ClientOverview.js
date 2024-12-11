@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import {Avatar, ConfigProvider, Select, Table, Button, message, Menu, Badge, Dropdown} from "antd";
+import {Avatar, ConfigProvider, Select, Table, Button, message, Menu, Badge, Dropdown, Tooltip, Radio} from "antd";
 import { antThemeTokens, ButterflyIcon, themes } from "../../Extra components/themes";
 import { createClient } from "@supabase/supabase-js";
-import {BellOutlined, DeleteOutlined, PoweroffOutlined} from "@ant-design/icons";
+import {BellOutlined, DeleteOutlined, PoweroffOutlined, QuestionCircleOutlined} from "@ant-design/icons";
 import { useNavigate } from 'react-router-dom';
 import ClientDetailsModal from "./ClientDetailsModal";
 import 'antd/dist/reset.css';
@@ -10,6 +10,7 @@ import '../../CSS/AntDesignOverride.css';
 import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
 import useHandleRequest from "../../UseHooks/useHandleRequest";
 import useFetchCaretakerData from "../../UseHooks/useFetchCaretakerData";
+import useTheme from "../../UseHooks/useTheme";
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q");
 
@@ -32,7 +33,8 @@ const useFetchClients = (actCode) => {
                     client.name,
                     client.access_level,
                     client.id
-                ]);
+                ])
+                .sort((a, b) => a[1].localeCompare(b[1]));
 
                 setClients(transformedClients);
             } catch (error) {
@@ -167,13 +169,8 @@ const useFetchCaretakers = (organizationId) => {
 const ClientOverview = () => {
     const caretaker_id = localStorage.getItem("user_id");
     let [savedTheme, savedDarkMode] = JSON.parse(localStorage.getItem('theme'));
-    let theme
-    if (savedDarkMode) {
-        theme = savedDarkMode + "_donker";
-    } else {
-        theme = savedTheme;
-    }
-    const themeColors = themes[theme] || themes.blauw;
+    const {themeColors, setThemeName, setDarkModeFlag} = useTheme(savedTheme, savedDarkMode)
+
     const name = localStorage.getItem('name')
     const savedProfilePicture = localStorage.getItem('profile_picture')
 
@@ -192,6 +189,8 @@ const ClientOverview = () => {
     const [notifications, setNotifications] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
 
+    const [isWideEnough, setIsWideEnough] = useState(window.innerWidth >= 800);
+
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -201,7 +200,7 @@ const ClientOverview = () => {
                 const { data: notificationData, error: notificationError } = await supabase
                     .from('Notifications')
                     .select('*') // Fetch notifications
-                    .eq('recipient_id', profileData?.id || null);
+                    .eq('recipient_id', caretaker_id || null);
 
                 if (notificationError) throw notificationError;
 
@@ -212,7 +211,7 @@ const ClientOverview = () => {
                         // Fetch the caretaker data based on the request_id in the notification
                         const { data: clientData, error: clientError } = await supabase
                             .from('User')
-                            .select('name')
+                            .select('name, access_level')
                             .eq('id', notification.requester_id)
                             .single(); // Only one result
 
@@ -221,7 +220,8 @@ const ClientOverview = () => {
                         // Add the caretaker name to the notification object
                         return {
                             ...notification,
-                            requesterName: clientData?.name || 'Onbekend', // Default to 'Unknown Caretaker' if not found
+                            requesterName: clientData?.name || 'Onbekend',
+                            currentAccessLevel: clientData?.access_level// Default to 'Unknown Caretaker' if not found
                         };
                     }));
                     console.log(updatedNotifications)
@@ -260,6 +260,7 @@ const ClientOverview = () => {
 
         const handleResize = () => {
             setPageSize(calculatePageSize());
+            setIsWideEnough(window.innerWidth >= 800);
         };
 
         window.addEventListener("resize", handleResize);
@@ -278,25 +279,55 @@ const ClientOverview = () => {
         initializeData();
     }, [profileData]);
 
+    const tooltips = {
+        "Volledige toegang": "Begeleiding heeft volledige toegang en kan alles mee volgen en profiel aanpassen",
+        "Gesprekken": "Begeleiding kan enkel gesprekken lezen",
+        "Contacten": "Begeleiding kan zien met wie jij contact hebt",
+        "Publiek profiel": "Begeleiding kan zien wat jij op je profiel plaatst, net zoals andere gebruikers",
+    };
+
     const handleLogout = () => {
         localStorage.clear();
         navigate('/login');
     };
 
     const notificationMenu = (
-        <Menu>
+        <Menu
+            style={{
+                minWidth: "50vw",
+                maxWidth: "400px",
+                overflowWrap: "break-word",
+            }}
+        >
             {notifications.length > 0 ? (
                 <>
                     {notifications.map((notification, index) => {
                         const requesterName = notification.requesterName || "Onbekend";
+                        const previousAccessLevel = notification.currentAccessLevel;
                         const requestedAccessLevel = notification.details?.requested_access_level || "Onbekend toegangsniveau";
-                        const notificationMessage = `${requesterName} heeft een wijziging in toegangsniveau aangevraagd: ${requestedAccessLevel}`;
 
                         return (
                             <Menu.Item key={index}>
                                 <div>
-                                    <p>{notificationMessage}</p>
-                                    <div style={{ display: "flex", justifyContent: "space-between" }}>
+                                    <p>
+                                        {requesterName} heeft een wijziging in toegangsniveau aangevraagd:
+                                        <Tooltip
+                                            title={tooltips[requestedAccessLevel] || "Geen informatie beschikbaar"}
+                                        >
+                                        <span style={{ textDecoration: "underline", cursor: "pointer", marginLeft: "5px" }}>
+                                            {requestedAccessLevel}
+                                        </span>
+                                        </Tooltip>.
+                                        Het vorige toegangsniveau was
+                                        <Tooltip
+                                            title={tooltips[previousAccessLevel] || "Geen informatie beschikbaar"}
+                                        >
+                                        <span style={{ textDecoration: "underline", cursor: "pointer", marginLeft: "5px" }}>
+                                            {previousAccessLevel}
+                                        </span>
+                                        </Tooltip>.
+                                    </p>
+                                    <div style={{ display: "flex", justifyContent: "space-between", marginTop: "10px" }}>
                                         <Button
                                             onClick={() => handleAcceptRequest(notification)}
                                             type="default"
@@ -445,27 +476,40 @@ const ClientOverview = () => {
             title: "Toegangsniveau",
             dataIndex: "access_level",
             key: "access_level",
-            render: (accessLevel, record) => (
-                <div>
-                    <Select
-                        defaultValue={accessLevel}
-                        onChange={(value) => handleAccessLevelChange(profileData.id, record.id, value)}
-                        style={{ width: "90%", maxWidth: '400px' }}
-                        className="prevent-row-click"
-                        options={[
-                            { value: "Volledige toegang", label: "Volledige toegang" },
-                            { value: "Gesprekken", label: "Gesprekken" },
-                            { value: "Contacten", label: "Contacten" },
-                            { value: "Publiek Profiel", label: "Publiek Profiel" },
-                        ]}
-                    />
-                    {pendingRequests[record.id] && (
-                        <p style={{ color: themeColors.primary9, marginTop: "5px" }}>
-                            Wijziging in behandeling: {pendingRequests[record.id]}
-                        </p>
-                    )}
-                </div>
-            ),
+            render: (accessLevel, record) => {
+                return (
+                    <div>
+                        <Select
+                            defaultValue={accessLevel}
+                            onChange={(value) => handleAccessLevelChange(profileData.id, record.id, value)}
+                            style={{ width: "90%", maxWidth: "400px" }}
+                            className="prevent-row-click"
+                            options={[
+                                { value: "Volledige toegang", label: "Volledige toegang" },
+                                { value: "Gesprekken", label: "Gesprekken" },
+                                { value: "Contacten", label: "Contacten" },
+                                { value: "Publiek profiel", label: "Publiek profiel" },
+                            ]}
+                        />
+                        <Tooltip title={tooltips[accessLevel] || "Geen informatie beschikbaar"}>
+                            <QuestionCircleOutlined
+                                className="prevent-row-click"
+                                style={{
+                                    marginLeft: "3px",
+                                    fontSize: "1.2rem",
+                                    color: themeColors.primary8,
+                                    cursor: "pointer",
+                                }}
+                            />
+                        </Tooltip>
+                        {pendingRequests[record.id] && (
+                            <p style={{ color: themeColors.primary9, marginTop: "5px" }}>
+                                Wijziging in behandeling: {pendingRequests[record.id]}
+                            </p>
+                        )}
+                    </div>
+                );
+            },
         },
         {
             title: "Acties",
@@ -509,130 +553,152 @@ const ClientOverview = () => {
     }));
 
     return (
-        <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
-            <div
-                style={{
-                    padding: "20px",
-                    position: "relative",
-                    minWidth: "100%",
-                    minHeight: "100vh",
-                    backgroundColor: themeColors.primary2,
-                    color: themeColors.primary10,
-                    zIndex: "0",
-                }}
-            >
-                <ButterflyIcon color={themeColors.primary3}/>
+        <div
+            style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                minHeight: "100vh",
+                textAlign: "center",
+            }}
+        >
+            {isWideEnough ? (
+                <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
+                    <div
+                        style={{
+                            padding: "20px",
+                            position: "relative",
+                            minWidth: "100%",
+                            minHeight: "100vh",
+                            backgroundColor: themeColors.primary2,
+                            color: themeColors.primary10,
+                            zIndex: "0",
+                        }}
+                    >
+                        <ButterflyIcon color={themeColors.primary3} />
 
-                {/* Notification Button */}
-                <div
-                    style={{
-                        position: "absolute",
-                        top: "2%",
-                        right: "2%",
-                        display: "flex",
-                        alignItems: "center",
-                    }}
-                >
-                    <Dropdown overlay={notificationMenu} trigger={['click']}>
-                        <Badge count={unreadCount} size="large">
-                            <BellOutlined
+                        {/* Notification Button */}
+                        <div
+                            style={{
+                                position: "absolute",
+                                top: "2%",
+                                right: "2%",
+                                display: "flex",
+                                alignItems: "center",
+                            }}
+                        >
+                            <Dropdown overlay={notificationMenu} trigger={["click"]}>
+                                <Badge count={unreadCount} size="large">
+                                    <BellOutlined
+                                        style={{
+                                            fontSize: "1.8rem",
+                                            cursor: "pointer",
+                                            color: themeColors.primary10,
+                                        }}
+                                    />
+                                </Badge>
+                            </Dropdown>
+                        </div>
+
+                        <h2 style={{ marginTop: "100px" }}>Clienten overzicht: </h2>
+
+                        {fetchClientsError && <p>Fout: {fetchClientsError}</p>}
+                        {clients.length > 0 ? (
+                            <Table
+                                dataSource={dataSource}
+                                columns={columns}
+                                showHeader={false}
+                                rowKey="id"
+                                pagination={{ pageSize: pageSize }}
                                 style={{
-                                    fontSize: "1.8rem",
-                                    cursor: "pointer",
+                                    marginTop: "20px",
+                                }}
+                                onRow={(record) => ({
+                                    onClick: (event) => {
+                                        // Prevent clicks on select and buttons from triggering row click
+                                        if (!event.target.closest(".prevent-row-click")) {
+                                            handleClientClick(record);
+                                        }
+                                    },
+                                })}
+                                rowClassName="clickable-row"
+                            />
+                        ) : (
+                            <p>Cliënten laden...</p>
+                        )}
+
+                        {/* Render the modal */}
+                        {selectedClient && (
+                            <ClientDetailsModal
+                                visible={isModalVisible}
+                                onClose={handleModalClose}
+                                clientData={selectedClient}
+                            />
+                        )}
+
+                        <div
+                            style={{
+                                display: "flex",
+                                justifyContent: "center",
+                            }}
+                        >
+                            <Button
+                                type="primary"
+                                style={{ marginTop: "20px" }}
+                            >
+                                Genereer nieuwe profiel code
+                            </Button>
+                        </div>
+
+                        <div
+                            style={{
+                                position: "absolute",
+                                top: "2%",
+                                left: "2%",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "15px",
+                                cursor: "pointer",
+                                padding: "10px",
+                            }}
+                            onClick={() => navigate("/caretakerProfileEdit")}
+                        >
+                            <Avatar
+                                size={60}
+                                src={savedProfilePicture}
+                                style={{
+                                    backgroundColor: themeColors.primary4,
                                     color: themeColors.primary10,
                                 }}
-                            />
-                        </Badge>
-                    </Dropdown>
+                            >
+                                {name[0]}
+                            </Avatar>
+                            <p style={{ fontSize: "2rem" }}>
+                                {name}
+                            </p>
+                        </div>
+                        <Button
+                            type="secondary"
+                            icon={<PoweroffOutlined />}
+                            style={{
+                                fontSize: "2rem",
+                                position: "absolute",
+                                bottom: "5%",
+                                right: "1%",
+                            }}
+                            onClick={() => handleLogout()}
+                        >
+                            Log uit
+                        </Button>
+                    </div>
+                </ConfigProvider>
+            ) : (
+                <div>
+                    <h1>Scherm te smal</h1>
+                    <p>Open deze pagina op een breder scherm (minimaal 800px).</p>
                 </div>
-
-                <h2 style={{marginTop: '100px'}}>Clienten overzicht: </h2>
-
-                {fetchClientsError && <p>Fout: {fetchClientsError}</p>}
-                {clients.length > 0 ? (
-                    <Table
-                        dataSource={dataSource}
-                        columns={columns}
-                        showHeader={false}
-                        rowKey="id"
-                        pagination={{pageSize: pageSize}}
-                        style={{
-                            marginTop: "20px",
-                        }}
-                        onRow={(record) => ({
-                            onClick: (event) => {
-                                // Prevent clicks on select and buttons from triggering row click
-                                if (!event.target.closest(".prevent-row-click")) {
-                                    handleClientClick(record);
-                                }
-                            },
-                        })}
-                        rowClassName="clickable-row"
-                    />
-
-                ) : (
-                    <p>Cliënten laden...</p>
-                )}
-
-                {/* Render the modal */}
-                {selectedClient && (
-                    <ClientDetailsModal
-                        visible={isModalVisible}
-                        onClose={handleModalClose}
-                        clientData={selectedClient}
-                    />
-                )}
-
-                <div style={{
-                    display: "flex",
-                    justifyContent: "center",
-                }}>
-                    <Button
-                        type="primary"
-                        style={{marginTop: "20px"}}
-                    >
-                        Genereer nieuwe profiel code
-                    </Button>
-                </div>
-
-
-                <div
-                    style={{
-                        position: 'absolute',
-                        top: '2%',
-                        left: '2%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '15px',
-                        cursor: 'pointer',
-                        padding: '10px',
-                    }}
-                    onClick={() => navigate('/caretakerProfileEdit')}
-                >
-                    <Avatar
-                        size={60}
-                        src={savedProfilePicture}
-                        style={{
-                            backgroundColor: themeColors.primary4,
-                            color: themeColors.primary10,
-                        }}
-                    >
-                        {name[0]}
-                    </Avatar>
-                    <p style={{fontSize: '2rem'}}>
-                        {name}
-                    </p>
-                </div>
-                <Button
-                    type="secondary"
-                    icon={<PoweroffOutlined />}
-                    style={{ fontSize: '2rem' , position: 'absolute', bottom: '5%', right: '1%' }}
-                    onClick={()=>handleLogout()}
-                >
-                    Log uit
-                </Button>
-            </div>
-        </ConfigProvider>
+            )}
+        </div>
     );
 };
 

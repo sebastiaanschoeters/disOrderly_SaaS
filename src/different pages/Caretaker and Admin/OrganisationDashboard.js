@@ -3,10 +3,10 @@ import '../../CSS/AntDesignOverride.css'
 import { antThemeTokens, themes } from '../../Extra components/themes';
 import {
     Button,
-    Card,
-    ConfigProvider, Form, List, Modal,
+    Card, Col,
+    ConfigProvider, Divider, Form, List, Modal, Popover, Progress, Row, Select, Statistic,
 } from 'antd';
-import {PlusOutlined, RedoOutlined} from "@ant-design/icons";
+import {PlusOutlined, RedoOutlined, TeamOutlined} from "@ant-design/icons";
 import React, {useEffect, useState} from "react";
 import { useNavigate } from 'react-router-dom';
 import { createClient } from "@supabase/supabase-js";
@@ -20,29 +20,55 @@ const OrganisationDashboard = () => {
     const navigate = useNavigate();
     const themeColors = themes["blauw"] || themes.blauw;
     const [caretakers, setCaretakers] = useState(undefined);
-    const [caretakersList, setCaretakersList] = useState([])
-    const [isCaretakerVisible, setIsCaretakerVisible] = useState(false)
+    const [caretakersList, setCaretakersList] = useState([]);
+    const [isCaretakerVisible, setIsCaretakerVisible] = useState(false);
+    const [isNewCaretakerVisible, setIsNewCaretakerVisible] = useState(false);
+    const [generatedCode, setGeneratedCode] = useState(undefined);
+    const [maximumAmountUsers, setMaximumAmountUsers] = useState(undefined);
+    const [currentUsers, setCurrentUsers] = useState(undefined);
+    const [activeUsers, setActiveUsers] = useState([]);
     const [selectedCaretaker, setSelectedCaretaker] = useState( {
         id: 0,
         name: undefined,
         email: undefined,
-        phone_number: undefined
+        phone_number: undefined,
     });
 
     const fetchOrganisationId = async () => {
-        const { data, error } = await supabase.from("Activation").select('organisation').eq("code", userId);
-        setOrganisationId(25);
-        setOrganisationId(data[0].organisation)
-        console.log('User Id: ', userId ,'Organisation Id: ', data[0].organisation);
+        const { data, error } = await supabase
+            .from("Activation")
+            .select('organisation')
+            .eq("code", userId);
         if(error) {
-            console.error(error);
+            console.error("Error fetching organisation ID", error);
         }
-
+        else if (data.length > 0) {
+            setOrganisationId(data[0].organisation);
+            console.log("Organisation ID fetched", data[0].organisation);
+        }
     }
 
-    const fetchOrganisationName = async () => {
-        const {data, error} = await supabase.from('Organisations').select('name').eq('id', organisationId);
 
+    const fetchOrganisationInfo = async () => {
+        const {data, error} = await supabase
+            .from('Organisations')
+            .select('name, maximum_activations_codes')
+            .eq('id', organisationId);
+        setOrganizationName(data[0].name);
+        setMaximumAmountUsers(data[0].maximum_activations_codes)
+        await fetchAmountUsers()
+        handleMaximumAmountUsers(data[0].maximum_activations_codes);
+        await fetchActiveUsers()
+        console.log("Organisation Info: ", data[0])
+    }
+
+    const fetchAmountUsers = async () => {
+        const {data, error} = await supabase
+            .from('Activation')
+            .select('*', { count : 'exact'})
+            .eq('organisation', organisationId)
+            .eq('type', 'user');
+        setCurrentUsers(data.length);
     }
 
     const fetchCaretakers = async () => {
@@ -66,6 +92,21 @@ const OrganisationDashboard = () => {
         await fetchOrganisationId();
         await fetchCaretakers();
         await fetchCaretakerInfo();
+        await fetchOrganisationInfo();
+        await fetchAmountUsers();
+    }
+
+    const handleMaximumAmountUsers = (maximumActivationCodes) => {
+        if(maximumActivationCodes === 1) {
+            setMaximumAmountUsers(50);
+        }
+        if(maximumActivationCodes === 2) {
+            setMaximumAmountUsers(200);
+        }
+        if(maximumActivationCodes === 3) {
+            setMaximumAmountUsers(1000);
+        }
+        console.log('Maximum amount users: ', maximumAmountUsers)
     }
 
     const fetchCaretakerInfo = async () => {
@@ -87,6 +128,21 @@ const OrganisationDashboard = () => {
         }
     }
 
+    const fetchActiveUsers = async () => {
+        const {data, error} = await supabase
+            .from("Chatroom")
+            .select('sender_id, receiver_id')
+
+        const userIds = data.reduce((acc, row) => {
+            acc.push(row.sender_id, row.receiver_id);
+            return acc;
+        }, []);
+
+        const uniqueUserIds = [...new Set(userIds)];
+
+        setActiveUsers(uniqueUserIds);
+    }
+
     const handleCloseCaretaker = () => {
         setIsCaretakerVisible(false);
         setSelectedCaretaker({
@@ -104,22 +160,45 @@ const OrganisationDashboard = () => {
 
     const handleDeleteCaretaker = async (caretaker) => {
         const {error} = await supabase.from('caretaker').delete().eq("id", caretaker);
+    }
 
+    const handleOpenNewCaretaker = () => {
+        setIsNewCaretakerVisible(true);
+    }
+
+    const handleGenerateCode = async () => {
+        const {data, error} = await supabase.from("Activation").insert({"usable": true, "type": "caretaker", "organisation": organisationId}).select();
+        await setGeneratedCode(data[0].code);
+    }
+
+    const handleCloseNewCaretaker = async () => {
+        setIsNewCaretakerVisible(false);
     }
 
     const styles = {
         list: {
-            width: '75%',
-            height: '650px'
+            width: '60%', // Increase the width of the list
+            height: '100%',
+            margin: '0 auto', // Center the list horizontally
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center', // Center items horizontally
+            gap: '20px', // Add space between cards
         },
         card: {
             width: '100%',
-            height: '75px',
-            marginBottom: '10px',
-            borderRadius: '10px',
+            height: '80px', // Increase the height of the card
+            marginBottom: '20px',
+            borderRadius: '15px', // Adjust border radius for a bigger card
             borderWidth: '1px',
             borderColor: themeColors.primary7,
             cursor: 'pointer',
+            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', // Add a subtle shadow for better visibility
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center', // Center text vertically
+            alignItems: 'center', // Center text horizontally
+            padding: '20px', // Add padding for better spacing
         },
         name: {
             fontSize: '14px'
@@ -142,10 +221,14 @@ const OrganisationDashboard = () => {
             textAlign: 'center',
             overflow: 'hidden',
             backgroundColor: 'red'
-        }}
+        },
+        button: {
+            width: '90%',
+            maxWidth: '400px',
+            height: 'auto'
+        },}
 
     useEffect(() => {
-        // Step 1: Fetch the organisation ID
         const fetchOrganisationId = async () => {
             const { data, error } = await supabase
                 .from("Activation")
@@ -164,7 +247,12 @@ const OrganisationDashboard = () => {
     }, [userId]);
 
     useEffect(() => {
-        // Step 2: Fetch caretakers when organisationId is updated
+        if (organisationId) {
+            fetchOrganisationInfo();
+        }
+    }, [organisationId]);
+
+    useEffect(() => {
         if (organisationId) {
             const fetchCaretakers = async () => {
                 try {
@@ -192,7 +280,6 @@ const OrganisationDashboard = () => {
     }, [organisationId]);
 
     useEffect(() => {
-        // Step 3: Fetch caretaker details when caretakers list is updated
         if (caretakers && caretakers.length > 0) {
             const fetchCaretakerInfo = async () => {
                 try {
@@ -226,10 +313,10 @@ const OrganisationDashboard = () => {
     return (<ConfigProvider theme={{token: antThemeTokens(themeColors)}}>
         <div
             style={{
-                padding: '20px',
+                padding: '10px',
                 position: 'relative',
                 width: '100%',
-                height: '100%',
+                minHeight: '100vh',
                 backgroundColor: themeColors.primary2,
                 color: themeColors.primary10,
                 display: 'flex',
@@ -238,78 +325,147 @@ const OrganisationDashboard = () => {
                 gap: '20px',
             }}>
 
-            <Button
-                type="primary"
-                style={{
-                    position: 'absolute',
-                    top: '20px',
-                    left: '20px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: '120px',
-                    height: '100px',
-                }}
-                icon={<RedoOutlined/>}
-                onClick={handleReload}
-            >
-                <h6> Reload data </h6>
-            </Button>
-            <Button
-                type="primary"
-                style={{
-                    position: 'absolute',
-                    top: '20px',
-                    right: '20px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: '120px',
-                    height: '100px',
-                }}
-                onClick={() => navigate('/login')}
+            <div style={{
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+            }}>
+                <Button
+                    type="primary"
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '120px',
+                        height: '100px',
+                    }}
+                    icon={<RedoOutlined/>}
+                    onClick={handleReload}
+                >
 
-            >
-                <h2 style={{margin: '0', fontSize: '1rem'}}>Afmelden</h2>
-            </Button>
-            <div style={{display: 'flex', flexDirection:'column', gap: '20px', width: '100%', alignItems: 'center', paddingTop:'100px'}}>
-                <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', gap: '20px'}}>
-                    <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', gap:'20px',}} >
-                        <h1>Begeleiders: </h1>
-                    </div>
-                </div>
-                <List
-                    itemLayout="horizontal"
-                    dataSource={caretakersList}
-                    style={styles.list}
-                    renderItem={(caretaker) => (
-                        <List.Item>
-                            <Card
-                                hoverable={true}
-                                onClick={() => setTimeout(() => handleClickCaretaker(caretaker), 100)}
-                            >
-                                <Card.Meta
-                                    title={<span style={styles.name}><li>{caretaker.name}</li></span>}
-                                />
-                                <p>{caretaker.email}</p>
-                            </Card>
-                        </List.Item>
-                    )}
-                />
-            </div>
-            <div>
-                <Button onClick={handleReload}>
-                    Reload
+                    <h6> Herladen </h6>
+                </Button>
+                <Button
+                    type="primary"
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '120px',
+                        height: '100px',
+                    }}
+                    onClick={() => navigate('/login')}
+
+                >
+                    <h2 style={{margin: '0', fontSize: '1rem'}}>Afmelden</h2>
                 </Button>
             </div>
 
+            <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '10px',
+                width: '100%',
+                alignItems: 'center',
+                paddingTop: '100px'
+            }}>
+                <h1 style={{fontSize: '40px'}}>{organisationName}</h1>
+                <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    flexWrap: 'wrap',
+                    alignItems: 'center',
+                    width: '100%',
+                    gap: '60px'
+                }}>
+
+                    <div style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        flexWrap: 'wrap',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        width: '100%',
+                        gap: '30px',
+                        top: '10px'
+                    }}>
+                        <Card style={{backgroundColor:'lightgray', height: '100%'}}>
+                            <Card.Meta title='Geregistreerde gebruikers'/>
+                            <div style={{
+                            }}>
+                                <TeamOutlined style={{fontSize: '30px'}}/>
+                                <Row gutter={30}>
+                                    <Col span={25}>
+                                        <Statistic prefix={currentUsers} value='/ ' suffix={maximumAmountUsers}/>
+                                    </Col>
+                                </Row>
+                            </div>
+                            <Progress percent={currentUsers*100/maximumAmountUsers} showInfo={false} />
+                        </Card>
+
+                        <Popover content='Een gebruiker wordt beschouwd als actief vanaf de gebruiker deelneemt aan een chat.' color='lightgray' placement='bottom'>
+                            <Card style={{
+                                backgroundColor: 'lightgray',
+                                height: '100%'
+                            }}>
+                                <Card.Meta title='Actieve gebruikers'/>
+                                <div style={{display: 'flex', justifyContent: 'space-between', flexDirection: 'column', gap: '30px'}}>
+                                    <TeamOutlined style={{fontSize: '30px'}}/>
+                                    <Statistic value={activeUsers.length}/>
+                                </div>
+                            </Card>
+                        </Popover>
+                    </div>
+
+                    <Divider/>
+
+                    <div style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        width: '100%',
+                        gap: '20px',
+
+                    }}>
+                        <h1 style={{fontSize:'20px'}}>Begeleiders: </h1>
+                        <List
+                            itemLayout="horizontal"
+                            dataSource={caretakersList}
+                            style={styles.list}
+                            renderItem={(caretaker) => (
+                                <List.Item>
+                                    <Card
+                                        hoverable={true}
+                                        onClick={() => setTimeout(() => handleClickCaretaker(caretaker), 100)}
+                                    >
+                                        <Card.Meta
+                                            title={<span style={styles.name}><li>{caretaker.name}</li></span>}
+                                        />
+                                        <p>{caretaker.email}</p>
+                                    </Card>
+                                </List.Item>
+                            )}
+                        />
+                        <Button
+                            type="primary"
+                            icon={<PlusOutlined/>}
+                            style={styles.button}
+                            onClick={handleOpenNewCaretaker}
+                        >
+                            <h6> Nieuwe begeleider toevoegen </h6>
+                        </Button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
             <Modal
-            open={isCaretakerVisible}
-            onCancel={handleCloseCaretaker}
-            footer={null}
-            style={{padding: '10px', height: '200px'}}
+                open={isCaretakerVisible}
+                onCancel={handleCloseCaretaker}
+                footer={null}
+                style={{padding: '10px', height: '200px'}}
             >
                 <div style={{padding: '25px'}}>
                     <Form>
@@ -318,17 +474,33 @@ const OrganisationDashboard = () => {
                         <h5>{selectedCaretaker.phone_number}</h5>
                     </Form>
                     <Button
-                        style={styles.deleteButton}>
+                        style={styles.deleteButton}
+                        onClick={() => handleDeleteCaretaker(selectedCaretaker.id)}>
                         Verwijder begeleider
                     </Button>
                 </div>
-
             </Modal>
 
-        </div>
-
-    </ConfigProvider>
-)
+            <Modal
+                open={isNewCaretakerVisible}
+                onCancel={handleCloseNewCaretaker}
+                footer={null}
+                style={{padding: '10px', display:'flex', flexDirection:'column'}}
+            >
+                <h3>Code voor de nieuwe begeleider:</h3>
+                <h2>{generatedCode}</h2>
+                <div/>
+                <text style={{fontSize:'14px'}}>Genereer hier een activatiecode waarmee een account voor begeleider aangemaakt kan worden.</text>
+                <div/>
+                <Button
+                    type={"primary"}
+                    onClick={handleGenerateCode}
+                >
+                    Genereer
+                </Button>
+            </Modal>
+        </ConfigProvider>
+    )
 }
 
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Button } from 'antd';
+import {Modal, Button, Tooltip} from 'antd';
 import { createClient } from '@supabase/supabase-js';
 import useHandleRequest from "../UseHooks/useHandleRequest";
 
@@ -31,9 +31,19 @@ const fetchNotification = async ( userId ) => {
 
             console.log(caretakerData)
 
+            const {data: accessLevelUser, error} = await supabase
+                .from('User')
+                .select('access_level')
+                .eq('id', userId)
+                .single()
+            console.log(accessLevelUser)
+
+            if (error) throw error
+
             return{
                 ...notification,
                 requesterName: caretakerData?.[0]?.name || 'Onbekend', // Default to 'Unknown' if not found
+                currentAccessLevel: accessLevelUser?.access_level
             };
         } else{
             return null;
@@ -70,6 +80,16 @@ const NotificationModal = () => {
     const handleAcceptRequest = (notification) => {handleRequest(notification, 'accept', false);};
     const handleDenyRequest = (notification) => {handleRequest(notification, 'deny', false);};
 
+
+    const tooltips = {
+        "Volledige toegang": "Begeleiding heeft volledige toegang en kan alles mee volgen en profiel aanpassen",
+        "Gesprekken": "Begeleiding kan enkel gesprekken lezen",
+        "Contacten": "Begeleiding kan zien met wie jij contact hebt",
+        "Publiek profiel": "Begeleiding kan zien wat jij op je profiel plaatst, net zoals andere gebruikers",
+    };
+
+    console.log(notification)
+
     return (
         <Modal
             title="Belangrijke melding"
@@ -83,11 +103,27 @@ const NotificationModal = () => {
             {notification ? (
                 <div>
                     <p>
-                        {`${notification.requesterName} heeft een wijziging in toegangsniveau aangevraagd: ${
-                            notification.details?.requested_access_level || 'Onbekend toegangsniveau'
-                        }`}
+                        {`${notification.requesterName} heeft een wijziging in toegangsniveau aangevraagd: `}
+                        <Tooltip
+                            title={
+                                tooltips[notification.details?.requested_access_level] || "Geen informatie beschikbaar"
+                            }
+                        >
+                    <span style={{ textDecoration: "underline", cursor: "pointer" }}>
+                        {notification.details?.requested_access_level || "Onbekend toegangsniveau"}
+                    </span>
+                        </Tooltip>
+                        {". Het vorige toegangsniveau was "}
+                        <Tooltip
+                            title={tooltips[notification.currentAccessLevel] || "Geen informatie beschikbaar"}
+                        >
+                    <span style={{ textDecoration: "underline", cursor: "pointer" }}>
+                        {notification.currentAccessLevel || "Onbekend toegangsniveau"}
+                    </span>
+                        </Tooltip>
+                        .
                     </p>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
                         <Button onClick={() => handleAcceptRequest(notification)} type="default" size="large">
                             Accepteren
                         </Button>

@@ -71,7 +71,7 @@ const ActivationPage = () => {
 
             if (error) {
                 console.error("Error checking activation code:", error.message);
-                message.error("Er is een probleem met het valideren van de activatiecode.");
+                message.error("Er is iets mis gegaan met het valideren van de activatiecode.");
                 setLoading(false);
                 return;
             }
@@ -159,7 +159,7 @@ const ActivationPage = () => {
             }
 
             if (data) {
-                message.error("Dit e-mailadres is al geregistreerd. Probeer een ander e-mailadres.");
+                message.error("Dit e-mailadres is al geregistreerd.");
                 return true;  // Return true if email is already taken
             }
 
@@ -178,7 +178,7 @@ const ActivationPage = () => {
         const caretakerName = vname + ' ' + aname;
         const hashedPassword = CryptoJS.SHA256(values.password).toString();
 
-        const emailExists = await checkEmailExistence(values.email);
+        const emailExists = await checkEmailExistence(values.email.toLowerCase());
         if (emailExists) {
             setLoading(false);
             return;
@@ -191,7 +191,7 @@ const ActivationPage = () => {
                     id: userData.activationKey,
                     name: caretakerName,
                     phone_number: values.phone,
-                    email: values.email
+                    email: values.email.toLowerCase()
                 });
 
             if (careError) throw careError;
@@ -200,17 +200,17 @@ const ActivationPage = () => {
                 .from("Credentials")
                 .insert({
                     user_id: userData.activationKey,
-                    email: values.email,
+                    email: values.email.toLowerCase(),
                     password: hashedPassword,
                     type: userType
                 });
 
             if (credError) throw credError;
 
-            message.success("Caretaker successfully saved!");
+            message.success("Account succesvol aangemaakt");
 
         } catch (error) {
-            console.error("something went wrong");
+            console.error("something went wrong", error);
         } finally {
             setLoading(false);
         }
@@ -319,25 +319,33 @@ const ActivationPage = () => {
     const EmailAndPassword = async (values) => {
         setLoading(true);
         try {
-            const emailExists = await checkEmailExistence(values.email);
+            // Convert email to lowercase
+            const lowercaseEmail = values.email.toLowerCase();
+
+            // Check if email already exists using lowercase email
+            const emailExists = await checkEmailExistence(lowercaseEmail);
             if (emailExists) {
                 setLoading(false);
                 return;
             }
 
+            // Hash the password
             const hashedPassword = CryptoJS.SHA256(values.password).toString();
 
+            // Update user data with lowercase email and hashed password
             const updatedUserData = {
                 ...userData,
-                email: values.email,
+                email: lowercaseEmail,
                 password: hashedPassword,
             };
 
             console.log("User Data to Submit:", updatedUserData);
 
+            // Save user profile
             await saveUserProfile(updatedUserData);
 
-            message.success("Account aangemaakt! Je kan een profielfoto toevoegen bij je profiel.");
+            // Show success message
+            message.success("Account aangemaakt! Je kan een profielfoto toevoegen bij je profiel instellingen.");
         } catch (err) {
             console.error("Unexpected error during email validation:", err);
             message.error("Er is iets misgegaan. Probeer het later opnieuw.");
@@ -345,6 +353,7 @@ const ActivationPage = () => {
             setLoading(false);
         }
     };
+
 
     return (
         <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
@@ -357,9 +366,12 @@ const ActivationPage = () => {
                     overflowY: 'auto',
                     backgroundImage: `url(${forestImage})`,
                     //backgroundColor: themeColors.primary2,
-                    color: themeColors.primary10
+                    color: themeColors.primary10,
+                    position: 'relative',
+                    zIndex: '0'
                 }}
             >
+                <ButterflyIcon color="rgba(255, 255, 255, 0.2)" />
                 <Card
                     style={{ width: 400 }}
                     title={
@@ -375,7 +387,7 @@ const ActivationPage = () => {
                                             ? "Beschermings niveau"
                                             : step === 6
                                                 ? "De laatste stap"
-                                                : "Wie ben jij?"
+                                                : "Wie ben je?"
                     }
                 >
                     {step === 1 && (
@@ -428,7 +440,7 @@ const ActivationPage = () => {
                             <Form.Item
                                 label="Geboortedatum"
                                 name="Geboortedatum"
-                                rules={[{ required: true, message: 'Selecteer uw geboortedatum' }]}
+                                rules={[{ required: true, message: 'Selecteer uw geboortedatum, of typ het uit in het formaat "YYYY-MM-DD"' }]}
                             >
                                 <DatePicker
                                     style={{ width: '100%' }}
@@ -546,10 +558,10 @@ const ActivationPage = () => {
                             <p>Selecteer de optie die het beste past bij jou en je begeleider</p>
                             <Form.Item name="niveau" rules={[{ required: true, message: 'Selecteer een optie' }]}>
                                 <Radio.Group>
-                                    <Radio value="Volledige Toegang">Begeleiding heeft volledige toegang en kan alles mee volgen en profiel aanpassen.</Radio>
+                                    <Radio value="Volledige toegang">Begeleiding heeft volledige toegang en kan alles mee volgen en profiel aanpassen</Radio>
                                     <Radio value="Gesprekken">Begeleiding kan enkel gesprekken lezen</Radio>
                                     <Radio value="Contacten">Begeleiding kan zien met wie jij contact hebt</Radio>
-                                    <Radio value="Publiek Profiel">Begeleiding kan zien wat jij op je profiel plaatst, net zoals andere gebruikers</Radio>
+                                    <Radio value="Publiek profiel">Begeleiding kan zien wat jij op je profiel plaatst, net zoals andere gebruikers</Radio>
                                 </Radio.Group>
                             </Form.Item>
                             <Form.Item>
@@ -569,8 +581,8 @@ const ActivationPage = () => {
                                 label="Email"
                                 name="email"
                                 rules={[
-                                    { required: true, message: 'Please enter your email' },
-                                    { type: 'email', message: 'Please enter a valid email' }
+                                    { required: true, message: 'Gelieve uw email adress in te vullen' },
+                                    { type: 'email', message: 'Gelieve een geldig email adress in te vullen' }
                                 ]}
                             >
                                 <Input />
@@ -580,7 +592,7 @@ const ActivationPage = () => {
                                 className="form-item"
                                 label="Wachtwoord"
                                 name="password"
-                                rules={[{ required: true, message: 'Please enter your password' }]}
+                                rules={[{ required: true, message: 'Gelieve uw wachtwoord in te vullen' }]}
                             >
                                 <Input.Password />
                             </Form.Item>
@@ -591,7 +603,7 @@ const ActivationPage = () => {
                                 name="confirmPassword"
                                 dependencies={['password']}
                                 rules={[
-                                    { required: true, message: 'Please confirm your password' },
+                                    { required: true, message: 'Gelieve uw wachtwoord te bevestiggen' },
                                     ({ getFieldValue }) => ({
                                         validator(_, value) {
                                             if (!value || getFieldValue('password') === value) {
@@ -628,8 +640,8 @@ const ActivationPage = () => {
                                 label="Voornaam"
                                 name="vname"
                                 rules={[
-                                    { required: true, message: 'Please enter your name' },
-                                    { min: 2, message: 'Name must be at least 2 characters long' },
+                                    { required: true, message: 'Gelieve uw voornaam in te vullen' },
+                                    { min: 2, message: 'Naam moet minstens 2 letters lang zijn' },
                                 ]}
                             >
                                 <Input />
@@ -639,8 +651,8 @@ const ActivationPage = () => {
                                 label="Achternaam"
                                 name="aname"
                                 rules={[
-                                    { required: true, message: 'Please enter your name' },
-                                    { min: 2, message: 'Name must be at least 2 characters long' },
+                                    { required: true, message: 'Gelieve uw achternaam in te vullen' },
+                                    { min: 2, message: 'Naam moet minstens 2 letters lang zijn' },
                                 ]}
                             >
                                 <Input />
@@ -648,14 +660,14 @@ const ActivationPage = () => {
 
                             <Form.Item
                                 className="form-item"
-                                label="Phone Number"
+                                label="GSM Nummer"
                                 name="phone"
                                 style={{ marginBottom: '48px' }}
                                 rules={[
-                                    { required: true, message: 'Please enter your phone number' },
+                                    { required: true, message: 'Gelieve uw GSM nummer in te vullen' },
                                     {
                                         pattern: /^[+]?[0-9]{10,15}$/,
-                                        message: 'Please enter a valid phone number (e.g., +1234567890)',
+                                        message: 'Gelieve een geldig GSM nummer in te vullen (b.v., +1234567890)',
                                     },
                                 ]}
                             >
@@ -667,8 +679,8 @@ const ActivationPage = () => {
                                 label="Email"
                                 name="email"
                                 rules={[
-                                    { required: true, message: 'Please enter your email' },
-                                    { type: 'email', message: 'Please enter a valid email' },
+                                    { required: true, message: 'Gelieve uw email adress in te vullen' },
+                                    { type: 'email', message: 'Gelieve een geldig email adress in te vullen' },
                                 ]}
                             >
                                 <Input />
@@ -676,11 +688,11 @@ const ActivationPage = () => {
 
                             <Form.Item
                                 className="form-item"
-                                label="Password"
+                                label="Wachtwoord"
                                 name="password"
                                 rules={[
-                                    { required: true, message: 'Please enter your password' },
-                                    { min: 6, message: 'Password must be at least 6 characters long' },
+                                    { required: true, message: 'Gelieve uw wachtwoord in te vullen' },
+                                    { min: 6, message: 'Wachtwoord moet minstens 6 characters lang zijn' },
                                 ]}
                             >
                                 <Input.Password />
@@ -688,17 +700,17 @@ const ActivationPage = () => {
 
                             <Form.Item
                                 className="form-item"
-                                label="Confirm Password"
+                                label="Bevestig Wachtwoord"
                                 name="confirmPassword"
                                 dependencies={['password']}
                                 rules={[
-                                    { required: true, message: 'Please confirm your password' },
+                                    { required: true, message: 'Gelieve uw wachtwoord te bevestiggen' },
                                     ({ getFieldValue }) => ({
                                         validator(_, value) {
                                             if (!value || getFieldValue('password') === value) {
                                                 return Promise.resolve();
                                             }
-                                            return Promise.reject(new Error('The passwords do not match'));
+                                            return Promise.reject(new Error('De wachtwoorden zijn niet hetzelfde'));
                                         },
                                     }),
                                 ]}
@@ -715,7 +727,7 @@ const ActivationPage = () => {
                                         validator: (_, value) =>
                                             value
                                                 ? Promise.resolve()
-                                                : Promise.reject(new Error('You must accept the terms and services')),
+                                                : Promise.reject(new Error('U moet de terms and services accepteren')),
                                     },
                                 ]}
                             >

@@ -11,6 +11,9 @@ import useThemeOnCSS from "../UseHooks/useThemeOnCSS";
 import {createClient} from "@supabase/supabase-js";
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
+//const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
+//const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
+//const supabase = createClient(supabaseUrl, supabaseKey);
 
 
 const HomePage = () => {
@@ -176,13 +179,13 @@ const HomePage = () => {
                     icon={<SettingOutlined />}
                     style={{
                         position: 'absolute',
-                        bottom: '1%',
+                        bottom: '2%',
                         left: '1%',
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        width: '15dvw',
+                        width: '20dvw',
                         height: '12dvh',
                         minWidth: '100px',
                         minHeight: '80px',
@@ -201,13 +204,13 @@ const HomePage = () => {
                     icon={<PoweroffOutlined />}
                     style={{
                         position: 'absolute',
-                        bottom: '1%',
+                        bottom: '2%',
                         right: '1%',
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        width: '15dvw',
+                        width: '20dvw',
                         height: '12dvh',
                         minWidth: '100px',
                         minHeight: '80px',
@@ -231,6 +234,7 @@ const HomePage = () => {
                     align-items: center;
                     justify-content: center;
                 }
+                
 
                 /* Media Query for Smaller Screens */
                 @media (max-width: 768px) {
@@ -279,6 +283,7 @@ const HomePage = () => {
                 #root {
                     height: 100%; /* Ensure the app takes the full viewport height */
                 }
+                
             `}</style>
         </ConfigProvider>
     );

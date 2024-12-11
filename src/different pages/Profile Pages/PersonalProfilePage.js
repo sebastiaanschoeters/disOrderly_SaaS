@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import {Avatar, Divider, Select, ConfigProvider, Spin, message} from 'antd';
-import { UserSwitchOutlined, HeartOutlined, TrophyOutlined } from '@ant-design/icons';
+import {Avatar, Divider, Select, ConfigProvider, Spin, message, Tooltip, Typography} from 'antd';
+import {UserSwitchOutlined, HeartOutlined, TrophyOutlined, QuestionCircleOutlined} from '@ant-design/icons';
 import 'antd/dist/reset.css';
 import '../../CSS/AntDesignOverride.css';
 import '../../CSS/PersonalProfilePage.css';
@@ -351,6 +351,18 @@ const ProfileCard = () => {
             });
         }
     };
+    const { Title } = Typography;
+
+    const styles = {
+        title: {
+            flexGrow: 1,
+            textAlign: 'center',
+            margin: 0,
+            fontSize: '48px',
+            transform: 'scale(1.5)', // Scale the title up
+            paddingTop: '15px',
+        },
+    };
 
 
     const handleThemeChange = (value) => {
@@ -368,138 +380,195 @@ const ProfileCard = () => {
         debouncedSaveSexuality(value);
     };
 
+    const tooltips = {
+        "Volledige toegang": "Begeleiding heeft volledige toegang en kan alles mee volgen en profiel aanpassen",
+        "Gesprekken": "Begeleiding kan enkel gesprekken lezen",
+        "Contacten": "Begeleiding kan zien met wie jij contact hebt",
+        "Publiek profiel": "Begeleiding kan zien wat jij op je profiel plaatst, net zoals andere gebruikers",
+    };
+
     if (isLoading) return <Spin tip="Profiel laden..." />;
     if (error) return <p>Failed to load profile: {error}</p>;
 
     return (
         <ConfigProvider theme={{token: antThemeTokens(themeColors)}}>
-            <div
-                style={{
-                    padding: '20px',
-                    position: 'relative',
-                    minWidth: '100%',
-                    minHeight: '100vh',
-                    backgroundColor: themeColors.primary2,
-                    color: themeColors.primary10,
-                    zIndex: '0'
-                }}
-            >
-                <HomeButtonUser color={themeColors.primary7}/>
-                <ButterflyIcon color={themeColors.primary3}/>
+            <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                position: 'relative',
+                minWidth: '100dvw',
+                minHeight: '100vh',
+                overflow: 'hidden',
+                overflowX: 'hidden',
+                backgroundColor: themeColors.primary2,
+                color: themeColors.primary10,
+                boxSizing: 'border-box',
+                zIndex: '0'
+            }}>
 
-                <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
-                    <Avatar
-                        src={profilePicture || "https://example.com/photo.jpg"} // Fallback to default avatar
-                        alt={name || "No Name"}
-                        style={{
-                            minWidth: '150px',
-                            width: '12dvw',
-                            minHeight: '150px',
-                            height: '12dvw',
-                            borderRadius: '50%'
-                        }}
-                    >
-                        <h2>{name[0]}</h2>
-                    </Avatar>
-                    <h2 style={{margin: '0', textAlign: 'center'}}>
-                        {name || 'Naam'}, {calculateAge(profileData.birthdate) || 'Leeftijd'}
-                    </h2>
-                    <Divider/>
-                </div>
+                <div
+                    style={{
+                        width: '80%',
+                    }}
+                >
+                    <HomeButtonUser color={themeColors.primary7}/>
+                    <ButterflyIcon color={themeColors.primary3}/>
 
-                <ThemeSelector
-                    theme={theme}
-                    isDarkMode={isDarkMode}
-                    handleThemeChange={handleThemeChange}
-                    handleThemeToggle={handleThemeToggle}
-                />
-
-                <Divider/>
-
-                <p>
-                    <strong>
-                        <UserSwitchOutlined/> Begeleiding met toegang:
-                    </strong>
-                </p>
-
-                <p style={{display: 'flex', alignItems: 'center', gap: '2%', marginBottom: '20px'}}>
-                    <div style={{width: '20%', minWidth: '150px'}}>
-                        <Avatar src={caretaker.profilePicture}
-                                style={{width: '40px', height: '40px', objectFit: 'cover', marginRight: '15px'}}/>
-                        <span>{caretaker.name}</span>
+                    <div style={styles.titleButton}>
+                        <Title level={1} style={{...styles.title, fontSize: '64px'}}>Instellingen</Title>
                     </div>
 
-                    <Select
-                        style={{flex: 1, minWidth: '200px'}}
-                        onChange={(value) => handleAccessLevelChange(user_id, profileData.caretaker.id, value)}
-                        value={caretaker.accessLevel}
-                        options={[
-                            {value: 'Volledige toegang', label: 'Volledige toegang'},
-                            {value: 'Gesprekken', label: 'Gesprekken'},
-                            {value: 'Contacten', label: 'Contacten'},
-                            {value: 'Publiek profiel', label: 'Publiek profiel'},
-                        ]}
+                    <div style={{marginTop: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+                        <Avatar
+                            src={profilePicture || "https://example.com/photo.jpg"} // Fallback to default avatar
+                            alt={name || "No Name"}
+                            style={{
+                                minWidth: '150px',
+                                width: '12dvw',
+                                minHeight: '150px',
+                                height: '12dvw',
+                                borderRadius: '50%'
+                            }}
+                        >
+                            <h2>{name[0]}</h2>
+                        </Avatar>
+                        <h2 style={{margin: '0', textAlign: 'center'}}>
+                            {name || 'Naam'}, {calculateAge(profileData.birthdate) || 'Leeftijd'}
+                        </h2>
+                        <Divider/>
+                    </div>
+
+                    <ThemeSelector
+                        theme={theme}
+                        isDarkMode={isDarkMode}
+                        handleThemeChange={handleThemeChange}
+                        handleThemeToggle={handleThemeToggle}
                     />
+
+                    <Divider/>
+
+                    <p>
+                        <strong>
+                            <UserSwitchOutlined/> Begeleiding met toegang:
+                        </strong>
+                    </p>
+                    <div
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '10px',
+                            flexWrap: 'nowrap',
+                            marginBottom: '20px',
+                        }}
+                    >
+                        <Avatar
+                            src={caretaker.profilePicture}
+                            style={{
+                                width: '40px',
+                                height: '40px',
+                                borderRadius: '50%',
+                                flexShrink: 0,
+                            }}
+                        />
+                        <span style={{flexGrow: 1, fontSize: '1rem', minWidth: '80px'}}>
+                            {caretaker.name}
+                        </span>
+                        <Select
+                            style={{flexGrow: 1, minWidth: '120px'}}
+                            onChange={(value) => handleAccessLevelChange(user_id, profileData.caretaker.id, value)}
+                            value={caretaker.accessLevel}
+                            options={[
+                                {value: 'Volledige toegang', label: 'Volledige toegang'},
+                                {value: 'Gesprekken', label: 'Gesprekken'},
+                                {value: 'Contacten', label: 'Contacten'},
+                                {value: 'Publiek profiel', label: 'Publiek profiel'},
+                            ]}
+                        />
+                        <Tooltip title={tooltips[caretaker.accessLevel] || "Geen informatie beschikbaar"}>
+                            <QuestionCircleOutlined
+                                style={{
+                                    fontSize: '1.2rem',
+                                    color: themeColors.primary8,
+                                    cursor: 'pointer',
+                                }}
+                            />
+                        </Tooltip>
+                    </div>
                     {pendingRequests[caretaker.id] && (
-                        <p style={{color: themeColors.primary9, marginTop: '5px'}}>
+                        <p style={{
+                            fontSize: '0.9rem',
+                            color: themeColors.primary9,
+                            marginTop: '5px',
+                            textAlign: 'right',
+                        }}>
                             Wijziging in behandeling: {pendingRequests[caretaker.id]}
+                            <Tooltip title={tooltips[pendingRequests[caretaker.id]] || "Geen informatie beschikbaar"}>
+                                <QuestionCircleOutlined
+                                    style={{
+                                        marginLeft: '3px',
+                                        fontSize: '1rem',
+                                        color: themeColors.primary8,
+                                        cursor: 'pointer',
+                                    }}
+                                />
+                            </Tooltip>
                         </p>
                     )}
-                </p>
 
-                <Divider/>
 
-                <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
-                    <strong style={{width: '20%', minWidth: '150px'}}>
-                        <HeartOutlined/> Ik ben geïntereseerd in:
-                    </strong>
-                    <Select
-                        style={{flex: 1, minWidth: '200px'}}
-                        placeholder="Selecteer seksualiteit"
-                        value={sexuality}
-                        options={[
-                            {value: 'Mannen', label: 'Mannen'},
-                            {value: 'Vrouwen', label: 'Vrouwen'},
-                            {value: 'Beide', label: 'Beide'},
-                        ]}
-                        onChange={handleSexualityChange}
+                    <Divider/>
 
-                    />
-                </p>
+                    <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
+                        <strong style={{width: '15%', minWidth: '100px'}}>
+                            <HeartOutlined/> Ik ben geïntereseerd in:
+                        </strong>
+                        <Select
+                            style={{flex: 1, minWidth: '200px'}}
+                            placeholder="Selecteer seksualiteit"
+                            value={sexuality}
+                            options={[
+                                {value: 'Mannen', label: 'Mannen'},
+                                {value: 'Vrouwen', label: 'Vrouwen'},
+                                {value: 'Beide', label: 'Beide'},
+                            ]}
+                            onChange={handleSexualityChange}
 
-                <Divider/>
+                        />
+                    </p>
 
-                <p>
-                    <strong>
-                        <TrophyOutlined/> Trofeeën
-                    </strong>
-                </p>
-                <div style={{display: 'flex', flexDirection: 'column', gap: '15px'}}>
-                    {trophies.map((trophy) => (
-                        <div key={trophy.id} style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
-                            <div style={{display: 'flex', alignItems: 'center'}}>
-                                <div className={trophy.earned ? "sparkle-icon" : ""}>
-                                    <TrophyOutlined
-                                        style={{
-                                            fontSize: '2rem',
-                                            color: trophy.earned ? themeColors.primary7 : themeColors.primary1,
-                                            transition: 'color 0.3s',
-                                        }}
-                                    />
+                    <Divider/>
+
+                    <p>
+                        <strong>
+                            <TrophyOutlined/> Trofeeën
+                        </strong>
+                    </p>
+                    <div style={{display: 'flex', flexDirection: 'column', gap: '15px'}}>
+                        {trophies.map((trophy) => (
+                            <div key={trophy.id} style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
+                                <div style={{display: 'flex', alignItems: 'center'}}>
+                                    <div className={trophy.earned ? "sparkle-icon" : ""}>
+                                        <TrophyOutlined
+                                            style={{
+                                                fontSize: '2rem',
+                                                color: trophy.earned ? themeColors.primary7 : themeColors.primary1,
+                                                transition: 'color 0.3s',
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                                <div>
+                                    <h4>{trophy.title}</h4>
+                                    {trophy.id === 8 && <p>Wins: {trophy.count}</p>}
+                                    {trophy.id === 3 && <p>{trophy.count}/3</p>}
                                 </div>
                             </div>
-                            <div>
-                                <h4>{trophy.title}</h4>
-                                {trophy.id === 8 && <p>Wins: {trophy.count}</p>}
-                                {trophy.id === 3 && <p>{trophy.count}/3</p>}
-                            </div>
-                        </div>
-                    ))}
+                        ))}
+                    </div>
                 </div>
             </div>
         </ConfigProvider>
-    )
-        ;
+    );
 };
 
 export default ProfileCard;

@@ -1,13 +1,13 @@
 import React, {useEffect, useState} from 'react';
 import { Avatar, Button, Modal, Input, Typography, ConfigProvider } from 'antd';
 import {useLocation, useNavigate, useParams} from 'react-router-dom';
-import {themes, antThemeTokens, ButterflyIcon} from '../Extra components/themes';
-import '../CSS/ChatSuggestionPage.css';
+import {themes, antThemeTokens, ButterflyIcon} from '../../Extra components/themes';
+import '../../CSS/ChatSuggestionPage.css';
 import { createClient } from "@supabase/supabase-js";
-import HomeButtonUser from "../Extra components/HomeButtonUser";
-import useTheme from "../UseHooks/useTheme";
-import useThemeOnCSS from "../UseHooks/useThemeOnCSS";
-import ProfileDetailsModal from "./Profile Pages/ProfileDetailsModal";
+import HomeButtonUser from "../../Extra components/HomeButtonUser";
+import useTheme from "../../UseHooks/useTheme";
+import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
+import ProfileDetailsModal from "../Profile Pages/ProfileDetailsModal";
 
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")

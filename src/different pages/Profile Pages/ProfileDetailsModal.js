@@ -7,7 +7,7 @@ const ProfileDetailsModal = ({ visible, onClose, clientData }) => {
     console.log(clientData)
     return (
         <Modal
-            title="Client Details"
+            title="Profiel informatie "
             open={visible}
             onCancel={onClose}
             footer={null}

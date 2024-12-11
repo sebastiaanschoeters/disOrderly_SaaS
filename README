@@ -54,6 +54,14 @@ User metrics                "As an administrative user i want an overview for my
 **Supabase password**
 ezeHoEBOW8sWvQQm
 
+hangman win + -wout **
+lower case email  -wout **
+trophy beter -wout **
+maak chat en zoek blokken korter -Wout
+vraag stellen zonder hang man  -wout
+vraag stellen zonder hang man -Wout
+
+
 organisation paginas -Seb
 knoppen onderaan op home page niet afkappen -Alvero
 Placeholders vervangen als er geen data is -Lotte
@@ -64,17 +72,14 @@ vilder op activate pagina -Alvaro
 Caretaker acces level met gesprekken implementeren -Lotte
 caretaker acces level notificatie duidelijker wat er veranderd -Lotte
 Testcode in cypress -Djeniz
-hangman win + -wout
 Maximum activation codes -Seb
 codes genereren voor users -Lotte en -Seb
 summative user evaluation zie discord -donderdag
-lower case email  -wout
-vraag stellen zonder hang man  -wout
 improve chat direct ipv dubbel model window
+improve chat direct ipv dubbel model window -Alvero
 -je kan deze chat terug vinden op de chat pagina ofzo
 chat klik op profiel heel de balk ipv alleen pfp -Djeniz
-titels -Wout
-trophy beter -wout
+titels -Alvero
 deactivated accounts kunnen niet inloggen -Lotte(caretaker kant) en Wout(login logic)
 weiger knop werkt niet -Djeniz
-maak chat en zoek blokken korter -Wout
+knop van admin naar clarity -Seb

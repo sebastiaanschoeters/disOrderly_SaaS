@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import {Avatar, Button, Modal, Table, Input} from "antd";
 import {UserOutlined} from "@ant-design/icons";
 import ProfileCard from "./CaretakerProfilePage";
+import {useNavigate} from "react-router-dom";
 
 const supabase = createClient(
     "https://flsogkmerliczcysodjt.supabase.co",
@@ -16,8 +17,10 @@ const useContacts = (userID) => {
         const fetchChatrooms = async () => {
             const { data, error } = await supabase
                 .from('Chatroom')
-                .select('id, sender_id, receiver_id, acceptance, senderProfile: sender_id(name, profile_picture, caretaker), receiverProfile: receiver_id(name, profile_picture, caretaker)')
+                .select('id, sender_id, receiver_id, acceptance, senderProfile: sender_id(id, name, profile_picture, caretaker), receiverProfile: receiver_id(id, name, profile_picture, caretaker)')
                 .or(`sender_id.eq.${userID},receiver_id.eq.${userID}`);
+
+            console.log(data)
 
             if (error) {
                 console.error('Error fetching chatrooms:', error);
@@ -26,13 +29,18 @@ const useContacts = (userID) => {
                     const profile =
                         chat.sender_id === userID ? chat.receiverProfile : chat.senderProfile;
 
+                    const isSender = chat.sender_id === userID;
+
                     return {
                         ...chat,
+                        profileId: profile.id,
                         profileName: profile.name,
                         profilePicture: profile.profile_picture,
-                        caretaker: profile.caretaker
+                        caretaker: profile.caretaker,
+                        isSender: isSender
                     };
                 });
+                console.log(formattedContacts)
                 setContacts(formattedContacts);
             }
         };
@@ -43,7 +51,13 @@ const useContacts = (userID) => {
     return { contacts };
 };
 
-const ContactsOverview = ({ id: userID }) => {
+const ContactsOverview = ({ id: userID , conversations: conversations}) => {
+    if (conversations == null){
+        conversations = false
+    }
+
+    const navigate = useNavigate();
+
     const { contacts } = useContacts(userID);
     const [filteredContacts, setFilteredContacts] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
@@ -51,7 +65,6 @@ const ContactsOverview = ({ id: userID }) => {
     const [selectedCaretakerId, setSelectedCaretakerId] = useState(null);
     const [clientName, setClientName] = useState('')
     const [isModalVisible, setIsModalVisible] = useState(false);
-
 
     useEffect(() => {
         setFilteredContacts(
@@ -114,6 +127,7 @@ const ContactsOverview = ({ id: userID }) => {
                 <Button
                     type="default"
                     onClick={() => handleCaretakerClick(record.caretaker, record.profileName)}
+                    className="prevent-row-click"
                     style={{
                         fontSize: "1rem",
                         width: "100%",
@@ -127,14 +141,26 @@ const ContactsOverview = ({ id: userID }) => {
     ];
 
     const dataSource = filteredContacts.map(contact => ({
-        id: contact.id,
+        chatroomId: contact.id,
+        id: contact.profileId,
         profileName: contact.profileName,
         profilePicture: contact.profilePicture,
         caretaker: contact.caretaker,
+        isSender: contact.isSender
     }));
 
-    console.log(filteredContacts)
-    console.log(dataSource)
+    function handleClientClick(record) {
+        console.log("clicked: ", {record})
+        const profileData = {
+            name: record.profileName,
+            profilePicture: record.profilePicture,
+            user_id: userID,
+            otherUserId: record.id,
+            isSender: record.isSender,
+            chatroomId: record.chatroomId,
+        };
+        navigate('/chat', {state: {profileData}})
+    }
 
     return (
         <div>
@@ -151,8 +177,17 @@ const ContactsOverview = ({ id: userID }) => {
                     columns={columns}
                     showHeader={false}
                     rowKey="id"
-                    pagination={{ pageSize }}
+                    pagination={{ pageSize: pageSize }}
                     style={{ marginTop: "20px" }}
+                    onRow={(record) => ({
+                        onClick: (event) => {
+                            // Prevent clicks on select and buttons from triggering row click
+                            if (!event.target.closest(".prevent-row-click")) {
+                                handleClientClick(record);
+                            }
+                        },
+                    })}
+                    rowClassName="clickable-row"
                 />
             ) : (
                 <p>Geen contacten gevonden</p>

@@ -1,13 +1,14 @@
 import 'antd/dist/reset.css'; // Import Ant Design styles
 import '../../CSS/AntDesignOverride.css'
 import { antThemeTokens, themes } from '../../Extra components/themes';
-import { Button, Card, ConfigProvider, Form, Input, List, Modal, Select } from 'antd';
+import { Button, Card, ConfigProvider, Form, Input, List, Modal, Select, AutoComplete } from 'antd';
 import {PlusOutlined, RedoOutlined} from "@ant-design/icons";
 import React, {useEffect, useState} from "react";
 import { useNavigate } from 'react-router-dom';
 import { createClient } from "@supabase/supabase-js";
 import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
 import useLocations from "../../UseHooks/useLocations";
+import {getActiveElement} from "@testing-library/user-event/dist/utils";
 
 const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q");
 
@@ -21,6 +22,7 @@ const AdminPage = () => {
     const [isCaretakerVisible, setCaretakerVisible] = useState(false);
     const [isOrganisationVisible, setIsOrganisationVisible] = useState(false);
     const [names, setNames] = useState([]);
+    const [allLocations, setAllLocations] = useState([]);
     const [generatedOrganisation, setGeneratedOrganisation] = useState('');
     const [generatedCode, setGeneratedCode] = useState('');
     const [selectedOrganisation, setSelectedOrganisation] = useState({
@@ -28,8 +30,9 @@ const AdminPage = () => {
         name: undefined,
         amountUsers: 0,
         responsible: 0,
-        location: undefined,
-        locationName: undefined
+        responsibleName: '',
+        location: 0,
+        locationName: ''
     });
 
     useEffect(() => {fetchData()}
@@ -50,6 +53,18 @@ const AdminPage = () => {
         }
         setOrganisations(mappedData);
         fetchNames();
+        fetchLocations();
+    }
+
+    const fetchLocations = async () => {
+        const {data, error} = await supabase
+            .from('Location')
+            .select('id, Gemeente')
+        const mappedLocations = data.map((gemeente) => ({
+            label: gemeente.Gemeente,
+            value: gemeente.id
+        }))
+        setAllLocations(mappedLocations);
     }
 
     const fetchLocationCode = async (locationName) => {
@@ -69,6 +84,10 @@ const AdminPage = () => {
                 return null;
             }
 
+            else {
+                handleFieldChange("location", data[0].id)
+            }
+
             return data[0].id;
         } catch (err) {
             console.error("Error:", err);
@@ -76,18 +95,25 @@ const AdminPage = () => {
         }
     };
 
+    const fetchLocationName = (locationCode) => {
+        const foundLocation = allLocations.find((location) => location.value === locationCode);
+        return foundLocation.label
+    }
+
     const fetchNames = async () => {
         const {data, error} = await supabase.from("Caretaker").select("id, name").order("name");
         console.log(data)
         const mappedData = data.map((user) => ({
-            id: user.id,
-            name: user.name,
+            value: user.id,
+            label: user.name,
         }))
         setNames(mappedData);
     }
 
-    const showCaretaker = () => {
-        setCaretakerVisible(true);
+    const fetchResponsibleName = (responsible) => {
+        const name = names.find((person) => person.value === responsible);
+        console.log(name)
+        return name.label;
     }
 
     const handleCloseCaretaker = () => {
@@ -95,33 +121,29 @@ const AdminPage = () => {
         setGeneratedCode("");
     }
 
-    const showModal = () => {
-        setIsModalVisible(true);
-    };
-
     const handleModalClose = () => {
         setIsModalVisible(false);
     };
 
     const handleClickOrganisation = async (organisation) => {
         try {
-            console.log(organisation);
             const {data, error} = await supabase
                 .from("Location")
                 .select("id")
                 .eq("Gemeente", organisation.locationName);
-
+            console.log(organisation.responsible)
             const locationCode = data.length > 0 ? data[0].id : 0;
+            const locationName = fetchLocationName(locationCode);
+            const responsibleName = fetchResponsibleName(organisation.responsible);
             setSelectedOrganisation({
                 ...organisation,
-                location: locationCode, // Use the resolved location name
+                location: locationCode,
+                locationName: locationName,
+                responsibleName: responsibleName
             });
         } catch (error) {
             console.error("Error fetching organisation details:", error);
         }
-
-
-
             setIsOrganisationVisible(true);
 
     }
@@ -144,7 +166,6 @@ const AdminPage = () => {
                 console.log("Organisation updated successfully!");
             }
             fetchData();
-            handleCloseOrganisation();
 
         } catch (err) {
             console.error("Update failed:", err);
@@ -153,6 +174,7 @@ const AdminPage = () => {
 
     const handleNewOrganisation = async () => {
         try {
+            console.log("Inserted organisation", selectedOrganisation)
             const {error } = await supabase
                 .from("Organisations")
                 .insert({
@@ -176,31 +198,17 @@ const AdminPage = () => {
     }
 
     const handleFieldChange = async (field, value) => {
-        if (field === "location") {
-            // Convert location name to code
-            const locationCode = await fetchLocationCode(value);
-            if (!locationCode) {
-                console.error("Invalid location provided.");
-                setSelectedOrganisation((prev) => ({
-                    ...prev,
-                    [field]: value,
-                }));
-            }
-
-            else {
-                setSelectedOrganisation((prev) => ({
-                    ...prev,
-                    [field]: locationCode, // Save the code instead of the name
-                }));
-            }
-        }
-        else {
-            setSelectedOrganisation((prev) => ({
-                ...prev,
-                [field]: value,
-            }))
-        }
+        setSelectedOrganisation((prev) => ({
+            ...prev,
+            [field]: value,
+        }))
     };
+
+    const handleNewLocation = async (value, label) => {
+        console.log("Location code", value);
+        await handleFieldChange("location", value);
+        await handleFieldChange('locationName', label);
+    }
 
     const handleCloseOrganisation = () => {
         setIsOrganisationVisible(false);
@@ -234,11 +242,10 @@ const AdminPage = () => {
     }
 
     const handleNewResponsible = async (newResponsible) => {
-        const responsibleName = names.find(name => name.id === newResponsible).name;
+        console.log(names)
         setSelectedOrganisation(prev => ({
             ...prev,
             responsible: newResponsible,
-            responsibleName,
         }));
 
         try {
@@ -259,6 +266,14 @@ const AdminPage = () => {
                 console.error("Update failed:", err);
             }
     }
+
+    const showCaretaker = () => {
+        setCaretakerVisible(true);
+    };
+
+    const showModal = () => {
+        setIsModalVisible(true);
+    };
 
     const styles = {
         list: {
@@ -467,8 +482,17 @@ const AdminPage = () => {
                                 name="location"
                                 rules={[{required: true, message: 'Vul een locatie in!'}]}>
 
-                                <Input placeholder="Locatie"
-                                       onChange={(e) => handleFieldChange("location", e.target.value)}/>
+                                <AutoComplete
+                                    fieldNames={{ value: 'label', key:'value'}}
+                                    value={selectedOrganisation.locationName}
+                                    placeholder="Locatie"
+                                    options={allLocations}
+                                    onSelect={(value, option) => {
+                                        handleNewLocation(option.value, value);
+                                    }}
+                                    filterOption={(input, option) =>
+                                        option.label.toLowerCase().startsWith(input.toLowerCase())}
+                                />
 
                             </Form.Item>
 
@@ -477,19 +501,16 @@ const AdminPage = () => {
                                 name="contactPerson"
                                 rules={[{required: true}]}>
 
-                                <Select
-                                    style={{ width: "95%" }}
-                                    placeholder="Kies een verantwoordelijke"
-                                    onChange={handleNewResponsible}
-                                    value={generatedOrganisation}
-                                    allowClear
-                                >
-                                    {names.map((name) => (
-                                        <Select.Option key={name.name} value={name.name}>
-                                            {name.name}
-                                        </Select.Option>
-                                    ))}
-                                </Select>
+                                <AutoComplete
+                                    fieldNames={{ value: 'label', key:'value'}}
+                                    placeholder="Kies een contactpersoon"
+                                    options={names}
+                                    onSelect={(value, option) => {
+                                        handleFieldChange("responsible", option.value);
+                                    }}
+                                    filterOption={(input, option) =>
+                                        option.label.toLowerCase().startsWith(input.toLowerCase())}
+                                />
 
                             </Form.Item>
 
@@ -552,55 +573,54 @@ const AdminPage = () => {
                             label="Contactpersoon"
                             name="contactPerson">
 
-                            <Select
-                                style={{ width: "95%" }}
+                            <AutoComplete
+                                value={selectedOrganisation.responsibleName}
+                                fieldNames={{ value: 'label', key:'value'}}
                                 placeholder="Kies een contactpersoon"
-                                onChange={(newResponsible) => handleNewResponsible(newResponsible)}
-                                value={selectedOrganisation.responsible}
-                                allowClear
-                            >
-                                {names.map((name) => (
-                                    <Select.Option key={name.name} value={name.id}>
-                                        {name.name}
-                                    </Select.Option>
-                                ))}
-                            </Select>
+                                options={names}
+                                onSelect={(value, option) => {
+                                    handleFieldChange("responsible", option.value);
+                                }}
+                                onChange={(value) => handleFieldChange("responsibleName", value)}
+                                filterOption={(input, option) =>
+                                    option.label.toLowerCase().startsWith(input.toLowerCase())}
+                            />
                             <div/>
                         </Form.Item>
 
                         <Form.Item
                             label="Locatie"
                             name="location">
-                            <Input
+                            <AutoComplete
                                 value={selectedOrganisation.locationName}
-                                onChange={async (e) => {
-                                    const locationName = e.target.value;
-                                    setSelectedOrganisation((prev) => ({
-                                        ...prev,
-                                        locationName, // Update the name for display immediately
-                                    }));
-
-                                    // Fetch the location code asynchronously
-                                    const locationCode = await fetchLocationCode(locationName);
-
-                                    if (locationCode !== null) {
-                                        setSelectedOrganisation((prev) => ({
-                                            ...prev,
-                                            location: locationCode, // Save the location ID
-                                        }));
-                                    }
-                                }}/>
-
+                                fieldNames={{ value: 'label', key:'value'}}
+                                placeholder="Kies een locatie"
+                                options={allLocations}
+                                onSelect={(value, option) => {
+                                    handleFieldChange("location", option.value);
+                                }}
+                                onChange={(value) => handleFieldChange("locationName", value)}
+                                filterOption={(input, option) =>
+                                    option.label.toLowerCase().startsWith(input.toLowerCase())}
+                            />
                             <div/>
                         </Form.Item>
 
 
                         <Form.Item>
-                            <Button type="primary" htmlType="submit" onClick={handleUpdateOrganisation} style={styles.saveButton}>
+                            <Button type="primary" htmlType="submit" onClick={() => {
+                                handleUpdateOrganisation();
+                                handleCloseOrganisation();
+                            }} style={styles.saveButton}>
                                 Opslaan
                             </Button>
 
-                            <Button type="primary" htmlType="submit" onClick={handleDeleteOrganisation} style={styles.deleteButton}>
+                            <Button type="primary" htmlType="submit"
+                                    onClick={() => {
+                                        handleDeleteOrganisation();
+                                        handleCloseOrganisation();
+                                    }}
+                                    style={styles.deleteButton}>
                                 Verwijder organisatie
                             </Button>
                         </Form.Item>

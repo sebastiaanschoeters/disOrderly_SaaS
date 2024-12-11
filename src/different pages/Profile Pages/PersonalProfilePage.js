@@ -8,7 +8,7 @@ import {antThemeTokens, ButterflyIcon, themes} from '../../Extra components/them
 import {createClient} from '@supabase/supabase-js';
 import HomeButtonUser from "../../Extra components/HomeButtonUser";
 import {calculateAge} from "../../Utils/calculations";
-import {debounce, saveField} from "../../Api/Utils";
+import {saveField} from "../../Api/Utils";
 import ThemeSelector from "../../Extra components/ThemeSelector";
 import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
 import {fetchPendingRequestsData} from "../../Utils/requests";
@@ -270,21 +270,6 @@ const ProfileCard = () => {
         }
     }, [profileData]);
 
-    const debouncedSaveTheme = debounce(async (newTheme, darkModeFlag) => {
-        try {
-            const themeData = [newTheme, darkModeFlag]; // Ensure both theme and dark mode flag are saved together
-            await saveField(user_id, 'theme', JSON.stringify(themeData));
-            localStorage.setItem('theme',JSON.stringify(themeData))// Save it as a stringified JSON array
-            if (newTheme !== "blauw" || darkModeFlag !== false) {
-                updateTrophyStatus(7, {earned:true});
-            }
-        } catch (error) {
-            console.error('Error saving theme:', error);
-        }
-    }, 500);
-
-    const debouncedSaveSexuality = debounce((value) => saveField(user_id,'sexuality', value), 1000);
-
     const handleAccessLevelChange = async (caretakerId, clientId, newAccessLevel) => {
         try {
             setPendingRequests((prev) => ({ ...prev, [clientId]: newAccessLevel })); // Mark as pending
@@ -351,19 +336,37 @@ const ProfileCard = () => {
     };
 
 
-    const handleThemeChange = (value) => {
+    const handleThemeChange = async (value) => {
         setTheme(value);
-        debouncedSaveTheme(value, isDarkMode); // Save theme with dark mode flag
+        try {
+            const themeData = [value, isDarkMode]; // Ensure both theme and dark mode flag are saved together
+            await saveField(user_id, 'theme', JSON.stringify(themeData));
+            localStorage.setItem('theme', JSON.stringify(themeData))// Save it as a stringified JSON array
+            if (value !== "blauw" || isDarkMode !== false) {
+                updateTrophyStatus(7, {earned: true});
+            }
+        } catch (error) {
+            console.error('Error saving theme:', error);
+        }
     };
 
-    const handleThemeToggle = (checked) => {
+    const handleThemeToggle = async (checked) => {
         setIsDarkMode(checked);
-        debouncedSaveTheme(theme, checked); // Save theme with dark mode flag
+        try {
+            const themeData = [theme, checked]; // Ensure both theme and dark mode flag are saved together
+            await saveField(user_id, 'theme', JSON.stringify(themeData));
+            localStorage.setItem('theme', JSON.stringify(themeData))// Save it as a stringified JSON array
+            if (theme !== "blauw" || checked !== false) {
+                updateTrophyStatus(7, {earned: true});
+            }
+        } catch (error) {
+            console.error('Error saving theme:', error);
+        }
     };
 
     const handleSexualityChange = (value) => {
         setSexuality(value);
-        debouncedSaveSexuality(value);
+        saveField(user_id,'sexuality', value);
     };
 
     const tooltips = {

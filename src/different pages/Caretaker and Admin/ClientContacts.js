@@ -172,20 +172,20 @@ const ContactsOverview = ({ id: userID , conversations: conversations}) => {
                     showHeader={false}
                     rowKey="id"
                     pagination={{ pageSize: pageSize }}
-                    style={{ marginTop: "20px" }}
-                    onRow={(record) => ({
+                    style={{ marginTop: "20px", cursor: conversations ? "pointer" : "default" }}
+                    onRow={conversations ? (record) => ({
                         onClick: (event) => {
                             // Prevent clicks on select and buttons from triggering row click
                             if (!event.target.closest(".prevent-row-click")) {
                                 handleClientClick(record);
                             }
                         },
-                    })}
+                    }) : undefined}
                     rowClassName="clickable-row"
                 />
             ) : (
                 <p>Geen contacten gevonden</p>
-            )}
+            ) }
             {/* Modal to display caretaker details */}
             <Modal
                 title={`Contact gegevens begeleiding van ${clientName}`}

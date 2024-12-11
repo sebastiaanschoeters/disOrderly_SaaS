@@ -23,7 +23,7 @@ import HomeButtonUser from "../../Extra components/HomeButtonUser";
 import useFetchProfileData from "../../UseHooks/useFetchProfileData";
 import {calculateAge, calculateSlidesToShow} from "../../Utils/calculations";
 import useLocations from "../../UseHooks/useLocations";
-import {debounce, saveField} from "../../Api/Utils";
+import {saveField} from "../../Api/Utils";
 import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
 import {requests} from "../../Utils/requests";
 import useTheme from "../../UseHooks/useTheme";
@@ -172,29 +172,6 @@ const ProfileCard = () => {
         setSearchValue(value); // Trigger new fetch based on search
     };
 
-    // Debounced save functions
-    const debouncedSaveBiography = debounce((value) => saveField(user_id, 'bio', value), 1000);
-    const debouncedSaveLocation = debounce((value) => saveField(user_id, 'location', value), 1000);
-    const debouncedSaveGender = debounce((value) => saveField(user_id, 'gender', value), 1000);
-    const debouncedSaveLivingSituation = debounce((value) => saveField(user_id, 'living_situation', value), 1000)
-    const debouncedSaveMobility = debounce((value) => saveField(user_id, 'mobility', value), 1000)
-    const debouncedSaveLookingFor = debounce(async (updatedLookingFor) => {
-        try {
-            const { data, error } = await supabase
-                .from('User information')
-                .update({ looking_for: updatedLookingFor })
-                .eq('user_id', user_id);
-            if (error) throw error;
-
-            message.success("op zoek naar opgeslagen")
-            console.log(`Looking for updated successfully width value ${updatedLookingFor}`);
-        } catch (error) {
-            message.error("probleem bij het opslaan van op zoek naar")
-            console.error('Error saving looking for:', error);
-        }
-    }, 1000);
-
-
     const capitalizeFirstLetter = (str) => {
         return str
             .split(' ')
@@ -314,20 +291,20 @@ const ProfileCard = () => {
     const handleBiographySave = (e) => {
         const newValue = e.target.value;
         setBiography(newValue);
-        debouncedSaveBiography(newValue);
+        saveField(user_id, 'bio', newValue)
     }
 
     const handleLocationChange = (value) => {
         setLocation(value);
-        debouncedSaveLocation(value);
+        saveField(user_id, 'location', value);
     };
 
     const handleGenderChange = (value) => {
         setGender(value);
-        debouncedSaveGender(value);
+        saveField(user_id, 'gender', value);
     };
 
-    const handleCheckboxChange = (value) => {
+    const handleCheckboxChange = async (value) => {
         const updatedLookingFor = [...lookingForArray];
         if (updatedLookingFor.includes(value)) {
             // If the value is already in the array, remove it (unchecked)
@@ -339,17 +316,30 @@ const ProfileCard = () => {
         }
 
         setLookingForArray(updatedLookingFor);
-        debouncedSaveLookingFor(updatedLookingFor); // Save updated value to the database
+
+        try {
+            const {data, error} = await supabase
+                .from('User information')
+                .update({looking_for: updatedLookingFor})
+                .eq('user_id', user_id);
+            if (error) throw error;
+
+            message.success("op zoek naar opgeslagen")
+            console.log(`Looking for updated successfully width value ${updatedLookingFor}`);
+        } catch (error) {
+            message.error("probleem bij het opslaan van op zoek naar")
+            console.error('Error saving looking for:', error);
+        };
     };
 
     const handleLivingChange = (value) => {
         setLivingSituation(value);
-        debouncedSaveLivingSituation(value);
+        saveField(user_id, 'living_situation', value);
     }
 
     const handleMobilityChange = (value)=>{
         setMobility(value);
-        debouncedSaveMobility(value);
+        saveField(user_id, 'mobility', value);
     }
 
     const handlePictureUpload = async ({ file }) => {

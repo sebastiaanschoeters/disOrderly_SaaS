@@ -91,38 +91,38 @@ const ProfileCard = () => {
         }
     };
 
-    const debounceSavePhoneNumber = debounce((value) => saveField('phone_number', value), 1000);
-    const debounceSaveEmail = debounce((value) => saveField('email', value), 1000);
-    const debouncedSaveTheme = debounce(async (newTheme, darkModeFlag) => {
+    const handleThemeChange = async (value) => {
+        setTheme(value);
         try {
-            const themeData = [newTheme, darkModeFlag]; // Ensure both theme and dark mode flag are saved together
+            const themeData = [value, isDarkMode]; // Ensure both theme and dark mode flag are saved together
             await saveField('theme', JSON.stringify(themeData));
-            localStorage.setItem('theme',JSON.stringify(themeData))// Save it as a stringified JSON array
+            localStorage.setItem('theme', JSON.stringify(themeData))
         } catch (error) {
             console.error('Error saving theme:', error);
         }
-    }, 500);
-
-    const handleThemeChange = (value) => {
-        setTheme(value);
-        debouncedSaveTheme(value, isDarkMode); // Save theme with dark mode flag
     };
 
-    const handleThemeToggle = (checked) => {
+    const handleThemeToggle = async (checked) => {
         setIsDarkMode(checked);
-        debouncedSaveTheme(theme, checked); // Save theme with dark mode flag
+        try {
+            const themeData = [theme, checked]; // Ensure both theme and dark mode flag are saved together
+            await saveField('theme', JSON.stringify(themeData));
+            localStorage.setItem('theme', JSON.stringify(themeData))
+        } catch (error) {
+            console.error('Error saving theme:', error);
+        }
     };
 
     const handlePhoneNumberChange = (e) => {
         const newValue = e.target.value;
         setPhoneNumber(newValue);
-        debounceSavePhoneNumber(newValue);
+        saveField('phone_number', newValue);
     }
 
     const handleEmailChange = (e) => {
         const newValue = e.target.value;
         setEmail(newValue);
-        debounceSaveEmail(newValue);
+        saveField('email', newValue);
     }
 
     const handleProfilePictureUpload = async ({ file }) => {

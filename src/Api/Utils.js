@@ -175,14 +175,6 @@ export const saveField = async (userId, field, value) => {
     }
 };
 
-export const debounce = (func, delay) => {
-    let timer;
-    return (...args) => {
-        clearTimeout(timer);
-        timer = setTimeout(() => func(...args), delay);
-    };
-};
-
 export const fetchUserData = async (userId) => {
     const { data: userData, error: userError } = await supabase
         .from('User')

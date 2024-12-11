@@ -594,6 +594,7 @@ const ClientOverview = () => {
                                 pagination={{ pageSize: pageSize }}
                                 style={{
                                     marginTop: "20px",
+                                    cursor: "pointer",
                                 }}
                                 onRow={(record) => ({
                                     onClick: (event) => {

@@ -25,7 +25,7 @@ import {calculateAge, calculateSlidesToShow} from "../../Utils/calculations";
 import useLocations from "../../UseHooks/useLocations";
 import {debounce, saveField} from "../../Api/Utils";
 import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
-import {uploadProfilePicture} from "../../Utils/uploadProfilePicture";
+import {requests} from "../../Utils/requests";
 import useTheme from "../../UseHooks/useTheme";
 
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
@@ -498,7 +498,7 @@ const ProfileCard = () => {
         try {
             setUploading(true);
 
-            const imageUrlWithCacheBuster = await uploadProfilePicture(user_id, file, 'profile-pictures');
+            const imageUrlWithCacheBuster = await requests(user_id, file, 'profile-pictures');
 
             setProfilePicture(imageUrlWithCacheBuster);
             localStorage.setItem('profile_picture', imageUrlWithCacheBuster);

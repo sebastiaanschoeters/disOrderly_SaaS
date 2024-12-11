@@ -12,7 +12,7 @@ import useFetchCaretakerData from "../../UseHooks/useFetchCaretakerData";
 import ThemeSelector from "../../Extra components/ThemeSelector";
 import {debounce} from "../../Api/Utils";
 import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
-import {uploadProfilePicture} from "../../Utils/uploadProfilePicture";
+import {requests} from "../../Utils/requests";
 
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
 const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
@@ -130,7 +130,7 @@ const ProfileCard = () => {
         try {
             setUploading(true);
 
-            const imageUrlWithCacheBuster = await uploadProfilePicture(profileData.id, file, 'profile-pictures-caretakers');
+            const imageUrlWithCacheBuster = await requests(profileData.id, file, 'profile-pictures-caretakers');
 
             setProfilePicture(imageUrlWithCacheBuster);
 

@@ -11,6 +11,7 @@ import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
 import useHandleRequest from "../../UseHooks/useHandleRequest";
 import useFetchCaretakerData from "../../UseHooks/useFetchCaretakerData";
 import useTheme from "../../UseHooks/useTheme";
+import {fetchPendingRequestsData} from "../../Utils/requests";
 
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
 const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
@@ -309,6 +310,7 @@ const ClientOverview = () => {
                         const requestedAccessLevel = notification.details?.requested_access_level || "Onbekend toegangsniveau";
 
                         return (
+                            <div>
                             <Menu.Item key={index}>
                                 <div>
                                     <p>
@@ -347,9 +349,10 @@ const ClientOverview = () => {
                                     </div>
                                 </div>
                             </Menu.Item>
+                            <Menu.Divider />
+                            </div>
                         );
                     })}
-                    <Menu.Divider />
                 </>
             ) : (
                 <Menu.Item>Geen nieuwe meldingen</Menu.Item>
@@ -437,25 +440,8 @@ const ClientOverview = () => {
     };
 
     const fetchPendingRequests = async (caretakerId) => {
-        try {
-            const { data, error } = await supabase
-                .from('Notifications')
-                .select('recipient_id, details')
-                .eq('requester_id', caretakerId)
-                .eq('type', 'ACCESS_LEVEL_CHANGE');
-
-            if (error) throw error;
-
-            // Map the data to a format usable by the state
-            const pending = data.reduce((acc, request) => {
-                acc[request.recipient_id] = request.details.requested_access_level;
-                return acc;
-            }, {});
-
-            setPendingRequests(pending); // Update the pending requests state
-        } catch (error) {
-            console.error('Error fetching pending requests:', error.message);
-        }
+        const pendingRequests = await fetchPendingRequestsData(caretakerId);
+        setPendingRequests(pendingRequests);
     };
 
     const columns = [

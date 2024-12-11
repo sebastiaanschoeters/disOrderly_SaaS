@@ -1,41 +1,24 @@
-import React, { useEffect, useState } from 'react';
-import {Avatar, Divider, Select, ConfigProvider, Spin, message, Tooltip, Typography} from 'antd';
-import {UserSwitchOutlined, HeartOutlined, TrophyOutlined, QuestionCircleOutlined} from '@ant-design/icons';
+import React, {useEffect, useState} from 'react';
+import {Avatar, ConfigProvider, Divider, message, Select, Spin, Tooltip, Typography} from 'antd';
+import {HeartOutlined, QuestionCircleOutlined, TrophyOutlined, UserSwitchOutlined} from '@ant-design/icons';
 import 'antd/dist/reset.css';
 import '../../CSS/AntDesignOverride.css';
 import '../../CSS/PersonalProfilePage.css';
 import {antThemeTokens, ButterflyIcon, themes} from '../../Extra components/themes';
-import { createClient } from '@supabase/supabase-js';
+import {createClient} from '@supabase/supabase-js';
 import HomeButtonUser from "../../Extra components/HomeButtonUser";
 import {calculateAge} from "../../Utils/calculations";
 import {debounce, saveField} from "../../Api/Utils";
 import ThemeSelector from "../../Extra components/ThemeSelector";
 import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
+import {fetchPendingRequestsData} from "../../Utils/requests";
 
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
 const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-
-const fetchPendingRequests = async (caretakerId) => {
-    try {
-        const { data, error } = await supabase
-            .from('Notifications')
-            .select('recipient_id, details')
-            .eq('requester_id', caretakerId)
-            .eq('type', 'ACCESS_LEVEL_CHANGE');
-
-        if (error) throw error;
-
-        // Map the data to a format usable by the state
-        return data.reduce((acc, request) => {
-            acc[request.recipient_id] = request.details.requested_access_level;
-            return acc;
-        }, {});
-    } catch (error) {
-        console.error('Error fetching pending requests:', error.message);
-        return {};
-    }
+const fetchPendingRequests = async (userId) => {
+    return await fetchPendingRequestsData(userId);
 };
 
 const useFetchProfileData = (actCode) => {
@@ -351,6 +334,7 @@ const ProfileCard = () => {
             });
         }
     };
+
     const { Title } = Typography;
 
     const styles = {

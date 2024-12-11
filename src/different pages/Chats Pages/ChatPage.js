@@ -16,6 +16,7 @@ import butterfly3 from '../../Media/butterfly3.png';
 import butterfly4 from '../../Media/butterfly4.png';
 import butterfly5 from '../../Media/butterfly5.png';
 import ProfileDetailsModal from "../Profile Pages/ProfileDetailsModal";
+import {handleModalProfileClose, handleProfileClick} from "../../Api/Utils";
 
 
 
@@ -232,17 +233,6 @@ const ChatPage = () => {
         setIsModalVisible(true);
     };
 
-    const handleProfileClick = (client) => {
-        console.log(client)
-        setSelectedClient({id: client});
-        setIsModalProfileVisible(true);
-    };
-
-    const handleModalProfileClose = () => {
-        setSelectedClient({});
-        setIsModalProfileVisible(false);
-    };
-
     const styles = {
         background: {
             width: '100dvw',
@@ -375,7 +365,7 @@ const ChatPage = () => {
                             <Avatar
                                 src={profilePicture || 'default-avatar.png'}
                                 style={styles.avatar}
-                                onClick={() => handleProfileClick(otherUserId)}
+                                onClick={() => handleProfileClick(otherUserId, setSelectedClient, setIsModalProfileVisible)}
                             >
                                 U
                             </Avatar>
@@ -525,7 +515,7 @@ const ChatPage = () => {
             {selectedClient && (
                 <ProfileDetailsModal
                     visible={isModalProfileVisible}
-                    onClose={handleModalProfileClose}
+                    onClose={()=> handleModalProfileClose(setSelectedClient, setIsModalProfileVisible)}
                     clientData={selectedClient}
                 />
             )}

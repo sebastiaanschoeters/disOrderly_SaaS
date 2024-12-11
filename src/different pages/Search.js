@@ -10,7 +10,8 @@ import ProfileDetailsModal from "./Profile Pages/ProfileDetailsModal";
 import useTheme from "../UseHooks/useTheme";
 import useThemeOnCSS from "../UseHooks/useThemeOnCSS";
 import {calculateAge, calculateDistance} from "../Utils/calculations";
-import useFetchProfileData from "../UseHooks/useFetchProfileData"; // Import useNavigate for routing
+import useFetchProfileData from "../UseHooks/useFetchProfileData";
+import {assembleProfileData, handleModalProfileClose, handleProfileClick} from "../Api/Utils"; // Import useNavigate for routing
 
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
 const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
@@ -71,104 +72,7 @@ const Search = () => {
 
 
     const fetchProfileData = async (userId) => {
-        try {
-            // Fetch user data from 'User' table
-            const { data: userData, error: userError } = await supabase
-                .from('User')
-                .select('id, name, birthdate, profile_picture')
-                .eq('id', userId);
-
-            if (userError) throw userError;
-
-            if (userData.length === 0) {
-                return { profileData: null, error: 'User not found' };
-            }
-
-            const user = userData[0];
-
-            // Fetch additional user info from 'User information'
-            const { data: userInfoData, error: userInfoError } = await supabase
-                .from('User information')
-                .select('*')
-                .eq('user_id', user.id);
-
-            if (userInfoError) throw userInfoError;
-
-            if (userInfoData && userInfoData.length > 0) {
-                const userInfo = userInfoData[0];
-                user.bio = userInfo.bio;
-                user.location = userInfo.location;
-                user.looking_for = userInfo.looking_for;
-                user.living_situation = userInfo.living_situation;
-                user.mobility = userInfo.mobility;
-                user.theme = userInfo.theme;
-                user.gender = userInfo.gender;
-                user.sexuality = userInfo.sexuality;
-
-                // Handle theme parsing
-                let parsedTheme = "blauw";
-                let isDarkMode = false;
-                if (userInfo.theme) {
-                    try {
-                        const [themeName, darkModeFlag] = JSON.parse(userInfo.theme);
-                        parsedTheme = themeName;
-                        isDarkMode = darkModeFlag;
-                    } catch (err) {
-                        console.error('Error parsing theme', err);
-                    }
-                }
-
-                user.theme = isDarkMode ? `${parsedTheme}_donker` : parsedTheme;
-            }
-
-            // Fetch user's location details from 'Location' table if available
-            if (user.location) {
-                const { data: locationData, error: locationError } = await supabase
-                    .from('Location')
-                    .select('Gemeente, Longitude, Latitude')
-                    .eq('id', user.location);
-
-                if (locationError) throw locationError;
-
-                if (locationData && locationData.length > 0) {
-                    const location = locationData[0];
-                    user.locationData = {
-                        gemeente: location.Gemeente,
-                        latitude: location.Latitude,
-                        longitude: location.Longitude,
-                    };
-                }
-            }
-
-            // Fetch user's interests from 'Interested in' and 'Interests' table
-            const { data: interestedInData, error: interestedInError } = await supabase
-                .from('Interested in')
-                .select('interest_id')
-                .eq('user_id', user.id);
-
-            if (interestedInError) throw interestedInError;
-
-            if (interestedInData && interestedInData.length > 0) {
-                const interestIds = interestedInData.map((item) => item.interest_id);
-                const { data: interestsData, error: fetchInterestsError } = await supabase
-                    .from('Interests')
-                    .select('Interest')
-                    .in('id', interestIds);
-
-                if (fetchInterestsError) throw fetchInterestsError;
-
-                user.interests = interestsData.map((interest) => ({
-                    interest_name: interest.Interest,
-                }));
-            }
-
-            // Return the profile data
-            return { profileData: user, error: null };
-
-        } catch (error) {
-            console.error('Error fetching profile data for user:', userId, error);
-            return { profileData: null, error: error.message };
-        }
+        return assembleProfileData(userId)
     };
 
     // Fetch users from Supabase
@@ -394,17 +298,6 @@ const Search = () => {
         setIsModalVisible(false);
     };
 
-    const handleProfileClick = (client) => {
-        console.log(client)
-        setSelectedClient({id: client});
-        setIsModalProfileVisible(true);
-    };
-
-    const handleModalProfileClose = () => {
-        setSelectedClient({});
-        setIsModalProfileVisible(false);
-    };
-
     useEffect(() => {
         fetchUsers(); // Fetch users when the component mounts
     }, [profileData]);
@@ -539,7 +432,7 @@ const Search = () => {
                                 renderItem={(item) => (
                                     <List.Item
                                         key={item.id}
-                                        onClick={() => handleProfileClick(item.id)}
+                                        onClick={() => handleProfileClick(item.id, setSelectedClient, setIsModalProfileVisible)}
                                         style={{
                                             display: 'flex',
                                             flexDirection: 'row',
@@ -588,7 +481,7 @@ const Search = () => {
                 {selectedClient && (
                     <ProfileDetailsModal
                         visible={isModalProfileVisible}
-                        onClose={handleModalProfileClose}
+                        onClose={()=>handleModalProfileClose(setSelectedClient, setIsModalProfileVisible)}
                         clientData={selectedClient}
                     />
                 )}

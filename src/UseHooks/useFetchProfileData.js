@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import {createClient} from "@supabase/supabase-js";
+import { createClient } from "@supabase/supabase-js";
+import { assembleProfileData } from "../Api/Utils";
 
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
 const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
@@ -29,103 +30,13 @@ const useFetchProfileData = (actCode, options = { fetchAllInterests: false }) =>
     }, [options.fetchAllInterests]);
     useEffect(() => {
         const fetchData = async () => {
-            try {
-                // Fetch user data
-                const { data: userData, error: userError } = await supabase
-                    .from("User")
-                    .select("id, name, birthdate, profile_picture")
-                    .eq("id", actCode);
-
-                if (userError) throw userError;
-
-                if (userData.length > 0) {
-                    const user = userData[0];
-
-                    // Fetch user information
-                    const { data: userInfoData, error: userInfoError } = await supabase
-                        .from("User information")
-                        .select("*")
-                        .eq("user_id", user.id);
-
-                    if (userInfoError) throw userInfoError;
-
-                    let parsedTheme = "blauw";
-                    let isDarkMode = false;
-
-                    if (userInfoData && userInfoData.length > 0) {
-                        const userInfo = userInfoData[0];
-                        user.bio = userInfo.bio;
-                        user.location = userInfo.location;
-                        user.looking_for = userInfo.looking_for;
-                        user.living_situation = userInfo.living_situation;
-                        user.mobility = userInfo.mobility;
-                        user.theme = userInfo.theme;
-                        user.gender = userInfo.gender;
-                        user.sexuality = userInfo.sexuality;
-
-                        if (userInfo.theme) {
-                            try {
-                                const [themeName, darkModeFlag] = JSON.parse(userInfo.theme);
-                                parsedTheme = themeName;
-                                isDarkMode = darkModeFlag;
-                            } catch (err) {
-                                console.error("Error parsing theme", err);
-                            }
-                        }
-
-                        // Fetch location details using location ID
-                        if (userInfo.location) {
-                            const { data: locationData, error: locationError } = await supabase
-                                .from("Location")
-                                .select("Gemeente, Longitude, Latitude")
-                                .eq("id", userInfo.location);
-
-                            if (locationError) throw locationError;
-
-                            if (locationData && locationData.length > 0) {
-                                const location = locationData[0];
-                                user.locationData = {
-                                    gemeente: location.Gemeente,
-                                    latitude: location.Latitude,
-                                    longitude: location.Longitude,
-                                };
-                            }
-                        }
-                    }
-
-                    // Fetch user's interests
-                    const { data: interestedInData, error: interestedInError } = await supabase
-                        .from("Interested in")
-                        .select("interest_id")
-                        .eq("user_id", user.id);
-
-                    if (interestedInError) throw interestedInError;
-
-                    if (interestedInData && interestedInData.length > 0) {
-                        const interestIds = interestedInData.map((item) => item.interest_id);
-                        const { data: interestsData, error: fetchInterestsError } = await supabase
-                            .from("Interests")
-                            .select("Interest")
-                            .in("id", interestIds);
-
-                        if (fetchInterestsError) throw fetchInterestsError;
-
-                        user.interests = interestsData.map((interest) => ({
-                            interest_name: interest.Interest,
-                        }));
-                    }
-
-                    // Set user profile data
-                    setProfileData({
-                        ...user,
-                        theme: isDarkMode ? `${parsedTheme}_donker` : parsedTheme,
-                    });
-                }
-            } catch (err) {
-                setError(err.message);
-            } finally {
-                setIsLoading(false);
+            const { profileData, error } = await assembleProfileData(actCode);
+            if (error) {
+                setError(error);
+            } else {
+                setProfileData(profileData)
             }
+            setIsLoading(false);
         };
 
         fetchData();

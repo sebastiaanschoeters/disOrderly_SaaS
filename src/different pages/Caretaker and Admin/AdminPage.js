@@ -25,6 +25,7 @@ const AdminPage = () => {
     const [allLocations, setAllLocations] = useState([]);
     const [generatedOrganisation, setGeneratedOrganisation] = useState('');
     const [generatedCode, setGeneratedCode] = useState('');
+    const [oldResponsible, setOldResponsible] = useState('')
     const [selectedOrganisation, setSelectedOrganisation] = useState({
         id: 0,
         name: undefined,
@@ -66,34 +67,6 @@ const AdminPage = () => {
         }))
         setAllLocations(mappedLocations);
     }
-
-    const fetchLocationCode = async (locationName) => {
-        try {
-            const { data, error } = await supabase
-                .from("Location")
-                .select("id")
-                .eq("Gemeente", locationName);
-
-            if (error) {
-                console.error("Error fetching location code:", error);
-                return null;
-            }
-
-            if (data.length === 0) {
-                console.warn("No location found for the given name.");
-                return null;
-            }
-
-            else {
-                handleFieldChange("location", data[0].id)
-            }
-
-            return data[0].id;
-        } catch (err) {
-            console.error("Error:", err);
-            return null;
-        }
-    };
 
     const fetchLocationName = (locationCode) => {
         const foundLocation = allLocations.find((location) => location.value === locationCode);
@@ -139,6 +112,7 @@ const AdminPage = () => {
                 .select("id")
                 .eq("Gemeente", organisation.locationName);
             console.log(organisation.responsible)
+            setOldResponsible(organisation.responsible);
             const locationCode = data.length > 0 ? data[0].id : 0;
             const locationName = fetchLocationName(locationCode);
             const responsibleName = fetchResponsibleName(organisation.responsible);
@@ -167,6 +141,7 @@ const AdminPage = () => {
                 })
                 .eq("id", selectedOrganisation.id);
 
+            handleNewResponsible(selectedOrganisation.responsible)
             if (error) {
                 console.error("Error updating organisation:", error);
             } else {
@@ -249,11 +224,13 @@ const AdminPage = () => {
     }
 
     const handleNewResponsible = async (newResponsible) => {
-        console.log(names)
+        setOldResponsible(selectedOrganisation.responsible)
         setSelectedOrganisation(prev => ({
             ...prev,
             responsible: newResponsible,
         }));
+        console.log('Old responsible: ',oldResponsible);
+        console.log('New responsible: ',newResponsible);
 
         try {
             const {error} = await supabase
@@ -272,6 +249,69 @@ const AdminPage = () => {
         catch (err) {
                 console.error("Update failed:", err);
             }
+
+        try {
+            const {error} = await supabase
+                .from('Credentials')
+                .update({type: 'caretaker'})
+                .eq('user_id', oldResponsible);
+            if (error) {
+                console.error("Error updating credentials table:", error);
+            } else {
+                console.log("Credentials updated successfully!");
+            }
+        }
+        catch (error) {
+            console.error("Update failed:", error);
+        }
+
+        try {
+            const {error} = await supabase
+                .from('Credentials')
+                .update({type: 'responsible'})
+                .eq('user_id', newResponsible);
+            if (error) {
+                console.error("Error updating credentials table:", error);
+            } else {
+                console.log("Credentials updated successfully!");
+            }
+        }
+
+        catch (error) {
+            console.error("Update failed:", error);
+        }
+
+        try {
+            const {error} = await supabase
+                .from('Activation')
+                .update({type: 'responsible'})
+                .eq('code', newResponsible);
+            if (error) {
+                console.error("Error updating activation table:", error);
+            } else {
+                console.log("Activation updated successfully!");
+            }
+        }
+
+        catch (error) {
+            console.error("Update failed:", error);
+        }
+
+        try {
+            const {error} = await supabase
+                .from('Activation')
+                .update({type: 'caretaker'})
+                .eq('code', oldResponsible);
+            if (error) {
+                console.error("Error updating activation table:", error);
+            } else {
+                console.log("Activation updated successfully!");
+            }
+        }
+
+        catch (error) {
+            console.error("Update failed:", error);
+        }
     }
 
     const showCaretaker = () => {

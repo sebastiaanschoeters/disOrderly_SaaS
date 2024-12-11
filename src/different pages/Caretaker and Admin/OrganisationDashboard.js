@@ -3,8 +3,8 @@ import '../../CSS/AntDesignOverride.css'
 import { antThemeTokens, themes } from '../../Extra components/themes';
 import {
     Button,
-    Card,
-    ConfigProvider, Form, List, Modal,
+    Card, Col,
+    ConfigProvider, Form, List, Modal, Row, Statistic,
 } from 'antd';
 import {PlusOutlined, RedoOutlined} from "@ant-design/icons";
 import React, {useEffect, useState} from "react";
@@ -356,8 +356,11 @@ const OrganisationDashboard = () => {
                         gap: '20px',
                         top: '10px'
                     }}>
-                        <h3> Aantal geregistreerde gebruikers </h3>
-                        <b style={{fontSize: '20px'}}>{currentUsers}/{maximumAmountUsers}</b>
+                        <Row gutter={20}>
+                            <Col span={16}>
+                                <Statistic title='Geregistreerde gebruikers: ' prefix={currentUsers} value='/ ' suffix={maximumAmountUsers}/>
+                            </Col>
+                        </Row>
                     </div>
 
                     <div style={{
@@ -368,7 +371,7 @@ const OrganisationDashboard = () => {
                         gap: '20px',
 
                     }}>
-                        <h3>Begeleiders: </h3>
+                        <h1 style={{fontSize:'25px'}}>Begeleiders: </h1>
                         <List
                             itemLayout="horizontal"
                             dataSource={caretakersList}

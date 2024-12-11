@@ -1,5 +1,18 @@
 import React, { useEffect, useState } from "react";
-import {Avatar, ConfigProvider, Select, Table, Button, message, Menu, Badge, Dropdown, Tooltip, Radio} from "antd";
+import {
+    Avatar,
+    ConfigProvider,
+    Select,
+    Table,
+    Button,
+    message,
+    Menu,
+    Badge,
+    Dropdown,
+    Tooltip,
+    Radio,
+    Modal
+} from "antd";
 import { antThemeTokens, ButterflyIcon, themes } from "../../Extra components/themes";
 import { createClient } from "@supabase/supabase-js";
 import {BellOutlined, DeleteOutlined, PoweroffOutlined, QuestionCircleOutlined} from "@ant-design/icons";
@@ -186,8 +199,14 @@ const ClientOverview = () => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [pendingRequests, setPendingRequests] = useState({});
 
+    const [isNewClientVisible, setIsNewClientVisible] = useState(false);
+    const [generatedCode, setGeneratedCode] = useState(undefined);
+    const [currentAmountUsers, setCurrentAmountUsers] = useState();
+    const [maximumAmountUsers, setMaximumAmountUsers] = useState();
+
     const [notifications, setNotifications] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
+
 
     const [isWideEnough, setIsWideEnough] = useState(window.innerWidth >= 800);
 
@@ -269,10 +288,48 @@ const ClientOverview = () => {
         };
     }, []);
 
+    const fetchAmountUsers = async () => {
+        try {
+            const {data, error} = await supabase
+                .from('Activation')
+                .select('*', {count : 'exact'})
+                .eq('organisation', profileData.organizationId)
+                .eq('type', 'user')
+                .eq('usable', 'false');
+
+            setCurrentAmountUsers(data.length);
+        }
+        catch (error) {
+            console.error(error);
+        }
+
+        try {
+            const {data, error} = await supabase
+                .from('Organisations')
+                .select("maximum_activations_codes")
+                .eq('id', profileData.organizationId)
+
+            if(data[0].maximum_activations_codes === 1) {
+                setMaximumAmountUsers(50)
+            }
+            if(data[0].maximum_activations_codes === 2) {
+                setMaximumAmountUsers(200)
+            }
+            if(data[0].maximum_activations_codes === 3) {
+                setMaximumAmountUsers(1000)
+            }
+        }
+        catch (error) {
+            console.error(error);
+        }
+
+    }
+
     useEffect(() => {
         const initializeData = async () => {
             if (profileData?.id) {
-                await fetchPendingRequests(profileData.id); // Fetch pending requests
+                await fetchPendingRequests(profileData.id);
+                await fetchAmountUsers()
             }
         };
 
@@ -552,6 +609,24 @@ const ClientOverview = () => {
         id: clientArray[3],
     }));
 
+    const handleOpenNewClient = () => {
+        setIsNewClientVisible(true);
+    }
+
+    const handleCloseNewClient = () => {
+        setIsNewClientVisible(false);
+    }
+
+    const handleGenerateCode = async () => {
+        const {data, error} = await supabase
+            .from('Activation')
+            .insert({'usable': true, 'type': 'user', 'organisation': profileData.organizationId})
+            .select()
+        console.log('Generated Code: ',data[0].code)
+        setGeneratedCode(data[0].code)
+        await fetchAmountUsers();
+    }
+
     return (
         <div
             style={{
@@ -575,6 +650,7 @@ const ClientOverview = () => {
                             zIndex: "0",
                         }}
                     >
+
                         <ButterflyIcon color={themeColors.primary3} />
 
                         {/* Notification Button */}
@@ -645,6 +721,7 @@ const ClientOverview = () => {
                             <Button
                                 type="primary"
                                 style={{ marginTop: "20px" }}
+                                onClick={handleOpenNewClient}
                             >
                                 Genereer nieuwe profiel code
                             </Button>
@@ -691,6 +768,26 @@ const ClientOverview = () => {
                             Log uit
                         </Button>
                     </div>
+
+                    <Modal
+                        open={isNewClientVisible}
+                        onCancel={handleCloseNewClient}
+                        footer={null}
+                        style={{padding: '10px'}}
+                        >
+                        <h3>Activatiecode voor de nieuwe gebruiker:</h3>
+                        <h2>{generatedCode}</h2>
+
+                        <h4> Er zijn reeds <b>{currentAmountUsers}</b> van de maximaal <b>{maximumAmountUsers}</b> codes in gebruik.</h4>
+
+                        <Button
+                            type={"primary"}
+                            onClick={handleGenerateCode}
+                        >
+                            Genereer
+                        </Button>
+                    </Modal>
+
                 </ConfigProvider>
             ) : (
                 <div>

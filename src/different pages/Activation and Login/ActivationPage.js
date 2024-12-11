@@ -575,7 +575,7 @@ const ActivationPage = () => {
                         <Form name="emailPasswordForm" onFinish={EmailAndPassword}
                               initialValues={{ email: userData.email || '',
                                   password: userData.password || ''
-                              }}>>
+                              }}>
                             <Form.Item
                                 className="form-item"
                                 label="Email"

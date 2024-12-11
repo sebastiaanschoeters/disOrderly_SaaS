@@ -265,6 +265,29 @@ const HangmanGame = ({ isModalVisible, setIsModalVisible, player1Id, player2Id, 
         return data;
     };
 
+    const handleGameWin = async () => {
+        try {
+            // Increment hangman_wins for the current user
+            const { data, error } = await supabase
+                .from('User information')
+                .update({ hangman_wins: supabase.raw('hangman_wins + 1') }) // Increment column value
+                .eq('user_id', localStorage.getItem('userId'));
+
+            if (error) {
+                console.error('Error updating hangman_wins:', error);
+                return;
+            }
+
+            console.log('Hangman win updated successfully:', data);
+            return;
+        } catch (error) {
+            console.error('Unexpected error in handleGameWin:', error);
+        }
+    };
+
+
+
+
     const isGameOver = wrongGuesses >= maxWrong;
     const isGameWon = answer.split('').every((letter) => guessedLetters.includes(letter.toUpperCase()));
 
@@ -273,6 +296,9 @@ const HangmanGame = ({ isModalVisible, setIsModalVisible, player1Id, player2Id, 
             if (answer) {
                 if (isGameWon) {
                     handleSendMessage(`ButterflyIcon${wrongGuesses} ` + localStorage.getItem('name') + " Heeft het antwoord geraden!" + renderWord());
+                    handleGameWin()
+                    setGameEnded(true);
+                    return;
                 } else {
                     handleSendMessage(`ButterflyIcon${wrongGuesses} ` + localStorage.getItem('name') + " Heeft het antwoord niet geraden!" + `Het juiste antwoord was ${answer}`);
                 }

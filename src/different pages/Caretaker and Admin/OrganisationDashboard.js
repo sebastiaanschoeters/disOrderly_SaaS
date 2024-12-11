@@ -4,9 +4,9 @@ import { antThemeTokens, themes } from '../../Extra components/themes';
 import {
     Button,
     Card, Col,
-    ConfigProvider, Form, List, Modal, Row, Statistic,
+    ConfigProvider, Divider, Form, List, Modal, Popover, Progress, Row, Select, Statistic,
 } from 'antd';
-import {PlusOutlined, RedoOutlined} from "@ant-design/icons";
+import {PlusOutlined, RedoOutlined, TeamOutlined} from "@ant-design/icons";
 import React, {useEffect, useState} from "react";
 import { useNavigate } from 'react-router-dom';
 import { createClient } from "@supabase/supabase-js";
@@ -20,10 +20,13 @@ const OrganisationDashboard = () => {
     const navigate = useNavigate();
     const themeColors = themes["blauw"] || themes.blauw;
     const [caretakers, setCaretakers] = useState(undefined);
-    const [caretakersList, setCaretakersList] = useState([])
-    const [isCaretakerVisible, setIsCaretakerVisible] = useState(false)
-    const [maximumAmountUsers, setMaximumAmountUsers] = useState(undefined)
-    const [currentUsers, setCurrentUsers] = useState(undefined)
+    const [caretakersList, setCaretakersList] = useState([]);
+    const [isCaretakerVisible, setIsCaretakerVisible] = useState(false);
+    const [isNewCaretakerVisible, setIsNewCaretakerVisible] = useState(false);
+    const [generatedCode, setGeneratedCode] = useState(undefined);
+    const [maximumAmountUsers, setMaximumAmountUsers] = useState(undefined);
+    const [currentUsers, setCurrentUsers] = useState(undefined);
+    const [activeUsers, setActiveUsers] = useState([]);
     const [selectedCaretaker, setSelectedCaretaker] = useState( {
         id: 0,
         name: undefined,
@@ -45,6 +48,7 @@ const OrganisationDashboard = () => {
         }
     }
 
+
     const fetchOrganisationInfo = async () => {
         const {data, error} = await supabase
             .from('Organisations')
@@ -54,6 +58,7 @@ const OrganisationDashboard = () => {
         setMaximumAmountUsers(data[0].maximum_activations_codes)
         await fetchAmountUsers()
         handleMaximumAmountUsers(data[0].maximum_activations_codes);
+        await fetchActiveUsers()
         console.log("Organisation Info: ", data[0])
     }
 
@@ -123,6 +128,21 @@ const OrganisationDashboard = () => {
         }
     }
 
+    const fetchActiveUsers = async () => {
+        const {data, error} = await supabase
+            .from("Chatroom")
+            .select('sender_id, receiver_id')
+
+        const userIds = data.reduce((acc, row) => {
+            acc.push(row.sender_id, row.receiver_id);
+            return acc;
+        }, []);
+
+        const uniqueUserIds = [...new Set(userIds)];
+
+        setActiveUsers(uniqueUserIds);
+    }
+
     const handleCloseCaretaker = () => {
         setIsCaretakerVisible(false);
         setSelectedCaretaker({
@@ -142,10 +162,23 @@ const OrganisationDashboard = () => {
         const {error} = await supabase.from('caretaker').delete().eq("id", caretaker);
     }
 
+    const handleOpenNewCaretaker = () => {
+        setIsNewCaretakerVisible(true);
+    }
+
+    const handleGenerateCode = async () => {
+        const {data, error} = await supabase.from("Activation").insert({"usable": true, "type": "caretaker", "organisation": organisationId}).select();
+        await setGeneratedCode(data[0].code);
+    }
+
+    const handleCloseNewCaretaker = async () => {
+        setIsNewCaretakerVisible(false);
+    }
+
     const styles = {
         list: {
             width: '60%', // Increase the width of the list
-            height: '500px',
+            height: '100%',
             margin: '0 auto', // Center the list horizontally
             display: 'flex',
             flexDirection: 'column',
@@ -192,7 +225,7 @@ const OrganisationDashboard = () => {
         button: {
             width: '90%',
             maxWidth: '400px',
-            height: 'auto',
+            height: 'auto'
         },}
 
     useEffect(() => {
@@ -283,7 +316,7 @@ const OrganisationDashboard = () => {
                 padding: '10px',
                 position: 'relative',
                 width: '100%',
-                height: '100%',
+                minHeight: '100vh',
                 backgroundColor: themeColors.primary2,
                 color: themeColors.primary10,
                 display: 'flex',
@@ -292,15 +325,15 @@ const OrganisationDashboard = () => {
                 gap: '20px',
             }}>
 
-            <div>
+            <div style={{
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+            }}>
                 <Button
                     type="primary"
                     style={{
-                        position: 'absolute',
-                        top: '20px',
-                        left: '20px',
                         display: 'flex',
-                        flexDirection: 'column',
                         alignItems: 'center',
                         justifyContent: 'center',
                         width: '120px',
@@ -309,16 +342,14 @@ const OrganisationDashboard = () => {
                     icon={<RedoOutlined/>}
                     onClick={handleReload}
                 >
-                    <h6> Reload data </h6>
+
+                    <h6> Herladen </h6>
                 </Button>
                 <Button
                     type="primary"
                     style={{
-                        position: 'absolute',
-                        top: '20px',
-                        right: '20px',
                         display: 'flex',
-                        flexDirection: 'column',
+                        flexDirection: 'row',
                         alignItems: 'center',
                         justifyContent: 'center',
                         width: '120px',
@@ -334,34 +365,60 @@ const OrganisationDashboard = () => {
             <div style={{
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '20px',
+                gap: '10px',
                 width: '100%',
                 alignItems: 'center',
                 paddingTop: '100px'
             }}>
-                <h1>{organisationName}</h1>
+                <h1 style={{fontSize: '40px'}}>{organisationName}</h1>
                 <div style={{
                     display: 'flex',
                     flexDirection: 'column',
-                    alignItems: '',
+                    flexWrap: 'wrap',
+                    alignItems: 'center',
                     width: '100%',
                     gap: '60px'
                 }}>
 
                     <div style={{
                         display: 'flex',
-                        flexDirection: 'column',
+                        flexDirection: 'row',
+                        flexWrap: 'wrap',
+                        justifyContent: 'center',
                         alignItems: 'center',
                         width: '100%',
-                        gap: '20px',
+                        gap: '30px',
                         top: '10px'
                     }}>
-                        <Row gutter={20}>
-                            <Col span={16}>
-                                <Statistic title='Geregistreerde gebruikers: ' prefix={currentUsers} value='/ ' suffix={maximumAmountUsers}/>
-                            </Col>
-                        </Row>
+                        <Card style={{backgroundColor:'lightgray', height: '100%'}}>
+                            <Card.Meta title='Geregistreerde gebruikers'/>
+                            <div style={{
+                            }}>
+                                <TeamOutlined style={{fontSize: '30px'}}/>
+                                <Row gutter={30}>
+                                    <Col span={25}>
+                                        <Statistic prefix={currentUsers} value='/ ' suffix={maximumAmountUsers}/>
+                                    </Col>
+                                </Row>
+                            </div>
+                            <Progress percent={currentUsers*100/maximumAmountUsers} showInfo={false} />
+                        </Card>
+
+                        <Popover content='Een gebruiker wordt beschouwd als actief vanaf de gebruiker deelneemt aan een chat.' color='lightgray' placement='bottom'>
+                            <Card style={{
+                                backgroundColor: 'lightgray',
+                                height: '100%'
+                            }}>
+                                <Card.Meta title='Actieve gebruikers'/>
+                                <div style={{display: 'flex', justifyContent: 'space-between', flexDirection: 'column', gap: '30px'}}>
+                                    <TeamOutlined style={{fontSize: '30px'}}/>
+                                    <Statistic value={activeUsers.length}/>
+                                </div>
+                            </Card>
+                        </Popover>
                     </div>
+
+                    <Divider/>
 
                     <div style={{
                         display: 'flex',
@@ -371,7 +428,7 @@ const OrganisationDashboard = () => {
                         gap: '20px',
 
                     }}>
-                        <h1 style={{fontSize:'25px'}}>Begeleiders: </h1>
+                        <h1 style={{fontSize:'20px'}}>Begeleiders: </h1>
                         <List
                             itemLayout="horizontal"
                             dataSource={caretakersList}
@@ -394,14 +451,15 @@ const OrganisationDashboard = () => {
                             type="primary"
                             icon={<PlusOutlined/>}
                             style={styles.button}
+                            onClick={handleOpenNewCaretaker}
                         >
                             <h6> Nieuwe begeleider toevoegen </h6>
                         </Button>
                     </div>
 
                 </div>
-
             </div>
+        </div>
 
             <Modal
                 open={isCaretakerVisible}
@@ -421,11 +479,26 @@ const OrganisationDashboard = () => {
                         Verwijder begeleider
                     </Button>
                 </div>
-
             </Modal>
 
-        </div>
-
+            <Modal
+                open={isNewCaretakerVisible}
+                onCancel={handleCloseNewCaretaker}
+                footer={null}
+                style={{padding: '10px', display:'flex', flexDirection:'column'}}
+            >
+                <h3>Code voor de nieuwe begeleider:</h3>
+                <h2>{generatedCode}</h2>
+                <div/>
+                <text style={{fontSize:'14px'}}>Genereer hier een activatiecode waarmee een account voor begeleider aangemaakt kan worden.</text>
+                <div/>
+                <Button
+                    type={"primary"}
+                    onClick={handleGenerateCode}
+                >
+                    Genereer
+                </Button>
+            </Modal>
         </ConfigProvider>
     )
 }

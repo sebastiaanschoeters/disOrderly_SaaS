@@ -178,7 +178,7 @@ const ActivationPage = () => {
         const caretakerName = vname + ' ' + aname;
         const hashedPassword = CryptoJS.SHA256(values.password).toString();
 
-        const emailExists = await checkEmailExistence(values.email);
+        const emailExists = await checkEmailExistence(values.email.toLowerCase());
         if (emailExists) {
             setLoading(false);
             return;
@@ -191,7 +191,7 @@ const ActivationPage = () => {
                     id: userData.activationKey,
                     name: caretakerName,
                     phone_number: values.phone,
-                    email: values.email
+                    email: values.email.toLowerCase()
                 });
 
             if (careError) throw careError;
@@ -200,7 +200,7 @@ const ActivationPage = () => {
                 .from("Credentials")
                 .insert({
                     user_id: userData.activationKey,
-                    email: values.email,
+                    email: values.email.toLowerCase(),
                     password: hashedPassword,
                     type: userType
                 });
@@ -319,24 +319,32 @@ const ActivationPage = () => {
     const EmailAndPassword = async (values) => {
         setLoading(true);
         try {
-            const emailExists = await checkEmailExistence(values.email);
+            // Convert email to lowercase
+            const lowercaseEmail = values.email.toLowerCase();
+
+            // Check if email already exists using lowercase email
+            const emailExists = await checkEmailExistence(lowercaseEmail);
             if (emailExists) {
                 setLoading(false);
                 return;
             }
 
+            // Hash the password
             const hashedPassword = CryptoJS.SHA256(values.password).toString();
 
+            // Update user data with lowercase email and hashed password
             const updatedUserData = {
                 ...userData,
-                email: values.email,
+                email: lowercaseEmail,
                 password: hashedPassword,
             };
 
             console.log("User Data to Submit:", updatedUserData);
 
+            // Save user profile
             await saveUserProfile(updatedUserData);
 
+            // Show success message
             message.success("Account aangemaakt! Je kan een profielfoto toevoegen bij je profiel instellingen.");
         } catch (err) {
             console.error("Unexpected error during email validation:", err);
@@ -345,6 +353,7 @@ const ActivationPage = () => {
             setLoading(false);
         }
     };
+
 
     return (
         <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>

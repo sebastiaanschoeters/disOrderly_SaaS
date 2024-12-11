@@ -123,6 +123,13 @@ const AdminPage = () => {
 
     const handleModalClose = () => {
         setIsModalVisible(false);
+        setSelectedOrganisation(prev => ({ ...prev,
+            id: 0,
+            name: '',
+            amountUsers: 0,
+            reponsible: 0,
+            location: 0
+        }));
     };
 
     const handleClickOrganisation = async (organisation) => {
@@ -418,6 +425,7 @@ const AdminPage = () => {
                             style={styles.button}
                             onClick={showModal}
                         >
+                            
                             <h6> Nieuwe organisatie toevoegen </h6>
                         </Button>
 
@@ -514,9 +522,11 @@ const AdminPage = () => {
 
                             </Form.Item>
 
-                            <Button onClick={handleNewOrganisation}>
-                                Aanmaken
-                            </Button>
+                            <Form.Item>
+                                <Button type="primary" htmlType="submit" style={styles.saveButton} onClick={handleNewOrganisation}>
+                                    Aanmaken
+                                </Button>
+                            </Form.Item>
                         </Form>
                     </div>
                 </Modal>
@@ -608,21 +618,27 @@ const AdminPage = () => {
 
 
                         <Form.Item>
-                            <Button type="primary" htmlType="submit" onClick={() => {
-                                handleUpdateOrganisation();
-                                handleCloseOrganisation();
-                            }} style={styles.saveButton}>
-                                Opslaan
-                            </Button>
-
-                            <Button type="primary" htmlType="submit"
-                                    onClick={() => {
-                                        handleDeleteOrganisation();
+                            <div style={{display:'flex', flexDirection:'column'}}>
+                                    <Button type="primary" htmlType="submit" onClick={() => {
+                                        handleUpdateOrganisation();
                                         handleCloseOrganisation();
-                                    }}
-                                    style={styles.deleteButton}>
-                                Verwijder organisatie
-                            </Button>
+                                    }} style={styles.saveButton}>
+                                        Opslaan
+                                    </Button>
+                            </div>
+                        </Form.Item>
+
+                        <Form.Item>
+                            <div>
+                                <Button type="primary" htmlType="submit"
+                                        onClick={() => {
+                                            handleDeleteOrganisation();
+                                            handleCloseOrganisation();
+                                        }}
+                                        style={styles.deleteButton}>
+                                    Verwijder organisatie
+                                </Button>
+                            </div>
                         </Form.Item>
                     </Form>
                 </Modal>
@@ -633,34 +649,29 @@ const AdminPage = () => {
                     footer={null}
                     style={{padding: '10px'}}
                 >
-                    <div>
-                        <Select
-                            style={{ width: "95%" }}
-                            placeholder="Kies een organisatie"
-                            onChange={handleGeneratedOrganisation}
-                            value={generatedOrganisation}
-                            allowClear
-                        >
-                            {Organisations.map((organisation) => (
-                                <Select.Option key={organisation.name} value={organisation.id}>
-                                    {organisation.name}
-                                </Select.Option>
-                            ))}
-                        </Select>
-                        <h3>Code voor de nieuwe begeleider:</h3>
-                        <h2>{generatedCode}</h2>
-                    </div>
-                    <div>
-                        <Button
-                            type={"primary"}
-                            onClick={handleGenerateCode}
-                        >
-                            Genereer
-                        </Button>
-                    </div>
+                    <Select
+                        style={{ width: "95%" }}
+                        placeholder="Kies een organisatie"
+                        onChange={handleGeneratedOrganisation}
+                        value={generatedOrganisation}
+                        allowClear
+                    >
+                        {Organisations.map((organisation) => (
+                            <Select.Option key={organisation.name} value={organisation.id}>
+                                {organisation.name}
+                            </Select.Option>
+                        ))}
+                    </Select>
+                    <h3>Code voor de nieuwe begeleider:</h3>
+                    <h2>{generatedCode}</h2>
 
+                    <Button
+                        type={"primary"}
+                        onClick={handleGenerateCode}
+                    >
+                        Genereer
+                    </Button>
                 </Modal>
-
             </div>
         </ConfigProvider>
     );

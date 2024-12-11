@@ -205,7 +205,9 @@ const ChatSuggestionPage = () => {
     const handleDecline = () => {
         deleteMessages(chatroomId);
         deleteChatroom(chatroomId);
-        navigate('/chatOverview');
+        setTimeout(() => {
+            navigate('/chatOverview');
+        }, 300);
     };
 
     const handleBlock = () => {
@@ -273,7 +275,7 @@ const ChatSuggestionPage = () => {
                 <div>
                     {isSender && (
                         <>
-                            <Button styles={styles.editButton} onClick={handleEdit}>Bewerken</Button>
+                            <Button styles={styles.editButton} className="ant-btn-bewerk" onClick={handleEdit}>Bewerken</Button>
                         </>
                     )}
                 </div>

@@ -365,7 +365,7 @@ const ChatPage = () => {
                                 {`${name}`}
                             </h2>
                         </div>
-                        <div style={styles.messageList} ref={messageListRef} onScroll={handleScroll}>
+                        <div style={styles.messageList} className={'messageList'} ref={messageListRef} onScroll={handleScroll}>
                             {!loadingMore && !noMoreMessages && (
                                 <p
                                     onClick={handleLoadMore}

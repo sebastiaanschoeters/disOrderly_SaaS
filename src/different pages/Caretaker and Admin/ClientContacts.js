@@ -19,8 +19,6 @@ const useContacts = (userID) => {
                 .select('id, sender_id, receiver_id, acceptance, senderProfile: sender_id(id, name, profile_picture, caretaker), receiverProfile: receiver_id(id, name, profile_picture, caretaker)')
                 .or(`sender_id.eq.${userID},receiver_id.eq.${userID}`);
 
-            console.log(data)
-
             if (error) {
                 console.error('Error fetching chatrooms:', error);
             } else {
@@ -39,7 +37,6 @@ const useContacts = (userID) => {
                         isSender: isSender
                     };
                 });
-                console.log(formattedContacts)
                 setContacts(formattedContacts);
             }
         };
@@ -97,7 +94,6 @@ const ContactsOverview = ({ id: userID , conversations: conversations}) => {
     }, []);
 
     function handleCaretakerClick(caretaker, clientName) {
-        console.log("caretaker clicked:", caretaker)
         setSelectedCaretakerId(caretaker);
         setClientName(clientName);
         setIsModalVisible(true);
@@ -149,7 +145,6 @@ const ContactsOverview = ({ id: userID , conversations: conversations}) => {
     }));
 
     function handleClientClick(record) {
-        console.log("clicked: ", {record})
         const profileData = {
             name: record.profileName,
             profilePicture: record.profilePicture,

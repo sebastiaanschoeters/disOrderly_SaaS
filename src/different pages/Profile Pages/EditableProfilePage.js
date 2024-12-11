@@ -309,8 +309,13 @@ const ProfileCard = () => {
     const handleBiographyChange = (e) => {
         const newValue = e.target.value;
         setBiography(newValue);
-        debouncedSaveBiography(newValue);
     };
+
+    const handleBiographySave = (e) => {
+        const newValue = e.target.value;
+        setBiography(newValue);
+        debouncedSaveBiography(newValue);
+    }
 
     const handleLocationChange = (value) => {
         setLocation(value);
@@ -456,7 +461,6 @@ const ProfileCard = () => {
 
     const handlePictureRemove = async (imageUrlToRemove) => {
         try {
-            console.log('attempting to remove: ', imageUrlToRemove)
             setRemovingPicture(true);
 
             const fileName = imageUrlToRemove.split('/').pop().split('?')[0];
@@ -479,8 +483,6 @@ const ProfileCard = () => {
                 console.error("DB Delete Error:", dbDeleteError)
                 throw dbDeleteError;
             }
-
-            console.log("removed picture:", imageUrlToRemove)
 
             setImages((prevImages) => {
                 return prevImages.filter((url) => url !== imageUrlToRemove);
@@ -639,6 +641,7 @@ const ProfileCard = () => {
                                 placeholder="Vertel iets over jezelf"
                                 value={biography}
                                 onChange={handleBiographyChange}
+                                onBlur={handleBiographySave}
                                 maxLength={200}
                             />
                             <div

@@ -14,13 +14,10 @@ const ProfileDetail = ({ label, value, icon }) => (
 );
 
 const ProfileCard = ({ actCode }) => {
-    console.log(actCode)
     const { profileData, isLoading, error } = useFetchCaretakerData(actCode)
     // Derive theme colors
     const theme = profileData.theme || 'blauw';
     const themeColors = themes[theme] || themes.blauw;
-
-    console.log(profileData)
 
     useThemeOnCSS(themeColors);
 

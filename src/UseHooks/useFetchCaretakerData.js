@@ -44,7 +44,6 @@ const useFetchCaretakerData = (actCode, options = { fetchOrganization: true }) =
                             .from("Activation")
                             .select("Organisation: organisation(name, id)")
                             .eq("code", actCode);
-                        console.log(userOrganization[0].Organisation.name)
 
                         if (userOrganizationError) throw userOrganizationError;
 

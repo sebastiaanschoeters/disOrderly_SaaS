@@ -224,8 +224,6 @@ const ProfileCard = (profileToShow) => {
                 return;  // Exit early if the ID is missing
             }
 
-            console.log('Chatroom created with ID:', chatroomId);
-
             // Insert the message into the Messages table
             const { data: messageData, error: messageError } = await supabase
                 .from('Messages')

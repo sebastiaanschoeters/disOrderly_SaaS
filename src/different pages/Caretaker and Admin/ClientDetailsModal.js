@@ -7,20 +7,11 @@ import {getUserEmailById} from "../../Api/Utils";
 import {storeUserSession} from "../../Utils/sessionHelpers";
 
 const ClientDetailsModal = ({ visible, onClose, clientData }) => {
-    function printLocalStorage() {
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            const value = localStorage.getItem(key);
-            console.log(key, ": ", value);
-        }
-    }
-    printLocalStorage()
     const [isViewingContactList, setIsViewingContactList] = useState(false);
     const [isTransitioning, setIsTransitioning] = useState(false);
     const navigate = useNavigate();
 
-    if (!clientData) return null; // Guard for no data
-    console.log(clientData);
+    if (!clientData) return null;
 
     const handleToggleView = () => {
         setIsViewingContactList((prevState) => !prevState);
@@ -106,7 +97,7 @@ const ClientDetailsModal = ({ visible, onClose, clientData }) => {
                         )}
                     </>
                 );
-            case "Publiek Profiel":
+            case "Publiek profiel":
                 return (
                     <>
                         <h2 style={{marginRight: '10px'}}>{clientData.client_info.name || "Client Information"}</h2>
@@ -114,7 +105,7 @@ const ClientDetailsModal = ({ visible, onClose, clientData }) => {
                     </>
                 );
             default:
-                return <p>Access level information is not available.</p>;
+                return <p>Informatie van deze client is niet beschikbaar.</p>;
         }
     };
 

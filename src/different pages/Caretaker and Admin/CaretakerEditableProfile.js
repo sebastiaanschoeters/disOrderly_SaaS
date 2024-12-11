@@ -40,7 +40,6 @@ const ProfileCard = () => {
     useEffect(() => {
         if (profileData.theme) {
             try {
-                console.log(profileData.theme)
                 let savedTheme = profileData.theme;
 
                 if (savedTheme.endsWith('_donker')) {

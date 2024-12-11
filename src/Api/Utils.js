@@ -63,8 +63,6 @@ export const getTheme = async (user_id, options={caretaker:false}) => {
             error = userError;
         }
 
-        console.log(data)
-
         if (error) {
             console.error('Error fetching user theme:', error.message);
             return null;
@@ -293,7 +291,6 @@ export const assembleProfileData = async (userId) => {
 
 // In Utils.js
 export const handleProfileClick = (client, setSelectedClient, setIsModalProfileVisible) => {
-    console.log(client);
     setSelectedClient({ id: client });
     setIsModalProfileVisible(true);
 };

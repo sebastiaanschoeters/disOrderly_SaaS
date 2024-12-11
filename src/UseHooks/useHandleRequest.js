@@ -7,8 +7,6 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 const useHandleRequest = (onSuccess = () => {}, onError = () => {}) => {
     const handleRequest = async (notification, action, acceptedByCaretaker) => {
-        console.log(notification)
-        console.log(action)
         let idToUpdate
         if (acceptedByCaretaker) {
             idToUpdate = notification.requester_id
@@ -22,9 +20,6 @@ const useHandleRequest = (onSuccess = () => {}, onError = () => {}) => {
                     .from('User')
                     .update( {access_level: notification.details.requested_access_level})
                     .eq('id', idToUpdate);
-
-                console.log(notification.details.requested_access_level)
-                console.log(idToUpdate)
 
                 if (accessLevelError) throw accessLevelError;
             }

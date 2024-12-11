@@ -137,7 +137,7 @@ const ProfileCard = () => {
 
         if (error) throw error;
 
-        if (data.length > 0) updateTrophyStatus(1);
+        if (data.length > 0) updateTrophyStatus(1, {earned: true});
     }
 
     const checkInterestsTrophy = async (userId) => {
@@ -146,12 +146,18 @@ const ProfileCard = () => {
             .select('id')
             .eq('user_id', userId);
 
-        console.log("InterestsTrophies: ", data);
         if (error) throw error;
 
         const interestsCount = data.length;
+
+        // Update trophy status with the current count
+        if (interestsCount > 0) {
+            updateTrophyStatus(3, { count: interestsCount }); // Update count only
+        }
+
+        // If count reaches 3 or more, mark the trophy as earned
         if (interestsCount >= 3) {
-            updateTrophyStatus(3,{count:  interestsCount} ); // Interests Added, with count
+            updateTrophyStatus(3, { earned: true, count: interestsCount});
         }
     };
 
@@ -161,10 +167,9 @@ const ProfileCard = () => {
             .select('id')
             .eq('User_id', userId);
 
-        console.log("PicturesTrophies: ", data);
         if (error) throw error;
 
-        if (data.length > 1) updateTrophyStatus(4); // Added Extra Pictures
+        if (data.length > 1) updateTrophyStatus(4, {earned: true}); // Added Extra Pictures
     };
 
     const checkProfilePictureTrophy = async (userId) => {
@@ -174,10 +179,9 @@ const ProfileCard = () => {
             .eq('id', userId)
             .single();
 
-        console.log("Profile Picture Trophies: ", data);
         if (error) throw error;
 
-        if (data.profile_picture) updateTrophyStatus(5); // Profile Picture Added
+        if (data.profile_picture) updateTrophyStatus(5, {earned:true}); // Profile Picture Added
     };
 
     const checkBioTrophy = async (userId) => {
@@ -187,10 +191,9 @@ const ProfileCard = () => {
             .eq('user_id', userId)
             .single();
 
-        console.log("BioTrophies: ", data);
         if (error) throw error;
 
-        if (data.bio) updateTrophyStatus(6); // Bio Added
+        if (data.bio) updateTrophyStatus(6, {earned:true}); // Bio Added
     };
 
     const checkHangmanWinsTrophy = async (userId) => {
@@ -200,21 +203,20 @@ const ProfileCard = () => {
             .eq('user_id', userId)
             .single();
 
-        console.log("HangmanTrophies: ", data);
         if (error) throw error;
 
         if (data && data.hangman_wins>0) {
-            updateTrophyStatus(8, { count: data.hangman_wins });
+            updateTrophyStatus(8, { count: data.hangman_wins , earned: true});
         }
     };
 
     useThemeOnCSS(themeColors);
 
-    const updateTrophyStatus = (trophyId, additionalData = {}) => {
+    const updateTrophyStatus = (trophyId, updates = {}) => {
         setTrophies((prevTrophies) =>
             prevTrophies.map((trophy) =>
                 trophy.id === trophyId
-                    ? { ...trophy, earned: true, ...additionalData }
+                    ? { ...trophy, ...updates }
                     : trophy
             )
         );
@@ -253,7 +255,7 @@ const ProfileCard = () => {
                 setTheme(savedTheme);
                 setIsDarkMode(darkModeFlag);
                 if (savedTheme !== "blauw" || darkModeFlag !== false){
-                    updateTrophyStatus(7);
+                    updateTrophyStatus(7, {earned:true});
                 }
             } catch (error) {
                 console.error('Error parsing theme data:', error);
@@ -274,7 +276,7 @@ const ProfileCard = () => {
             await saveField(user_id, 'theme', JSON.stringify(themeData));
             localStorage.setItem('theme',JSON.stringify(themeData))// Save it as a stringified JSON array
             if (newTheme !== "blauw" || darkModeFlag !== false) {
-                updateTrophyStatus(7);
+                updateTrophyStatus(7, {earned:true});
             }
         } catch (error) {
             console.error('Error saving theme:', error);

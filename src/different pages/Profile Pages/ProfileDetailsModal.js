@@ -3,8 +3,8 @@ import { Modal } from "antd";
 import ProfileCard from './ProfilePage'
 
 const ProfileDetailsModal = ({ visible, onClose, clientData }) => {
-    if (!clientData) return null; // Guard for no data
-    console.log(clientData)
+    if (!clientData) return null;
+
     return (
         <Modal
             title="Profiel informatie "

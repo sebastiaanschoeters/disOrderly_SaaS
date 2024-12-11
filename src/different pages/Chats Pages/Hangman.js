@@ -175,7 +175,7 @@ const HangmanGame = ({ isModalVisible, setIsModalVisible, player1Id, player2Id, 
         setStep(2);
 
         // Step 4: Notify players about the new game
-        handleSendMessage("ButterflyIcon0 " + localStorage.getItem('name') + " heeft een nieuw spel gestart! Klik lings inderaan op de + om te spelen");
+        handleSendMessage("ButterflyIcon0 " + localStorage.getItem('name') + " heeft een nieuw spel gestart! Klik links onderaan op de + om te spelen");
 
         return data; // Return the new game data
     };
@@ -193,14 +193,13 @@ const HangmanGame = ({ isModalVisible, setIsModalVisible, player1Id, player2Id, 
             console.error('Error saving answer:', error);
         }
         setIsModalVisible(false)
-        handleSendMessage("ButterflyIcon0 " + localStorage.getItem('name') + " heeft de vraag beantwoord!Klik lings inderaan op de + om te spelen")
+        handleSendMessage("ButterflyIcon0 " + localStorage.getItem('name') + " heeft de vraag beantwoord!Klik links onderaan op de + om te spelen")
         setStep(3)
         return answer
     };
 
 // handleGuess function - simplified
     const handleGuess = (letter) => {
-        console.log("handle guess functionnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn")
         // If the letter has already been guessed, do nothing
         if (guessedLetters.includes(letter)) return;
 

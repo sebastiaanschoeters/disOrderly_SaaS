@@ -83,7 +83,6 @@ const useFetchProfileData = (actCode) => {
                         }
                     }
 
-                    console.log(user)
                     // Set the user profile data with the theme
                     setProfileData({
                         ...user,
@@ -93,7 +92,6 @@ const useFetchProfileData = (actCode) => {
             } catch (error) {
                 setError(error.message);
             } finally {
-                console.log("user element: ", profileData)
                 setIsLoading(false);
             }
         };
@@ -139,8 +137,6 @@ const useFetchCaretakers = (organizationId) => {
                     .eq("organisation", organizationId)
                     .eq("usable", false)
                     .eq("type", "caretaker");
-
-                console.log(activationData)
 
                 if (idError) throw new Error(`Fout bij het ophalen van activatiecodes: ${idError.message}`);
                 if (!activationData || activationData.length === 0) {
@@ -227,7 +223,6 @@ const ClientOverview = () => {
                             currentAccessLevel: clientData?.access_level// Default to 'Unknown Caretaker' if not found
                         };
                     }));
-                    console.log(updatedNotifications)
                     // Set the notifications state with updated data
                     setNotifications(updatedNotifications);
                 }
@@ -372,7 +367,6 @@ const ClientOverview = () => {
 
     const handleClientClick = (client) => {
         setSelectedClient(client);
-        console.log(client)
         setIsModalVisible(true);
     };
 

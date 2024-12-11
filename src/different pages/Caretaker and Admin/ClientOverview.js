@@ -51,79 +51,6 @@ const useFetchClients = (actCode) => {
     return { clients, error };
 };
 
-const useFetchProfileData = (actCode) => {
-    const [profileData, setProfileData] = useState({});
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState(null);
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                // Fetch user data
-                const { data: userData, error: userError } = await supabase
-                    .from('Caretaker')
-                    .select('*')
-                    .eq('id', actCode);
-
-                if (userError) throw userError;
-
-                if (userData.length > 0) {
-                    const user = userData[0];
-
-                    let parsedTheme = 'blauw';
-                    let isDarkMode = false;
-
-                    if (user.theme) {
-                        try {
-                            const [themeName, darkModeFlag] = JSON.parse(user.theme);
-                            parsedTheme = themeName;
-                            isDarkMode = darkModeFlag;
-                        } catch (error) {
-                            console.error('Error parsing theme', error);
-                        }
-                    }
-
-                    // Set the user profile data with the theme
-                    setProfileData({
-                        ...user,
-                        theme: isDarkMode ? `${parsedTheme}_donker` : parsedTheme
-                    });
-                }
-            } catch (error) {
-                setError(error.message);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        fetchData();
-    }, [actCode]);
-
-    return { profileData };
-};
-
-const deleteClient = async (clientId) => {
-    try {
-        const { error } = await supabase
-            .from("User")
-            .delete()
-            .eq("id", clientId);
-
-        if (error) throw error;
-
-        const { infoError } = await supabase
-            .from("User information")
-            .delete()
-            .eq("user_id", clientId)
-
-        if (infoError) throw infoError;
-
-        message.success("Klantaccount succesvol gedeactiveerd!");
-    } catch (error) {
-        message.error("Klantaccount deactiveren is mislukt: " + error.message);
-    }
-};
-
 const useFetchCaretakers = (organizationId) => {
     const [caretakers, setCaretakers] = useState([]);
     const [error, setError] = useState(null);
@@ -395,6 +322,7 @@ const ClientOverview = () => {
             message.success("Toegangsniveau wijziging verzoek verzonden!");
         } catch (error) {
             message.error("Fout bij het verzenden van toegangsniveau wijziging verzoek: " + error.message);
+
             setPendingRequests((prev) => {
                 const updated = { ...prev };
                 delete updated[clientId]; // Remove pending status on error

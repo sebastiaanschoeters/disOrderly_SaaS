@@ -335,33 +335,27 @@ const ProfileCard = () => {
         },
     };
 
-
-    const handleThemeChange = async (value) => {
-        setTheme(value);
+    const saveThemeData = async (theme, isDarkMode) => {
         try {
-            const themeData = [value, isDarkMode]; // Ensure both theme and dark mode flag are saved together
+            const themeData = [theme, isDarkMode]; // Ensure both theme and dark mode flag are saved together
             await saveField(user_id, 'theme', JSON.stringify(themeData));
-            localStorage.setItem('theme', JSON.stringify(themeData))// Save it as a stringified JSON array
-            if (value !== "blauw" || isDarkMode !== false) {
-                updateTrophyStatus(7, {earned: true});
+            localStorage.setItem('theme', JSON.stringify(themeData)); // Save it as a stringified JSON array
+            if (theme !== "blauw" || isDarkMode !== false) {
+                updateTrophyStatus(7, { earned: true });
             }
         } catch (error) {
             console.error('Error saving theme:', error);
         }
     };
 
+    const handleThemeChange = async (value) => {
+        setTheme(value);
+        await saveThemeData(value, isDarkMode);
+    };
+
     const handleThemeToggle = async (checked) => {
         setIsDarkMode(checked);
-        try {
-            const themeData = [theme, checked]; // Ensure both theme and dark mode flag are saved together
-            await saveField(user_id, 'theme', JSON.stringify(themeData));
-            localStorage.setItem('theme', JSON.stringify(themeData))// Save it as a stringified JSON array
-            if (theme !== "blauw" || checked !== false) {
-                updateTrophyStatus(7, {earned: true});
-            }
-        } catch (error) {
-            console.error('Error saving theme:', error);
-        }
+        await saveThemeData(theme, checked);
     };
 
     const handleSexualityChange = (value) => {

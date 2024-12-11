@@ -10,7 +10,6 @@ import {createClient} from "@supabase/supabase-js";
 import HomeButton from '../../Extra components/HomeButtonCaretaker'
 import useFetchCaretakerData from "../../UseHooks/useFetchCaretakerData";
 import ThemeSelector from "../../Extra components/ThemeSelector";
-import {debounce} from "../../Api/Utils";
 import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
 import {requests} from "../../Utils/requests";
 
@@ -64,30 +63,37 @@ const ProfileCard = () => {
         }
     }, [profileData]);
 
-    // Define async save functions
     const saveField = async (field, value) => {
-        let dutch_field = ''
+        // Map English field names to Dutch equivalents
+        const fieldTranslations = {
+            theme: "thema",
+            phone_number: "gsm nummer",
+            email: "email",
+        };
 
-        if (field === "theme"){
-            dutch_field = "thema"
-        } else if (field === "phone_number"){
-            dutch_field = "gsm nummer"
-        } else if (field === "email"){
-            dutch_field = "email"
-        }
+        // Get the Dutch equivalent or fall back to the original field name
+        const dutch_field = fieldTranslations[field] || field;
 
         try {
-            const { data, error } = await supabase
+            const { error } = await supabase
                 .from('Caretaker')
                 .update({ [field]: value })
                 .eq('id', profileData.id);
-            if (error) throw error;
 
-            message.success(`${dutch_field} opgeslagen`)
+            if (error) {
+                // Handle error directly without throwing it
+                message.error(`Probleem bij het opslaan van ${dutch_field}`);
+                console.error(`Error saving ${field}:`, error);
+                return;  // Early return to exit function
+            }
+
+            // Display success message
+            message.success(`${dutch_field} opgeslagen`);
             console.log(`${field} saved successfully with value ${value}`);
         } catch (error) {
-            message.error(`probleem bij het opslaan van ${dutch_field}`)
-            console.error(`Error saving ${field}:`, error);
+            // Display error message for unexpected errors
+            message.error(`Probleem bij het opslaan van ${dutch_field}`);
+            console.error(`Unexpected error saving ${field}:`, error);
         }
     };
 
@@ -114,10 +120,13 @@ const ProfileCard = () => {
     };
 
     const handlePhoneNumberChange = (e) => {
-        const newValue = e.target.value;
-        setPhoneNumber(newValue);
-        saveField('phone_number', newValue);
-    }
+        const newValue = e.target.value.replace(/[^0-9+]/g, '');
+        if (newValue.length <= 11) { // Ensure the length is no more than 10
+            setPhoneNumber(newValue);
+            saveField('phone_number', newValue);
+        }
+    };
+
 
     const handleEmailChange = (e) => {
         const newValue = e.target.value;
@@ -216,6 +225,7 @@ const ProfileCard = () => {
                         placeholder="Geef je telefoon nummer in"
                         value={phoneNumber}
                         onChange={handlePhoneNumberChange}
+                        maxLength={11}
                     />
                 </p>
 

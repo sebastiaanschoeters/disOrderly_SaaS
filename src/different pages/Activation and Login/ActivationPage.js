@@ -525,7 +525,7 @@ const ActivationPage = () => {
                                 <Select placeholder="Selecteer uw seksualiteit">
                                     <Select.Option value="Mannen">Mannen</Select.Option>
                                     <Select.Option value="Vrouwen">Vrouwen</Select.Option>
-                                    <Select.Option value="Beiden">Biseksueel</Select.Option>
+                                    <Select.Option value="Beide">Beide</Select.Option>
                                 </Select>
                             </Form.Item>
 

@@ -47,9 +47,6 @@ const useFetchPicturesData = (actCode) => {
                     .eq('User_id', actCode);
 
                 if (userError) throw userError;
-                if (pictures.length > 0) {
-                    const user = pictures[0];
-                }
                 setPictures(pictures)
             } catch (error) {
                 setError(error.message);

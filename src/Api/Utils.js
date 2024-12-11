@@ -135,7 +135,6 @@ export const getUserEmailById = async (userId) => {
             return null;
         }
 
-        console.log('Fetched dataaaaaa:', data);
         return data;
     } catch (err) {
         console.error('Unexpected error:', err);
@@ -158,20 +157,23 @@ export const saveField = async (userId, field, value) => {
     const dutchField = fieldTranslations[field] || field;
 
     try {
-        const { data, error } = await supabase
+        const { error } = await supabase
             .from('User information')
             .update({ [field]: value })
             .eq('user_id', userId);
 
-        if (error) throw error;
+        if (error) {
+            message.error(`Probleem bij het opslaan van ${dutchField}`);
+            console.error(`Error saving ${dutchField}:`, error);
+            return; // Early return to exit function on error
+        }
 
         // Display success message
         message.success(`${dutchField} opgeslagen`);
         console.log(`${field} saved successfully with value ${value}`);
     } catch (error) {
-        // Display error message
-        message.error(`Probleem bij het opslaan van ${dutchField}`);
-        console.error(`Error saving ${dutchField}:`, error);
+        message.error(`Onverwachte fout bij het opslaan van ${dutchField}`);
+        console.error(`Unexpected error saving ${dutchField}:`, error);
     }
 };
 
@@ -248,9 +250,14 @@ export const fetchUserInterests = async (userId) => {
 };
 
 export const assembleProfileData = async (userId) => {
+    const result = { profileData: null, error: null };
+
     try {
         const user = await fetchUserData(userId);
-        if (!user) throw new Error("User not found");
+        if (!user) {
+            result.error = "User not found";
+            return result;
+        }
 
         const userInfo = await fetchUserInfo(userId);
         if (userInfo) {
@@ -273,12 +280,14 @@ export const assembleProfileData = async (userId) => {
             }
         }
 
-        user.interests = await fetchUserInterests(user.id);
-        return { profileData: user, error: null };
+        user.interests = await fetchUserInterests(userId);
+        result.profileData = user;
     } catch (error) {
         console.error("Error assembling profile data for user:", userId, error);
-        return { profileData: null, error: error.message };
+        result.error = error.message;
     }
+
+    return result;
 };
 
 // In Utils.js

@@ -9,7 +9,9 @@ import useFetchProfileData from "../../UseHooks/useFetchProfileData";
 import {calculateAge, calculateDistance, calculateSlidesToShow} from "../../Utils/calculations";
 import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
 
-const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
+const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
+const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 const useFetchPicturesData = (actCode) => {
     const [pictures, setPictures] = useState([]);
@@ -222,8 +224,6 @@ const ProfileCard = (profileToShow) => {
                 return;  // Exit early if the ID is missing
             }
 
-            console.log('Chatroom created with ID:', chatroomId);
-
             // Insert the message into the Messages table
             const { data: messageData, error: messageError } = await supabase
                 .from('Messages')
@@ -262,15 +262,15 @@ const ProfileCard = (profileToShow) => {
                     .from('Chatroom')
                     .select('id')
                     .or(`and(sender_id.eq.${senderId},receiver_id.eq.${receiverId}),and(sender_id.eq.${receiverId},receiver_id.eq.${senderId})`)
-                    .single();
 
-                if (error) {
-                    console.error('Error fetching chatroom:', error);
-                    return;
+                if (error) throw error
+
+                if (chatroomData.length === 0){
+                    setChatroomExistent(false)
+                } else {
+                    setChatroomExistent(true)
                 }
 
-                // If chatroomData is found, set the state to true
-                setChatroomExistent(!!chatroomData);
             } catch (error) {
                 console.error('Error checking chatroom:', error);
             }
@@ -307,7 +307,17 @@ const ProfileCard = (profileToShow) => {
                             position: 'relative',
                             top: '0%',
                             left: '1%',
-                            zIndex: 1000
+                            zIndex: 1000,
+                            display: 'flex', // Use flexbox for alignment
+                            flexDirection: 'row', // Keep icon and text horizontally aligned
+                            alignItems: 'center', // Center vertically
+                            justifyContent: 'center', // Center horizontally
+                            whiteSpace: 'normal', // Allow text wrapping
+                            wordBreak: 'break-word', // Break long text onto multiple lines
+                            textAlign: 'center', // Keep text visually centered
+                            padding: '12px 16px', // Add generous padding for better readability
+                            minHeight: '60px', // Increase the minimum height to allow room for wrapped text
+                            lineHeight: '1', // Adjust line height for better spacing between lines
                         }}
                         disabled={isChatroomExistent}
                         onClick={handleMessage}
@@ -323,14 +333,14 @@ const ProfileCard = (profileToShow) => {
                             src={profilePicture}
                             alt={profileData.name || "No Name"}
                             style ={{
-                                minWidth: '200px',
-                                minHeight: '200px',
+                                minWidth: '175px',
+                                minHeight: '175px',
                                 borderRadius: '50%',
                                 marginTop: '20px'
                             }}
                         />
                         <div>
-                            <h2 style={{ margin: '0' }}>
+                            <h2 style={{ margin: '0' , fontSize: '28px'}}>
                                 {profileData.name || 'Naam'}, {calculateAge(profileData.birthdate) || 'Leeftijd'}
                             </h2>
                             <p style={{margin: '5px 0', maxWidth: '550px'}}>

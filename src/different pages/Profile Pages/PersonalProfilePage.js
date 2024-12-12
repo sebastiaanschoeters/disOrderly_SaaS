@@ -1,47 +1,31 @@
-import React, { useEffect, useState } from 'react';
-import {Avatar, Divider, Select, ConfigProvider, Spin, message, Tooltip, Typography} from 'antd';
+import React, {useEffect, useState} from 'react';
+import {Avatar, ConfigProvider, Divider, message, Select, Spin, Tooltip, Typography} from 'antd';
 import {
-    UserSwitchOutlined,
     HeartOutlined,
-    TrophyOutlined,
+    LockOutlined,
     QuestionCircleOutlined,
-    LockOutlined
+    TrophyOutlined,
+    UserSwitchOutlined
 } from '@ant-design/icons';
+
 import 'antd/dist/reset.css';
 import '../../CSS/AntDesignOverride.css';
 import '../../CSS/PersonalProfilePage.css';
 import {antThemeTokens, ButterflyIcon, themes} from '../../Extra components/themes';
-import { createClient } from '@supabase/supabase-js';
+import {createClient} from '@supabase/supabase-js';
 import HomeButtonUser from "../../Extra components/HomeButtonUser";
 import {calculateAge} from "../../Utils/calculations";
-import {debounce, saveField} from "../../Api/Utils";
+import {saveField} from "../../Api/Utils";
 import ThemeSelector from "../../Extra components/ThemeSelector";
 import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
+import {fetchPendingRequestsData} from "../../Utils/requests";
 
-const supabase = createClient(
-    'https://flsogkmerliczcysodjt.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q'
-);
+const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
+const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
-const fetchPendingRequests = async (caretakerId) => {
-    try {
-        const { data, error } = await supabase
-            .from('Notifications')
-            .select('recipient_id, details')
-            .eq('requester_id', caretakerId)
-            .eq('type', 'ACCESS_LEVEL_CHANGE');
-
-        if (error) throw error;
-
-        // Map the data to a format usable by the state
-        return data.reduce((acc, request) => {
-            acc[request.recipient_id] = request.details.requested_access_level;
-            return acc;
-        }, {});
-    } catch (error) {
-        console.error('Error fetching pending requests:', error.message);
-        return {};
-    }
+const fetchPendingRequests = async (userId) => {
+    return await fetchPendingRequestsData(userId);
 };
 
 const useFetchProfileData = (actCode) => {
@@ -149,7 +133,7 @@ const ProfileCard = () => {
         {id: 4, title: "Voeg extra foto's toe aan je profiel", earned: false},
         {id: 5, title: "Voeg een profielfoto toe", earned: false},
         {id: 6, title: "Voeg een biografie toe aan je profiel", earned: false},
-        {id: 7, title: "Verander je thema van de standaard kleuren", earned: themeTrophyEarned},
+        {id: 7, title: "Verander je kleuren thema", earned: themeTrophyEarned},
     ]);
 
     const checkMessageSentTrophy = async (userId) => {
@@ -160,7 +144,7 @@ const ProfileCard = () => {
 
         if (error) throw error;
 
-        if (data.length > 0) updateTrophyStatus(1);
+        if (data.length > 0) updateTrophyStatus(1, {earned: true});
     }
 
     const checkInterestsTrophy = async (userId) => {
@@ -169,12 +153,18 @@ const ProfileCard = () => {
             .select('id')
             .eq('user_id', userId);
 
-        console.log("InterestsTrophies: ", data);
         if (error) throw error;
 
         const interestsCount = data.length;
+
+        // Update trophy status with the current count
+        if (interestsCount > 0) {
+            updateTrophyStatus(3, { count: interestsCount }); // Update count only
+        }
+
+        // If count reaches 3 or more, mark the trophy as earned
         if (interestsCount >= 3) {
-            updateTrophyStatus(3, {count: interestsCount}); // Interests Added, with count
+            updateTrophyStatus(3, { earned: true, count: interestsCount});
         }
     };
 
@@ -184,10 +174,9 @@ const ProfileCard = () => {
             .select('id')
             .eq('User_id', userId);
 
-        console.log("PicturesTrophies: ", data);
         if (error) throw error;
 
-        if (data.length > 1) updateTrophyStatus(4); // Added Extra Pictures
+        if (data.length > 1) updateTrophyStatus(4, {earned: true}); // Added Extra Pictures
     };
 
     const checkProfilePictureTrophy = async (userId) => {
@@ -197,10 +186,9 @@ const ProfileCard = () => {
             .eq('id', userId)
             .single();
 
-        console.log("Profile Picture Trophies: ", data);
         if (error) throw error;
 
-        if (data.profile_picture) updateTrophyStatus(5); // Profile Picture Added
+        if (data.profile_picture) updateTrophyStatus(5, {earned:true}); // Profile Picture Added
     };
 
     const checkBioTrophy = async (userId) => {
@@ -210,10 +198,9 @@ const ProfileCard = () => {
             .eq('user_id', userId)
             .single();
 
-        console.log("BioTrophies: ", data);
         if (error) throw error;
 
-        if (data.bio) updateTrophyStatus(6); // Bio Added
+        if (data.bio) updateTrophyStatus(6, {earned:true}); // Bio Added
     };
 
     const checkHangmanWinsTrophy = async (userId) => {
@@ -223,21 +210,20 @@ const ProfileCard = () => {
             .eq('user_id', userId)
             .single();
 
-        console.log("HangmanTrophies: ", data);
         if (error) throw error;
 
         if (data && data.hangman_wins > 0) {
-            updateTrophyStatus(8, {count: data.hangman_wins});
+            updateTrophyStatus(8, { count: data.hangman_wins , earned: true});
         }
     };
 
     useThemeOnCSS(themeColors);
 
-    const updateTrophyStatus = (trophyId, additionalData = {}) => {
+    const updateTrophyStatus = (trophyId, updates = {}) => {
         setTrophies((prevTrophies) =>
             prevTrophies.map((trophy) =>
                 trophy.id === trophyId
-                    ? {...trophy, earned: true, ...additionalData}
+                    ? { ...trophy, ...updates }
                     : trophy
             )
         );
@@ -275,8 +261,8 @@ const ProfileCard = () => {
                 const [savedTheme, darkModeFlag] = profileData.theme;
                 setTheme(savedTheme);
                 setIsDarkMode(darkModeFlag);
-                if (savedTheme !== "blauw" || darkModeFlag !== false) {
-                    updateTrophyStatus(7);
+                if (savedTheme !== "blauw" || darkModeFlag !== false){
+                    updateTrophyStatus(7, {earned:true});
                 }
             } catch (error) {
                 console.error('Error parsing theme data:', error);
@@ -290,21 +276,6 @@ const ProfileCard = () => {
             setCaretaker(profileData.caretaker)
         }
     }, [profileData]);
-
-    const debouncedSaveTheme = debounce(async (newTheme, darkModeFlag) => {
-        try {
-            const themeData = [newTheme, darkModeFlag]; // Ensure both theme and dark mode flag are saved together
-            await saveField(user_id, 'theme', JSON.stringify(themeData));
-            localStorage.setItem('theme', JSON.stringify(themeData))// Save it as a stringified JSON array
-            if (newTheme !== "blauw" || darkModeFlag !== false) {
-                updateTrophyStatus(7);
-            }
-        } catch (error) {
-            console.error('Error saving theme:', error);
-        }
-    }, 500);
-
-    const debouncedSaveSexuality = debounce((value) => saveField(user_id, 'sexuality', value), 1000);
 
     const handleAccessLevelChange = async (caretakerId, clientId, newAccessLevel) => {
         try {
@@ -357,7 +328,8 @@ const ProfileCard = () => {
             });
         }
     };
-    const {Title} = Typography;
+
+    const { Title } = Typography;
 
     const styles = {
         title: {
@@ -370,20 +342,32 @@ const ProfileCard = () => {
         },
     };
 
-
-    const handleThemeChange = (value) => {
-        setTheme(value);
-        debouncedSaveTheme(value, isDarkMode); // Save theme with dark mode flag
+    const saveThemeData = async (theme, isDarkMode) => {
+        try {
+            const themeData = [theme, isDarkMode]; // Ensure both theme and dark mode flag are saved together
+            await saveField(user_id, 'theme', JSON.stringify(themeData));
+            localStorage.setItem('theme', JSON.stringify(themeData)); // Save it as a stringified JSON array
+            if (theme !== "blauw" || isDarkMode !== false) {
+                updateTrophyStatus(7, { earned: true });
+            }
+        } catch (error) {
+            console.error('Error saving theme:', error);
+        }
     };
 
-    const handleThemeToggle = (checked) => {
+    const handleThemeChange = async (value) => {
+        setTheme(value);
+        await saveThemeData(value, isDarkMode);
+    };
+
+    const handleThemeToggle = async (checked) => {
         setIsDarkMode(checked);
-        debouncedSaveTheme(theme, checked); // Save theme with dark mode flag
+        await saveThemeData(theme, checked);
     };
 
     const handleSexualityChange = (value) => {
         setSexuality(value);
-        debouncedSaveSexuality(value);
+        saveField(user_id,'sexuality', value);
     };
 
     const tooltips = {
@@ -465,7 +449,7 @@ const ProfileCard = () => {
 
                     <p>
                         <strong>
-                            <UserSwitchOutlined/> Begeleiding met toegang:
+                            <UserSwitchOutlined/> Begeleider met toegang
                         </strong>
                     </p>
                     <div
@@ -487,8 +471,8 @@ const ProfileCard = () => {
                             }}
                         />
                         <span style={{flexGrow: 1, fontSize: '1rem', minWidth: '80px'}}>
-                        {caretaker.name}
-                    </span>
+                            {caretaker.name}
+                        </span>
                         <Select
                             style={{flexGrow: 1, minWidth: '120px'}}
                             onChange={(value) =>
@@ -537,11 +521,12 @@ const ProfileCard = () => {
                         </p>
                     )}
 
+
                     <Divider/>
 
-                    <div style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
-                        <strong style={{width: '15%', minWidth: '100px'}}>
-                            <HeartOutlined/> Ik ben geïntereseerd in:
+                    <p style={{width: '100%'}}>
+                        <strong style={{display: 'block', marginBottom: '10px'}}>
+                            <HeartOutlined/> Ik ben geïnteresseerd in
                         </strong>
                         <Select
                             style={{width: '100%', minWidth: '200px'}}
@@ -554,7 +539,9 @@ const ProfileCard = () => {
                             ]}
                             onChange={handleSexualityChange}
                         />
-                    </div>
+                    </p>
+
+                    <Divider/>
 
                     <p>
                         <strong>
@@ -575,7 +562,7 @@ const ProfileCard = () => {
                                 key={trophy.id}
                                 style={{
                                     //flex: '0 1 calc(50% - 20px)', // Two per row by default
-                                    maxWidth: '375px',
+                                    minWidth: '350px',
                                     display: 'flex',
                                     alignItems: 'center',
                                     padding: '10px',
@@ -596,7 +583,7 @@ const ProfileCard = () => {
                                 }}
                             >
                                 {/* Left Icon Section */}
-                                <div style={{ marginRight: '10px', display: 'flex', alignItems: 'center' }}>
+                                <div style={{marginRight: '10px', display: 'flex', alignItems: 'center'}}>
                                     <div className={trophy.earned ? 'sparkle-icon' : ''}>
                                         <TrophyOutlined
                                             style={{
@@ -620,8 +607,8 @@ const ProfileCard = () => {
                                     {trophy.id === 8 && <p>Wins: {trophy.count}</p>}
                                     {trophy.id === 3 && <p>{trophy.count}/3</p>}
                                     {!trophy.earned && (
-                                        <p style={{ color: '#a0a0a0', margin: 0 }}>
-                                            <LockOutlined style={{ marginRight: '5px' }} />
+                                        <p style={{color: '#a0a0a0', margin: 0}}>
+                                            <LockOutlined style={{marginRight: '5px'}}/>
                                             Trofee niet voltooid
                                         </p>
                                     )}

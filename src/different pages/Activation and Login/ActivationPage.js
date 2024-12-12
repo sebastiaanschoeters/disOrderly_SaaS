@@ -25,7 +25,9 @@ const ActivationPage = () => {
     const theme = 'blauw'
     const themeColors = themes[theme] || themes.blauw;
 
-    const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q");
+    const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
+    const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
+    const supabase = createClient(supabaseUrl, supabaseKey);
 
     useThemeOnCSS(themeColors);
 
@@ -525,7 +527,7 @@ const ActivationPage = () => {
                                 <Select placeholder="Selecteer uw seksualiteit">
                                     <Select.Option value="Mannen">Mannen</Select.Option>
                                     <Select.Option value="Vrouwen">Vrouwen</Select.Option>
-                                    <Select.Option value="Beiden">Biseksueel</Select.Option>
+                                    <Select.Option value="Beide">Beide</Select.Option>
                                 </Select>
                             </Form.Item>
 
@@ -575,7 +577,7 @@ const ActivationPage = () => {
                         <Form name="emailPasswordForm" onFinish={EmailAndPassword}
                               initialValues={{ email: userData.email || '',
                                   password: userData.password || ''
-                              }}>>
+                              }}>
                             <Form.Item
                                 className="form-item"
                                 label="Email"

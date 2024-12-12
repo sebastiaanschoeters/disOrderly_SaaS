@@ -3,19 +3,18 @@ import {Modal, Button, Tooltip} from 'antd';
 import { createClient } from '@supabase/supabase-js';
 import useHandleRequest from "../UseHooks/useHandleRequest";
 
-// Supabase client initialization
-const supabase = createClient(
-    "https://flsogkmerliczcysodjt.supabase.co",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q"
-);
+const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
+const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
+
 
 const fetchNotification = async ( userId ) => {
     try {
         const { data: notificationData, error: notificationError } = await supabase
             .from('Notifications')
             .select('*')
-            .eq('recipient_id', userId || null); // Fetch notifications based on user_id
-        console.log(notificationData)
+            .eq('recipient_id', userId || null);
+
         if (notificationError) throw notificationError;
 
         if (notificationData && notificationData.length > 0) {
@@ -29,14 +28,11 @@ const fetchNotification = async ( userId ) => {
 
             if (notificationError) throw notificationError
 
-            console.log(caretakerData)
-
             const {data: accessLevelUser, error} = await supabase
                 .from('User')
                 .select('access_level')
                 .eq('id', userId)
                 .single()
-            console.log(accessLevelUser)
 
             if (error) throw error
 
@@ -87,8 +83,6 @@ const NotificationModal = () => {
         "Contacten": "Begeleiding kan zien met wie jij contact hebt",
         "Publiek profiel": "Begeleiding kan zien wat jij op je profiel plaatst, net zoals andere gebruikers",
     };
-
-    console.log(notification)
 
     return (
         <Modal

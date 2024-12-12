@@ -1,7 +1,10 @@
 import {createClient} from "@supabase/supabase-js";
-const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
 
-export const uploadProfilePicture = async (userId, file, bucketName) => {
+const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
+const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+export const requests = async (userId, file, bucketName) => {
     try {
         const fileName = `${userId}-profilePicture`;
 
@@ -48,5 +51,26 @@ export const uploadProfilePicture = async (userId, file, bucketName) => {
     } catch (error) {
         console.error('Error uploading profile picture:', error);
         throw error; // Re-throw to be handled by caller
+    }
+};
+
+export const fetchPendingRequestsData = async (userId) => {
+    try {
+        const { data, error } = await supabase
+            .from('Notifications')
+            .select('recipient_id, details')
+            .eq('requester_id', userId)
+            .eq('type', 'ACCESS_LEVEL_CHANGE');
+
+        if (error) throw error;
+
+        // Map the data to a format usable by the state
+        return data.reduce((acc, request) => {
+            acc[request.recipient_id] = request.details.requested_access_level;
+            return acc;
+        }, {});
+    } catch (error) {
+        console.error('Error fetching pending requests:', error.message);
+        return {};
     }
 };

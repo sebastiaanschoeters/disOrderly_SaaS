@@ -1,7 +1,9 @@
 import {createClient} from "@supabase/supabase-js";
 import {message} from "antd";
 
-const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q");
+const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
+const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 export const getName = async (user_id, options={caretaker: false}) => {
     try {
@@ -60,8 +62,6 @@ export const getTheme = async (user_id, options={caretaker:false}) => {
             data = userData;
             error = userError;
         }
-
-        console.log(data)
 
         if (error) {
             console.error('Error fetching user theme:', error.message);
@@ -135,7 +135,6 @@ export const getUserEmailById = async (userId) => {
             return null;
         }
 
-        console.log('Fetched dataaaaaa:', data);
         return data;
     } catch (err) {
         console.error('Unexpected error:', err);
@@ -144,58 +143,160 @@ export const getUserEmailById = async (userId) => {
 };
 
 export const saveField = async (userId, field, value) => {
+    // Map English field names to Dutch equivalents
+    const fieldTranslations = {
+        bio: "biografie",
+        location: "locatie",
+        gender: "geslacht",
+        living_situation: "woonsituatie",
+        mobility: "mobiliteit",
+        theme: "thema",
+        sexuality: "seksualiteit",
+    };
+
+    const dutchField = fieldTranslations[field] || field;
+
     try {
-        const { data, error } = await supabase
+        const { error } = await supabase
             .from('User information')
             .update({ [field]: value })
-            .eq('user_id', userId);  // Use dynamic userId passed as argument
-        if (error) throw error;
-        let dutch_field = field
-        if (field === 'bio'){
-            dutch_field = "biografie"
-        } else if (field === 'location'){
-            dutch_field = "locatie"
-        } else if (field === 'gender'){
-            dutch_field = "geslacht"
-        } else if (field === 'living_situation'){
-            dutch_field = "woonsituatie"
-        } else if (field === 'mobility'){
-            dutch_field = "mobiliteit"
-        } else if (field === 'theme'){
-            dutch_field = "thema"
-        } else if (field === 'sexuality'){
-            dutch_field = "seksualiteit"
+            .eq('user_id', userId);
+
+        if (error) {
+            message.error(`Probleem bij het opslaan van ${dutchField}`);
+            console.error(`Error saving ${dutchField}:`, error);
+            return; // Early return to exit function on error
         }
 
-        message.success(`${dutch_field} opgeslagen`);
+        // Display success message
+        message.success(`${dutchField} opgeslagen`);
         console.log(`${field} saved successfully with value ${value}`);
     } catch (error) {
-        let dutch_field = field
-        if (field === 'bio'){
-            dutch_field = "biografie"
-        } else if (field === 'location'){
-            dutch_field = "locatie"
-        } else if (field === 'gender'){
-            dutch_field = "geslacht"
-        } else if (field === 'living_situation'){
-            dutch_field = "woonsituatie"
-        } else if (field === 'mobility'){
-            dutch_field = "mobiliteit"
-        } else if (field === 'theme'){
-            dutch_field = "thema"
-        } else if (field === 'sexuality'){
-            dutch_field = "seksualiteit"
-        }
-
-        message.error(`probleem bij het opslaan van ${field}`);
-        console.error(`Error saving ${dutch_field}:`, error);
+        message.error(`Onverwachte fout bij het opslaan van ${dutchField}`);
+        console.error(`Unexpected error saving ${dutchField}:`, error);
     }
 };
 
-export const debounce = (func, delay) => {
-    let timer;
-    return (...args) => {
-        clearTimeout(timer);
-        timer = setTimeout(() => func(...args), delay);
-    };
+export const fetchUserData = async (userId) => {
+    const { data: userData, error: userError } = await supabase
+        .from('User')
+        .select('id, name, birthdate, profile_picture')
+        .eq('id', userId);
+
+    if (userError) throw userError;
+    return userData.length > 0 ? userData[0] : null;
+}
+
+export const fetchUserInfo = async (userId) => {
+    const { data: userInfo, error: userInfoError } = await supabase
+        .from('User information')
+        .select('*')
+        .eq('user_id', userId);
+
+    if (userInfoError) throw userInfoError;
+    return userInfo.length > 0 ? userInfo[0] : null;
+};
+
+export const parseTheme = (theme) => {
+    let parsedTheme = 'blauw';
+    let isDarkMode = false;
+
+    if (theme) {
+        try {
+            const [themeName, darkModeFlag] = JSON.parse(theme);
+            parsedTheme = themeName;
+            isDarkMode = darkModeFlag;
+        } catch (err) {
+            console.error('Error parsing theme', err);
+        }
+    }
+
+    return isDarkMode ? `${parsedTheme}_donker` : parsedTheme;
+};
+
+export const fetchLocationData = async (locationId) => {
+    if (!locationId) return null;
+
+    const { data: locationData, error: locationError } = await supabase
+        .from('Location')
+        .select('Gemeente, Longitude, Latitude')
+        .eq('id', locationId);
+
+    if (locationError) throw locationError;
+    return locationData.length > 0 ? locationData[0] : null;
+};
+
+export const fetchUserInterests = async (userId) => {
+    const { data: interestedInData, error: interestedInError } = await supabase
+        .from('Interested in')
+        .select('interest_id')
+        .eq('user_id', userId);
+
+    if (interestedInError) throw interestedInError;
+
+    if (interestedInData.length === 0) return [];
+
+    const interestIds = interestedInData.map((item) => item.interest_id);
+    const { data: interestsData, error: fetchInterestsError } = await supabase
+        .from('Interests')
+        .select('Interest')
+        .in('id', interestIds);
+
+    if (fetchInterestsError) throw fetchInterestsError;
+
+    return interestsData.map((interest) => ({
+        interest_name: interest.Interest,
+    }));
+};
+
+export const assembleProfileData = async (userId) => {
+    const result = { profileData: null, error: null };
+
+    try {
+        const user = await fetchUserData(userId);
+        if (!user) {
+            result.error = "User not found";
+            return result;
+        }
+
+        const userInfo = await fetchUserInfo(userId);
+        if (userInfo) {
+            user.bio = userInfo.bio;
+            user.location = userInfo.location;
+            user.looking_for = userInfo.looking_for;
+            user.living_situation = userInfo.living_situation;
+            user.mobility = userInfo.mobility;
+            user.gender = userInfo.gender;
+            user.sexuality = userInfo.sexuality;
+            user.theme = parseTheme(userInfo.theme);
+
+            if (userInfo.location) {
+                const location = await fetchLocationData(userInfo.location);
+                user.locationData = {
+                    gemeente: location.Gemeente,
+                    latitude: location.Latitude,
+                    longitude: location.Longitude,
+                };
+            }
+        }
+
+        user.interests = await fetchUserInterests(userId);
+        result.profileData = user;
+    } catch (error) {
+        console.error("Error assembling profile data for user:", userId, error);
+        result.error = error.message;
+    }
+
+    return result;
+};
+
+// In Utils.js
+export const handleProfileClick = (client, setSelectedClient, setIsModalProfileVisible) => {
+    setSelectedClient({ id: client });
+    setIsModalProfileVisible(true);
+};
+
+export const handleModalProfileClose = (setSelectedClient, setIsModalProfileVisible) => {
+    setSelectedClient({});
+    setIsModalProfileVisible(false);
 };

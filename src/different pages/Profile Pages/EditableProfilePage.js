@@ -23,12 +23,14 @@ import HomeButtonUser from "../../Extra components/HomeButtonUser";
 import useFetchProfileData from "../../UseHooks/useFetchProfileData";
 import {calculateAge, calculateSlidesToShow} from "../../Utils/calculations";
 import useLocations from "../../UseHooks/useLocations";
-import {debounce, saveField} from "../../Api/Utils";
+import {saveField} from "../../Api/Utils";
 import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
-import {uploadProfilePicture} from "../../Utils/uploadProfilePicture";
+import {requests} from "../../Utils/requests";
 import useTheme from "../../UseHooks/useTheme";
 
-const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
+const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
+const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 const useFetchPicturesData = (actCode) => {
     const [pictures, setPictures] = useState({});
@@ -45,9 +47,6 @@ const useFetchPicturesData = (actCode) => {
                     .eq('User_id', actCode);
 
                 if (userError) throw userError;
-                if (pictures.length > 0) {
-                    const user = pictures[0];
-                }
                 setPictures(pictures)
             } catch (error) {
                 setError(error.message);
@@ -170,29 +169,6 @@ const ProfileCard = () => {
         setSearchValue(value); // Trigger new fetch based on search
     };
 
-    // Debounced save functions
-    const debouncedSaveBiography = debounce((value) => saveField(user_id, 'bio', value), 1000);
-    const debouncedSaveLocation = debounce((value) => saveField(user_id, 'location', value), 1000);
-    const debouncedSaveGender = debounce((value) => saveField(user_id, 'gender', value), 1000);
-    const debouncedSaveLivingSituation = debounce((value) => saveField(user_id, 'living_situation', value), 1000)
-    const debouncedSaveMobility = debounce((value) => saveField(user_id, 'mobility', value), 1000)
-    const debouncedSaveLookingFor = debounce(async (updatedLookingFor) => {
-        try {
-            const { data, error } = await supabase
-                .from('User information')
-                .update({ looking_for: updatedLookingFor })
-                .eq('user_id', user_id);
-            if (error) throw error;
-
-            message.success("op zoek naar opgeslagen")
-            console.log(`Looking for updated successfully width value ${updatedLookingFor}`);
-        } catch (error) {
-            message.error("probleem bij het opslaan van op zoek naar")
-            console.error('Error saving looking for:', error);
-        }
-    }, 1000);
-
-
     const capitalizeFirstLetter = (str) => {
         return str
             .split(' ')
@@ -307,20 +283,25 @@ const ProfileCard = () => {
     const handleBiographyChange = (e) => {
         const newValue = e.target.value;
         setBiography(newValue);
-        debouncedSaveBiography(newValue);
     };
+
+    const handleBiographySave = (e) => {
+        const newValue = e.target.value;
+        setBiography(newValue);
+        saveField(user_id, 'bio', newValue)
+    }
 
     const handleLocationChange = (value) => {
         setLocation(value);
-        debouncedSaveLocation(value);
+        saveField(user_id, 'location', value);
     };
 
     const handleGenderChange = (value) => {
         setGender(value);
-        debouncedSaveGender(value);
+        saveField(user_id, 'gender', value);
     };
 
-    const handleCheckboxChange = (value) => {
+    const handleCheckboxChange = async (value) => {
         const updatedLookingFor = [...lookingForArray];
         if (updatedLookingFor.includes(value)) {
             // If the value is already in the array, remove it (unchecked)
@@ -332,17 +313,30 @@ const ProfileCard = () => {
         }
 
         setLookingForArray(updatedLookingFor);
-        debouncedSaveLookingFor(updatedLookingFor); // Save updated value to the database
+
+        try {
+            const {data, error} = await supabase
+                .from('User information')
+                .update({looking_for: updatedLookingFor})
+                .eq('user_id', user_id);
+            if (error) throw error;
+
+            message.success("op zoek naar opgeslagen")
+            console.log(`Looking for updated successfully width value ${updatedLookingFor}`);
+        } catch (error) {
+            message.error("probleem bij het opslaan van op zoek naar")
+            console.error('Error saving looking for:', error);
+        };
     };
 
     const handleLivingChange = (value) => {
         setLivingSituation(value);
-        debouncedSaveLivingSituation(value);
+        saveField(user_id, 'living_situation', value);
     }
 
     const handleMobilityChange = (value)=>{
         setMobility(value);
-        debouncedSaveMobility(value);
+        saveField(user_id, 'mobility', value);
     }
 
     const handlePictureUpload = async ({ file }) => {
@@ -423,7 +417,6 @@ const ProfileCard = () => {
             if (urlError) throw urlError;
 
             const imageUrl = fileData.publicUrl;
-            const imageUrlWithCacheBuster = `${imageUrl}?t=${new Date().getTime()}`;
 
             const { error: dbInsertError } = await supabase
                 .from('Pictures')
@@ -432,7 +425,7 @@ const ProfileCard = () => {
             if (dbInsertError) throw dbInsertError;
 
             setImages((prevImages) => {
-                const updatedImages = [...prevImages, imageUrlWithCacheBuster];
+                const updatedImages = [...prevImages, imageUrl];
 
                 // Automatically scroll to the last image
                 setTimeout(() => {
@@ -478,8 +471,6 @@ const ProfileCard = () => {
                 throw dbDeleteError;
             }
 
-            console.log("removed picture:", imageUrlToRemove)
-
             setImages((prevImages) => {
                 return prevImages.filter((url) => url !== imageUrlToRemove);
             });
@@ -496,7 +487,7 @@ const ProfileCard = () => {
         try {
             setUploading(true);
 
-            const imageUrlWithCacheBuster = await uploadProfilePicture(user_id, file, 'profile-pictures');
+            const imageUrlWithCacheBuster = await requests(user_id, file, 'profile-pictures');
 
             setProfilePicture(imageUrlWithCacheBuster);
             localStorage.setItem('profile_picture', imageUrlWithCacheBuster);
@@ -627,7 +618,7 @@ const ProfileCard = () => {
 
                     <p style={{width: '100%'}}>
                         <strong style={{display: 'block', marginBottom: '10px'}}>
-                            <BookOutlined/> Biografie:
+                            <BookOutlined/> Biografie
                         </strong>
                         <div style={{position: 'relative', width: '100%', minWidth: '200px'}}>
                             <TextArea
@@ -636,6 +627,7 @@ const ProfileCard = () => {
                                 placeholder="Vertel iets over jezelf"
                                 value={biography}
                                 onChange={handleBiographyChange}
+                                onBlur={handleBiographySave}
                                 maxLength={200}
                             />
                             <div
@@ -657,7 +649,7 @@ const ProfileCard = () => {
 
                     <p style={{width: '100%'}}>
                         <strong style={{display: 'block', marginBottom: '10px'}}>
-                            <EnvironmentOutlined/> Locatie:
+                            <EnvironmentOutlined/> Locatie
                         </strong>
                         <Select
                             showSearch
@@ -695,7 +687,7 @@ const ProfileCard = () => {
 
                     <p style={{width: '100%'}}>
                         <strong style={{display: 'block', marginBottom: '10px'}}>
-                            <UserOutlined/> Geslacht:
+                            <UserOutlined/> Geslacht
                         </strong>
                         <Select
                             style={{width: '100%', minWidth: '200px'}}
@@ -715,7 +707,7 @@ const ProfileCard = () => {
 
                     <p style={{width: '100%'}}>
                         <strong style={{display: 'block', marginBottom: '10px'}}>
-                            <StarOutlined/> Interesses:
+                            <StarOutlined/> Interesses
                         </strong>
                         <Select
                             mode="multiple"
@@ -759,7 +751,7 @@ const ProfileCard = () => {
 
                     <p style={{width: '100%'}}>
                         <strong style={{display: 'block', marginBottom: '10px'}}>
-                            <HeartOutlined/> Ik zoek naar:
+                            <HeartOutlined/> Ik zoek naar
                         </strong>
                         <div
                             style={{
@@ -795,7 +787,7 @@ const ProfileCard = () => {
 
                     <p style={{width: '100%'}}>
                         <strong style={{display: 'block', marginBottom: '10px'}}>
-                            <HomeOutlined/> Woonsituatie:
+                            <HomeOutlined/> Woonsituatie
                         </strong>
                         <Select
                             placeholder="Selecteer jouw woonsituatie"
@@ -818,7 +810,7 @@ const ProfileCard = () => {
 
                     <p style={{width: '100%'}}>
                         <strong style={{display: 'block', marginBottom: '10px'}}>
-                            <CarOutlined/> Kan zich zelfstanding verplaatsen:
+                            <CarOutlined/> Kan zich zelfstanding verplaatsen
                         </strong>
                         <Select
                             value={mobility}
@@ -837,7 +829,7 @@ const ProfileCard = () => {
                     <div style={{marginTop: '20px', marginBottom: '20px'}}>
                         <p>
                             <strong style={{width: '40%', minWidth: '100px', flexShrink: 0}}>
-                                <PictureOutlined/> Meer fotos van jezelf tonen:
+                                <PictureOutlined/> Meer fotos van jezelf tonen
                             </strong>
                         </p>
                         <Carousel

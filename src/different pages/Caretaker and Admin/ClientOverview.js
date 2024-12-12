@@ -24,8 +24,11 @@ import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
 import useHandleRequest from "../../UseHooks/useHandleRequest";
 import useFetchCaretakerData from "../../UseHooks/useFetchCaretakerData";
 import useTheme from "../../UseHooks/useTheme";
+import {fetchPendingRequestsData} from "../../Utils/requests";
 
-const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q");
+const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
+const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 const useFetchClients = (actCode) => {
     const [clients, setClients] = useState([]);
@@ -61,81 +64,6 @@ const useFetchClients = (actCode) => {
     return { clients, error };
 };
 
-const useFetchProfileData = (actCode) => {
-    const [profileData, setProfileData] = useState({});
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState(null);
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                // Fetch user data
-                const { data: userData, error: userError } = await supabase
-                    .from('Caretaker')
-                    .select('*')
-                    .eq('id', actCode);
-
-                if (userError) throw userError;
-
-                if (userData.length > 0) {
-                    const user = userData[0];
-
-                    let parsedTheme = 'blauw';
-                    let isDarkMode = false;
-
-                    if (user.theme) {
-                        try {
-                            const [themeName, darkModeFlag] = JSON.parse(user.theme);
-                            parsedTheme = themeName;
-                            isDarkMode = darkModeFlag;
-                        } catch (error) {
-                            console.error('Error parsing theme', error);
-                        }
-                    }
-
-                    console.log(user)
-                    // Set the user profile data with the theme
-                    setProfileData({
-                        ...user,
-                        theme: isDarkMode ? `${parsedTheme}_donker` : parsedTheme
-                    });
-                }
-            } catch (error) {
-                setError(error.message);
-            } finally {
-                console.log("user element: ", profileData)
-                setIsLoading(false);
-            }
-        };
-
-        fetchData();
-    }, [actCode]);
-
-    return { profileData };
-};
-
-const deleteClient = async (clientId) => {
-    try {
-        const { error } = await supabase
-            .from("User")
-            .delete()
-            .eq("id", clientId);
-
-        if (error) throw error;
-
-        const { infoError } = await supabase
-            .from("User information")
-            .delete()
-            .eq("user_id", clientId)
-
-        if (infoError) throw infoError;
-
-        message.success("Klantaccount succesvol gedeactiveerd!");
-    } catch (error) {
-        message.error("Klantaccount deactiveren is mislukt: " + error.message);
-    }
-};
-
 const useFetchCaretakers = (organizationId) => {
     const [caretakers, setCaretakers] = useState([]);
     const [error, setError] = useState(null);
@@ -149,8 +77,6 @@ const useFetchCaretakers = (organizationId) => {
                     .eq("organisation", organizationId)
                     .eq("usable", false)
                     .eq("type", "caretaker");
-
-                console.log(activationData)
 
                 if (idError) throw new Error(`Fout bij het ophalen van activatiecodes: ${idError.message}`);
                 if (!activationData || activationData.length === 0) {
@@ -212,6 +138,8 @@ const ClientOverview = () => {
 
     const [isWideEnough, setIsWideEnough] = useState(window.innerWidth >= 800);
 
+    const [accessLevels, setAccessLevels] = useState({});
+
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -245,7 +173,6 @@ const ClientOverview = () => {
                             currentAccessLevel: clientData?.access_level// Default to 'Unknown Caretaker' if not found
                         };
                     }));
-                    console.log(updatedNotifications)
                     // Set the notifications state with updated data
                     setNotifications(updatedNotifications);
                 }
@@ -264,6 +191,13 @@ const ClientOverview = () => {
 
     useEffect(() => {
         setLocalClients(clients);
+
+        const initialAccessLevels = clients.reduce((acc, client) => {
+            const [profilePicture, name, accessLevel, id] = client;
+            acc[id] = accessLevel; // Map client ID to their access level
+            return acc;
+        }, {});
+        setAccessLevels(initialAccessLevels);
     }, [clients]);
 
     useEffect(() => {
@@ -375,6 +309,7 @@ const ClientOverview = () => {
                         const requestedAccessLevel = notification.details?.requested_access_level || "Onbekend toegangsniveau";
 
                         return (
+                            <div>
                             <Menu.Item key={index}>
                                 <div>
                                     <p>
@@ -413,9 +348,10 @@ const ClientOverview = () => {
                                     </div>
                                 </div>
                             </Menu.Item>
+                            <Menu.Divider />
+                            </div>
                         );
                     })}
-                    <Menu.Divider />
                 </>
             ) : (
                 <Menu.Item>Geen nieuwe meldingen</Menu.Item>
@@ -427,6 +363,16 @@ const ClientOverview = () => {
         (notification, action) => {
             setNotifications((prev) => prev.filter((n) => n.id !== notification.id));
             setUnreadCount((prev) => prev - 1);
+            console.log(notification)
+            if (action === 'accept'){
+                const requestedAccessLevel = notification.details?.requested_access_level || "Onbekend";
+                const userId = notification.requester_id;
+                // should change the access level on the corresponding select element
+                setAccessLevels((prev) => ({
+                    ...prev,
+                    [userId]: requestedAccessLevel, // Update the level for this user
+                }));
+            }
         }
     )
 
@@ -435,7 +381,6 @@ const ClientOverview = () => {
 
     const handleClientClick = (client) => {
         setSelectedClient(client);
-        console.log(client)
         setIsModalVisible(true);
     };
 
@@ -464,6 +409,7 @@ const ClientOverview = () => {
             message.success("Toegangsniveau wijziging verzoek verzonden!");
         } catch (error) {
             message.error("Fout bij het verzenden van toegangsniveau wijziging verzoek: " + error.message);
+
             setPendingRequests((prev) => {
                 const updated = { ...prev };
                 delete updated[clientId]; // Remove pending status on error
@@ -473,11 +419,22 @@ const ClientOverview = () => {
     };
 
     const handleDelete = (clientId) => {
-        // deleteClient(clientId);
-        setLocalClients((prevClients) =>
-            prevClients.filter((client) => client[3] !== clientId)
-        );
+        deleteClient(clientId);
     };
+
+    const deleteClient = async (clientId) => {
+        const {error} = await supabase
+            .from('Activation').delete().eq('code', clientId)
+        if (error) {
+            message.error("Probleem bij het verwijderen van client")
+            console.log("issue with delting client")
+        } else {
+            message.success("Client verwijderd")
+            setLocalClients((prevClients) =>
+                prevClients.filter((client) => client[3] !== clientId)
+            );
+        }
+    }
 
     const handleCaretakerChange = async (clientId, newCaretakerId) => {
         try {
@@ -503,25 +460,8 @@ const ClientOverview = () => {
     };
 
     const fetchPendingRequests = async (caretakerId) => {
-        try {
-            const { data, error } = await supabase
-                .from('Notifications')
-                .select('recipient_id, details')
-                .eq('requester_id', caretakerId)
-                .eq('type', 'ACCESS_LEVEL_CHANGE');
-
-            if (error) throw error;
-
-            // Map the data to a format usable by the state
-            const pending = data.reduce((acc, request) => {
-                acc[request.recipient_id] = request.details.requested_access_level;
-                return acc;
-            }, {});
-
-            setPendingRequests(pending); // Update the pending requests state
-        } catch (error) {
-            console.error('Error fetching pending requests:', error.message);
-        }
+        const pendingRequests = await fetchPendingRequestsData(caretakerId);
+        setPendingRequests(pendingRequests);
     };
 
     const columns = [
@@ -548,7 +488,7 @@ const ClientOverview = () => {
                 return (
                     <div>
                         <Select
-                            defaultValue={accessLevel}
+                            value={accessLevels[record.id] || accessLevel}
                             onChange={(value) => handleAccessLevelChange(profileData.id, record.id, value)}
                             style={{ width: "90%", maxWidth: "400px" }}
                             className="prevent-row-click"
@@ -604,7 +544,7 @@ const ClientOverview = () => {
                             maxWidth: "400px"
                         }}
                     >
-                        Account Deactiveren <DeleteOutlined />
+                        Account Verwijderen <DeleteOutlined />
                     </Button>
                 </div>
             ),
@@ -721,6 +661,7 @@ const ClientOverview = () => {
                                 pagination={{ pageSize: pageSize }}
                                 style={{
                                     marginTop: "20px",
+                                    cursor: "pointer",
                                 }}
                                 onRow={(record) => ({
                                     onClick: (event) => {

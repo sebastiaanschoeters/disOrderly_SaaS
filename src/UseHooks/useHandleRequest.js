@@ -1,12 +1,12 @@
 import { message } from 'antd';
 import {createClient} from "@supabase/supabase-js";
 
-const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
+const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
+const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 const useHandleRequest = (onSuccess = () => {}, onError = () => {}) => {
     const handleRequest = async (notification, action, acceptedByCaretaker) => {
-        console.log(notification)
-        console.log(action)
         let idToUpdate
         if (acceptedByCaretaker) {
             idToUpdate = notification.requester_id
@@ -20,9 +20,6 @@ const useHandleRequest = (onSuccess = () => {}, onError = () => {}) => {
                     .from('User')
                     .update( {access_level: notification.details.requested_access_level})
                     .eq('id', idToUpdate);
-
-                console.log(notification.details.requested_access_level)
-                console.log(idToUpdate)
 
                 if (accessLevelError) throw accessLevelError;
             }

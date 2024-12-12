@@ -5,10 +5,9 @@ import {UserOutlined} from "@ant-design/icons";
 import ProfileCard from "./CaretakerProfilePage";
 import {useNavigate} from "react-router-dom";
 
-const supabase = createClient(
-    "https://flsogkmerliczcysodjt.supabase.co",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q"
-);
+const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
+const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 const useContacts = (userID) => {
     const [contacts, setContacts] = useState([]);
@@ -19,8 +18,6 @@ const useContacts = (userID) => {
                 .from('Chatroom')
                 .select('id, sender_id, receiver_id, acceptance, senderProfile: sender_id(id, name, profile_picture, caretaker), receiverProfile: receiver_id(id, name, profile_picture, caretaker)')
                 .or(`sender_id.eq.${userID},receiver_id.eq.${userID}`);
-
-            console.log(data)
 
             if (error) {
                 console.error('Error fetching chatrooms:', error);
@@ -40,7 +37,6 @@ const useContacts = (userID) => {
                         isSender: isSender
                     };
                 });
-                console.log(formattedContacts)
                 setContacts(formattedContacts);
             }
         };
@@ -98,7 +94,6 @@ const ContactsOverview = ({ id: userID , conversations: conversations}) => {
     }, []);
 
     function handleCaretakerClick(caretaker, clientName) {
-        console.log("caretaker clicked:", caretaker)
         setSelectedCaretakerId(caretaker);
         setClientName(clientName);
         setIsModalVisible(true);
@@ -150,7 +145,6 @@ const ContactsOverview = ({ id: userID , conversations: conversations}) => {
     }));
 
     function handleClientClick(record) {
-        console.log("clicked: ", {record})
         const profileData = {
             name: record.profileName,
             profilePicture: record.profilePicture,
@@ -178,20 +172,20 @@ const ContactsOverview = ({ id: userID , conversations: conversations}) => {
                     showHeader={false}
                     rowKey="id"
                     pagination={{ pageSize: pageSize }}
-                    style={{ marginTop: "20px" }}
-                    onRow={(record) => ({
+                    style={{ marginTop: "20px", cursor: conversations ? "pointer" : "default" }}
+                    onRow={conversations ? (record) => ({
                         onClick: (event) => {
                             // Prevent clicks on select and buttons from triggering row click
                             if (!event.target.closest(".prevent-row-click")) {
                                 handleClientClick(record);
                             }
                         },
-                    })}
+                    }) : undefined}
                     rowClassName="clickable-row"
                 />
             ) : (
                 <p>Geen contacten gevonden</p>
-            )}
+            ) }
             {/* Modal to display caretaker details */}
             <Modal
                 title={`Contact gegevens begeleiding van ${clientName}`}

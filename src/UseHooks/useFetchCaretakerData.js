@@ -1,7 +1,9 @@
 import {useEffect, useState} from "react";
 import {createClient} from "@supabase/supabase-js";
 
-const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
+const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
+const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 const useFetchCaretakerData = (actCode, options = { fetchOrganization: true }) => {
     const [profileData, setProfileData] = useState({});
@@ -42,7 +44,6 @@ const useFetchCaretakerData = (actCode, options = { fetchOrganization: true }) =
                             .from("Activation")
                             .select("Organisation: organisation(name, id)")
                             .eq("code", actCode);
-                        console.log(userOrganization[0].Organisation.name)
 
                         if (userOrganizationError) throw userOrganizationError;
 

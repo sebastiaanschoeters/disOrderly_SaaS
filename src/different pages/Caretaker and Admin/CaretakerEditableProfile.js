@@ -10,12 +10,12 @@ import {createClient} from "@supabase/supabase-js";
 import HomeButton from '../../Extra components/HomeButtonCaretaker'
 import useFetchCaretakerData from "../../UseHooks/useFetchCaretakerData";
 import ThemeSelector from "../../Extra components/ThemeSelector";
-import {debounce} from "../../Api/Utils";
 import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
-import {uploadProfilePicture} from "../../Utils/uploadProfilePicture";
-import {useNavigate} from "react-router-dom";
+import {requests} from "../../Utils/requests";
 
-const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
+const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
+const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 const ProfileCard = () => {
     const caretaker_id = localStorage.getItem('user_id');
@@ -39,7 +39,6 @@ const ProfileCard = () => {
     useEffect(() => {
         if (profileData.theme) {
             try {
-                console.log(profileData.theme)
                 let savedTheme = profileData.theme;
 
                 if (savedTheme.endsWith('_donker')) {
@@ -64,72 +63,89 @@ const ProfileCard = () => {
         }
     }, [profileData]);
 
-    // Define async save functions
     const saveField = async (field, value) => {
-        let dutch_field = ''
+        // Map English field names to Dutch equivalents
+        const fieldTranslations = {
+            theme: "thema",
+            phone_number: "gsm nummer",
+            email: "email",
+        };
 
-        if (field === "theme"){
-            dutch_field = "thema"
-        } else if (field === "phone_number"){
-            dutch_field = "gsm nummer"
-        } else if (field === "email"){
-            dutch_field = "email"
-        }
+        // Get the Dutch equivalent or fall back to the original field name
+        const dutch_field = fieldTranslations[field] || field;
 
         try {
-            const { data, error } = await supabase
+            const { error } = await supabase
                 .from('Caretaker')
                 .update({ [field]: value })
                 .eq('id', profileData.id);
-            if (error) throw error;
 
-            message.success(`${dutch_field} opgeslagen`)
+            if (error) {
+                // Handle error directly without throwing it
+                message.error(`Probleem bij het opslaan van ${dutch_field}`);
+                console.error(`Error saving ${field}:`, error);
+                return;  // Early return to exit function
+            }
+
+            // Display success message
+            message.success(`${dutch_field} opgeslagen`);
             console.log(`${field} saved successfully with value ${value}`);
         } catch (error) {
-            message.error(`probleem bij het opslaan van ${dutch_field}`)
-            console.error(`Error saving ${field}:`, error);
+            // Display error message for unexpected errors
+            message.error(`Probleem bij het opslaan van ${dutch_field}`);
+            console.error(`Unexpected error saving ${field}:`, error);
         }
     };
 
-    const debounceSavePhoneNumber = debounce((value) => saveField('phone_number', value), 1000);
-    const debounceSaveEmail = debounce((value) => saveField('email', value), 1000);
-    const debouncedSaveTheme = debounce(async (newTheme, darkModeFlag) => {
+    const handleThemeChange = async (value) => {
+        setTheme(value);
         try {
-            const themeData = [newTheme, darkModeFlag]; // Ensure both theme and dark mode flag are saved together
+            const themeData = [value, isDarkMode]; // Ensure both theme and dark mode flag are saved together
             await saveField('theme', JSON.stringify(themeData));
-            localStorage.setItem('theme',JSON.stringify(themeData))// Save it as a stringified JSON array
+            localStorage.setItem('theme', JSON.stringify(themeData))
         } catch (error) {
             console.error('Error saving theme:', error);
         }
-    }, 500);
-
-    const handleThemeChange = (value) => {
-        setTheme(value);
-        debouncedSaveTheme(value, isDarkMode); // Save theme with dark mode flag
     };
 
-    const handleThemeToggle = (checked) => {
+    const handleThemeToggle = async (checked) => {
         setIsDarkMode(checked);
-        debouncedSaveTheme(theme, checked); // Save theme with dark mode flag
+        try {
+            const themeData = [theme, checked]; // Ensure both theme and dark mode flag are saved together
+            await saveField('theme', JSON.stringify(themeData));
+            localStorage.setItem('theme', JSON.stringify(themeData))
+        } catch (error) {
+            console.error('Error saving theme:', error);
+        }
     };
 
     const handlePhoneNumberChange = (e) => {
-        const newValue = e.target.value;
-        setPhoneNumber(newValue);
-        debounceSavePhoneNumber(newValue);
+        const newValue = e.target.value.replace(/[^0-9+]/g, '');
+        if (newValue.length <= 11) { // Ensure the length is no more than 10
+            setPhoneNumber(newValue);
+        }
+    };
+
+    const handlePhoneNumberSave = (e) => {
+        const newValue = e.target.value.replace(/[^0-9+]/g, '');
+        if (newValue.length <= 11) { // Ensure the length is no more than 10
+            setPhoneNumber(newValue);
+            saveField('phone_number', newValue);
+        }
     }
+
 
     const handleEmailChange = (e) => {
         const newValue = e.target.value;
         setEmail(newValue);
-        debounceSaveEmail(newValue);
+        saveField('email', newValue);
     }
 
     const handleProfilePictureUpload = async ({ file }) => {
         try {
             setUploading(true);
 
-            const imageUrlWithCacheBuster = await uploadProfilePicture(profileData.id, file, 'profile-pictures-caretakers');
+            const imageUrlWithCacheBuster = await requests(profileData.id, file, 'profile-pictures-caretakers');
 
             setProfilePicture(imageUrlWithCacheBuster);
 
@@ -222,6 +238,8 @@ const ProfileCard = () => {
                             placeholder="Geef je telefoon nummer in"
                             value={phoneNumber}
                             onChange={handlePhoneNumberChange}
+                            onBlur={handlePhoneNumberSave}
+                            maxLength={11}
                         />
                     </p>
 

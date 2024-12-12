@@ -4,7 +4,6 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import {ArrowDownOutlined, PlusOutlined, SendOutlined} from '@ant-design/icons';
 import {antThemeTokens, ButterflyIcon, ButterflyIconSmall, themes} from '../../Extra components/themes';
 import { createClient } from "@supabase/supabase-js";
-import '../../CSS/ChatPage.css';
 import HomeButtonUser from "../../Extra components/HomeButtonUser";
 import HangmanGame from "./Hangman";
 import useTheme from "../../UseHooks/useTheme";
@@ -16,21 +15,25 @@ import butterfly3 from '../../Media/butterfly3.png';
 import butterfly4 from '../../Media/butterfly4.png';
 import butterfly5 from '../../Media/butterfly5.png';
 import ProfileDetailsModal from "../Profile Pages/ProfileDetailsModal";
+import {handleModalProfileClose, handleProfileClick} from "../../Api/Utils";
 
-
-
-const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
+const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
+const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 const ChatPage = () => {
     const caretaker = localStorage.getItem('controlling');
+    const userType = localStorage.getItem('userType');
+    console.log("usertype:", userType)
     const location = useLocation();
     const {profileData} = location.state || {};
-    const {name, profilePicture, chatroomId, otherUserId} = profileData || {};
+    const {name, profilePicture, chatroomId, otherUserId, user_id} = profileData || {};
     const navigate = useNavigate();
 
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState("");
-    const userId = parseInt(localStorage.getItem('user_id'), 10);
+    const userId = user_id
+    // const userId = parseInt(localStorage.getItem('user_id'), 10);
     const [loading, setLoading] = useState(false);
     const [loadingMore, setLoadingMore] = useState(false);
 
@@ -52,11 +55,11 @@ const ChatPage = () => {
     const [selectedClient, setSelectedClient] = useState({});
 
     if(!chatroomId){
-        if(localStorage.getItem('userType') == "user"){
+        if(localStorage.getItem('userType') === "user"){
             navigate("/home");
             message.error("deze pagina is niet beschikbaar via deze link");
         }
-        else if(localStorage.getItem('userType') == "caretaker"){
+        else if(localStorage.getItem('userType') === "caretaker"){
             navigate("/clientOverview");
             message.error("deze pagina is niet beschikbaar via deze link");
         }
@@ -229,17 +232,6 @@ const ChatPage = () => {
         setIsModalVisible(true);
     };
 
-    const handleProfileClick = (client) => {
-        console.log(client)
-        setSelectedClient({id: client});
-        setIsModalProfileVisible(true);
-    };
-
-    const handleModalProfileClose = () => {
-        setSelectedClient({});
-        setIsModalProfileVisible(false);
-    };
-
     const styles = {
         background: {
             width: '100dvw',
@@ -275,6 +267,7 @@ const ChatPage = () => {
             marginBottom: '15px',
             width: '100%',
             position: 'relative',
+            cursor: 'pointer',
         },
         avatar: {
             marginRight: '20px',
@@ -362,16 +355,16 @@ const ChatPage = () => {
                 zIndex: '0'
                 }}
             >
-                <HomeButtonUser color={themeColors.primary7} />
+                {userType !== "caretaker" && (<HomeButtonUser color={themeColors.primary7} />)}
+
                 <ButterflyIcon color={themeColors.primary3} />
 
-                <Card style={styles.card} bordered>
+                <Card style={styles.card} bordered >
                     <div style={styles.chatContainer}>
-                        <div style={styles.header}>
+                        <div style={styles.header} onClick={() => handleProfileClick(otherUserId)}>
                             <Avatar
                                 src={profilePicture || 'default-avatar.png'}
                                 style={styles.avatar}
-                                onClick={() => handleProfileClick(otherUserId)}
                             >
                                 U
                             </Avatar>
@@ -379,7 +372,7 @@ const ChatPage = () => {
                                 {`${name}`}
                             </h2>
                         </div>
-                        <div style={styles.messageList} ref={messageListRef} onScroll={handleScroll}>
+                        <div style={styles.messageList} className={'messageList'} ref={messageListRef} onScroll={handleScroll}>
                             {!loadingMore && !noMoreMessages && (
                                 <p
                                     onClick={handleLoadMore}
@@ -487,21 +480,24 @@ const ChatPage = () => {
                             />
                             <div ref={dummyRef}/>
                         </div>
-                        <div style={styles.inputContainer}>
-                            <Button type="primary"
-                                    style={styles.sendButton}
-                                    icon={<PlusOutlined/>}
-                                    onClick={handleHangman}/>
-                            <Input
-                                style={styles.input}
-                                placeholder="Type hier..."
-                                value={newMessage}
-                                onChange={(e) => setNewMessage(e.target.value)}
-                                onPressEnter={handleSendMessage}
-                            />
-                            <Button type="primary" style={styles.sendButton} icon={<SendOutlined/>}
-                                    onClick={handleSendMessage}/>
-                        </div>
+                        {userType !== "caretaker" && (
+                            <div style={styles.inputContainer}>
+                                <Button type="primary"
+                                        style={styles.sendButton}
+                                        icon={<PlusOutlined/>}
+                                        onClick={handleHangman}/>
+                                <Input
+                                    style={styles.input}
+                                    placeholder="Type hier..."
+                                    value={newMessage}
+                                    onChange={(e) => setNewMessage(e.target.value)}
+                                    onPressEnter={handleSendMessage}
+                                />
+                                <Button type="primary" style={styles.sendButton} icon={<SendOutlined/>}
+                                        onClick={handleSendMessage}/>
+                            </div>
+                        )}
+
                     </div>
                 </Card>
             </div>
@@ -518,7 +514,7 @@ const ChatPage = () => {
             {selectedClient && (
                 <ProfileDetailsModal
                     visible={isModalProfileVisible}
-                    onClose={handleModalProfileClose}
+                    onClose={()=> handleModalProfileClose(setSelectedClient, setIsModalProfileVisible)}
                     clientData={selectedClient}
                 />
             )}

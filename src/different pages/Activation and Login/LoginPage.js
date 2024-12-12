@@ -27,11 +27,11 @@ const LoginPage = () => {
     const [isTransitioning, setIsTransitioning] = useState(false); // To handle transition state
     const themeColors = themes[theme] || themes.blauw; // Get theme colors dynamically
     const navigate = useNavigate();
-    //const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
-    //const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
-    //const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co/", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q");
+    const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
+    const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
     useThemeOnCSS(themeColors);
 
     // Function to change the theme dynamically
@@ -233,6 +233,7 @@ const LoginPage = () => {
                             ]}
                         >
                             <Input
+                                name="email"
                                 onBlur={(e) => {
                                     const emailValue = e.target.value;
                                     if(emailValue) {
@@ -251,6 +252,7 @@ const LoginPage = () => {
                             ]}
                         >
                             <Input.Password
+                                name="password"
                                 onChange={(e) => {
                                     const emailField = document.querySelector("#loginForm_email");
                                     if(!themeToSet) {
@@ -261,6 +263,7 @@ const LoginPage = () => {
                         </Form.Item>
                         <Form.Item>
                             <Button
+                                name ="submit"
                                 type="primary"
                                 htmlType="submit"
                                 style={{ width: '100%' }}

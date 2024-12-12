@@ -1,4 +1,4 @@
-import {getName, getPfp, getTheme, getThemeCaretaker} from "../Api/Utils";
+import {getName, getPfp, getTheme} from "../Api/Utils";
 
 export const storeUserSession = async (userId, userType, setIsTransitioning, navigate) => {
     let theme = [];

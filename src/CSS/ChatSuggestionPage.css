@@ -1,3 +1,31 @@
+.buttonContainer {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    width: 75%;
+}
+.buttonContainerEdit {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    width: 75%;
+}
+
+@media (max-width: 500px) {
+    .buttonContainer {
+        flex-direction: column;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        width:  100%;
+    }
+}
+
 .ant-btn-accept:hover {
     background-color: green !important;
     border-color: green !important;

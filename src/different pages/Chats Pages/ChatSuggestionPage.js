@@ -8,10 +8,11 @@ import HomeButtonUser from "../../Extra components/HomeButtonUser";
 import useTheme from "../../UseHooks/useTheme";
 import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
 import ProfileDetailsModal from "../Profile Pages/ProfileDetailsModal";
+import {handleModalProfileClose, handleProfileClick} from "../../Api/Utils";
 
-
-const supabase = createClient("https://flsogkmerliczcysodjt.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsc29na21lcmxpY3pjeXNvZGp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNTEyODYsImV4cCI6MjA0NDgyNzI4Nn0.5e5mnpDQAObA_WjJR159mLHVtvfEhorXiui0q1AeK9Q")
-
+const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
+const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 const { Title } = Typography;
 
@@ -128,18 +129,6 @@ const ChatSuggestionPage = () => {
         fetchMessages(chatroomId);
     }, [chatroomId]);
 
-
-    const handleProfileClick = (client) => {
-        console.log(client)
-        setSelectedClient({id: client});
-        setIsModalProfileVisible(true);
-    };
-
-    const handleModalProfileClose = () => {
-        setSelectedClient({});
-        setIsModalProfileVisible(false);
-    };
-
     const styles = {
         container: {
             padding: '20px',
@@ -161,6 +150,7 @@ const ChatSuggestionPage = () => {
             borderRadius: '8px',
             marginBottom: '15px',
             position: 'relative',
+            cursor: 'pointer',
         },
         headerAvatar: {
             marginRight: '10px',
@@ -175,15 +165,9 @@ const ChatSuggestionPage = () => {
             marginBottom: '20px',
             width: '75%',
         },
-        buttonContainer: {
-            display: 'flex',
-            justifyContent: 'space-between',
-            width: '75%',
-        },
         button:{
-            margin: '0 5px',
             flex: 1,
-            maxWidth: '250px',
+            width: '75%',
         },
         editButton:{
             width: '50%',
@@ -204,7 +188,9 @@ const ChatSuggestionPage = () => {
     const handleDecline = () => {
         deleteMessages(chatroomId);
         deleteChatroom(chatroomId);
-        navigate('/chatOverview');
+        setTimeout(() => {
+            navigate('/chatOverview');
+        }, 300);
     };
 
     const handleBlock = () => {
@@ -227,7 +213,7 @@ const ChatSuggestionPage = () => {
 
 
     return (
-        <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
+        <ConfigProvider theme={{token: antThemeTokens(themeColors)}}>
             <div
                 style={{
                     padding: '20px',
@@ -245,19 +231,18 @@ const ChatSuggestionPage = () => {
                     zIndex: '0'
                 }}
             >
-                <HomeButtonUser color={themeColors.primary7} />
-                <ButterflyIcon color={themeColors.primary3} />
+                <HomeButtonUser color={themeColors.primary7}/>
+                <ButterflyIcon color={themeColors.primary3}/>
 
-                <div style={styles.header}>
+                <div style={styles.header} onClick={() => handleProfileClick(otherUserId)}>
                     <Avatar src={profilePicture || 'default-avatar.png'}
-                            onClick={() => handleProfileClick(otherUserId)}
                             style={styles.headerAvatar}>U</Avatar>
                     <Title level={2} style={{margin: 0, color: themeColors.primary10}} h2>{`${name}`}</Title>
                 </div>
                 <div style={styles.messageContainer}>
                     <p>{message}</p>
                 </div>
-                <div style={styles.buttonContainer}>
+                <div className="buttonContainer" >
                     {!isSender && (
                         <>
                             <Button className="ant-btn-accept" style={styles.button}
@@ -273,7 +258,8 @@ const ChatSuggestionPage = () => {
                 <div>
                     {isSender && (
                         <>
-                            <Button styles={styles.editButton} onClick={handleEdit}>Bewerken</Button>
+                            <Button styles={styles.editButton} className="ant-btn-bewerk"
+                                    onClick={handleEdit}>Bewerken</Button>
                         </>
                     )}
                 </div>
@@ -298,7 +284,7 @@ const ChatSuggestionPage = () => {
             {selectedClient && (
                 <ProfileDetailsModal
                     visible={isModalProfileVisible}
-                    onClose={handleModalProfileClose}
+                    onClose={()=>handleModalProfileClose(setSelectedClient, setIsModalProfileVisible)}
                     clientData={selectedClient}
                 />
             )}

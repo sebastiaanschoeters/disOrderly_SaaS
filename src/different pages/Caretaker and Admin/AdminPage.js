@@ -415,6 +415,7 @@ const AdminPage = () => {
                     position: 'relative',
                     width: '100%',
                     height: '100%',
+                    minHeight: '100vh',
                     backgroundColor: themeColors.primary2,
                     color: themeColors.primary10,
                     display: 'flex',

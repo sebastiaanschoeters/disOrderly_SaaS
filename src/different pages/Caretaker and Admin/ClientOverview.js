@@ -575,9 +575,9 @@ const ClientOverview = () => {
         else {
             await fetchActivationCodes;
             console.log(caretaker_id)
-            const newCode = caretaker_id + getRandomInt(1000, 9999)
+            let newCode = caretaker_id + getRandomInt(1000, 9999)
             while (allActivationCodes.includes(newCode)) {
-                const newCode = caretaker_id + getRandomInt(1000, 9999);
+                newCode = caretaker_id + getRandomInt(1000, 9999);
             }
 
             const {error} = await supabase.from("Activation").insert({"code": newCode,"usable": true, "type": "user", "organisation": profileData.organizationId}).select();

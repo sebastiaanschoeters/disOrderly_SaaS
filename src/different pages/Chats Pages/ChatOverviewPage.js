@@ -54,6 +54,11 @@ const ChatOverviewPage = () => {
             }
 
             const lastMessageParse = (message) => {
+                const truncate = (str) => {
+                    const maxLength = 12
+                    return str.length > maxLength ? str.slice(0, maxLength) + "..." : str;
+                };
+
                 if(message.startsWith("ButterflyIcon")) {
                     const contentAfterIcon = message.slice(13).trim();
 
@@ -61,10 +66,10 @@ const ChatOverviewPage = () => {
                     const title = indexMatch ? indexMatch[2] : ""; // Rest is the title
 
                     const [mainTitle, extraContent] = title.split('!').map(part => part.trim());
-                    return mainTitle;
+                    return truncate(mainTitle);
 
                 } else {
-                    return message;
+                    return truncate(message);
                 }
             }
 
@@ -166,6 +171,13 @@ const ChatOverviewPage = () => {
             borderRadius: '5px',
             fontSize: '1rem',
         },
+        timeContainer: {
+            position: 'absolute',
+            bottom: '5px', // Adjust as needed
+            right: '5px',  // Adjust as needed
+            fontSize: '0.8rem',
+            color: '#888', // Lighter text color for subtlety
+        },
     };
 
     return (
@@ -221,29 +233,36 @@ const ChatOverviewPage = () => {
                             >
                                 <Card.Meta
                                     avatar={<Avatar src={chat.profilePicture || 'default-avatar.png'} style={{width: '65px', height: '65px'}}/>}
-                                    title={<span style={styles.name}>{chat.profileName}</span>}
+                                    title={
+                                        <span style={styles.name}>
+                                            <span style={{ fontWeight: chat.last_sender_id !== userID ? 'bold' : 'normal' }}>{chat.profileName}</span>
+                                            {' '}
+                                        </span>
+                                    }
                                     description={
+                                    <>
                                         <span style={styles.lastMessage}>
-                                        {
-                                            // Check if the message was sent today
-                                            (() => {
-                                                const messageTime = moment(chat.last_message_time); // Convert string to moment object
-                                                const today = moment();
-
-                                                // If the message was sent today, show only the time
-                                                if (messageTime.isSame(today, 'day')) {
-                                                    return <i><b>{messageTime.format('HH:mm')}</b></i>; // Display time in HH:mm format and italic
-                                                } else {
-                                                    return <i><b>{messageTime.format('DD-MM')}</b></i>; // Display the date in DD-MM format and italic
-                                                }
-                                            })()
-                                        }
-                                        {' '}
                                             {chat.last_sender_id === userID && (
                                                 "jij: "
                                             )}
                                             {chat.last_message}
-                                    </span>
+                                        </span>
+                                        <div style={styles.timeContainer}>
+                                            {
+                                                (() => {
+                                                    const messageTime = moment(chat.last_message_time); // Convert string to moment object
+                                                    const today = moment();
+
+                                                    // If the message was sent today, show only the time
+                                                    if (messageTime.isSame(today, 'day')) {
+                                                        return <i>{messageTime.format('HH:mm')}</i>; // Display time in HH:mm format and italic
+                                                    } else {
+                                                        return <i>{messageTime.format('DD-MM')}</i>; // Display the date in DD-MM format and italic
+                                                    }
+                                                })()
+                                            }
+                                        </div>
+                                    </>
                                     }
                                 />
 

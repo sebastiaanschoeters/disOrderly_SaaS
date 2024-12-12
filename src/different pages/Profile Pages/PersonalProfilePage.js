@@ -1,12 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {Avatar, Divider, Select, ConfigProvider, Spin, message, Tooltip, Typography} from 'antd';
-import {
-    UserSwitchOutlined,
-    HeartOutlined,
-    TrophyOutlined,
-    QuestionCircleOutlined,
-    LockOutlined
-} from '@ant-design/icons';
+import {UserSwitchOutlined, HeartOutlined, TrophyOutlined, QuestionCircleOutlined} from '@ant-design/icons';
 import 'antd/dist/reset.css';
 import '../../CSS/AntDesignOverride.css';
 import '../../CSS/PersonalProfilePage.css';
@@ -544,7 +538,7 @@ const ProfileCard = () => {
                             <HeartOutlined/> Ik ben geïntereseerd in:
                         </strong>
                         <Select
-                            style={{flex: 1, minWidth: '200px'}}
+                            style={{width: '100%', minWidth: '200px'}}
                             placeholder="Selecteer seksualiteit"
                             value={sexuality}
                             options={[

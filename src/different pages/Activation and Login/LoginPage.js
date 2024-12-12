@@ -23,9 +23,9 @@ const LoginPage = () => {
     }, []);
 
     const [theme, setTheme] = useState('blauw');
-    const [themeToSet, setThemeToSet] = useState('blauw');// State for the theme
-    const [isTransitioning, setIsTransitioning] = useState(false); // To handle transition state
-    const themeColors = themes[theme] || themes.blauw; // Get theme colors dynamically
+    const [themeToSet, setThemeToSet] = useState('blauw');
+    const [isTransitioning, setIsTransitioning] = useState(false);
+    const themeColors = themes[theme] || themes.blauw;
     const navigate = useNavigate();
 
     const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
@@ -34,10 +34,9 @@ const LoginPage = () => {
 
     useThemeOnCSS(themeColors);
 
-    // Function to change the theme dynamically
     const changeTheme = (newTheme) => {
-        setTheme(newTheme); // Update theme state
-        localStorage.setItem('theme', newTheme); // Persist theme in localStorage
+        setTheme(newTheme);
+        localStorage.setItem('theme', newTheme);
     };
 
     const emailUpdated = async (emaill) => {
@@ -46,7 +45,6 @@ const LoginPage = () => {
         if(!user_data) {return;}
         const userId = user_data[0].user_id;
         const themeUser = await getThemeById(userId)
-        console.log(themeUser)
         setThemeToSet(themeUser);
     };
 
@@ -123,7 +121,6 @@ const LoginPage = () => {
                 console.log('No user found with the provided email.');
                 return false;
             }
-            console.log(data)
             return true;
         } catch (err) {
             console.error('Unexpected error:', err);
@@ -152,7 +149,6 @@ const LoginPage = () => {
             user: { email },
         };
 
-        // Save user session to localStorage
         localStorage.setItem('sessionToken', LoginResponse.token);
         localStorage.setItem('userEmail', LoginResponse.user.email);
 

@@ -1,4 +1,4 @@
-import 'antd/dist/reset.css'; // Import Ant Design styles
+import 'antd/dist/reset.css';
 import '../../CSS/AntDesignOverride.css'
 import { antThemeTokens, themes } from '../../Extra components/themes';
 import {Button, Card, ConfigProvider, Form, Input, List, Modal, Select, AutoComplete, message} from 'antd';
@@ -63,12 +63,14 @@ const AdminPage = () => {
         const {data, error} = await supabase
             .from('Location')
             .select('id, Gemeente, Postcode')
+        if (error){
+            console.error(error)
+        }
         const mappedLocations = data.map((gemeente) => ({
             label: gemeente.Gemeente + ' (' + gemeente.Postcode + ')',
             value: gemeente.id
         }))
         setAllLocations(mappedLocations);
-        console.log(mappedLocations)
     }
 
     const fetchLocationName = (locationCode) => {
@@ -78,7 +80,10 @@ const AdminPage = () => {
 
     const fetchNames = async () => {
         const {data, error} = await supabase.from("Caretaker").select("id, name").order("name");
-        console.log(data)
+        if (error){
+            console.error(error)
+        }
+
         const mappedData = data.map((user) => ({
             value: user.id,
             label: user.name,
@@ -88,7 +93,6 @@ const AdminPage = () => {
 
     const fetchResponsibleName = (responsible) => {
         const name = names.find((person) => person.value === responsible);
-        console.log(name)
         return name.label;
     }
 
@@ -96,6 +100,9 @@ const AdminPage = () => {
         const {data, error} = await supabase
             .from('Activation')
             .select('code')
+        if (error){
+            console.error(error)
+        }
 
         const codes = data.map(record => record.code);
         setAllActivationCodes(codes);
@@ -123,7 +130,11 @@ const AdminPage = () => {
                 .from("Location")
                 .select("id")
                 .eq("Gemeente", organisation.locationName);
-            console.log(organisation.responsible)
+
+            if (error){
+                console.error(error)
+            }
+
             setOldResponsible(organisation.responsible);
             const locationCode = data.length > 0 ? data[0].id : 0;
             const locationName = fetchLocationName(locationCode);
@@ -200,7 +211,6 @@ const AdminPage = () => {
     };
 
     const handleNewLocation = async (value, label) => {
-        console.log("Location code", value);
         await handleFieldChange("location", value);
         await handleFieldChange('locationName', label);
     }
@@ -235,8 +245,6 @@ const AdminPage = () => {
             const random = getRandomInt(1000, 9999)
         }
 
-        console.log('Random:' , random)
-
         const {error} = await supabase.from("Activation").insert({"code": random ,"usable": true, "type": "caretaker", "organisation": generatedOrganisation});
         if(error) {
             handleMessage('Code kan niet gegenereerd worden.')
@@ -256,8 +264,6 @@ const AdminPage = () => {
             ...prev,
             responsible: newResponsible,
         }));
-        console.log('Old responsible: ',oldResponsible);
-        console.log('New responsible: ',newResponsible);
 
         try {
             const {error} = await supabase

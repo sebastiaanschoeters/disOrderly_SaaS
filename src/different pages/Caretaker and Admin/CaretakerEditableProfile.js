@@ -64,14 +64,12 @@ const ProfileCard = () => {
     }, [profileData]);
 
     const saveField = async (field, value) => {
-        // Map English field names to Dutch equivalents
         const fieldTranslations = {
             theme: "thema",
             phone_number: "gsm nummer",
             email: "email",
         };
 
-        // Get the Dutch equivalent or fall back to the original field name
         const dutch_field = fieldTranslations[field] || field;
 
         try {
@@ -81,7 +79,6 @@ const ProfileCard = () => {
                 .eq('id', profileData.id);
 
             if (error) {
-                // Handle error directly without throwing it
                 message.error(`Probleem bij het opslaan van ${dutch_field}`);
                 console.error(`Error saving ${field}:`, error);
                 return;  // Early return to exit function

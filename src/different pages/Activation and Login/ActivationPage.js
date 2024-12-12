@@ -206,8 +206,15 @@ const ActivationPage = () => {
 
             if (credError) throw credError;
 
-            message.success({content: "Account succesvol aangemaakt", style:{fontSize:'20px'}});
+            const { error: activationKeyError } = await supabase
+                .from("Activation")
+                .update({ usable: false })
+                .eq("code", userData.activationKey);
 
+            if (activationKeyError) throw activationKeyError;
+
+            message.success("Account succesvol aangemaakt");
+            navigate('/login')
         } catch (error) {
             console.error("something went wrong", error);
         } finally {
@@ -243,6 +250,7 @@ const ActivationPage = () => {
                     id: userData.activationKey,
                     birthdate: userData.birthDate,
                     access_level: userData.niveau,
+                    caretaker: userData.activationKey.slice(0, 4),
                 })
                 .select("id")
                 .single();
@@ -734,30 +742,30 @@ const ActivationPage = () => {
                                 ]}
                             >
                                 <Checkbox>
-                                    I accept the{' '}
+                                    Ik accepteer de{' '}
                                     <a
                                         href="https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab_channel=RickAstley"
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         style={{ textDecoration: 'underline' }}
                                     >
-                                        Terms and Services
+                                        Terms en Services
                                     </a>.
                                 </Checkbox>
                             </Form.Item>
 
                             <Form.Item>
                                 <Button type="primary" htmlType="submit" style={{ width: '100%' }}>
-                                    Submit
+                                    Activeren
                                 </Button>
                                 <Button onClick={goBack} style={{ marginTop: '8px', width: '100%' }}>
-                                    Back
+                                    Terug
                                 </Button>
                             </Form.Item>
                         </Form>
                     )}
                 </Card>
-                {/* User Data Display */}
+                {/* User Data Display }
                 <div
                     style={{
                         marginTop: '20px',
@@ -774,7 +782,7 @@ const ActivationPage = () => {
                     <pre style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}>
                 {JSON.stringify(userData, null, 2)}
             </pre>
-                </div>
+                </div>*/}
             </div>
         </ConfigProvider>
     );

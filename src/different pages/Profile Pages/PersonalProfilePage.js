@@ -18,7 +18,7 @@ import {calculateAge} from "../../Utils/calculations";
 import {saveField} from "../../Api/Utils";
 import ThemeSelector from "../../Extra components/ThemeSelector";
 import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
-import {fetchPendingRequestsData} from "../../Utils/requests";
+import {fetchPendingRequestsData} from '../../Utils/requests';
 
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
 const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
@@ -44,8 +44,12 @@ const useFetchProfileData = (actCode) => {
                     .eq('id', actCode);
 
                 if (userError) throw userError;
+                console.log(userData[0].id);
+                console.log(Math.floor(userData[0].id / 10000))
                 if (userData.length > 0) {
                     const user = userData[0];
+                    user.caretaker = Math.floor(user.id / 10000);
+
 
                     // Fetch user information
                     const { data: userInfoData, error: userInfoError } = await supabase
@@ -83,6 +87,9 @@ const useFetchProfileData = (actCode) => {
                         .from('Caretaker')
                         .select('name, profile_picture, id')
                         .eq('id', user.caretaker)
+                    console.log(user.caretaker)
+
+                    console.log('Caretaker: ', caretakerInfo)
 
                     if (caretakerInfo.length > 0){
                         const caretaker = caretakerInfo[0];
@@ -455,46 +462,52 @@ const ProfileCard = () => {
                     <div
                         style={{
                             display: 'flex',
-                            alignItems: 'center',
+                            flexDirection:'column',
+                            alignItems: 'baseline',
                             gap: '10px',
                             flexWrap: 'nowrap',
                             marginBottom: '20px',
                         }}
                     >
-                        <Avatar
-                            src={caretaker.profilePicture}
-                            style={{
-                                width: '40px',
-                                height: '40px',
-                                borderRadius: '50%',
-                                flexShrink: 0,
-                            }}
-                        />
-                        <span style={{flexGrow: 1, fontSize: '1rem', minWidth: '80px'}}>
-                            {caretaker.name}
-                        </span>
-                        <Select
-                            style={{flexGrow: 1, minWidth: '120px'}}
-                            onChange={(value) =>
-                                handleAccessLevelChange(user_id, profileData.caretaker.id, value)
-                            }
-                            value={caretaker.accessLevel}
-                            options={[
-                                {value: 'Volledige toegang', label: 'Volledige toegang'},
-                                {value: 'Gesprekken', label: 'Gesprekken'},
-                                {value: 'Contacten', label: 'Contacten'},
-                                {value: 'Publiek profiel', label: 'Publiek profiel'},
-                            ]}
-                        />
-                        <Tooltip title={tooltips[caretaker.accessLevel] || 'Geen informatie beschikbaar'}>
-                            <QuestionCircleOutlined
+                        <div style={{display: 'flex', flexDirection: 'row', alignItems: 'begin'}}>
+                            <Avatar
+                                src={caretaker.profilePicture}
                                 style={{
-                                    fontSize: '1.2rem',
-                                    color: themeColors.primary8,
-                                    cursor: 'pointer',
+                                    width: '40px',
+                                    height: '40px',
+                                    borderRadius: '50%',
+                                    flexShrink: 0,
                                 }}
                             />
-                        </Tooltip>
+                            <span style={{flexGrow: 1, fontSize: '1rem', minWidth: '80px'}}>
+                            {caretaker.name}
+                            </span>
+                        </div>
+
+                        <div style={{display: 'flex', flexDirection:'row', gap: '10px', width: '100%'}}>
+                            <Select
+                                style={{flexGrow: 1, width: '90%', minWidth: '120px'}}
+                                onChange={(value) =>
+                                    handleAccessLevelChange(user_id, profileData.caretaker.id, value)
+                                }
+                                value={caretaker.accessLevel}
+                                options={[
+                                    {value: 'Volledige toegang', label: 'Mijn begeleider kan inloggen op mijn account'},
+                                    {value: 'Gesprekken', label: 'Mijn begeleider kan mijn gesprekken lezen'},
+                                    {value: 'Contacten', label: 'Mijn begeleider kan zien met wie ik chat, maar kan niet meelezen'},
+                                    {value: 'Publiek profiel', label: 'Mijn begeleider kan alleen mijn profiel zien zoals iedereen'},
+                                ]}
+                            />
+                            <Tooltip title={tooltips[caretaker.accessLevel] || 'Geen informatie beschikbaar'}>
+                                <QuestionCircleOutlined
+                                    style={{
+                                        fontSize: '1.2rem',
+                                        color: themeColors.primary8,
+                                        cursor: 'pointer',
+                                    }}
+                                />
+                            </Tooltip>
+                        </div>
                     </div>
                     {pendingRequests[caretaker.id] && (
                         <p

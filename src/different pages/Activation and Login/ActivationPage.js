@@ -1,17 +1,18 @@
 // ActivationPage.js
-import { useParams } from 'react-router-dom';
+import {useNavigate, useParams} from 'react-router-dom';
 import React, {useEffect, useState} from 'react';
 import * as dayjs from 'dayjs'
 import '../../CSS/AntDesignOverride.css'
 import '../../CSS/ActivationPage.css'
 import 'antd/dist/reset.css';
-import {Form, Input, Button, Card, message, ConfigProvider, DatePicker, Radio, Select, Checkbox} from 'antd';
+import {Form, Input, Button, Card, message, ConfigProvider, DatePicker, Radio, Select, Checkbox, Divider} from 'antd';
 import {antThemeTokens, ButterflyIcon, themes} from '../../Extra components/themes';
 import { createClient } from "@supabase/supabase-js";
 import CryptoJS from 'crypto-js';
 import useLocations from "../../UseHooks/useLocations";
 import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
 import forestImage from '../../Media/forest.jpg';
+
 
 const ActivationPage = () => {
     const { activationCodeLink } = useParams();
@@ -21,6 +22,7 @@ const ActivationPage = () => {
     const [userData, setUserData] = useState({});
     const [form] = Form.useForm();
     const [userType, setUserType] = useState('');
+    const navigate = useNavigate();
 
     const theme = 'blauw'
     const themeColors = themes[theme] || themes.blauw;
@@ -113,7 +115,7 @@ const ActivationPage = () => {
             ...prevData,
             name: values.Voornaam,
             livingSituation: values.Woonsituatie,
-            birthDate: values.Geboortedatum ? values.Geboortedatum.format('YYYY-MM-DD') : null,
+            birthDate: values.Geboortedatum
         }));
         setStep(3);
     };
@@ -348,6 +350,7 @@ const ActivationPage = () => {
 
             // Show success message
             message.success("Account aangemaakt! Je kan een profielfoto toevoegen bij je profiel instellingen.");
+            navigate('/login');
         } catch (err) {
             console.error("Unexpected error during email validation:", err);
             message.error("Er is iets misgegaan. Probeer het later opnieuw.");
@@ -421,7 +424,9 @@ const ActivationPage = () => {
                                 className="form-item"
                                 label="Voornaam"
                                 name="Voornaam"
-                                rules={[{ required: true, message: 'Vul uw voornaam in' }]}
+                                rules={[{ required: true, message: 'Vul uw voornaam in' },
+                                    { min: 2, message: 'Naam moet minstens 2 letters lang zijn' }
+                                ]}
                             >
                                 <Input />
                             </Form.Item>
@@ -443,42 +448,50 @@ const ActivationPage = () => {
                             <Form.Item
                                 label="Geboortedatum"
                                 name="Geboortedatum"
-                                rules={[{ required: true, message: 'Selecteer uw geboortedatum, of typ het uit in het formaat "YYYY-MM-DD"' }]}
+                                rules={[{ required: true, message: 'Selecteer uw geboortedatum, of typ het uit in het formaat "DD-MM-YYYY"' }]}
                             >
-                                <DatePicker
-                                    style={{ width: '100%' }}
-                                    format="YYYY-MM-DD"
-                                    disabledDate={(current) => {
-                                        // Get today's date
-                                        const today = new Date();
-                                        // Calculate the minimum allowed birthdate (18 years ago)
-                                        const minimumBirthdate = new Date(
-                                            today.getFullYear() - 18,
-                                            today.getMonth(),
-                                            today.getDate()
-                                        );
-                                        // Disable future dates and dates after the minimum allowed birthdate
-                                        return current && (current > today || current > minimumBirthdate);
-                                    }}
-                                    // Default picker view set to 18 years ago
-                                    defaultPickerValue={dayjs().subtract(18, 'year')}
-                                />
+                                <div style={{marginBottom: '1rem'}}>
+                                    <input
+                                        type="date"
+                                        id="birthdate"
+                                        style={{
+                                            backgroundColor: themeColors.primary1,
+                                            width: '100%',
+                                            padding: '10px',
+                                            fontSize: '16px',
+                                            border: `1px solid ${themeColors.primary4}`, // Use primary1 for the border color
+                                            borderRadius: '4px',
+                                            boxSizing: 'border-box',
+                                        }}
+
+                                        max={new Date().toISOString().split('T')[0]} // Disables future dates
+                                        onChange={(e) => {
+                                            const selectedDate = new Date(e.target.value);
+                                            const today = new Date();
+                                            const age = today.getFullYear() - selectedDate.getFullYear();
+                                            if (age < 18) {
+                                                message.error('Je moet minstens 18 jaar oud zijn');
+                                                e.target.value = '';
+                                            }
+                                        }}
+                                    />
+                                </div>
                             </Form.Item>
                             <Form.Item>
-                                <Button type="primary" htmlType="submit" style={{ width: '100%' }}>Volgende</Button>
-                                <Button onClick={goBack} style={{ marginTop: '8px', width: '100%' }}>Terug</Button>
+                                <Button type="primary" htmlType="submit" style={{width: '100%'}}>Volgende</Button>
+                                <Button onClick={goBack} style={{marginTop: '8px', width: '100%'}}>Terug</Button>
                             </Form.Item>
                         </Form>
                     )}
 
                     {step === 3 && (
                         <Form name="additionalInfoForm" onFinish={Location}
-                              initialValues={{ city: userData.city || ''}}>
+                              initialValues={{city: userData.city || ''}}>
                             <Form.Item
                                 className="form-item"
                                 label="Stad"
                                 name="city"
-                                rules={[{ required: true, message: 'Selecteer uw stad' }]}
+                                rules={[{required: true, message: 'Selecteer uw stad'}]}
                             >
                                 <Select
                                     showSearch
@@ -558,13 +571,14 @@ const ActivationPage = () => {
                     {step === 5 && (
                         <Form name="preferenceForm" onFinish={lvlSelect}
                               initialValues={{ niveau: userData.niveau || '' }}>
-                            <p>Selecteer de optie die het beste past bij jou en je begeleider</p>
+                            <b>Selecteer de optie die het beste past bij jou en je begeleider</b> <Divider/>
                             <Form.Item name="niveau" rules={[{ required: true, message: 'Selecteer een optie' }]}>
                                 <Radio.Group>
-                                    <Radio value="Volledige toegang">Begeleiding heeft volledige toegang en kan alles mee volgen en profiel aanpassen</Radio>
-                                    <Radio value="Gesprekken">Begeleiding kan enkel gesprekken lezen</Radio>
-                                    <Radio value="Contacten">Begeleiding kan zien met wie jij contact hebt</Radio>
-                                    <Radio value="Publiek profiel">Begeleiding kan zien wat jij op je profiel plaatst, net zoals andere gebruikers</Radio>
+                                    <Radio value="Volledige toegang">Mijn begeleider heeft volledige toegang en kan inloggen op mijn account</Radio>
+                                    <Divider/>
+                                    <Radio value="Gesprekken">Mijn begeleider kan mijn chats lezen</Radio> <Divider/>
+                                    <Radio value="Contacten">Mijn begeleider kan zien met wie ik chat maar kan de chats niet lezen</Radio> <Divider/>
+                                    <Radio value="Publiek profiel">Mijn begeleider kan enkel zien wat ik op mijn profiel zet, net zoals andere gebruikers</Radio> <Divider/>
                                 </Radio.Group>
                             </Form.Item>
                             <Form.Item>

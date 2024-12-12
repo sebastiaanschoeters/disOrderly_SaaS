@@ -486,19 +486,22 @@ const ClientOverview = () => {
             key: "access_level",
             render: (accessLevel, record) => {
                 return (
-                    <div>
-                        <Select
-                            value={accessLevels[record.id] || accessLevel}
-                            onChange={(value) => handleAccessLevelChange(profileData.id, record.id, value)}
-                            style={{ width: "90%", maxWidth: "400px" }}
-                            className="prevent-row-click"
-                            options={[
-                                { value: "Volledige toegang", label: "Volledige toegang" },
-                                { value: "Gesprekken", label: "Gesprekken" },
-                                { value: "Contacten", label: "Contacten" },
-                                { value: "Publiek profiel", label: "Publiek profiel" },
-                            ]}
-                        />
+                    <div style={{display:'flex', flexDirection: 'row'}}>
+                        <div style={{display: "flex", flexDirection: 'column', width: "95%", maxWidth: "400px"}}>
+                            <b>Begeleider kan</b>
+                            <Select
+                                value={accessLevels[record.id] || accessLevel}
+                                onChange={(value) => handleAccessLevelChange(profileData.id, record.id, value)}
+                                style={{ width: "95%", maxWidth: "400px" }}
+                                className="prevent-row-click"
+                                options={[
+                                    { value: "Volledige toegang", label: "inloggen op het account" },
+                                    { value: "Gesprekken", label: "chats lezen" },
+                                    { value: "Contacten", label: "contacten zien, maar niet meelezen" },
+                                    { value: "Publiek profiel", label: "enkel publiek profiel zien" },
+                                ]}
+                            />
+                        </div>
                         <Tooltip title={tooltips[accessLevel] || "Geen informatie beschikbaar"}>
                             <QuestionCircleOutlined
                                 className="prevent-row-click"
@@ -525,7 +528,7 @@ const ClientOverview = () => {
             render: (_, record) => (
                 <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                     <Select
-                        placeholder="Verander begeleiding"
+                        placeholder="Verander begeleider"
                         onChange={(value) => handleCaretakerChange(record.id, value)}
                         options={caretakers.map((caretaker) => ({
                             value: caretaker.id,

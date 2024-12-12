@@ -151,7 +151,7 @@ const ProfileCard = () => {
 
         if (error) throw error;
 
-        if (data.length > 0) updateTrophyStatus(1, {earned: true});
+        if (data.length > 1) updateTrophyStatus(1, {earned: true});
     }
 
     const checkInterestsTrophy = async (userId) => {

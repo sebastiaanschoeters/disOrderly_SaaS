@@ -153,7 +153,7 @@ const ContactsOverview = ({ id: userID , conversations: conversations}) => {
             isSender: record.isSender,
             chatroomId: record.chatroomId,
         };
-        navigate('/chat', {state: {profileData}})
+        navigate('/chat_overzicht/chat', {state: {profileData}})
     }
 
     return (

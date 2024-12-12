@@ -119,7 +119,7 @@ const HomePage = () => {
             isAdmin: true,
         };
 
-        navigate(`/chat`, { state: { profileData } });
+        navigate(`/chat_overzicht/chat`, { state: { profileData } });
     };
 
     return (
@@ -168,7 +168,7 @@ const HomePage = () => {
                             textAlign: 'center',
                             overflow: 'hidden',
                         }}
-                        onClick={() => navigate('/search')}
+                        onClick={() => navigate('/mensen_ontdekken')}
                     >
                         <h2 style={{ margin: '0', minWidth: '20px', whiteSpace: 'normal', lineHeight: '1.1', }}>Mensen ontdekken</h2>
                     </Button>
@@ -200,7 +200,7 @@ const HomePage = () => {
                                 textAlign: 'center',
                                 overflow: 'hidden',
                             }}
-                            onClick={() => navigate('/chatoverview')}
+                            onClick={() => navigate('/chat_overzicht')}
                         >
                             <h2 style={{ margin: '0', minWidth: '20px', whiteSpace: 'nowrap' }}>Chats</h2>
                         </Button>
@@ -218,7 +218,7 @@ const HomePage = () => {
                         cursor: 'pointer',
                         padding: '10px',
                     }}
-                    onClick={() => navigate('/profileEdit')}
+                    onClick={() => navigate('/gebruiker_profiel')}
                 >
                     <Avatar
                         size={100}
@@ -261,7 +261,7 @@ const HomePage = () => {
                         textAlign: 'center',
                         overflow: 'hidden',
                     }}
-                    onClick={() => navigate('/profilePersonal')}
+                    onClick={() => navigate('/persoonlijke_instellingen')}
                 >
                     <h2 style={{ margin: '0', minWidth: '10px', whiteSpace: 'nowrap' }}>Instellingen</h2>
                 </Button>

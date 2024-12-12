@@ -4,7 +4,6 @@ import {useNavigate, useLocation, Link} from 'react-router-dom';
 import {ArrowDownOutlined, PlusOutlined, SendOutlined} from '@ant-design/icons';
 import {antThemeTokens, ButterflyIcon, ButterflyIconSmall, themes} from '../../Extra components/themes';
 import { createClient } from "@supabase/supabase-js";
-import HomeButtonUser from "../../Extra components/HomeButtonUser";
 import BreadcrumbComponent from "../../Extra components/BreadcrumbComponent";
 import HangmanGame from "./Hangman";
 import useTheme from "../../UseHooks/useTheme";
@@ -62,7 +61,7 @@ const ChatPage = () => {
             message.error({content: "deze pagina is niet beschikbaar via deze link", style:{fontSize:'20px'}});
         }
         else if(localStorage.getItem('userType') === "caretaker"){
-            navigate("/clientOverview");
+            navigate("/clienten_overzicht");
             message.error({content: "deze pagina is niet beschikbaar via deze link", style:{fontSize:'20px'}});
         }
         else {

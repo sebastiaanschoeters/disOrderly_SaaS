@@ -1,14 +1,29 @@
 import {Breadcrumb} from "antd";
 import {useNavigate, useLocation} from "react-router-dom";
 
+const routeLabels = {
+    "/mensen_ontdekken": "mensen ontdekken",
+    "/clienten_overzicht": "clienten overzicht",
+    "/begeleider_profiel": "profiel",
+    "/gebruiker_profiel": "profiel",
+    "/persoonlijke_instellingen": "persoonlijke instellingen",
+    "/chat_overzicht": "chats overzicht",
+    "/chat_overzicht/chat": "chat",
+    "/chat_overzicht/nieuwe_chat": "nieuwe chat",
+};
+
+
 const BreadcrumbComponent = () => {
     const location = useLocation();
-    const pathnames = location.pathname.split("/").filter(Boolean);
-    console.log(pathnames);
     const navigate = useNavigate();
 
+    const pathnames = location.pathname.split("/").filter(Boolean);
+
+    const formatLabel = (path) =>
+        routeLabels[path] || path.replace(/_/g, " ");
+
     const handleBreadcrumbClick = (to) => {
-        navigate(to); // Navigate to the clicked breadcrumb's path
+        navigate(to);
     };
 
     return (
@@ -18,12 +33,14 @@ const BreadcrumbComponent = () => {
             </Breadcrumb.Item>
             {pathnames.map((value, index) => {
                 const to = `/${pathnames.slice(0, index + 1).join("/")}`;
+                const label = formatLabel(to);
+
                 return (
                     <Breadcrumb.Item key={to}>
                         {index + 1 === pathnames.length ? (
-                            value // Last item, no link
+                            label // Last item, no link
                         ) : (
-                            <span onClick={() => handleBreadcrumbClick(to)} style={{cursor: 'pointer'}}>{value}</span>
+                            <span onClick={() => handleBreadcrumbClick(to)} style={{cursor: 'pointer'}}>{label}</span>
                         )}
                     </Breadcrumb.Item>
                 );

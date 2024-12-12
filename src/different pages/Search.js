@@ -5,14 +5,13 @@ import {Avatar, ConfigProvider, Input, List, Typography, Modal, Button, Slider, 
 import { FilterOutlined } from "@ant-design/icons";
 import { createClient } from "@supabase/supabase-js";
 import React, { useState, useEffect } from "react";
-import HomeButtonUser from '../Extra components/HomeButtonUser'
 import ProfileDetailsModal from "./Profile Pages/ProfileDetailsModal";
 import useTheme from "../UseHooks/useTheme";
 import useThemeOnCSS from "../UseHooks/useThemeOnCSS";
 import {calculateAge, calculateDistance} from "../Utils/calculations";
 import useFetchProfileData from "../UseHooks/useFetchProfileData";
 import {assembleProfileData, handleModalProfileClose, handleProfileClick} from "../Api/Utils";
-import BreadcrumbComponent from "../Extra components/BreadcrumbComponent"; // Import useNavigate for routing
+import BreadcrumbComponent from "../Extra components/BreadcrumbComponent";
 
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
 const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;

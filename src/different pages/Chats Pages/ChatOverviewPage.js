@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { antThemeTokens, ButterflyIcon, themes } from '../../Extra components/themes';
 import { createClient } from "@supabase/supabase-js";
 import moment from 'moment';
-import HomeButtonUser from "../../Extra components/HomeButtonUser";
 import useTheme from "../../UseHooks/useTheme";
 import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
 import BreadcrumbComponent from "../../Extra components/BreadcrumbComponent";
@@ -174,8 +173,9 @@ const ChatOverviewPage = () => {
             <div
                 style={styles.chatContainer}
             >
-                <BreadcrumbComponent />
                 <ButterflyIcon color={themeColors.primary3} />
+
+                <BreadcrumbComponent />
 
                 <Input.Search
                     placeholder="Zoek in chats..."
@@ -208,9 +208,9 @@ const ChatOverviewPage = () => {
                                         chatroomId: chat.id,
                                     };
                                     if (chat.acceptance === true) {
-                                        navigate('/chat', { state: { profileData } });
+                                        navigate('/chat_overzicht/chat', { state: { profileData } });
                                     } else {
-                                        navigate('/chatsuggestion', { state: { profileData } });
+                                        navigate('/chat_overzicht/nieuwe_chat', { state: { profileData } });
                                     }
                                 }}
                             >

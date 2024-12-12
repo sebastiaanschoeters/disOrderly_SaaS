@@ -3,8 +3,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import ActivationPage from './different pages/Activation and Login/ActivationPage';
 import LoginPage from './different pages/Activation and Login/LoginPage';
 import NotFoundPage from './different pages/Activation and Login/NotFoundPage';
-import HomePage from './different pages/HomePage';
-import ProfilePage from './different pages/Profile Pages/ProfilePage';
+import HomePage from './different pages/HomePage'
 import PersonalProfilePage from './different pages/Profile Pages/PersonalProfilePage';
 import ChatOverviewPage from './different pages/Chats Pages/ChatOverviewPage';
 import ChatPage from './different pages/Chats Pages/ChatPage';
@@ -12,17 +11,13 @@ import ChatSuggestionPage from './different pages/Chats Pages/ChatSuggestionPage
 import Search from './different pages/Search';
 import ProtectedRoute from './Extra components/ProtectedRoute'; // Import the ProtectedRoute component
 import {clarity} from "react-microsoft-clarity";
-
 import AdminPage from "./different pages/Caretaker and Admin/AdminPage";
-import Hangman from "./different pages/Chats Pages/Hangman";
 import EditableProfilePage from "./different pages/Profile Pages/EditableProfilePage";
-import CaretakerProfilePage from "./different pages/Caretaker and Admin/CaretakerProfilePage";
 import CaretakerEditableProfile from "./different pages/Caretaker and Admin/CaretakerEditableProfile";
 import ClientOverview from "./different pages/Caretaker and Admin/ClientOverview";
 import OrganisationDashboard from "./different pages/Caretaker and Admin/OrganisationDashboard";
 
 clarity.init('p658v8svx1');
-
 
 const App = () => {
     return (
@@ -32,12 +27,12 @@ const App = () => {
                 {/* Public routes */}
                 <Route path="/" element={<LoginPage/>}/>
                 <Route path="/login" element={<LoginPage/>}/>
-                <Route path="/activate" element={<ActivationPage/>}/>
-                <Route path="/activate/:activationCodeLink" element={<ActivationPage />} />
+                <Route path="/activatie" element={<ActivationPage/>}/>
+                <Route path="/activatie/:activationCodeLink" element={<ActivationPage />} />
 
                 {/* Protected routes */}
                 <Route
-                    path="/search"
+                    path="/mensen_ontdekken"
                     element={
                         <ProtectedRoute allowedRoles={["user"]}>
                             <Search />
@@ -45,7 +40,7 @@ const App = () => {
                     }
                 />
                 <Route
-                    path="/clientOverview"
+                    path="/clienten_overzicht"
                     element={
                         <ProtectedRoute allowedRoles={["caretaker", "admin"]}>
                             <ClientOverview />
@@ -53,15 +48,7 @@ const App = () => {
                     }
                 />
                 <Route
-                    path="/caretakerProfile"
-                    element={
-                        <ProtectedRoute allowedRoles={["caretaker", "admin"]}>
-                            <CaretakerProfilePage />
-                        </ProtectedRoute>
-                    }
-                />
-                <Route
-                    path="/caretakerProfileEdit"
+                    path="/begeleider_profiel"
                     element={
                         <ProtectedRoute allowedRoles={["caretaker", "admin"]}>
                             <CaretakerEditableProfile />
@@ -77,15 +64,7 @@ const App = () => {
                     }
                 />
                 <Route
-                    path="/profile"
-                    element={
-                        <ProtectedRoute allowedRoles={["user"]}>
-                            <ProfilePage />
-                        </ProtectedRoute>
-                    }
-                />
-                <Route
-                    path="/profileEdit"
+                    path="/gebruiker_profiel"
                     element={
                         <ProtectedRoute allowedRoles={["user"]}>
                             <EditableProfilePage />
@@ -93,7 +72,7 @@ const App = () => {
                     }
                 />
                 <Route
-                    path="/profilePersonal"
+                    path="/persoonlijke_instellingen"
                     element={
                         <ProtectedRoute allowedRoles={["user"]}>
                             <PersonalProfilePage />
@@ -101,7 +80,7 @@ const App = () => {
                     }
                 />
                 <Route
-                    path="/chatOverview"
+                    path="/chat_overzicht"
                     element={
                         <ProtectedRoute allowedRoles={["user"]}>
                             <ChatOverviewPage />
@@ -109,7 +88,7 @@ const App = () => {
                     }
                 />
                 <Route
-                    path="/chat"
+                    path="/chat_overzicht/chat"
                     element={
                         <ProtectedRoute allowedRoles={["caretaker", "user"]}>
                             <ChatPage />
@@ -117,7 +96,7 @@ const App = () => {
                     }
                 />
                 <Route
-                    path="/chatSuggestion"
+                    path="/chat_overzicht/nieuwe_chat"
                     element={
                         <ProtectedRoute allowedRoles={["user", "caretaker"]}>
                             <ChatSuggestionPage />
@@ -133,7 +112,7 @@ const App = () => {
                     }
                 />
                 <Route
-                    path="/organisationDashboard"
+                    path="/organisatie_dashboard"
                     element={
                         <ProtectedRoute allowedRoles={["responsible"]}>
                             <OrganisationDashboard />

@@ -715,7 +715,7 @@ const ClientOverview = () => {
                                 cursor: "pointer",
                                 padding: "10px",
                             }}
-                            onClick={() => navigate("/caretakerProfileEdit")}
+                            onClick={() => navigate("/begeleider_profiel")}
                         >
                             <Avatar
                                 size={60}

@@ -192,7 +192,7 @@ const ProfileCard = (profileToShow) => {
         setIsModalVisible(true);
     };
     const navigateToChatOverview = async () => {
-        navigate(`/chatoverview`);
+        navigate(`/chat_overzicht`);
     };
 
     const handleSendMessage = async () => {
@@ -242,7 +242,6 @@ const ProfileCard = (profileToShow) => {
                 throw messageError;
             }
 
-            // Hide the modal, clear the message, and navigate to the chatroom
             setIsModalVisible(false);
             setNewMessage('');
             setChatroomExistent(true);

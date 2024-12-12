@@ -4,7 +4,6 @@ import {useLocation, useNavigate, useParams} from 'react-router-dom';
 import {themes, antThemeTokens, ButterflyIcon} from '../../Extra components/themes';
 import '../../CSS/ChatSuggestionPage.css';
 import { createClient } from "@supabase/supabase-js";
-import HomeButtonUser from "../../Extra components/HomeButtonUser";
 import useTheme from "../../UseHooks/useTheme";
 import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
 import ProfileDetailsModal from "../Profile Pages/ProfileDetailsModal";
@@ -112,7 +111,7 @@ const ChatSuggestionPage = () => {
         if (error) {
             console.error("Error updating blocked status:", error);
         } else {
-            navigate('/chatOverview');
+            navigate('/chat_overzicht');
         }
     };
 
@@ -167,26 +166,22 @@ const ChatSuggestionPage = () => {
         }
     };
 
-    const handleProfile = () => {
-        navigate('/profile');
-    };
-
     const handleAccept = () => {
         updateAcceptance(chatroomId, true);
-        navigate(`/chat`, { state: { profileData} });
+        navigate(`/chat_overzicht/chat`, { state: { profileData} });
     };
 
     const handleDecline = () => {
         deleteMessages(chatroomId);
         deleteChatroom(chatroomId);
         setTimeout(() => {
-            navigate('/chatOverview');
+            navigate('/chat_overzicht');
         }, 300);
     };
 
     const handleBlock = () => {
         insertBlocked();
-        navigate('/chatOverview');
+        navigate('/chat_overzicht');
     };
     const handleEdit = () => {
         setEditedMessage(message);

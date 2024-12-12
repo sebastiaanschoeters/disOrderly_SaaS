@@ -38,11 +38,11 @@ export const storeUserSession = async (userId, userType, setIsTransitioning, nav
         if (userType === 'user') {
             navigate('/home');
         } else if (userType === 'caretaker') {
-            navigate('/clientOverview');
+            navigate('/clienten_overzicht');
         } else if (userType === 'admin') {
             navigate('/admin');
         } else if (userType === 'responsible') {
-            navigate('/organisationDashboard');
+            navigate('/organisatie_dashboard');
         }
     }, 500);
 };

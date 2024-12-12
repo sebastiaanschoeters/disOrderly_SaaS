@@ -164,7 +164,7 @@ const LoginPage = () => {
     };
 
     const functtest = () => {
-        navigate('/activate');
+        navigate('/activatie');
     };
 
     return (

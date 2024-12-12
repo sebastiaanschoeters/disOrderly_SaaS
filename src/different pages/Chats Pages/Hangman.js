@@ -196,7 +196,7 @@ const HangmanGame = ({ isModalVisible, setIsModalVisible, player1Id, player2Id, 
             console.error('Error saving answer:', error);
         }
         setIsModalVisible(false)
-        handleSendMessage("ButterflyIcon0 " + localStorage.getItem('name') + "heeft de vraag beantwoord! Klik links onderaan op de gamecontroller om te spelen")
+        handleSendMessage("ButterflyIcon0 " + localStorage.getItem('name') + " heeft de vraag beantwoord! Klik links onderaan op de gamecontroller om te spelen")
         setStep(3)
         return answer
     };

@@ -4,7 +4,6 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import {ArrowDownOutlined, PlusOutlined, SendOutlined} from '@ant-design/icons';
 import {antThemeTokens, ButterflyIcon, ButterflyIconSmall, themes} from '../../Extra components/themes';
 import { createClient } from "@supabase/supabase-js";
-import '../../CSS/ChatPage.css';
 import HomeButtonUser from "../../Extra components/HomeButtonUser";
 import HangmanGame from "./Hangman";
 import useTheme from "../../UseHooks/useTheme";
@@ -56,11 +55,11 @@ const ChatPage = () => {
     const [selectedClient, setSelectedClient] = useState({});
 
     if(!chatroomId){
-        if(localStorage.getItem('userType') == "user"){
+        if(localStorage.getItem('userType') === "user"){
             navigate("/home");
             message.error("deze pagina is niet beschikbaar via deze link");
         }
-        else if(localStorage.getItem('userType') == "caretaker"){
+        else if(localStorage.getItem('userType') === "caretaker"){
             navigate("/clientOverview");
             message.error("deze pagina is niet beschikbaar via deze link");
         }
@@ -268,6 +267,7 @@ const ChatPage = () => {
             marginBottom: '15px',
             width: '100%',
             position: 'relative',
+            cursor: 'pointer',
         },
         avatar: {
             marginRight: '20px',
@@ -359,13 +359,12 @@ const ChatPage = () => {
 
                 <ButterflyIcon color={themeColors.primary3} />
 
-                <Card style={styles.card} bordered>
+                <Card style={styles.card} bordered >
                     <div style={styles.chatContainer}>
-                        <div style={styles.header}>
+                        <div style={styles.header} onClick={() => handleProfileClick(otherUserId)}>
                             <Avatar
                                 src={profilePicture || 'default-avatar.png'}
                                 style={styles.avatar}
-                                onClick={() => handleProfileClick(otherUserId, setSelectedClient, setIsModalProfileVisible)}
                             >
                                 U
                             </Avatar>
@@ -373,7 +372,7 @@ const ChatPage = () => {
                                 {`${name}`}
                             </h2>
                         </div>
-                        <div style={styles.messageList} ref={messageListRef} onScroll={handleScroll}>
+                        <div style={styles.messageList} className={'messageList'} ref={messageListRef} onScroll={handleScroll}>
                             {!loadingMore && !noMoreMessages && (
                                 <p
                                     onClick={handleLoadMore}

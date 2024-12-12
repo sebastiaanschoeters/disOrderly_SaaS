@@ -6,7 +6,7 @@ import { createClient } from "@supabase/supabase-js";
 import HomeButtonUser from "../../Extra components/HomeButtonUser";
 import useTheme from "../../UseHooks/useTheme";
 import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
-import {PlusCircleOutlined, UserOutlined} from "@ant-design/icons";
+import '../../CSS/ChatOverviewPage.css'
 
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
 const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
@@ -77,7 +77,7 @@ const ChatOverviewPage = () => {
             width: '100%',
             display: 'flex',
             alignItems: 'center',
-            padding: '0px 20px'
+            padding: '0px 20px',
         },
         title: {
             flexGrow: 1,
@@ -86,12 +86,14 @@ const ChatOverviewPage = () => {
         },
         searchBar: {
             width: '75%',
+            maxWidth: '600px',
             marginBottom: '20px',
             marginTop: '20px',
             fontSize: '1rem',
         },
         list: {
             width: '75%',
+            maxWidth: '600px',
         },
         card: {
             width: '100%',
@@ -115,8 +117,9 @@ const ChatOverviewPage = () => {
         },
         name: {
             fontSize: '1rem',
-        }
+        },
     };
+
 
     return (
         <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>

@@ -152,7 +152,7 @@ const HomePage = () => {
                     onClick={() => navigate('/profileEdit')}
                 >
                     <Avatar
-                        size={60}
+                        size={100}
                         src={profile_picture}
                         style={{
                             backgroundColor: themeColors.primary4,

@@ -367,7 +367,8 @@ const ActivationPage = () => {
                     height: '100vh',
                     overflowY: 'auto',
                     backgroundImage: `url(${forestImage})`,
-                    //backgroundColor: themeColors.primary2,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
                     color: themeColors.primary10,
                     position: 'relative',
                     zIndex: '0'

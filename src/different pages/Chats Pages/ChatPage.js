@@ -242,8 +242,9 @@ const ChatPage = () => {
             backgroundColor: themeColors.primary2,
         },
         card: {
-            width: '90%',
-            maxWidth: '650px',
+            width: '100%',
+            minWidth: '375px',
+            maxWidth: '800px',
             borderRadius: '10px',
             boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
             backgroundColor: themeColors.primary3,
@@ -251,7 +252,7 @@ const ChatPage = () => {
             flexDirection: 'column',
         },
         chatContainer: {
-            padding: '20px',
+            padding: '10px',
             height: '80dvh',
             display: 'flex',
             flexDirection: 'column',

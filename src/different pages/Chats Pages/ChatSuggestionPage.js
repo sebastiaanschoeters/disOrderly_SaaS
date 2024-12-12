@@ -223,9 +223,10 @@ const ChatSuggestionPage = () => {
                 }}
             >
                 <BreadcrumbComponent />
+
                 <ButterflyIcon color={themeColors.primary3}/>
 
-                <div style={styles.header} onClick={() => handleProfileClick(otherUserId)}>
+                <div style={styles.header} onClick={() => handleProfileClick(otherUserId, setSelectedClient, setIsModalProfileVisible)}>
                     <Avatar src={profilePicture || 'default-avatar.png'}
                             style={styles.headerAvatar}>U</Avatar>
                     <Title level={2} style={{margin: 0, color: themeColors.primary10}} h2>{`${name}`}</Title>

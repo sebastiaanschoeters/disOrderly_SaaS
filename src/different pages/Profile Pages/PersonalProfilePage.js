@@ -401,6 +401,7 @@ const ProfileCard = () => {
                     minHeight: '100vh',
                     overflow: 'hidden',
                     overflowX: 'hidden',
+                    padding: 20,
                     backgroundColor: themeColors.primary2,
                     color: themeColors.primary10,
                     boxSizing: 'border-box',

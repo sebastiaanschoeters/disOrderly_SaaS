@@ -561,6 +561,7 @@ const ProfileCard = () => {
                     flexDirection: 'column',
                     justifyContent: 'flex-start',
                     alignItems: 'center',
+                    padding: 20,
                     position: 'relative',
                     minWidth: '100dvw',
                     minHeight: '100vh',

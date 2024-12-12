@@ -12,9 +12,9 @@ const BreadcrumbComponent = () => {
     };
 
     return (
-        <Breadcrumb style={{position: "relative", left: 0, top: 0, fontSize: '2rem', marginBottom: 16, width: '100%' }}>
+        <Breadcrumb style={{position: "relative", left: 40, top: 0, fontSize: '1.5rem' , marginBottom: 16, width: '100vw', marginTop: 16 }}>
             <Breadcrumb.Item>
-                <span onClick={() => handleBreadcrumbClick("/home")}>home</span>
+                <span onClick={() => handleBreadcrumbClick("/home")} style={{cursor: 'pointer'}}>home</span>
             </Breadcrumb.Item>
             {pathnames.map((value, index) => {
                 const to = `/${pathnames.slice(0, index + 1).join("/")}`;
@@ -23,7 +23,7 @@ const BreadcrumbComponent = () => {
                         {index + 1 === pathnames.length ? (
                             value // Last item, no link
                         ) : (
-                            <span onClick={() => handleBreadcrumbClick(to)}>{value}</span>
+                            <span onClick={() => handleBreadcrumbClick(to)} style={{cursor: 'pointer'}}>{value}</span>
                         )}
                     </Breadcrumb.Item>
                 );

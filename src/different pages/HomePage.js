@@ -35,7 +35,7 @@ const HomePage = () => {
         navigate('/login');
     };
 
-    const userEmail = localStorage.getItem('userEmail'); // Logged-in user's email
+    const userEmail = localStorage.getItem('userEmail');
     const userId = localStorage.getItem('user_id');
     const name = localStorage.getItem('name');
     const profile_picture = localStorage.getItem('profile_picture');
@@ -57,7 +57,7 @@ const HomePage = () => {
     };
 
     useEffect(() => {
-        fetchnumber(); // Fetch the count on component mount
+        fetchnumber();
     }, []);
 
     return (
@@ -83,18 +83,18 @@ const HomePage = () => {
 
                 <div style={{
                     display: 'flex',
-                    rowGap: '20px', // Vertical gap between stacked buttons
-                    columnGap: '80px', // Horizontal gap between buttons
-                    flexWrap: 'wrap', // Allows buttons to wrap to the next line on smaller screens
+                    rowGap: '20px',
+                    columnGap: '80px',
+                    flexWrap: 'wrap',
                     justifyContent: 'center',
                     width: '100%',
-                    alignItems: 'center', // Keep buttons centered vertically when stacked
+                    alignItems: 'center',
                     marginTop: '-50px'
                 }}>
                     <Button
-                        className="primary-button"  // Add class for targeting with CSS
+                        className="primary-button"
                         type="primary"
-                        icon={<SearchOutlined style={{ fontSize: '4rem' }} />}  // Increase icon size
+                        icon={<SearchOutlined style={{ fontSize: '4rem' }} />}
                         style={{
                             display: 'flex',
                             flexDirection: 'column',
@@ -103,30 +103,30 @@ const HomePage = () => {
                             width: '240px',
                             height: '240px',
                             fontSize: '2rem',
-                            textAlign: 'center',  // Ensure text is centered
-                            overflow: 'hidden',   // Prevent text overflow
+                            textAlign: 'center',
+                            overflow: 'hidden',
                         }}
                         onClick={() => navigate('/search')}
                     >
                         <h2 style={{ margin: '0', minWidth: '20px', whiteSpace: 'normal', lineHeight: '1.1', }}>Mensen ontdekken</h2>
                     </Button>
                     <Badge
-                        count={newRequestCount} // Dynamic count
-                                offset={[0, 10]} // Adjust badge position (horizontal, vertical)
+                        count={newRequestCount}
+                                offset={[0, 10]}
                                 style={{
-                                    backgroundColor: 'orange', // Badge background color
-                                    color: 'white',           // Badge text color
+                                    backgroundColor: 'orange',
+                                    color: 'white',
                                     fontSize: '2rem',
-                                    width: '32px',              // Width of the badge
-                                    height: '32px',             // Height of the badge
-                                    lineHeight: '32px',         // Line height to center the text
-                                    borderRadius: '50%', // Font size for badge
+                                    width: '32px',
+                                    height: '32px',
+                                    lineHeight: '32px',
+                                    borderRadius: '50%',
                                 }}
                     >
                         <Button
-                            className="primary-button"  // Add class for targeting with CSS
+                            className="primary-button"
                             type="primary"
-                            icon={<MessageOutlined style={{ fontSize: '4rem' }} />}  // Increase icon size
+                            icon={<MessageOutlined style={{ fontSize: '4rem' }} />}
                             style={{
                                 display: 'flex',
                                 flexDirection: 'column',
@@ -135,8 +135,8 @@ const HomePage = () => {
                                 width: '240px',
                                 height: '240px',
                                 fontSize: '2rem',
-                                textAlign: 'center',  // Ensure text is centered
-                                overflow: 'hidden',   // Prevent text overflow
+                                textAlign: 'center',
+                                overflow: 'hidden',
                             }}
                             onClick={() => navigate('/chatoverview')}
                         >
@@ -172,7 +172,7 @@ const HomePage = () => {
                         style={{
                             color: themeColors.primary10,
                             whiteSpace: 'nowrap',
-                            fontSize: '1.4rem',  // Increase font size for name
+                            fontSize: '1.4rem',
                         }}
                     >
                         {name} <EditOutlined style={{marginLeft:'10px'}}/>
@@ -180,7 +180,7 @@ const HomePage = () => {
                 </div>
 
                 <Button
-                    className="secondary-button"  // Add class for targeting with CSS
+                    className="secondary-button"
                     type="secondary"
                     icon={<SettingOutlined />}
                     style={{
@@ -195,7 +195,7 @@ const HomePage = () => {
                         height: '12dvh',
                         minWidth: '100px',
                         minHeight: '80px',
-                        fontSize: '1.8rem',  // Increase text size for "Instellingen"
+                        fontSize: '1.8rem',
                         textAlign: 'center',
                         overflow: 'hidden',
                     }}
@@ -205,7 +205,7 @@ const HomePage = () => {
                 </Button>
 
                 <Button
-                    className="secondary-button"  // Add class for targeting with CSS
+                    className="secondary-button"
                     type="secondary"
                     icon={<PoweroffOutlined />}
                     style={{
@@ -220,7 +220,7 @@ const HomePage = () => {
                         height: '12dvh',
                         minWidth: '100px',
                         minHeight: '80px',
-                        fontSize: '1.8rem',  // Increase text size for "Afmelden"
+                        fontSize: '1.8rem',
                         textAlign: 'center',
                         overflow: 'hidden',
                     }}
@@ -230,7 +230,7 @@ const HomePage = () => {
                 </Button>
 
                 <Button
-                    className="secondary-button"  // Add class for targeting with CSS
+                    className="secondary-button"
                     type="secondary"
                     icon={<QuestionCircleOutlined />}
                     style={{

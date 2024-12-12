@@ -312,12 +312,12 @@ const HangmanGame = ({ isModalVisible, setIsModalVisible, player1Id, player2Id, 
         if (isGameOver || isGameWon) {
             if (answer) {
                 if (isGameWon) {
-                    handleSendMessage(`ButterflyIcon${wrongGuesses} ` + localStorage.getItem('name') + " Heeft het antwoord geraden!" + renderWord());
+                    handleSendMessage(`ButterflyIcon${wrongGuesses} ` + localStorage.getItem('name') + " heeft het antwoord geraden!" + renderWord());
                     handleGameWin()
                     setGameEnded(true);
                     return;
                 } else {
-                    handleSendMessage(`ButterflyIcon${wrongGuesses} ` + localStorage.getItem('name') + " Heeft het antwoord niet geraden!" + `Het juiste antwoord was ${answer}`);
+                    handleSendMessage(`ButterflyIcon${wrongGuesses} ` + localStorage.getItem('name') + " heeft het antwoord niet geraden!" + `Het juiste antwoord was ${answer}`);
                 }
                 setGameEnded(true);
             }

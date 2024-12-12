@@ -34,8 +34,7 @@ const ChatPage = () => {
 
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState("");
-    const userId = user_id
-    // const userId = parseInt(localStorage.getItem('user_id'), 10);
+    const userId = parseInt(localStorage.getItem('user_id'), 10);
     const [loading, setLoading] = useState(false);
     const [loadingMore, setLoadingMore] = useState(false);
 
@@ -107,7 +106,6 @@ const ChatPage = () => {
                 'postgres_changes',
                 { event: 'INSERT', schema: 'public', table: 'Messages' , filter: `chatroom_id=eq.${chatroomId}`  },
                 (payload) => {
-                    console.log("New message payload", payload);
                     setMessages(prevMessages => [...prevMessages,payload.new]);
             })
             .subscribe();
@@ -175,7 +173,7 @@ const ChatPage = () => {
     };
 
     const handleSendMessageArg = async (messageContent) => {
-        console.log("Sending messageaaa:", messageContent);
+        console.log("Sending message:", messageContent);
         if (messageContent) {
             if (messageContent.trim() === "") return; {
             }
@@ -387,7 +385,7 @@ const ChatPage = () => {
                                         marginTop: '5px',
                                     }}
                                 >
-                                    <strong>Load More</strong>
+                                    <strong>verder laden</strong>
                                 </p>
 
                             )}
@@ -421,19 +419,16 @@ const ChatPage = () => {
                                                     }}
                                                 >
                                                     {message.message_content && typeof message.message_content === 'string' && message.message_content.startsWith("ButterflyIcon") ? (() => {
-                                                        const butterflyImages = [butterfly0, butterfly1, butterfly2, butterfly3, butterfly4, butterfly5]; // Add your local image paths
-                                                        const contentAfterIcon = message.message_content.slice(13).trim(); // Get everything after "ButterflyIcon"
+                                                        const butterflyImages = [butterfly0, butterfly1, butterfly2, butterfly3, butterfly4, butterfly5];
+                                                        const contentAfterIcon = message.message_content.slice(13).trim();
 
-                                                        // Extract index and title
-                                                        const indexMatch = contentAfterIcon.match(/^(\d+)\s*(.*)$/); // Regex to extract number and text
-                                                        const index = indexMatch ? parseInt(indexMatch[1], 10) : NaN; // First part is the index
-                                                        const title = indexMatch ? indexMatch[2] : ""; // Rest is the title
+                                                        const indexMatch = contentAfterIcon.match(/^(\d+)\s*(.*)$/);
+                                                        const index = indexMatch ? parseInt(indexMatch[1], 10) : NaN;
+                                                        const title = indexMatch ? indexMatch[2] : "";
 
-                                                        // Split title at "!" if exists
                                                         const [mainTitle, extraContent] = title.split('!').map(part => part.trim());
 
                                                         if (!isNaN(index) && index >= 0 && index < butterflyImages.length) {
-                                                            // Valid index: render title, image, and content after "!"
                                                             return (
                                                                 <div style={{ textAlign: "center" }}>
                                                                     {mainTitle && <p style={{ margin: 0, fontWeight: "bold" }}>{mainTitle + '!'}</p>}
@@ -451,10 +446,8 @@ const ChatPage = () => {
                                                             );
                                                         }
 
-                                                        // Invalid index or no number: display the plain text
                                                         return <p style={{ margin: 0 }}>{message.message_content}</p>;
                                                     })() : (
-                                                        // Default case: display plain text
                                                         <p style={{ margin: 0 }}>{message.message_content}</p>
                                                     )}
                                                 </div>

@@ -217,7 +217,7 @@ const LoginPage = () => {
                         fontSize: "1rem"
                     }}
                 >
-                    Activate
+                    Activeren
                 </Button>
 
                 <Card style={{ minWidth: 300, width: '25%' }} title="Login" bordered={false}>
@@ -249,7 +249,7 @@ const LoginPage = () => {
 
 
                         <Form.Item
-                            label="Password"
+                            label="Wachtwoord"
                             name="password"
                             rules={[
                                 { required: true, message: 'Please input your password!' },

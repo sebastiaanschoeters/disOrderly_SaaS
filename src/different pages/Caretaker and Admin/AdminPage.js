@@ -1,7 +1,7 @@
 import 'antd/dist/reset.css'; // Import Ant Design styles
 import '../../CSS/AntDesignOverride.css'
 import { antThemeTokens, themes } from '../../Extra components/themes';
-import { Button, Card, ConfigProvider, Form, Input, List, Modal, Select, AutoComplete } from 'antd';
+import {Button, Card, ConfigProvider, Form, Input, List, Modal, Select, AutoComplete, message} from 'antd';
 import {PlusOutlined, RedoOutlined} from "@ant-design/icons";
 import React, {useEffect, useState} from "react";
 import { useNavigate } from 'react-router-dom';
@@ -26,6 +26,7 @@ const AdminPage = () => {
     const [generatedOrganisation, setGeneratedOrganisation] = useState('');
     const [generatedCode, setGeneratedCode] = useState('');
     const [oldResponsible, setOldResponsible] = useState('')
+    const [allActivationCodes, setAllActivationCodes] = useState([])
     const [selectedOrganisation, setSelectedOrganisation] = useState({
         id: 0,
         name: undefined,
@@ -35,6 +36,7 @@ const AdminPage = () => {
         location: 0,
         locationName: ''
     });
+    const [messageApi, contextHolder] = message.useMessage();
 
     useEffect(() => {fetchData()}
     , []);
@@ -87,6 +89,15 @@ const AdminPage = () => {
         const name = names.find((person) => person.value === responsible);
         console.log(name)
         return name.label;
+    }
+
+    const fetchActivationCodes = async () => {
+        const {data, error} = await supabase
+            .from('Activation')
+            .select('code')
+
+        const codes = data.map(record => record.code);
+        setAllActivationCodes(codes);
     }
 
     const handleCloseCaretaker = () => {
@@ -146,6 +157,7 @@ const AdminPage = () => {
                 console.error("Error updating organisation:", error);
             } else {
                 console.log("Organisation updated successfully!");
+                handleMessage('De informatie is bijgewerkt!')
             }
             fetchData();
 
@@ -209,14 +221,28 @@ const AdminPage = () => {
         if (error) {
             console.error("Error deleting organisation:", error);
         } else {
+            handleMessage('De organisatie is verwijderd')
             console.log("Organisation deleted successfully!");
         }
         fetchData();
     };
 
     const handleGenerateCode = async () => {
-        const {data, error} = await supabase.from("Activation").insert({"usable": true, "type": "caretaker", "organisation": generatedOrganisation}).select();
-        await setGeneratedCode(data[0].code);
+        await fetchActivationCodes();
+        const random = getRandomInt(1000, 9999);
+        while(allActivationCodes.includes(random)) {
+            const random = getRandomInt(1000, 9999)
+        }
+
+        console.log('Random:' , random)
+
+        const {error} = await supabase.from("Activation").insert({"code": random ,"usable": true, "type": "caretaker", "organisation": generatedOrganisation});
+        if(error) {
+            handleMessage('Code kan niet gegenereerd worden.')
+        }
+        else {
+            await setGeneratedCode(random);
+        }
     }
 
     const handleGeneratedOrganisation = (organisation) => {
@@ -322,6 +348,14 @@ const AdminPage = () => {
         setIsModalVisible(true);
     };
 
+    const handleMessage = (content) => {
+        messageApi.open({content: content})
+    }
+
+    function getRandomInt(min, max) {
+        return Math.floor(Math.random() * (max-min) + min);
+    }
+
     const styles = {
         list: {
             width: '75%',
@@ -381,6 +415,7 @@ const AdminPage = () => {
                     position: 'relative',
                     width: '100%',
                     height: '100%',
+                    minHeight: '100vh',
                     backgroundColor: themeColors.primary2,
                     color: themeColors.primary10,
                     display: 'flex',

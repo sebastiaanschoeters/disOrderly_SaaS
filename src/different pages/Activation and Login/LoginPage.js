@@ -40,8 +40,8 @@ const LoginPage = () => {
         localStorage.setItem('theme', newTheme); // Persist theme in localStorage
     };
 
-    const emailUpdated = async (email) => {
-        console.log(email)
+    const emailUpdated = async (emaill) => {
+        const email = emaill.toLowerCase()
         const user_data = await getUserIdByEmail(email);
         if(!user_data) {return;}
         const userId = user_data[0].user_id;
@@ -216,7 +216,7 @@ const LoginPage = () => {
                     Activate
                 </Button>
 
-                <Card style={{ width: 300 }} title="Login" bordered={false}>
+                <Card style={{ minWidth: 300, width: '25%' }} title="Login" bordered={false}>
                     <Form
                         name="loginForm"
                         initialValues={{ remember: true }}
@@ -237,7 +237,7 @@ const LoginPage = () => {
                                 onBlur={(e) => {
                                     const emailValue = e.target.value;
                                     if(emailValue) {
-                                        emailUpdated(emailValue)
+                                        emailUpdated(emailValue.toLowerCase())
                                     }
                                 }}
                             />
@@ -256,7 +256,7 @@ const LoginPage = () => {
                                 onChange={(e) => {
                                     const emailField = document.querySelector("#loginForm_email");
                                     if(!themeToSet) {
-                                        emailUpdated(emailField.value)
+                                        emailUpdated(emailField.value.toLowerCase())
                                     }
                                 }}
                             />

@@ -344,14 +344,14 @@ const ProfileCard = (profileToShow) => {
                             src={profilePicture}
                             alt={profileData.name || "No Name"}
                             style ={{
-                                minWidth: '150px',
-                                minHeight: '150px',
+                                minWidth: '175px',
+                                minHeight: '175px',
                                 borderRadius: '50%',
                                 marginTop: '20px'
                             }}
                         />
                         <div>
-                            <h2 style={{ margin: '0' }}>
+                            <h2 style={{ margin: '0' , fontSize: '28px'}}>
                                 {profileData.name || 'Naam'}, {calculateAge(profileData.birthdate) || 'Leeftijd'}
                             </h2>
                             <p style={{margin: '5px 0', maxWidth: '550px'}}>

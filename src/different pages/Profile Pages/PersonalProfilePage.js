@@ -44,8 +44,12 @@ const useFetchProfileData = (actCode) => {
                     .eq('id', actCode);
 
                 if (userError) throw userError;
+                console.log(userData[0].id);
+                console.log(Math.floor(userData[0].id / 10000))
                 if (userData.length > 0) {
                     const user = userData[0];
+                    user.caretaker = Math.floor(user.id / 10000);
+
 
                     // Fetch user information
                     const { data: userInfoData, error: userInfoError } = await supabase
@@ -83,6 +87,9 @@ const useFetchProfileData = (actCode) => {
                         .from('Caretaker')
                         .select('name, profile_picture, id')
                         .eq('id', user.caretaker)
+                    console.log(user.caretaker)
+
+                    console.log('Caretaker: ', caretakerInfo)
 
                     if (caretakerInfo.length > 0){
                         const caretaker = caretakerInfo[0];
@@ -480,10 +487,10 @@ const ProfileCard = () => {
                             }
                             value={caretaker.accessLevel}
                             options={[
-                                {value: 'Volledige toegang', label: 'Volledige toegang'},
-                                {value: 'Gesprekken', label: 'Gesprekken'},
-                                {value: 'Contacten', label: 'Contacten'},
-                                {value: 'Publiek profiel', label: 'Publiek profiel'},
+                                {value: 'Volledige toegang', label: 'Begeleider kan inloggen op mijn account'},
+                                {value: 'Gesprekken', label: 'Begeleider kan mijn gesprekken lezen'},
+                                {value: 'Contacten', label: 'Begeleider kan zien met wie ik chat'},
+                                {value: 'Publiek profiel', label: 'Begeleider kan alleen mijn profiel zien'},
                             ]}
                         />
                         <Tooltip title={tooltips[caretaker.accessLevel] || 'Geen informatie beschikbaar'}>

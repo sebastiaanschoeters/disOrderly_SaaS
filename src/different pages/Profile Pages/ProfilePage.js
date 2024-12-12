@@ -8,7 +8,6 @@ import '../../CSS/AntDesignOverride.css';
 import { antThemeTokens, themes } from '../../Extra components/themes';
 import useFetchProfileData from "../../UseHooks/useFetchProfileData";
 import {calculateAge, calculateDistance, calculateSlidesToShow} from "../../Utils/calculations";
-import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
 
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
 const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
@@ -170,8 +169,6 @@ const ProfileCard = (profileToShow) => {
     // Derive theme colors
     const theme = profileData.theme || 'blauw';
     const themeColors = themes[theme] || themes.blauw;
-
-    useThemeOnCSS(themeColors);
 
     // Current user location (with fallback)
     const currentUserLocation = locationData

@@ -148,7 +148,7 @@ const HangmanGame = ({ isModalVisible, setIsModalVisible, player1Id, player2Id, 
 
         if (existingGame && existingGame.length > 0) {
             console.log('A game already exists between these players:', existingGame[0].id);
-            message.error('De andere persoon heeft al een nieuw spel gestart');
+            message.error({content: 'De andere persoon heeft al een nieuw spel gestart', style:{fontSize:'20px'}});
             return; // Do not create a new game
         }
 

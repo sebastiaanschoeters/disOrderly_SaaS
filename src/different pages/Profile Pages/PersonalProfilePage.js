@@ -309,7 +309,7 @@ const ProfileCard = () => {
 
                 if (updateError) throw updateError;
 
-                message.success("Toegangsniveau wijziging verzoek bijgewerkt!");
+                message.success({content: "Toegangsniveau wijziging verzoek bijgewerkt!", style:{fontSize:'20px'}});
             } else {
                 // If no request exists, insert a new one
                 const {error: insertError} = await supabase
@@ -323,10 +323,10 @@ const ProfileCard = () => {
 
                 if (insertError) throw insertError;
 
-                message.success("Toegangsniveau wijziging verzoek verzonden!");
+                message.success({content: "Toegangsniveau wijziging verzoek verzonden!", style:{fontSize:'20px'}});
             }
         } catch (error) {
-            message.error("Fout bij het verzenden of bijwerken van toegangsniveau wijziging verzoek: " + error.message);
+            message.error({content: "Fout bij het verzenden of bijwerken van toegangsniveau wijziging verzoek: " + error.message, style:{fontSize:'20px'}});
 
             setPendingRequests((prev) => {
                 const updated = {...prev};

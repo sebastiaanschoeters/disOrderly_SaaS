@@ -175,7 +175,7 @@ const HomePage = () => {
                             fontSize: '1.4rem',  // Increase font size for name
                         }}
                     >
-                        {name}     <EditOutlined style={{marginLeft:'15px'}}/>
+                        {name} <EditOutlined style={{marginLeft:'10px'}}/>
                     </p>
                 </div>
 

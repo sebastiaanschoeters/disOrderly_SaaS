@@ -59,11 +59,11 @@ const ChatPage = () => {
     if(!chatroomId){
         if(localStorage.getItem('userType') === "user"){
             navigate("/home");
-            message.error("deze pagina is niet beschikbaar via deze link");
+            message.error({content: "deze pagina is niet beschikbaar via deze link", style:{fontSize:'20px'}});
         }
         else if(localStorage.getItem('userType') === "caretaker"){
             navigate("/clientOverview");
-            message.error("deze pagina is niet beschikbaar via deze link");
+            message.error({content: "deze pagina is niet beschikbaar via deze link", style:{fontSize:'20px'}});
         }
         else {
             navigate("/login");

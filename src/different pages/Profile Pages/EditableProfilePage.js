@@ -221,10 +221,10 @@ const ProfileCard = () => {
                 setInterests([...interests, capitalizedInterest]);
                 setSelectedInterests([...selectedInterests, capitalizedInterest]);
                 setNewInterest('');
-                message.success("nieuwe interesse opgeslagen")
+                message.success({content: "nieuwe interesse opgeslagen", style: {fontSize:'30px'}})
             } catch (error) {
                 console.error('Error adding new interest:', error);
-                message.error("probleem bij het toevoegen van een nieuwe interesse")
+                message.error({content: "probleem bij het toevoegen van een nieuwe interesse", style:{fontSize:'20px'}})
             }
         }
     };
@@ -272,7 +272,7 @@ const ProfileCard = () => {
                     .eq('user_id', user_id)
                     .in('interest_id', interestsToRemove);
             }
-            message.success("interesse opgeslagen")
+            message.success({content: "Interesse opgeslagen", style:{fontSize:'20px'} })
         } catch (error) {
             console.error('Error updating interests:', error);
             message.error("probleem bij het opslaan van interesse")
@@ -321,10 +321,10 @@ const ProfileCard = () => {
                 .eq('user_id', user_id);
             if (error) throw error;
 
-            message.success("op zoek naar opgeslagen")
+            message.success({content: "op zoek naar opgeslagen", style:{fontSize:'20px'}})
             console.log(`Looking for updated successfully width value ${updatedLookingFor}`);
         } catch (error) {
-            message.error("probleem bij het opslaan van op zoek naar")
+            message.error({content: "probleem bij het opslaan van op zoek naar", style:{fontSize:'20px'}})
             console.error('Error saving looking for:', error);
         };
     };
@@ -439,10 +439,10 @@ const ProfileCard = () => {
 
         } catch (error) {
             message.error(error.message);
-            message.error("foto opgeslagen")
+            message.error({content: "foto opgeslagen", style:{fontSize:'20px'}})
         } finally {
             setUploadingPicture(false);
-            message.success("foto opgeslagen")
+            message.success({content: "foto opgeslagen", style:{fontSize:'20px'}})
         }
     };
 
@@ -476,10 +476,10 @@ const ProfileCard = () => {
             });
         } catch (error) {
             console.error('Error removing profile picture:', error);
-            message.error('probleem bij het verwijderen van de foto')
+            message.error({content: 'probleem bij het verwijderen van de foto', style:{fontSize:'20px'}})
         } finally {
             setRemovingPicture(false);
-            message.success('foto verwijdert')
+            message.success({content: 'foto verwijdert', style:{fontSize:'20px'}})
         }
     };
 

@@ -14,7 +14,7 @@
 }
 
 .sparkle-icon::after {
-    content: '\2605'; /* Unicode character for sparkle/star */
+    content: '\2605';
     position: relative;
     top: -3px;
     left: -10px;

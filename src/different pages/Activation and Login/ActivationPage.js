@@ -1,11 +1,9 @@
-// ActivationPage.js
 import {useNavigate, useParams} from 'react-router-dom';
 import React, {useEffect, useState} from 'react';
-import * as dayjs from 'dayjs'
 import '../../CSS/AntDesignOverride.css'
 import '../../CSS/ActivationPage.css'
 import 'antd/dist/reset.css';
-import {Form, Input, Button, Card, message, ConfigProvider, DatePicker, Radio, Select, Checkbox, Divider} from 'antd';
+import {Form, Input, Button, Card, message, ConfigProvider, Radio, Select, Checkbox, Divider} from 'antd';
 import {antThemeTokens, ButterflyIcon, themes} from '../../Extra components/themes';
 import { createClient } from "@supabase/supabase-js";
 import CryptoJS from 'crypto-js';
@@ -16,7 +14,7 @@ import forestImage from '../../Media/forest.jpg';
 
 const ActivationPage = () => {
     const { activationCodeLink } = useParams();
-    const [searchValue, setSearchValue] = useState(""); // For search functionality
+    const [searchValue, setSearchValue] = useState("");
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
     const [userData, setUserData] = useState({});
@@ -42,7 +40,7 @@ const ActivationPage = () => {
     const {locations } = useLocations(searchValue);
 
     const handleSearch = (value) => {
-        setSearchValue(value); // Trigger new fetch based on search
+        setSearchValue(value);
     };
 
     const goBack = () => {
@@ -64,12 +62,11 @@ const ActivationPage = () => {
     const activationCode = async (values) => {
         setLoading(true);
         try {
-            // Query the "Activation" table to validate the code
             const { data, error } = await supabase
                 .from("Activation")
                 .select("usable, type")
                 .eq("code", values.activationKey)
-                .single(); // Expect a single result
+                .single();
 
             console.log(data)
 
@@ -92,7 +89,6 @@ const ActivationPage = () => {
                 return;
             }
 
-            // Activation code is valid and usable
             setUserData((prevData) => ({
                 ...prevData,
                 activationKey: values.activationKey,
@@ -120,11 +116,10 @@ const ActivationPage = () => {
         setStep(3);
     };
 
-    // Handle submission of additional info (city and organization)
     const Location = (values) => {
         setUserData((prevData) => ({
             ...prevData,
-            city: values.city, // Save city ID, not name
+            city: values.city,
             mobility: values.mobility,
         }));
         setStep(4);
@@ -135,7 +130,7 @@ const ActivationPage = () => {
             ...prevData,
             gender: values.gender,
             sexuality: values.sexuality,
-            relationshipPreference: JSON.stringify(values.relationshipPreference), // Store as JSON
+            relationshipPreference: JSON.stringify(values.relationshipPreference),
         }));
         setStep(5);
     };
@@ -159,19 +154,19 @@ const ActivationPage = () => {
             if (error && error.code !== "PGRST116") {
                 console.error("Error checking email existence:", error.message);
                 message.error({content: "Er is iets misgegaan tijdens de validatie van uw e-mailadres.", style:{fontSize:'20px'}});
-                return true;  // Return true if there's an error
+                return true;
             }
 
             if (data) {
                 message.error({content: "Dit e-mailadres is al geregistreerd.", style:{fontSize:'20px'}});
-                return true;  // Return true if email is already taken
+                return true;
             }
 
-            return false;  // Return false if email is available
+            return false;
         } catch (err) {
             console.error("Unexpected error during email validation:", err);
             message.error({content: "Er is iets misgegaan. Probeer het later opnieuw.", style:{fontSize:'20px'}});
-            return true;  // Return true if an unexpected error occurs
+            return true;
         }
     };
 
@@ -221,12 +216,11 @@ const ActivationPage = () => {
     };
 
     const saveUserProfile = async (userData) => {
-        let insertedCredentialId = null; // Track inserted IDs for rollback
+        let insertedCredentialId = null;
         let insertedUserId = null;
-        let activationKeyUpdated = false; // Track if activation key was updated
+        let activationKeyUpdated = false;
 
         try {
-            // Insert data into "Credentials" table
             const { data: credentialData, error: credentialError } = await supabase
                 .from("Credentials")
                 .insert({
@@ -235,14 +229,13 @@ const ActivationPage = () => {
                     password: userData.password,
                 })
                 .select("user_id")
-                .single(); // Retrieve the inserted ID
+                .single();
 
             if (credentialError) {
                 throw new Error(`Error saving credentials: ${credentialError.message}`);
             }
             insertedCredentialId = credentialData.id;
 
-            // Insert data into "User" table
             const { data: userDataResponse, error: userError } = await supabase
                 .from("User")
                 .insert({
@@ -259,7 +252,6 @@ const ActivationPage = () => {
             }
             insertedUserId = userDataResponse.id;
 
-            // Insert data into "User information" table
             const { data: profileData, error: profileError } = await supabase
                 .from("User information")
                 .insert({
@@ -284,7 +276,6 @@ const ActivationPage = () => {
             if (activationKeyError) {
                 throw new Error(`Error updating activation key: ${activationKeyError.message}`);
             }
-            activationKeyUpdated = true;
 
             console.log("Profile saved successfully", {
                 credentialData,
@@ -308,7 +299,6 @@ const ActivationPage = () => {
                 .eq("user_id", userData.activationKey);
 
             if (activationKeyUpdated) {
-                // Revert the "usable" column to true if it was updated
                 await supabase
                     .from("Activation")
                     .update({ usable: true })
@@ -323,20 +313,16 @@ const ActivationPage = () => {
     const EmailAndPassword = async (values) => {
         setLoading(true);
         try {
-            // Convert email to lowercase
             const lowercaseEmail = values.email.toLowerCase();
 
-            // Check if email already exists using lowercase email
             const emailExists = await checkEmailExistence(lowercaseEmail);
             if (emailExists) {
                 setLoading(false);
                 return;
             }
 
-            // Hash the password
             const hashedPassword = CryptoJS.SHA256(values.password).toString();
 
-            // Update user data with lowercase email and hashed password
             const updatedUserData = {
                 ...userData,
                 email: lowercaseEmail,
@@ -345,10 +331,8 @@ const ActivationPage = () => {
 
             console.log("User Data to Submit:", updatedUserData);
 
-            // Save user profile
             await saveUserProfile(updatedUserData);
 
-            // Show success message
             message.success({content: "Account aangemaakt! Je kan een profielfoto toevoegen in je profiel.", style:{fontSize:'20px'}});
             navigate('/login');
         } catch (err) {
@@ -459,12 +443,12 @@ const ActivationPage = () => {
                                             width: '100%',
                                             padding: '10px',
                                             fontSize: '16px',
-                                            border: `1px solid ${themeColors.primary4}`, // Use primary1 for the border color
+                                            border: `1px solid ${themeColors.primary4}`,
                                             borderRadius: '4px',
                                             boxSizing: 'border-box',
                                         }}
 
-                                        max={new Date().toISOString().split('T')[0]} // Disables future dates
+                                        max={new Date().toISOString().split('T')[0]}
                                         onChange={(e) => {
                                             const selectedDate = new Date(e.target.value);
                                             const today = new Date();
@@ -496,11 +480,11 @@ const ActivationPage = () => {
                                 <Select
                                     showSearch
                                     placeholder="Zoek en selecteer uw stad"
-                                    onSearch={handleSearch} // Trigger search
-                                    filterOption={false} // Disable client-side filtering
+                                    onSearch={handleSearch}
+                                    filterOption={false}
                                     options={locations.map((location) => ({
-                                        value: location.id, // Use ID as the value
-                                        label: location.Gemeente +' (' + location.Postcode + ')', // Display gemeente
+                                        value: location.id,
+                                        label: location.Gemeente +' (' + location.Postcode + ')',
                                     }))}
                                 />
                             </Form.Item>

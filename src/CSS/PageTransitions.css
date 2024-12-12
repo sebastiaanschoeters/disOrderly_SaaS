@@ -23,5 +23,5 @@
 /* Keep non-fading elements on top */
 .non-fading-elements {
     position: relative;
-    z-index: 10; /* Ensure form and button stay visible */
+    z-index: 10;
 }

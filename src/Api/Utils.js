@@ -7,8 +7,8 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 export const getName = async (user_id, options={caretaker: false}) => {
     try {
-        let data = {};
-        let error = {};
+        let data;
+        let error;
         if (options.caretaker){
             const {data: caretakerData, error: caretakerError} = await supabase
                 .from('Caretaker')
@@ -36,7 +36,7 @@ export const getName = async (user_id, options={caretaker: false}) => {
         }
 
         console.log('Fetched name:', data[0].name);
-        return data[0].name;  // Ensure it's a string
+        return data[0].name;
     } catch (err) {
         console.error('Unexpected error:', err);
         return null;
@@ -45,8 +45,8 @@ export const getName = async (user_id, options={caretaker: false}) => {
 
 export const getTheme = async (user_id, options={caretaker:false}) => {
     try {
-        let data = {};
-        let error = {};
+        let data;
+        let error;
         if (options.caretaker){
             const {data: caretakerData, error: caretakerError} = await supabase
                 .from('Caretaker')
@@ -73,7 +73,7 @@ export const getTheme = async (user_id, options={caretaker:false}) => {
             return null;
         }
 
-        return data[0].theme; // Returning the theme directly
+        return data[0].theme;
     } catch (err) {
         console.error('Unexpected error:', err);
         return null;
@@ -82,8 +82,8 @@ export const getTheme = async (user_id, options={caretaker:false}) => {
 
 export const getPfp = async (user_id, options={caretaker:false}) => {
     try {
-        let data = {};
-        let error = {};
+        let data;
+        let error;
         if (options.caretaker){
             const {data: caretakerData, error: caretakerError} = await supabase
                 .from('Caretaker')
@@ -111,7 +111,7 @@ export const getPfp = async (user_id, options={caretaker:false}) => {
         }
 
         console.log('Fetched pfp:', data[0].profile_picture);
-        return data[0].profile_picture; // Ensure it's a string
+        return data[0].profile_picture;
     } catch (err) {
         console.error('Unexpected error:', err);
         return null;
@@ -142,8 +142,8 @@ export const getUserEmailById = async (userId) => {
     }
 };
 
+// Function to save user field
 export const saveField = async (userId, field, value) => {
-    // Map English field names to Dutch equivalents
     const fieldTranslations = {
         bio: "biografie",
         location: "locatie",
@@ -165,10 +165,9 @@ export const saveField = async (userId, field, value) => {
         if (error) {
             message.error({content: `Probleem bij het opslaan van ${dutchField}`, style:{fontSize:'20px'}});
             console.error(`Error saving ${dutchField}:`, error);
-            return; // Early return to exit function on error
+            return;
         }
 
-        // Display success message
         message.success({content: `${dutchField} opgeslagen`, style:{fontSize:'20px'}});
         console.log(`${field} saved successfully with value ${value}`);
     } catch (error) {
@@ -290,7 +289,6 @@ export const assembleProfileData = async (userId) => {
     return result;
 };
 
-// In Utils.js
 export const handleProfileClick = (client, setSelectedClient, setIsModalProfileVisible) => {
     setSelectedClient({ id: client });
     setIsModalProfileVisible(true);

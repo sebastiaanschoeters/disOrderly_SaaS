@@ -13,35 +13,35 @@
 
 /* Default font size for various components */
 body, p, .ant-typography, .ant-btn, .ant-select, .ant-tag, .ant-txtArea {
-    font-size: 1rem; /* Default base font size */
+    font-size: 1rem;
 }
 
 /* Specific styles for Select component */
 .ant-select .ant-select-selector {
-    font-size: 1rem; /* Apply font size to the Select component */
+    font-size: 1rem;
 }
 
 /* Apply font size to dropdown items */
 .ant-select-dropdown .ant-select-item {
-    font-size: 1rem; /* Font size for dropdown options */
+    font-size: 1rem;
 }
 
 /* Adjust font size of Card header */
 .ant-card-head-title {
-    font-size: 1.5rem; /* Use relative units to scale */
-    line-height: 1.2;  /* Adjust for readability */
+    font-size: 1.5rem;
+    line-height: 1.2;
 }
 
 /* Adjust font size of form item labels */
 .ant-form-item-label > label {
-    font-size: 1rem !important; /* Scale with browser settings */
-    line-height: 1.5rem; /* Ensure proper spacing */
+    font-size: 1rem !important;
+    line-height: 1.5rem;
 }
 
 /* Adjust font size of inputs */
 .ant-input,
 .ant-input-password {
-    font-size: 1rem; /* Scale input text size */
+    font-size: 1rem;
 }
 
 .ant-input-search {
@@ -50,7 +50,7 @@ body, p, .ant-typography, .ant-btn, .ant-select, .ant-tag, .ant-txtArea {
 
 /* Adjust spacing of form items */
 .ant-form-item {
-    margin-bottom: 1.5rem; /* Use relative units for spacing */
+    margin-bottom: 1.5rem;
 }
 
 /* Checkbox font size */
@@ -60,7 +60,7 @@ body, p, .ant-typography, .ant-btn, .ant-select, .ant-tag, .ant-txtArea {
 
 /* Adjust the size of the modal title */
 .ant-modal-title {
-    font-size: 1.5rem !important;  /* Adjust the font size of the title */
+    font-size: 1.5rem !important;
 }
 
 .ant-typography {
@@ -93,7 +93,7 @@ body, p, .ant-typography, .ant-btn, .ant-select, .ant-tag, .ant-txtArea {
 
 /* Styling for both checked and unchecked switch states */
 .ant-switch-inner span{
-    font-size: 1rem; /* Font size for switch inner text */
+    font-size: 1rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -101,13 +101,13 @@ body, p, .ant-typography, .ant-btn, .ant-select, .ant-tag, .ant-txtArea {
 
 /* Other element styles */
 h1, h2 {
-    font-size: 2rem; /* Scales with base font size */
+    font-size: 2rem;
 }
 
 /* spacing voor radio forms */
 .ant-radio-wrapper {
     display: block;
-    margin-bottom: 16px; /* Adjust this value for more or less space */
+    margin-bottom: 16px;
 }
 
 .ant-btn-primary {

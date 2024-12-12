@@ -1,6 +1,6 @@
 @media (max-width: 575px) {
     .form-item {
-        padding: 0px !important;
-        margin: 0px !important;
+        padding: 0 !important;
+        margin: 0 !important;
     }
 }

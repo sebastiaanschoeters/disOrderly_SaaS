@@ -40,25 +40,87 @@ const HomePage = () => {
     const name = localStorage.getItem('name');
     const profile_picture = localStorage.getItem('profile_picture');
     const [newRequestCount, setNewRequestCount] = useState(0);
+    const [chatroomId, setChatroomId] = useState(null);
+
+    const fetchChatroomId = async () => {
+        try {
+            const { data: dataChatroom, error: fetchError } = await supabase
+                .from('Chatroom')
+                .select('id')
+                .eq('sender_id', userId)
+                .eq('receiver_id', 1)
+                .single();
+
+            if (fetchError && fetchError.code !== 'PGRST116') { // Ignore "No rows found" error
+                console.error("Error fetching chatroom:", fetchError);
+                return;
+            }
+
+            if (dataChatroom) {
+                setChatroomId(dataChatroom.id);
+            } else {
+                // Insert new chatroom if it doesn't exist
+                const { data: newChatroom, error: insertError } = await supabase
+                    .from('Chatroom')
+                    .insert({
+                        sender_id: userId,
+                        receiver_id: 1,
+                        acceptance: true,
+                        last_sender_id: userId,
+                    })
+                    .select()
+                    .single();
+
+                if (insertError) {
+                    console.error("Error inserting new chatroom:", insertError);
+                    return;
+                }
+
+                setChatroomId(newChatroom.id);
+            }
+        } catch (error) {
+            console.error("Unexpected error in fetchChatroomId:", error);
+        }
+    };
 
     const fetchnumber = async () => {
-        const {count, error} = await supabase
-            .from('Chatroom')
-            .select('id', { count: 'exact' })
-            .eq(`receiver_id`,userId)
-            .eq('acceptance', false);
+        try {
+            const { count, error } = await supabase
+                .from('Chatroom')
+                .select('id', { count: 'exact' })
+                .eq('receiver_id', userId)
+                .eq('acceptance', false);
 
-        if (error) {
-            console.error("Error fetching chatrooms:", error);
-        }
-        if (count > 0){
-            setNewRequestCount(count || 0);
+            if (error) {
+                console.error("Error fetching chatrooms:", error);
+                return;
+            }
+
+            if (count > 0) {
+                setNewRequestCount(count || 0);
+            }
+        } catch (error) {
+            console.error("Unexpected error in fetchnumber:", error);
         }
     };
 
     useEffect(() => {
         fetchnumber();
+        fetchChatroomId();
     }, []);
+
+    const handleHelpService = () => {
+        const profileData = {
+            name: "Helpdesk",
+            user_id: userId,
+            otherUserId: 1,
+            isSender: true,
+            chatroomId: chatroomId,
+            isAdmin: true,
+        };
+
+        navigate(`/chat`, { state: { profileData } });
+    };
 
     return (
         <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
@@ -249,7 +311,7 @@ const HomePage = () => {
                         textAlign: 'center',
                         overflow: 'hidden',
                     }}
-                    //onClick={() => handleLogout()}
+                    onClick={() => handleHelpService()}
                 >
                     <h2 style={{ margin: '0', minWidth: '10px', whiteSpace: 'nowrap' }}>Helpdesk</h2>
                 </Button>

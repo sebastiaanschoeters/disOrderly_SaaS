@@ -400,7 +400,7 @@ const ActivationPage = () => {
                         <Form form={form} name="activationForm" onFinish={activationCode}>
                             <Form.Item
                                 className="form-item"
-                                label="Activation Key"
+                                label="Activeringscode"
                                 name="activationKey"
                                 initialValues={{ activationKey: userData.activationKey || '' }}
                                 rules={[{ required: true, message: 'Dit is geen geldige activatie sleutel' }]}
@@ -616,7 +616,7 @@ const ActivationPage = () => {
 
                             <Form.Item
                                 className="form-item"
-                                label="Confirm Password"
+                                label="Herhaal Wachtwoord"
                                 name="confirmPassword"
                                 dependencies={['password']}
                                 rules={[
@@ -636,16 +636,17 @@ const ActivationPage = () => {
 
                             <Form.Item>
                                 <Checkbox>
-                                    I accept the{' '}
+
+                                    Ik ga akkoord met de{' '}
                                     <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab_channel=RickAstley" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'underline' }}>
-                                        Terms and Services
+                                        algemene voorwaarden
                                     </a>.
                                 </Checkbox>
                             </Form.Item>
 
                             <Form.Item>
                                 <Button type="primary" htmlType="submit" style={{ width: '100%' }}>Verzenden</Button>
-                                <Button onClick={goBack} style={{ marginTop: '8px', width: '100%' }}>Back</Button>
+                                <Button onClick={goBack} style={{ marginTop: '8px', width: '100%' }}>Terug</Button>
                             </Form.Item>
                         </Form>
                     )}

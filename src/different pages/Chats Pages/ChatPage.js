@@ -16,6 +16,8 @@ import butterfly4 from '../../Media/butterfly4.png';
 import butterfly5 from '../../Media/butterfly5.png';
 import ProfileDetailsModal from "../Profile Pages/ProfileDetailsModal";
 import {handleModalProfileClose, handleProfileClick} from "../../Api/Utils";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faGamepad } from '@fortawesome/free-solid-svg-icons';
 
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
 const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
@@ -56,11 +58,11 @@ const ChatPage = () => {
     if(!chatroomId){
         if(localStorage.getItem('userType') === "user"){
             navigate("/home");
-            message.error("deze pagina is niet beschikbaar via deze link");
+            message.error({content: "deze pagina is niet beschikbaar via deze link", style:{fontSize:'20px'}});
         }
         else if(localStorage.getItem('userType') === "caretaker"){
             navigate("/clientOverview");
-            message.error("deze pagina is niet beschikbaar via deze link");
+            message.error({content: "deze pagina is niet beschikbaar via deze link", style:{fontSize:'20px'}});
         }
         else {
             navigate("/login");
@@ -478,7 +480,7 @@ const ChatPage = () => {
                             <div style={styles.inputContainer}>
                                 <Button type="primary"
                                         style={styles.sendButton}
-                                        icon={<PlusOutlined/>}
+                                        icon={<FontAwesomeIcon icon={faGamepad} />}
                                         onClick={handleHangman}/>
                                 <Input
                                     style={styles.input}
@@ -490,6 +492,7 @@ const ChatPage = () => {
                                 <Button type="primary" style={styles.sendButton} icon={<SendOutlined/>}
                                         onClick={handleSendMessage}/>
                             </div>
+
                         )}
 
                     </div>

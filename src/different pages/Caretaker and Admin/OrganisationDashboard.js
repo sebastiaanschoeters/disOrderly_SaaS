@@ -51,7 +51,6 @@ const OrganisationDashboard = () => {
         }
     }
 
-
     const fetchOrganisationInfo = async () => {
         const {data, error} = await supabase
             .from('Organisations')

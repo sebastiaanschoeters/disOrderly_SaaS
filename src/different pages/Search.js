@@ -1,7 +1,7 @@
 import 'antd/dist/reset.css'; // Import Ant Design styles
 import '../CSS/AntDesignOverride.css';
 import { ButterflyIcon, antThemeTokens} from '../Extra components/themes';
-import { Avatar, ConfigProvider, Input, List, Typography, Modal, Button, Slider, Radio, Checkbox } from 'antd';
+import {Avatar, ConfigProvider, Input, List, Typography, Modal, Button, Slider, Radio, Checkbox, Spin} from 'antd';
 import { FilterOutlined } from "@ant-design/icons";
 import { createClient } from "@supabase/supabase-js";
 import React, { useState, useEffect } from "react";
@@ -394,7 +394,19 @@ const Search = () => {
 
 
                 {loading ? (
-                    <div>Gebruikers aan het zoeken...</div>
+                    <div
+                        style={{
+                            display: 'flex',
+                            flexDirection: 'column', // Stack text and spinner vertically
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            width: '100%',
+                            height: '100px', // or whatever height you want for the loading area
+                        }}
+                    >
+                        <div>Gebruikers aan het zoeken...</div>
+                        <Spin/> {/* Spinner below the text */}
+                    </div>
                 ) : (
                     <div
                         style={{

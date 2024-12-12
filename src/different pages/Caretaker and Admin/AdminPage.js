@@ -42,14 +42,14 @@ const AdminPage = () => {
     , []);
 
     const fetchData = async () => {
-        const {data, error} = await supabase.from("Organisations").select("id, name, maximum_activations_codes, responsible, location:Location ( id, Gemeente )").order("name");
+        const {data, error} = await supabase.from("Organisations").select("id, name, maximum_activations_codes, responsible, location:Location ( id, Gemeente, Postcode )").order("name");
         const mappedData = data.map((organisation) => ({
             id: organisation.id,
             name: organisation.name,
             amountUsers: organisation.maximum_activations_codes,
             responsible: organisation.responsible,
             location: organisation.location?.id || null,
-            locationName: organisation.location?.Gemeente || "",
+            locationName: organisation.location?.Gemeente|| "",
         }));
         if(error) {
             console.error(error);
@@ -62,12 +62,13 @@ const AdminPage = () => {
     const fetchLocations = async () => {
         const {data, error} = await supabase
             .from('Location')
-            .select('id, Gemeente')
+            .select('id, Gemeente, Postcode')
         const mappedLocations = data.map((gemeente) => ({
-            label: gemeente.Gemeente,
+            label: gemeente.Gemeente + ' (' + gemeente.Postcode + ')',
             value: gemeente.id
         }))
         setAllLocations(mappedLocations);
+        console.log(mappedLocations)
     }
 
     const fetchLocationName = (locationCode) => {

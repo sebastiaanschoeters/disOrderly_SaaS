@@ -163,16 +163,16 @@ export const saveField = async (userId, field, value) => {
             .eq('user_id', userId);
 
         if (error) {
-            message.error(`Probleem bij het opslaan van ${dutchField}`);
+            message.error({content: `Probleem bij het opslaan van ${dutchField}`, style:{fontSize:'20px'}});
             console.error(`Error saving ${dutchField}:`, error);
             return; // Early return to exit function on error
         }
 
         // Display success message
-        message.success(`${dutchField} opgeslagen`);
+        message.success({content: `${dutchField} opgeslagen`, style:{fontSize:'20px'}});
         console.log(`${field} saved successfully with value ${value}`);
     } catch (error) {
-        message.error(`Onverwachte fout bij het opslaan van ${dutchField}`);
+        message.error({content: `Onverwachte fout bij het opslaan van ${dutchField}`, style:{fontSize:'20px'}});
         console.error(`Unexpected error saving ${dutchField}:`, error);
     }
 };

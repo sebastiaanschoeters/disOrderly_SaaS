@@ -75,19 +75,19 @@ const ActivationPage = () => {
 
             if (error) {
                 console.error("Error checking activation code:", error.message);
-                message.error("Er is iets mis gegaan met het valideren van de activatiecode.");
+                message.error({content: "Er is iets mis gegaan met het valideren van de activatiecode.", style:{fontSize:'20px'}});
                 setLoading(false);
                 return;
             }
 
             if (!data) {
-                message.error("De activatiecode bestaat niet");
+                message.error({content: "De activatiecode bestaat niet", style:{fontSize:'20px'}});
                 setLoading(false);
                 return;
             }
 
             if (!data.usable) {
-                message.error("Deze activatiecode is al in gebruik.");
+                message.error({content: "Deze activatiecode is al in gebruik.", style:{fontSize:'20px'}});
                 setLoading(false);
                 return;
             }
@@ -103,7 +103,7 @@ const ActivationPage = () => {
 
         } catch (err) {
             console.error("Unexpected error during activation code validation:", err);
-            message.error("Er is iets misgegaan. Probeer het later opnieuw.");
+            message.error({content: "Er is iets misgegaan. Probeer het later opnieuw.", style:{fontSize:'20px'}});
         } finally {
             setLoading(false);
         }
@@ -158,19 +158,19 @@ const ActivationPage = () => {
 
             if (error && error.code !== "PGRST116") {
                 console.error("Error checking email existence:", error.message);
-                message.error("Er is iets misgegaan tijdens de validatie van uw e-mailadres.");
+                message.error({content: "Er is iets misgegaan tijdens de validatie van uw e-mailadres.", style:{fontSize:'20px'}});
                 return true;  // Return true if there's an error
             }
 
             if (data) {
-                message.error("Dit e-mailadres is al geregistreerd.");
+                message.error({content: "Dit e-mailadres is al geregistreerd.", style:{fontSize:'20px'}});
                 return true;  // Return true if email is already taken
             }
 
             return false;  // Return false if email is available
         } catch (err) {
             console.error("Unexpected error during email validation:", err);
-            message.error("Er is iets misgegaan. Probeer het later opnieuw.");
+            message.error({content: "Er is iets misgegaan. Probeer het later opnieuw.", style:{fontSize:'20px'}});
             return true;  // Return true if an unexpected error occurs
         }
     };
@@ -211,7 +211,7 @@ const ActivationPage = () => {
 
             if (credError) throw credError;
 
-            message.success("Account succesvol aangemaakt");
+            message.success({content: "Account succesvol aangemaakt", style:{fontSize:'20px'}});
 
         } catch (error) {
             console.error("something went wrong", error);
@@ -349,11 +349,11 @@ const ActivationPage = () => {
             await saveUserProfile(updatedUserData);
 
             // Show success message
-            message.success("Account aangemaakt! Je kan een profielfoto toevoegen bij je profiel instellingen.");
+            message.success({content: "Account aangemaakt! Je kan een profielfoto toevoegen in je profiel.", style:{fontSize:'20px'}});
             navigate('/login');
         } catch (err) {
             console.error("Unexpected error during email validation:", err);
-            message.error("Er is iets misgegaan. Probeer het later opnieuw.");
+            message.error({content: "Er is iets misgegaan. Probeer het later opnieuw.", style:{fontSize:'20px'}});
         } finally {
             setLoading(false);
         }
@@ -470,7 +470,7 @@ const ActivationPage = () => {
                                             const today = new Date();
                                             const age = today.getFullYear() - selectedDate.getFullYear();
                                             if (age < 18) {
-                                                message.error('Je moet minstens 18 jaar oud zijn');
+                                                message.error({content: 'Je moet minstens 18 jaar oud zijn', style:{fontSize:'20px'}});
                                                 e.target.value = '';
                                             }
                                         }}
@@ -500,7 +500,7 @@ const ActivationPage = () => {
                                     filterOption={false} // Disable client-side filtering
                                     options={locations.map((location) => ({
                                         value: location.id, // Use ID as the value
-                                        label: location.Gemeente, // Display gemeente
+                                        label: location.Gemeente +' (' + location.Postcode + ')', // Display gemeente
                                     }))}
                                 />
                             </Form.Item>

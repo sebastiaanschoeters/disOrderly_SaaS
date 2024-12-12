@@ -198,7 +198,7 @@ const ChatOverviewPage = () => {
                 >
                     {filteredChats.length === 0 && (
                         <div style={{ textAlign: 'center', marginTop: '20px', color: themeColors.primary9 }}>
-                            Geen chats gevonden voor deze zoek criteria
+                            Geen chats gevonden.
                         </div>
                     )}
                 </List>

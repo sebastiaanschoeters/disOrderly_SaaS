@@ -1,6 +1,9 @@
 import React, {useEffect, useState} from 'react';
-import {Modal, Button, Spin, Input, Typography, Space, message} from 'antd';
+import {Modal, Button, Spin, Input, Typography, Space, message, Tooltip} from 'antd';
 import { createClient } from '@supabase/supabase-js';
+import {InfoCircleOutlined, ReloadOutlined, RetweetOutlined, UserOutlined} from "@ant-design/icons";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faGamepad } from '@fortawesome/free-solid-svg-icons';
 
 
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
@@ -145,7 +148,7 @@ const HangmanGame = ({ isModalVisible, setIsModalVisible, player1Id, player2Id, 
 
         if (existingGame && existingGame.length > 0) {
             console.log('A game already exists between these players:', existingGame[0].id);
-            message.error('De andere persoon heeft al een nieuw spel gestart');
+            message.error({content: 'De andere persoon heeft al een nieuw spel gestart', style:{fontSize:'20px'}});
             return; // Do not create a new game
         }
 
@@ -175,7 +178,7 @@ const HangmanGame = ({ isModalVisible, setIsModalVisible, player1Id, player2Id, 
         setStep(2);
 
         // Step 4: Notify players about the new game
-        handleSendMessage("ButterflyIcon0 " + localStorage.getItem('name') + " heeft een nieuw spel gestart! Klik links onderaan op de + om te spelen");
+        handleSendMessage("ButterflyIcon0 " + localStorage.getItem('name') + " heeft een nieuw spel gestart! Klik links onderaan op de gamecontroller om te spelen");
 
         return data; // Return the new game data
     };
@@ -193,7 +196,7 @@ const HangmanGame = ({ isModalVisible, setIsModalVisible, player1Id, player2Id, 
             console.error('Error saving answer:', error);
         }
         setIsModalVisible(false)
-        handleSendMessage("ButterflyIcon0 " + localStorage.getItem('name') + " heeft de vraag beantwoord!Klik links onderaan op de + om te spelen")
+        handleSendMessage("ButterflyIcon0 " + localStorage.getItem('name') + "heeft de vraag beantwoord! Klik links onderaan op de gamecontroller om te spelen")
         setStep(3)
         return answer
     };
@@ -336,45 +339,64 @@ const HangmanGame = ({ isModalVisible, setIsModalVisible, player1Id, player2Id, 
         <div>
             {step === 1 && isSender &&(
                 <Modal
-                    title="Typ hier een vraag, of laat een vraag genereren"
+                    title={
+                        <>
+                            Speel galgje om elkaar beter te leren kennen.
+                            <Tooltip title="Galgje is een spel waarin je letters raadt om een woord te vormen. Elk fout antwoord brengt je dichter bij een het einde van het spel. Stel een vraag om te beginnen! Je zal proberen de andere persoon zijn antwoord te raden">
+                                <InfoCircleOutlined style={{ marginLeft: 8 }} />
+                            </Tooltip>
+                        </>
+                    }
                     open={step === 1} // Modal visibility controlled by state
                     onCancel={() => setIsModalVisible(false)}
                     footer={null}
                 >
+                    <p>Typ hier een vraag, of laat een vraag genereren</p>
                     <Input.TextArea
                         rows={3}
                         placeholder="Typ hier je vraag..."
                         value={question}
                         onChange={(e) => setQuestion(e.target.value)}
                     />
-                    <Space direction="horizontal" style={{ marginTop: 10 }}>
+                    <div style={{ marginTop: 10 }}>
                         <Button
                             type="default"
                             onClick={async () => {
                                 const generatedQuestion = await generateConversationStarter();
                                 setQuestion(generatedQuestion);
                             }}
+                            style={{marginRight: 10}}
+                            icon={<RetweetOutlined/>}
                         >
                             Genereer een vraag
                         </Button>
                         <Button
                             type="primary"
+                            style = {{ fontSize: '1rem', marginTop: 10}}
                             onClick={() => startNewGame(question)}
                             disabled={!question} // Disable if the question is empty
                         >
                             Vraag instellen
                         </Button>
-                    </Space>
+                    </div>
                 </Modal>
             )}
 
             {step === 2 && !isSender &&(
                 <Modal
-                    title={`Vraag: ${question} (Player 2)`}
+                    title={
+                        <>
+                            Speel galgje om elkaar beter te leren kennen.
+                            <Tooltip title="Galgje is een spel waarin je letters raadt om een woord te vormen. Elk fout antwoord brengt je dichter bij een het einde van het spel. Stel een vraag om te beginnen! De andere persoon zal proberen jou antwoord te raden">
+                                <InfoCircleOutlined style={{ marginLeft: 8 }} />
+                            </Tooltip>
+                        </>
+                    }
                     open={step === 2} // Modal visibility controlled by state
                     onCancel={() => setIsModalVisible(false)}
                     footer={null}
                 >
+                    <p>Vraag: {question}</p>
                     <Input
                         placeholder="Typ hier het antwoord... (geen spaties)"
                         value={answer}

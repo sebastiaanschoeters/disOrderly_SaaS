@@ -129,6 +129,7 @@ const ClientOverview = () => {
     const [generatedCode, setGeneratedCode] = useState(undefined);
     const [currentAmountUsers, setCurrentAmountUsers] = useState();
     const [maximumAmountUsers, setMaximumAmountUsers] = useState();
+    const [allActivationCodes, setAllActivationCodes] = useState([]);
     const [messageApi, contextHolder] = message.useMessage();
 
     const [notifications, setNotifications] = useState([]);
@@ -258,6 +259,15 @@ const ClientOverview = () => {
             console.error(error);
         }
 
+    }
+
+    const fetchActivationCodes = async () => {
+        const {data, error} = await supabase
+            .from('Activation')
+            .select('code')
+
+        const codes = data.map(record => record.code);
+        setAllActivationCodes(codes);
     }
 
     useEffect(() => {
@@ -562,17 +572,31 @@ const ClientOverview = () => {
         if(currentAmountUsers >= maximumAmountUsers) {
             handleMessage('Je hebt het maximum aantal gebruikers reeds bereikt. Neem contact op met de administrator om je plan te upgraden.')
         }
-        const {data, error} = await supabase
-            .from('Activation')
-            .insert({'usable': true, 'type': 'user', 'organisation': profileData.organizationId})
-            .select()
-        console.log('Generated Code: ',data[0].code)
-        setGeneratedCode(data[0].code)
-        await fetchAmountUsers();
+        else {
+            await fetchActivationCodes;
+            console.log(caretaker_id)
+            let newCode = caretaker_id + getRandomInt(1000, 9999)
+            while (allActivationCodes.includes(newCode)) {
+                newCode = caretaker_id + getRandomInt(1000, 9999);
+            }
+
+            const {error} = await supabase.from("Activation").insert({"code": newCode,"usable": true, "type": "user", "organisation": profileData.organizationId}).select();
+            console.log(newCode);
+            if(error) {
+                console.error(error);
+            }
+            else {
+                await setGeneratedCode(newCode);
+            }
+        }
     }
 
     const handleMessage = (content) => {
         messageApi.open({content: content})
+    }
+
+    function getRandomInt(min, max) {
+        return Math.floor(Math.random() * (max-min) + min);
     }
 
     return (

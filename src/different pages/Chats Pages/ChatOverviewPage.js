@@ -155,6 +155,17 @@ const ChatOverviewPage = () => {
         name: {
             fontSize: '1.2rem',
         },
+        newMessageIndicator: {
+            position: 'absolute',
+            top: '15px',
+            height: '25px',
+            right: '15px',
+            backgroundColor: themeColors.primary8,
+            color: themeColors.primary1,
+            padding: '0px 5px',
+            borderRadius: '5px',
+            fontSize: '1rem',
+        },
     };
 
     return (
@@ -206,7 +217,7 @@ const ChatOverviewPage = () => {
                                 }}
                             >
                                 <Card.Meta
-                                    avatar={<Avatar src={chat.profilePicture || 'default-avatar.png'} style={{width: '70px', height: '70px'}}/>}
+                                    avatar={<Avatar src={chat.profilePicture || 'default-avatar.png'} style={{width: '65px', height: '65px'}}/>}
                                     title={<span style={styles.name}>{chat.profileName}</span>}
                                     description={
                                         <span style={styles.lastMessage}>

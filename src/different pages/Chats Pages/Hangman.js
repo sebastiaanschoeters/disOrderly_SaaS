@@ -266,26 +266,41 @@ const HangmanGame = ({ isModalVisible, setIsModalVisible, player1Id, player2Id, 
 
     const handleGameWin = async () => {
         try {
-            // Increment hangman_wins for the current user
-            const { data, error } = await supabase
+            const userId = localStorage.getItem('user_id');
+            console.log(userId)
+            // Fetch the current value of hangman_wins
+            const { data: userData, error: fetchError } = await supabase
                 .from('User information')
-                .update({ hangman_wins: supabase.raw('hangman_wins + 1') }) // Increment column value
-                .eq('user_id', localStorage.getItem('userId'));
+                .select('hangman_wins')
+                .eq('user_id', userId)
+                .single();
 
-            if (error) {
-                console.error('Error updating hangman_wins:', error);
+            if (fetchError) {
+                console.error('Error fetching hangman_wins:', fetchError);
+                return;
+            }
+
+            const currentWins = userData.hangman_wins || 0;
+
+            // Increment the value locally
+            const updatedWins = currentWins + 1;
+
+            // Update the value in the database
+            const { data, error: updateError } = await supabase
+                .from('User information')
+                .update({ hangman_wins: updatedWins })
+                .eq('user_id', userId);
+
+            if (updateError) {
+                console.error('Error updating hangman_wins:', updateError);
                 return;
             }
 
             console.log('Hangman win updated successfully:', data);
-            return;
         } catch (error) {
             console.error('Unexpected error in handleGameWin:', error);
         }
     };
-
-
-
 
     const isGameOver = wrongGuesses >= maxWrong;
     const isGameWon = answer.split('').every((letter) => guessedLetters.includes(letter.toUpperCase()));
@@ -321,7 +336,7 @@ const HangmanGame = ({ isModalVisible, setIsModalVisible, player1Id, player2Id, 
         <div>
             {step === 1 && isSender &&(
                 <Modal
-                    title="Stel een vraag (Player 1)"
+                    title="Typ hier een vraag, of laat een vraag genereren"
                     open={step === 1} // Modal visibility controlled by state
                     onCancel={() => setIsModalVisible(false)}
                     footer={null}

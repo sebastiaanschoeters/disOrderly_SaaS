@@ -203,6 +203,7 @@ const ClientOverview = () => {
     const [generatedCode, setGeneratedCode] = useState(undefined);
     const [currentAmountUsers, setCurrentAmountUsers] = useState();
     const [maximumAmountUsers, setMaximumAmountUsers] = useState();
+    const [messageApi, contextHolder] = message.useMessage();
 
     const [notifications, setNotifications] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
@@ -618,6 +619,9 @@ const ClientOverview = () => {
     }
 
     const handleGenerateCode = async () => {
+        if(currentAmountUsers >= maximumAmountUsers) {
+            handleMessage('Je hebt het maximum aantal gebruikers reeds bereikt. Neem contact op met de administrator om je plan te upgraden.')
+        }
         const {data, error} = await supabase
             .from('Activation')
             .insert({'usable': true, 'type': 'user', 'organisation': profileData.organizationId})
@@ -625,6 +629,10 @@ const ClientOverview = () => {
         console.log('Generated Code: ',data[0].code)
         setGeneratedCode(data[0].code)
         await fetchAmountUsers();
+    }
+
+    const handleMessage = (content) => {
+        messageApi.open({content: content})
     }
 
     return (
@@ -637,6 +645,7 @@ const ClientOverview = () => {
                 textAlign: "center",
             }}
         >
+            {contextHolder}
             {isWideEnough ? (
                 <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
                     <div
@@ -782,12 +791,11 @@ const ClientOverview = () => {
 
                         <Button
                             type={"primary"}
-                            onClick={handleGenerateCode}
+                            onClick={()=> handleGenerateCode()}
                         >
                             Genereer
                         </Button>
                     </Modal>
-
                 </ConfigProvider>
             ) : (
                 <div>

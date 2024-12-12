@@ -350,7 +350,7 @@ const ChatPage = () => {
                 zIndex: '0'
                 }}
             >
-                {userType !== "caretaker" && (<HomeButtonUser color={themeColors.primary7} />)}
+                {userType !== "caretaker" && userType !== "admin" && (<HomeButtonUser color={themeColors.primary7} />)}
 
                 <ButterflyIcon color={themeColors.primary3} />
 
@@ -472,9 +472,9 @@ const ChatPage = () => {
                             />
                             <div ref={dummyRef}/>
                         </div>
-                        {userType !== "caretaker" && (
+                        {userType !== "caretaker" &&(
                             <div style={styles.inputContainer}>
-                                {!isAdmin && (
+                                {!isAdmin && userType !== "admin"&& (
                                     <Button
                                         type="primary"
                                         style={styles.sendButton}

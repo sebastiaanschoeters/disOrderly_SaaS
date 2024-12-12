@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { List, Avatar, Typography, Input, ConfigProvider, Card } from 'antd';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate  } from 'react-router-dom';
 import { antThemeTokens, ButterflyIcon, themes } from '../../Extra components/themes';
 import { createClient } from "@supabase/supabase-js";
 import moment from 'moment';
@@ -19,6 +19,7 @@ const ChatOverviewPage = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [chatrooms, setChatrooms] = useState([]);
     const userID = parseInt(localStorage.getItem('user_id'), 10);
+    const userType = localStorage.getItem('userType');
 
     const [themeName, darkModeFlag] = JSON.parse(localStorage.getItem('theme')) || ['blauw', false];
     const { themeColors, setThemeName, setDarkModeFlag } = useTheme(themeName, darkModeFlag);
@@ -26,13 +27,24 @@ const ChatOverviewPage = () => {
     useThemeOnCSS(themeColors);
 
     const fetchChatrooms = async () => {
-        const { data, error } = await supabase
-            .from('Chatroom')
-            .select(`id, sender_id, receiver_id, acceptance, last_sender_id,
-            senderProfile: sender_id(name, profile_picture), 
-            receiverProfile: receiver_id(name, profile_picture)`)
-            .or(`sender_id.eq.${userID},receiver_id.eq.${userID}`)
-
+        let data, error;
+        if (userType !== "admin") {
+            ({ data, error } = await supabase
+                .from('Chatroom')
+                .select(`id, sender_id, receiver_id, acceptance, last_sender_id,
+                senderProfile: sender_id(name, profile_picture), 
+                receiverProfile: receiver_id(name, profile_picture)`)
+                .or(`sender_id.eq.${userID},receiver_id.eq.${userID}`)
+                .not('receiver_id', 'eq', 1)); // Corrected negation query
+        } else {
+            // Non-admin: No exclusion, fetch all chatrooms
+            ({ data, error } = await supabase
+                .from('Chatroom')
+                .select(`id, sender_id, receiver_id, acceptance, last_sender_id,
+                senderProfile: sender_id(name, profile_picture), 
+                receiverProfile: receiver_id(name, profile_picture)`)
+                .or(`sender_id.eq.${userID},receiver_id.eq.${userID}`));
+        }
 
         if (error) {
             console.error("Error fetching chatrooms:", error);
@@ -173,7 +185,7 @@ const ChatOverviewPage = () => {
             <div
                 style={styles.chatContainer}
             >
-                <HomeButtonUser color={themeColors.primary7} />
+                {userType !== "admin" && <HomeButtonUser color={themeColors.primary7} />}
                 <ButterflyIcon color={themeColors.primary3} />
 
                 <div style={styles.titleButton}>

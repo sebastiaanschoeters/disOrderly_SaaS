@@ -2,7 +2,14 @@ import 'antd/dist/reset.css'; // Import Ant Design styles
 import '../CSS/AntDesignOverride.css';
 import { antThemeTokens, ButterflyIcon, themes } from '../Extra components/themes';
 import { Button, ConfigProvider, Avatar, Badge } from 'antd';
-import { MessageOutlined, SearchOutlined, SettingOutlined, PoweroffOutlined, QuestionCircleOutlined } from "@ant-design/icons";
+import {
+    MessageOutlined,
+    SearchOutlined,
+    SettingOutlined,
+    PoweroffOutlined,
+    QuestionCircleOutlined,
+    EditOutlined
+} from "@ant-design/icons";
 import React, {useState, useEffect} from "react";
 import { useNavigate } from 'react-router-dom';
 import NotificationModal from "./NotifiactionModal";
@@ -168,7 +175,7 @@ const HomePage = () => {
                             fontSize: '1.4rem',  // Increase font size for name
                         }}
                     >
-                        {name}
+                        {name}     <EditOutlined style={{marginLeft:'15px'}}/>
                     </p>
                 </div>
 

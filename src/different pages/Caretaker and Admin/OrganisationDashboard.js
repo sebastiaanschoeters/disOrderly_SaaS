@@ -4,7 +4,7 @@ import { antThemeTokens, themes } from '../../Extra components/themes';
 import {
     Button,
     Card, Col,
-    ConfigProvider, Divider, Form, List, Modal, Popover, Progress, Row, Select, Statistic,
+    ConfigProvider, Divider, Form, List, message, Modal, Popover, Progress, Row, Select, Statistic,
 } from 'antd';
 import {PlusOutlined, RedoOutlined, TeamOutlined} from "@ant-design/icons";
 import React, {useEffect, useState} from "react";
@@ -25,6 +25,7 @@ const OrganisationDashboard = () => {
     const [isNewCaretakerVisible, setIsNewCaretakerVisible] = useState(false);
     const [generatedCode, setGeneratedCode] = useState(undefined);
     const [maximumAmountUsers, setMaximumAmountUsers] = useState(undefined);
+    const [allActivationCodes, setAllActivationCodes] = useState([])
     const [currentUsers, setCurrentUsers] = useState(undefined);
     const [activeUsers, setActiveUsers] = useState([]);
     const [selectedCaretaker, setSelectedCaretaker] = useState( {
@@ -87,6 +88,15 @@ const OrganisationDashboard = () => {
         catch(error) {
             console.error(error);
         }
+    }
+
+    const fetchActivationCodes = async () => {
+        const {data, error} = await supabase
+            .from('Activation')
+            .select('code')
+
+        const codes = data.map(record => record.code);
+        setAllActivationCodes(codes);
     }
 
     const handleReload = async () => {
@@ -168,8 +178,24 @@ const OrganisationDashboard = () => {
     }
 
     const handleGenerateCode = async () => {
-        const {data, error} = await supabase.from("Activation").insert({"usable": true, "type": "caretaker", "organisation": organisationId}).select();
-        await setGeneratedCode(data[0].code);
+        await fetchActivationCodes;
+        const newCode = getRandomInt(1000, 9999)
+        while (allActivationCodes.includes(newCode)) {
+            const newCode = getRandomInt(1000, 9999);
+        }
+
+        const {error} = await supabase.from("Activation").insert({"code": newCode,"usable": true, "type": "caretaker", "organisation": organisationId}).select();
+        console.log(newCode);
+        if(error) {
+            console.error(error);
+        }
+        else {
+            await setGeneratedCode(newCode);
+        }
+    }
+
+    function getRandomInt(min, max) {
+        return Math.floor(Math.random() * (max-min) + min);
     }
 
     const handleCloseNewCaretaker = async () => {

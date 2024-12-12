@@ -364,7 +364,7 @@ const ChatPage = () => {
 
                 <Card style={styles.card} bordered >
                     <div style={styles.chatContainer}>
-                        <div style={styles.header} onClick={() => handleProfileClick(otherUserId)}>
+                        <div style={styles.header} onClick={() => handleProfileClick(otherUserId, setSelectedClient, setIsModalProfileVisible)}>
                             <Avatar
                                 src={profilePicture || 'default-avatar.png'}
                                 style={styles.avatar}

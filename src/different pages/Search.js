@@ -101,13 +101,6 @@ const Search = () => {
             // Filter out the logged-in user
             const filteredUserData = userData.filter(user => user.id !== loggedInUserId);
 
-            // Add calculated age and user information to the result
-            const usersWithDetails = filteredUserData.map((user) => {
-                return {
-                    ...user,
-                };
-            });
-
             // Fetch chatroom data
             const { data: chatroomData, error: chatroomError } = await supabase
                 .from('Chatroom')
@@ -141,7 +134,7 @@ const Search = () => {
             console.log("Excluded User IDs:", [...excludedUserIds]);
 
             // Filter out excluded users from the fetched user data
-            const finalFilteredUserData = usersWithDetails.filter(user => !excludedUserIds.has(user.id));
+            const finalFilteredUserData = filteredUserData.filter(user => !excludedUserIds.has(user.id));
 
             // Optional: Log the final filtered data for debugging
             console.log("Final Filtered Users:", finalFilteredUserData);
@@ -154,7 +147,7 @@ const Search = () => {
                 const userId = finalFilteredUserData[i].id;
 
                 // Fetch profile data for each user
-                const { profileData, error } = await fetchProfileData(userId); // Assume `fetchProfileData` is a function that mimics `useFetchProfileData`
+                const { profileData, error } = await fetchProfileData(userId);
 
                 if (error) {
                     console.error(`Error fetching profile data for user ${userId}:`, error);
@@ -169,9 +162,8 @@ const Search = () => {
 
             console.log(transformedUsers)
 
-            // Set the enriched user data
-            setUsers(transformedUsers); // Set the users with their details
-            setFilteredUsers(transformedUsers); // Optionally, only show users with chat history
+            setUsers(transformedUsers);
+            setFilteredUsers(transformedUsers);
 
         } catch (error) {
             console.error('Error fetching users:', error);

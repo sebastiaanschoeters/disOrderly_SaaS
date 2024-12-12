@@ -1,15 +1,13 @@
 import React, {useEffect, useState} from 'react';
 import {Avatar, ConfigProvider, Divider, message, Select, Spin, Tooltip, Typography} from 'antd';
-import {HeartOutlined, QuestionCircleOutlined, TrophyOutlined, UserSwitchOutlined} from '@ant-design/icons';
-import React, { useEffect, useState } from 'react';
-import {Avatar, Divider, Select, ConfigProvider, Spin, message, Tooltip, Typography} from 'antd';
 import {
-    UserSwitchOutlined,
     HeartOutlined,
-    TrophyOutlined,
+    LockOutlined,
     QuestionCircleOutlined,
-    LockOutlined
+    TrophyOutlined,
+    UserSwitchOutlined
 } from '@ant-design/icons';
+
 import 'antd/dist/reset.css';
 import '../../CSS/AntDesignOverride.css';
 import '../../CSS/PersonalProfilePage.css';
@@ -226,7 +224,6 @@ const ProfileCard = () => {
             prevTrophies.map((trophy) =>
                 trophy.id === trophyId
                     ? { ...trophy, ...updates }
-                    ? {...trophy, earned: true, ...additionalData}
                     : trophy
             )
         );

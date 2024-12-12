@@ -2,7 +2,7 @@ import 'antd/dist/reset.css'; // Import Ant Design styles
 import '../CSS/AntDesignOverride.css';
 import { antThemeTokens, ButterflyIcon, themes } from '../Extra components/themes';
 import { Button, ConfigProvider, Avatar, Badge } from 'antd';
-import { MessageOutlined, SearchOutlined, SettingOutlined, PoweroffOutlined } from "@ant-design/icons";
+import { MessageOutlined, SearchOutlined, SettingOutlined, PoweroffOutlined, QuestionCircleOutlined } from "@ant-design/icons";
 import React, {useState, useEffect} from "react";
 import { useNavigate } from 'react-router-dom';
 import NotificationModal from "./NotifiactionModal";
@@ -220,6 +220,31 @@ const HomePage = () => {
                     onClick={() => handleLogout()}
                 >
                     <h2 style={{ margin: '0', minWidth: '10px', whiteSpace: 'nowrap' }}>Afmelden</h2>
+                </Button>
+
+                <Button
+                    className="secondary-button"  // Add class for targeting with CSS
+                    type="secondary"
+                    icon={<QuestionCircleOutlined />}
+                    style={{
+                        position: 'absolute',
+                        top: '3%',
+                        right: '1%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '20dvw',
+                        height: '12dvh',
+                        minWidth: '100px',
+                        minHeight: '80px',
+                        fontSize: '1.8rem',
+                        textAlign: 'center',
+                        overflow: 'hidden',
+                    }}
+                    //onClick={() => handleLogout()}
+                >
+                    <h2 style={{ margin: '0', minWidth: '10px', whiteSpace: 'nowrap' }}>Helpdesk</h2>
                 </Button>
             </div>
 

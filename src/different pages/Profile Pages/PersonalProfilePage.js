@@ -474,7 +474,7 @@ const ProfileCard = () => {
                             {caretaker.name}
                         </span>
                         <Select
-                            style={{flexGrow: 1, minWidth: '120px'}}
+                            style={{flexGrow: 1, minWidth: '165px'}}
                             onChange={(value) => handleAccessLevelChange(user_id, profileData.caretaker.id, value)}
                             value={caretaker.accessLevel}
                             options={[
@@ -518,12 +518,12 @@ const ProfileCard = () => {
 
                     <Divider/>
 
-                    <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
-                        <strong style={{width: '15%', minWidth: '100px'}}>
-                            <HeartOutlined/> Ik ben geïntereseerd in:
+                    <p style={{width: '100%'}}>
+                        <strong style={{display: 'block', marginBottom: '10px'}}>
+                            <HeartOutlined/> Ik ben geïnteresseerd in:
                         </strong>
                         <Select
-                            style={{flex: 1, minWidth: '200px'}}
+                            style={{width: '100%', minWidth: '200px'}}
                             placeholder="Selecteer seksualiteit"
                             value={sexuality}
                             options={[
@@ -532,9 +532,9 @@ const ProfileCard = () => {
                                 {value: 'Beide', label: 'Beide'},
                             ]}
                             onChange={handleSexualityChange}
-
                         />
                     </p>
+
 
                     <Divider/>
 

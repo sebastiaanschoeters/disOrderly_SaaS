@@ -11,7 +11,7 @@ import {
     Dropdown,
     Tooltip,
     Radio,
-    Modal
+    Modal, Popconfirm
 } from "antd";
 import { antThemeTokens, ButterflyIcon, themes } from "../../Extra components/themes";
 import { createClient } from "@supabase/supabase-js";
@@ -534,18 +534,43 @@ const ClientOverview = () => {
                         style={{ width: "100%", maxWidth: "400px" }}
                         className="prevent-row-click" // Prevent row click
                     />
-                    <Button
-                        type="default"
-                        onClick={() => handleDelete(record.id)}
-                        className="prevent-row-click" // Prevent row click
-                        style={{
-                            fontSize: "1rem",
-                            width: "100%",
-                            maxWidth: "400px"
+                    <Popconfirm
+                        title={'Account verwijderen'}
+                        description={'Weet je zeker dat je dit account wilt verwijderen?'}
+                        onConfirm={(e) => {
+                            e.stopPropagation();
+                            handleDelete(record.id);
                         }}
+                        onCancel={(e) => e.stopPropagation()}
+                        placement={"bottom"}
+                        okType="default"
+                        okButtonProps={{style: {
+                                backgroundColor: 'red',
+                                fontSize: '15px',
+                                fontweight: 'bold',
+                            }, size: 'large'
+                        }}
+                        cancelButtonProps={{style: {
+                                fontSize: '15px',
+                                fontweight: 'bold',
+                            }, size: 'large'}}
+                        okText={'Verwijder'}
+                        cancelText="Annuleer"
+                        style={{height:'100%'}}
                     >
-                        Account Verwijderen <DeleteOutlined />
-                    </Button>
+                        <Button
+                            type="default"
+                            className="prevent-row-click"
+                            style={{
+                                fontSize: "1rem",
+                                width: "100%",
+                                maxWidth: "400px"
+                            }}
+                        >
+                            Account Verwijderen <DeleteOutlined />
+                        </Button>
+                    </Popconfirm>
+
                 </div>
             ),
         },

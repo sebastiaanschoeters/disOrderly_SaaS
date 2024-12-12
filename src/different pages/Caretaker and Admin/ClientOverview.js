@@ -286,6 +286,12 @@ const ClientOverview = () => {
         (notification, action) => {
             setNotifications((prev) => prev.filter((n) => n.id !== notification.id));
             setUnreadCount((prev) => prev - 1);
+            console.log(notification)
+            if (action === 'accept'){
+                const requestedAccessLevel = notification.details?.requested_access_level || "Onbekend";
+                const userId = notification.requester_id;
+                // should change the access level on the corresponding select element
+            }
         }
     )
 

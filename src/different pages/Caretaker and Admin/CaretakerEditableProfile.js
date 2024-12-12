@@ -123,9 +123,16 @@ const ProfileCard = () => {
         const newValue = e.target.value.replace(/[^0-9+]/g, '');
         if (newValue.length <= 11) { // Ensure the length is no more than 10
             setPhoneNumber(newValue);
-            saveField('phone_number', newValue);
         }
     };
+
+    const handlePhoneNumberSave = (e) => {
+        const newValue = e.target.value.replace(/[^0-9+]/g, '');
+        if (newValue.length <= 11) { // Ensure the length is no more than 10
+            setPhoneNumber(newValue);
+            saveField('phone_number', newValue);
+        }
+    }
 
 
     const handleEmailChange = (e) => {
@@ -225,6 +232,7 @@ const ProfileCard = () => {
                         placeholder="Geef je telefoon nummer in"
                         value={phoneNumber}
                         onChange={handlePhoneNumberChange}
+                        onBlur={handlePhoneNumberSave}
                         maxLength={11}
                     />
                 </p>

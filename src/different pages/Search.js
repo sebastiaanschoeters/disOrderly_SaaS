@@ -449,6 +449,7 @@ const Search = () => {
                         justifyContent: 'center',
                         alignItems: 'stretch',
                         width: '70%',
+                        maxWidth: '600px',
                         marginBottom: '2vw',
                     }}
                 >
@@ -510,6 +511,7 @@ const Search = () => {
                             flexDirection: 'row',
                             justifyContent: 'center',
                             width: '70%',
+                            maxWidth: '600px',
                         }}
                     >
                         {/* Check if there are users to display */}

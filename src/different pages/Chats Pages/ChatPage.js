@@ -4,7 +4,6 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import {ArrowDownOutlined, PlusOutlined, SendOutlined} from '@ant-design/icons';
 import {antThemeTokens, ButterflyIcon, ButterflyIconSmall, themes} from '../../Extra components/themes';
 import { createClient } from "@supabase/supabase-js";
-import '../../CSS/ChatPage.css';
 import HomeButtonUser from "../../Extra components/HomeButtonUser";
 import HangmanGame from "./Hangman";
 import useTheme from "../../UseHooks/useTheme";

@@ -1,0 +1,10 @@
+@media (max-width: 768px) {
+    .chat-support-button {
+        position: static !important;
+        margin-top: 35%;
+        align-self: center;
+        width: 90%;
+        height: auto;
+    }
+}
+

@@ -179,7 +179,7 @@ const HomePage = () => {
                     icon={<SettingOutlined />}
                     style={{
                         position: 'absolute',
-                        bottom: '2%',
+                        bottom: '3%',
                         left: '1%',
                         display: 'flex',
                         flexDirection: 'column',
@@ -204,7 +204,7 @@ const HomePage = () => {
                     icon={<PoweroffOutlined />}
                     style={{
                         position: 'absolute',
-                        bottom: '2%',
+                        bottom: '3%',
                         right: '1%',
                         display: 'flex',
                         flexDirection: 'column',

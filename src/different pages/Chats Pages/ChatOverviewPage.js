@@ -35,9 +35,8 @@ const ChatOverviewPage = () => {
                 senderProfile: sender_id(name, profile_picture), 
                 receiverProfile: receiver_id(name, profile_picture)`)
                 .or(`sender_id.eq.${userID},receiver_id.eq.${userID}`)
-                .not('receiver_id', 'eq', 1)); // Corrected negation query
+                .not('receiver_id', 'eq', 1));
         } else {
-            // Non-admin: No exclusion, fetch all chatrooms
             ({ data, error } = await supabase
                 .from('Chatroom')
                 .select(`id, sender_id, receiver_id, acceptance, last_sender_id,

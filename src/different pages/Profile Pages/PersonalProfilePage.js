@@ -575,7 +575,7 @@ const ProfileCard = () => {
                                 key={trophy.id}
                                 style={{
                                     //flex: '0 1 calc(50% - 20px)', // Two per row by default
-                                    maxWidth: '375px',
+                                    minWidth: '350px',
                                     display: 'flex',
                                     alignItems: 'center',
                                     padding: '10px',

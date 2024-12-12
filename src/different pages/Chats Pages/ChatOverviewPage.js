@@ -171,7 +171,12 @@ const ChatOverviewPage = () => {
     return (
         <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
             <div
-                style={styles.chatContainer}
+                style={{
+                    ...styles.chatContainer,
+                    position: 'relative',
+                    zIndex: '0',
+                }}
+
             >
                 <ButterflyIcon color={themeColors.primary3} />
 

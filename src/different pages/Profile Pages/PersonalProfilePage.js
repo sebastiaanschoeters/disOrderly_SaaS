@@ -539,9 +539,9 @@ const ProfileCard = () => {
 
                     <Divider/>
 
-                    <div style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
-                        <strong style={{width: '15%', minWidth: '100px'}}>
-                            <HeartOutlined/> Ik ben geïntereseerd in:
+                    <p style={{width: '100%'}}>
+                        <strong style={{display: 'block', marginBottom: '10px'}}>
+                            <HeartOutlined/> Ik ben geïnteresseerd in:
                         </strong>
                         <Select
                             style={{width: '100%', minWidth: '200px'}}
@@ -554,7 +554,10 @@ const ProfileCard = () => {
                             ]}
                             onChange={handleSexualityChange}
                         />
-                    </div>
+                    </p>
+
+
+                    <Divider/>
 
                     <p>
                         <strong>
@@ -596,7 +599,7 @@ const ProfileCard = () => {
                                 }}
                             >
                                 {/* Left Icon Section */}
-                                <div style={{ marginRight: '10px', display: 'flex', alignItems: 'center' }}>
+                                <div style={{marginRight: '10px', display: 'flex', alignItems: 'center'}}>
                                     <div className={trophy.earned ? 'sparkle-icon' : ''}>
                                         <TrophyOutlined
                                             style={{
@@ -620,8 +623,8 @@ const ProfileCard = () => {
                                     {trophy.id === 8 && <p>Wins: {trophy.count}</p>}
                                     {trophy.id === 3 && <p>{trophy.count}/3</p>}
                                     {!trophy.earned && (
-                                        <p style={{ color: '#a0a0a0', margin: 0 }}>
-                                            <LockOutlined style={{ marginRight: '5px' }} />
+                                        <p style={{color: '#a0a0a0', margin: 0}}>
+                                            <LockOutlined style={{marginRight: '5px'}}/>
                                             Trofee niet voltooid
                                         </p>
                                     )}

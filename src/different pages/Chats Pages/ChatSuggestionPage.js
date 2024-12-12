@@ -176,15 +176,9 @@ const ChatSuggestionPage = () => {
             marginBottom: '20px',
             width: '75%',
         },
-        buttonContainer: {
-            display: 'flex',
-            justifyContent: 'space-between',
-            width: '75%',
-        },
         button:{
-            margin: '0 5px',
             flex: 1,
-            maxWidth: '250px',
+            width: '75%',
         },
         editButton:{
             width: '50%',
@@ -230,7 +224,7 @@ const ChatSuggestionPage = () => {
 
 
     return (
-        <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
+        <ConfigProvider theme={{token: antThemeTokens(themeColors)}}>
             <div
                 style={{
                     padding: '20px',
@@ -248,8 +242,8 @@ const ChatSuggestionPage = () => {
                     zIndex: '0'
                 }}
             >
-                <HomeButtonUser color={themeColors.primary7} />
-                <ButterflyIcon color={themeColors.primary3} />
+                <HomeButtonUser color={themeColors.primary7}/>
+                <ButterflyIcon color={themeColors.primary3}/>
 
                 <div style={styles.header} onClick={() => handleProfileClick(otherUserId)}>
                     <Avatar src={profilePicture || 'default-avatar.png'}
@@ -259,7 +253,7 @@ const ChatSuggestionPage = () => {
                 <div style={styles.messageContainer}>
                     <p>{message}</p>
                 </div>
-                <div style={styles.buttonContainer}>
+                <div className="buttonContainer" >
                     {!isSender && (
                         <>
                             <Button className="ant-btn-accept" style={styles.button}
@@ -275,7 +269,8 @@ const ChatSuggestionPage = () => {
                 <div>
                     {isSender && (
                         <>
-                            <Button styles={styles.editButton} className="ant-btn-bewerk" onClick={handleEdit}>Bewerken</Button>
+                            <Button styles={styles.editButton} className="ant-btn-bewerk"
+                                    onClick={handleEdit}>Bewerken</Button>
                         </>
                     )}
                 </div>

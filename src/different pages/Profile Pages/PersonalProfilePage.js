@@ -465,7 +465,7 @@ const ProfileCard = () => {
 
                     <p>
                         <strong>
-                            <UserSwitchOutlined/> Begeleiding met toegang:
+                            <UserSwitchOutlined/> Begeleider met toegang
                         </strong>
                     </p>
                     <div
@@ -541,7 +541,7 @@ const ProfileCard = () => {
 
                     <p style={{width: '100%'}}>
                         <strong style={{display: 'block', marginBottom: '10px'}}>
-                            <HeartOutlined/> Ik ben geïnteresseerd in:
+                            <HeartOutlined/> Ik ben geïnteresseerd in
                         </strong>
                         <Select
                             style={{width: '100%', minWidth: '200px'}}

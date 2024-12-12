@@ -469,7 +469,7 @@ const AdminPage = () => {
                     type="primary"
                     style={{
                         position: 'absolute',
-                        top: '20px',
+                        bottom: '20px',
                         right: '20px',
                         display: 'flex',
                         flexDirection: 'column',
@@ -482,6 +482,25 @@ const AdminPage = () => {
 
                 >
                     <h2 style={{margin: '0', fontSize: '1rem'}}>Afmelden</h2>
+                </Button>
+
+                <Button
+                    type="primary"
+                    style={{
+                        position: 'absolute',
+                        top: '20px',
+                        right: '20px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '120px',
+                        height: '100px',
+                    }}
+                    onClick={() => window.open('https://clarity.microsoft.com/projects/view/p658v8svx1/dashboard?date=Last%203%20days', '_blank')}
+
+                >
+                    <h2 style={{margin: '0', fontSize: '1rem'}}>Clarity</h2>
                 </Button>
                 <div style={{display: 'flex', flexDirection:'column', gap: '20px', width: '100%', alignItems: 'center', paddingTop:'100px'}}>
                     <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', gap: '20px'}}>

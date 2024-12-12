@@ -208,8 +208,8 @@ const HomePage = () => {
                 <div
                     style={{
                         position: 'absolute',
-                        top: '2%',
-                        left: '2%',
+                        top: '3%',
+                        left: '1%',
                         display: 'flex',
                         alignItems: 'center',
                         gap: '15px',

@@ -133,7 +133,11 @@ const LoginPage = () => {
 
 
     const handleLogin = async (values) => {
-        const { email, password } = values;
+        const emaill = values?.email
+        const password = values?.password
+
+        const email = emaill.toLowerCase();
+
         if(!await checkPassword(email, CryptoJS.SHA256(password).toString())) {
             message.error("Email of wachtwoord is niet juist")
             return;
@@ -235,9 +239,9 @@ const LoginPage = () => {
                             <Input
                                 name="email"
                                 onBlur={(e) => {
-                                    const emailValue = e.target.value;
+                                    const emailValue = e.target.value.toLowerCase();
                                     if(emailValue) {
-                                        emailUpdated(emailValue.toLowerCase())
+                                        emailUpdated(emailValue)
                                     }
                                 }}
                             />

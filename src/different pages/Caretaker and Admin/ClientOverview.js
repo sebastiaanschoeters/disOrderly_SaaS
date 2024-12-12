@@ -351,11 +351,22 @@ const ClientOverview = () => {
     };
 
     const handleDelete = (clientId) => {
-        // deleteClient(clientId);
-        setLocalClients((prevClients) =>
-            prevClients.filter((client) => client[3] !== clientId)
-        );
+        deleteClient(clientId);
     };
+
+    const deleteClient = async (clientId) => {
+        const {error} = await supabase
+            .from('Activation').delete().eq('code', clientId)
+        if (error) {
+            message.error("Probleem bij het verwijderen van client")
+            console.log("issue with delting client")
+        } else {
+            message.success("Client verwijderd")
+            setLocalClients((prevClients) =>
+                prevClients.filter((client) => client[3] !== clientId)
+            );
+        }
+    }
 
     const handleCaretakerChange = async (clientId, newCaretakerId) => {
         try {
@@ -465,7 +476,7 @@ const ClientOverview = () => {
                             maxWidth: "400px"
                         }}
                     >
-                        Account Deactiveren <DeleteOutlined />
+                        Account Verwijderen <DeleteOutlined />
                     </Button>
                 </div>
             ),

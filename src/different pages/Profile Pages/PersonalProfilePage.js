@@ -18,7 +18,7 @@ import {calculateAge} from "../../Utils/calculations";
 import {saveField} from "../../Api/Utils";
 import ThemeSelector from "../../Extra components/ThemeSelector";
 import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
-import {fetchPendingRequestsData} from "../../Utils/requests";
+import {fetchPendingRequestsData} from '../../Utils/requests';
 
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
 const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;

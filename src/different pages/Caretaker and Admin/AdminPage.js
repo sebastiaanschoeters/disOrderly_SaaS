@@ -460,11 +460,11 @@ const AdminPage = () => {
                     <h2 style={{margin: '0', fontSize: '1rem'}}>Afmelden</h2>
                 </Button>
                 <div style={{display: 'flex', flexDirection:'column', gap: '20px', width: '100%', alignItems: 'center', paddingTop:'100px'}}>
-
                     <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', gap: '20px'}}>
                         <div
-                        style={{display: 'flex', flexDirection: 'row', alignItems: 'center', gap:'20px',}}>
-                            <h1>Organisaties: </h1>
+                        style={{display: 'flex', flexDirection: 'column', alignItems: 'center', gap:'20px',}}>
+                            <h1 style={{fontSize:'35px'}}> Admin </h1>
+                            <h3>Organisaties: </h3>
                         </div>
                         <List
                             itemLayout="horizontal"

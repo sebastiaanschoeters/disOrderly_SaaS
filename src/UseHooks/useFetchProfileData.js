@@ -13,7 +13,6 @@ const useFetchProfileData = (actCode, options = { fetchAllInterests: false }) =>
     const [interest, setInterests] = useState([]);
 
     useEffect(() => {
-        // Fetch global list of interests if requested
         const fetchAllInterests = async () => {
             if (options.fetchAllInterests) {
                 try {

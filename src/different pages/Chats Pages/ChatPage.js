@@ -125,8 +125,6 @@ const ChatPage = () => {
             const scrollHeight = messageListRef.current.scrollHeight;
             const scrollTop = messageListRef.current.scrollTop;
             const clientHeight = messageListRef.current.clientHeight;
-
-            // Calculate the distance from the bottom
             const distanceFromBottom = scrollHeight - (scrollTop + clientHeight);
 
             setIsScrolledToBottom(distanceFromBottom <= 80);
@@ -186,7 +184,7 @@ const ChatPage = () => {
             .insert([{
                 chatroom_id: chatroomId,
                 sender_id: userId,
-                message_content: messageContent, // Use the provided message content
+                message_content: messageContent,
                 created_at: localTime.toISOString(),
             }]);
 
@@ -200,12 +198,10 @@ const ChatPage = () => {
             .update({ last_sender_id: userId })
             .eq('id', chatroomId);
 
-        setNewMessage(""); // Clear the message input if applicable
-        scrollToBottom();  // Scroll to the bottom of the chat
+        setNewMessage("");
+        scrollToBottom();
     };
 
-
-    // Function to group messages by date
     const groupMessagesByDate = (messages) => {
         return messages.reduce((groups, message) => {
             const date = new Date(message.created_at).toLocaleDateString('nl-NL', {
@@ -227,7 +223,6 @@ const ChatPage = () => {
         fetchMessages(10, messages.length);
     };
 
-    // Function to handle when the "Start Game" button is clicked
     const handleHangman = () => {
         setIsModalVisible(true);
     };

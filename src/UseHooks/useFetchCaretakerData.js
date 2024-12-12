@@ -13,7 +13,6 @@ const useFetchCaretakerData = (actCode, options = { fetchOrganization: true }) =
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // Fetch caretaker data
                 const { data: userData, error: userError } = await supabase
                     .from("Caretaker")
                     .select("*")
@@ -24,7 +23,6 @@ const useFetchCaretakerData = (actCode, options = { fetchOrganization: true }) =
                 if (userData.length > 0) {
                     const user = userData[0];
 
-                    // Parse theme
                     let parsedTheme = "blauw";
                     let isDarkMode = false;
 
@@ -38,7 +36,6 @@ const useFetchCaretakerData = (actCode, options = { fetchOrganization: true }) =
                         }
                     }
 
-                    // Fetch organization data if requested
                     if (options.fetchOrganization) {
                         const { data: userOrganization, error: userOrganizationError } = await supabase
                             .from("Activation")
@@ -53,7 +50,6 @@ const useFetchCaretakerData = (actCode, options = { fetchOrganization: true }) =
                         }
                     }
 
-                    // Set the profile data
                     setProfileData({
                         ...user,
                         theme: isDarkMode ? `${parsedTheme}_donker` : parsedTheme,

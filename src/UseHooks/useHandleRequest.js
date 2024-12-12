@@ -14,7 +14,6 @@ const useHandleRequest = (onSuccess = () => {}, onError = () => {}) => {
             idToUpdate = notification.recipient_id
         }
         try {
-            // Update user access level if action is "accept"
             if (action === 'accept') {
                 const { error: accessLevelError } = await supabase
                     .from('User')
@@ -23,29 +22,21 @@ const useHandleRequest = (onSuccess = () => {}, onError = () => {}) => {
 
                 if (accessLevelError) throw accessLevelError;
             }
-
-            // Delete the notification
             const { error: deleteError } = await supabase
                 .from('Notifications')
                 .delete()
                 .eq('id', notification.id);
 
             if (deleteError) throw deleteError;
-
-            // Call the success callback (e.g., update state)
             onSuccess(notification, action);
 
-            // Show a success message
             const successMessage =
                 action === 'accept'
                     ? `Wijziging van ${notification.requesterName} geaccepteerd!`
                     : `Wijziging van ${notification.requesterName} geweigerd!`;
             message.success(successMessage);
         } catch (error) {
-            // Call the error callback (if needed)
             onError(notification, action, error);
-
-            // Show an error message
             const errorMessage =
                 action === 'accept'
                     ? "Fout bij het accepteren van de wijziging: "

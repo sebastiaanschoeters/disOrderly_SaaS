@@ -40,7 +40,6 @@ const useFetchPicturesData = (actCode) => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // Fetch user data
                 const { data: pictures, error: userError } = await supabase
                     .from('Pictures')
                     .select('*')
@@ -90,7 +89,7 @@ const ProfileCard = () => {
     const [newInterest, setNewInterest] = useState('');
     const [interestOptions, setInterestOptions] = useState([])
     const [lookingForArray, setLookingForArray] = useState([])
-    const [searchValue, setSearchValue] = useState(""); // For search functionality
+    const [searchValue, setSearchValue] = useState("");
 
     const { pictures} = useFetchPicturesData(user_id);
     const { profileData, isLoading, error, interest} = useFetchProfileData(user_id, { fetchAllInterests: true});
@@ -156,17 +155,15 @@ const ProfileCard = () => {
         };
 
         handleResize();
-
         window.addEventListener('resize', handleResize);
 
-        // Cleanup on unmount
         return () => window.removeEventListener('resize', handleResize);
     }, [images.length]);
 
     const { locations } = useLocations(searchValue);
 
     const handleSearch = (value) => {
-        setSearchValue(value); // Trigger new fetch based on search
+        setSearchValue(value);
     };
 
     const capitalizeFirstLetter = (str) => {
@@ -181,7 +178,6 @@ const ProfileCard = () => {
         const capitalizedInterest = capitalizeFirstLetter(newInterest);
         if (capitalizedInterest && !interests.includes(capitalizedInterest)) {
             try {
-                // Step 1: Save new interest to database
                 const { data: existingInterest, error: fetchError } = await supabase
                     .from('Interests')
                     .select('id')
@@ -191,7 +187,6 @@ const ProfileCard = () => {
                 let interestId;
 
                 if (fetchError) {
-                    // Handle fetching error or insert if interest does not exist
                     const { data: insertedInterest, error: insertError } = await supabase
                         .from('Interests')
                         .insert({ Interest: capitalizedInterest })
@@ -201,23 +196,18 @@ const ProfileCard = () => {
                     if (insertError) throw insertError;
                     interestId = insertedInterest.id;
                 } else {
-                    // Interest already exists, get its ID
                     interestId = existingInterest.id;
                 }
 
-                // Step 2: Associate the interest with the current profile
                 await supabase.from('Interested in').insert({
                     user_id: user_id,
                     interest_id: interestId
                 });
-
-                // Check if the interest is already in the options list before adding
                 if (!interestOptions.some(option => option.value === capitalizedInterest)) {
                     const newInterestOption = { value: capitalizedInterest, label: capitalizedInterest };
                     setInterestOptions([...interestOptions, newInterestOption]);
                 }
 
-                // Update state to reflect new interest, ensuring it's not a duplicate
                 setInterests([...interests, capitalizedInterest]);
                 setSelectedInterests([...selectedInterests, capitalizedInterest]);
                 setNewInterest('');
@@ -234,7 +224,6 @@ const ProfileCard = () => {
         setSelectedInterests(selectedInterestNames);
 
         try {
-            // Retrieve existing interests linked to this profile
             const { data: existingInterests, error: existingError } = await supabase
                 .from('Interested in')
                 .select('interest_id')
@@ -242,10 +231,8 @@ const ProfileCard = () => {
 
             if (existingError) throw existingError;
 
-            // Create a set of existing interest IDs for efficient lookup
             const existingInterestIds = new Set(existingInterests.map((item) => item.interest_id));
 
-            // Retrieve IDs for newly selected interests from the `Interests` table
             const { data: allInterests, error: fetchError } = await supabase
                 .from('Interests')
                 .select('id, Interest')
@@ -254,7 +241,6 @@ const ProfileCard = () => {
             if (fetchError) throw fetchError;
             const newInterestIds = allInterests.map((interest) => interest.id);
 
-            // Determine interests to add and remove
             const interestsToAdd = newInterestIds.filter((id) => !existingInterestIds.has(id));
             const interestsToRemove = Array.from(existingInterestIds).filter((id) => !newInterestIds.includes(id));
 
@@ -264,7 +250,6 @@ const ProfileCard = () => {
                     .insert(interestsToAdd.map((id) => ({ user_id: user_id, interest_id: id })));
             }
 
-            // Remove deselected interests if any
             if (interestsToRemove.length > 0) {
                 await supabase
                     .from('Interested in')
@@ -304,11 +289,9 @@ const ProfileCard = () => {
     const handleCheckboxChange = async (value) => {
         const updatedLookingFor = [...lookingForArray];
         if (updatedLookingFor.includes(value)) {
-            // If the value is already in the array, remove it (unchecked)
             const index = updatedLookingFor.indexOf(value);
             updatedLookingFor.splice(index, 1);
         } else {
-            // Otherwise, add it (checked)
             updatedLookingFor.push(value);
         }
 
@@ -357,18 +340,16 @@ const ProfileCard = () => {
                             const aspectRatio = width / height;
 
                             if (aspectRatio > maxAspectRatio) {
-                                // Crop width to match the max aspect ratio
                                 width = height * maxAspectRatio;
                             }
 
                             canvas.width = width;
                             canvas.height = height;
 
-                            // Draw the cropped image
                             ctx.drawImage(
                                 img,
-                                (img.width - width) / 2, // Center the cropped area horizontally
-                                0, // Start at the top
+                                (img.width - width) / 2,
+                                0,
                                 width,
                                 height,
                                 0,
@@ -386,7 +367,7 @@ const ProfileCard = () => {
                                     }
                                 },
                                 file.type,
-                                1 // Quality (1 = max)
+                                1
                             );
                         };
                         img.onerror = () => reject("Invalid image file.");
@@ -397,10 +378,8 @@ const ProfileCard = () => {
                 });
             };
 
-            // Crop the image before uploading
             const croppedFile = await cropImage(file);
 
-            // Proceed with upload
             const uniqueSuffix = `${new Date().getTime()}-${Math.random().toString(36).substring(2, 9)}`;
             const fileName = `${user_id}-${uniqueSuffix}-${croppedFile.name}`;
 
@@ -427,7 +406,6 @@ const ProfileCard = () => {
             setImages((prevImages) => {
                 const updatedImages = [...prevImages, imageUrl];
 
-                // Automatically scroll to the last image
                 setTimeout(() => {
                     if (carouselRef.current) {
                         carouselRef.current.goTo(updatedImages.length);
@@ -543,7 +521,7 @@ const ProfileCard = () => {
             textAlign: 'center',
             margin: 0,
             fontSize: '48px',
-            transform: 'scale(1.5)', // Scale the title up
+            transform: 'scale(1.5)',
             paddingTop: '15px',
         },
     };
@@ -657,11 +635,11 @@ const ProfileCard = () => {
                             placeholder="Zoek en selecteer uw locatie"
                             value={location}
                             onChange={handleLocationChange}
-                            onSearch={handleSearch} // Trigger search
-                            filterOption={false} // Disable client-side filtering
+                            onSearch={handleSearch}
+                            filterOption={false}
                             options={locations.map((location) => ({
-                                value: location.id, // Use ID as the value
-                                label: location.Gemeente + ' (' + location.Postcode + ')', // Display gemeente
+                                value: location.id,
+                                label: location.Gemeente + ' (' + location.Postcode + ')',
                             }))}
                             notFoundContent={
                                 <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
@@ -673,7 +651,7 @@ const ProfileCard = () => {
                             }
                             dropdownRender={(menu) => (
                                 <div
-                                    onWheel={(e) => e.stopPropagation()} // Prevent scroll propagation
+                                    onWheel={(e) => e.stopPropagation()}
                                     style={{maxHeight: 300}}
                                 >
                                     {menu}
@@ -737,7 +715,7 @@ const ProfileCard = () => {
                             }
                             dropdownRender={(menu) => (
                                 <div
-                                    onWheel={(e) => e.stopPropagation()} // Prevent scroll propagation
+                                    onWheel={(e) => e.stopPropagation()}
                                     style={{maxHeight: 300}}
                                 >
                                     {menu}

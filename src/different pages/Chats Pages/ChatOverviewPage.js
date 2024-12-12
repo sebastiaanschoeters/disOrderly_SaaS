@@ -7,7 +7,6 @@ import moment from 'moment';
 import HomeButtonUser from "../../Extra components/HomeButtonUser";
 import useTheme from "../../UseHooks/useTheme";
 import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
-import '../../CSS/ChatOverviewPage.css';
 
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
 const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
@@ -58,8 +57,8 @@ const ChatOverviewPage = () => {
                 if(message.startsWith("ButterflyIcon")) {
                     const contentAfterIcon = message.slice(13).trim();
 
-                    const indexMatch = contentAfterIcon.match(/^(\d+)\s*(.*)$/); // Regex to extract number and text
-                    const title = indexMatch ? indexMatch[2] : ""; // Rest is the title
+                    const indexMatch = contentAfterIcon.match(/^(\d+)\s*(.*)$/);
+                    const title = indexMatch ? indexMatch[2] : "";
 
                     const [mainTitle, extraContent] = title.split('!').map(part => part.trim());
                     return mainTitle;
@@ -223,16 +222,14 @@ const ChatOverviewPage = () => {
                                     description={
                                         <span style={styles.lastMessage}>
                                         {
-                                            // Check if the message was sent today
                                             (() => {
-                                                const messageTime = moment(chat.last_message_time); // Convert string to moment object
+                                                const messageTime = moment(chat.last_message_time);
                                                 const today = moment();
 
-                                                // If the message was sent today, show only the time
                                                 if (messageTime.isSame(today, 'day')) {
-                                                    return <i><b>{messageTime.format('HH:mm')}</b></i>; // Display time in HH:mm format and italic
+                                                    return <i><b>{messageTime.format('HH:mm')}</b></i>;
                                                 } else {
-                                                    return <i><b>{messageTime.format('DD-MM')}</b></i>; // Display the date in DD-MM format and italic
+                                                    return <i><b>{messageTime.format('DD-MM')}</b></i>;
                                                 }
                                             })()
                                         }

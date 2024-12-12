@@ -81,14 +81,12 @@ const ProfileCard = () => {
             if (error) {
                 message.error(`Probleem bij het opslaan van ${dutch_field}`);
                 console.error(`Error saving ${field}:`, error);
-                return;  // Early return to exit function
+                return;
             }
 
-            // Display success message
             message.success(`${dutch_field} opgeslagen`);
             console.log(`${field} saved successfully with value ${value}`);
         } catch (error) {
-            // Display error message for unexpected errors
             message.error(`Probleem bij het opslaan van ${dutch_field}`);
             console.error(`Unexpected error saving ${field}:`, error);
         }
@@ -97,7 +95,7 @@ const ProfileCard = () => {
     const handleThemeChange = async (value) => {
         setTheme(value);
         try {
-            const themeData = [value, isDarkMode]; // Ensure both theme and dark mode flag are saved together
+            const themeData = [value, isDarkMode];
             await saveField('theme', JSON.stringify(themeData));
             localStorage.setItem('theme', JSON.stringify(themeData))
         } catch (error) {
@@ -108,7 +106,7 @@ const ProfileCard = () => {
     const handleThemeToggle = async (checked) => {
         setIsDarkMode(checked);
         try {
-            const themeData = [theme, checked]; // Ensure both theme and dark mode flag are saved together
+            const themeData = [theme, checked];
             await saveField('theme', JSON.stringify(themeData));
             localStorage.setItem('theme', JSON.stringify(themeData))
         } catch (error) {
@@ -118,14 +116,14 @@ const ProfileCard = () => {
 
     const handlePhoneNumberChange = (e) => {
         const newValue = e.target.value.replace(/[^0-9+]/g, '');
-        if (newValue.length <= 11) { // Ensure the length is no more than 10
+        if (newValue.length <= 11) {
             setPhoneNumber(newValue);
         }
     };
 
     const handlePhoneNumberSave = (e) => {
         const newValue = e.target.value.replace(/[^0-9+]/g, '');
-        if (newValue.length <= 11) { // Ensure the length is no more than 10
+        if (newValue.length <= 11) {
             setPhoneNumber(newValue);
             saveField('phone_number', newValue);
         }

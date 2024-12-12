@@ -25,9 +25,7 @@ import {
 import tinycolor from 'tinycolor2';
 
 import React from 'react';
-//import '../App.css'; // Import the CSS file
 
-// Your custom SVG icon component
 export const ButterflyIcon = ({ color }) => (
     <svg className="butterfly-icon" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
         <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
@@ -155,7 +153,7 @@ export const antThemeTokens = (colors) => ({
 });
 
 const lightenColor = (color, amount) => {
-    return tinycolor(color).lighten(amount).toHexString(); // Lightens by specified percentage
+    return tinycolor(color).lighten(amount).toHexString();
 };
 
 export const themes = {

@@ -307,7 +307,17 @@ const ProfileCard = (profileToShow) => {
                             position: 'relative',
                             top: '0%',
                             left: '1%',
-                            zIndex: 1000
+                            zIndex: 1000,
+                            display: 'flex', // Use flexbox for alignment
+                            flexDirection: 'row', // Keep icon and text horizontally aligned
+                            alignItems: 'center', // Center vertically
+                            justifyContent: 'center', // Center horizontally
+                            whiteSpace: 'normal', // Allow text wrapping
+                            wordBreak: 'break-word', // Break long text onto multiple lines
+                            textAlign: 'center', // Keep text visually centered
+                            padding: '12px 16px', // Add generous padding for better readability
+                            minHeight: '60px', // Increase the minimum height to allow room for wrapped text
+                            lineHeight: '1', // Adjust line height for better spacing between lines
                         }}
                         disabled={isChatroomExistent}
                         onClick={handleMessage}
@@ -323,8 +333,8 @@ const ProfileCard = (profileToShow) => {
                             src={profilePicture}
                             alt={profileData.name || "No Name"}
                             style ={{
-                                minWidth: '200px',
-                                minHeight: '200px',
+                                minWidth: '150px',
+                                minHeight: '150px',
                                 borderRadius: '50%',
                                 marginTop: '20px'
                             }}

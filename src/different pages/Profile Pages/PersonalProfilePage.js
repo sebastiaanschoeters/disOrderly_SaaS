@@ -44,8 +44,14 @@ const useFetchProfileData = (actCode) => {
                     .eq('id', actCode);
 
                 if (userError) throw userError;
+                console.log(userData[0].id);
+                console.log(Math.floor(userData[0].id / 10000))
                 if (userData.length > 0) {
                     const user = userData[0];
+                    const caretaker = Math.floor(user.id, 10000)
+                    user.caretaker = caretaker;
+                    setProfileData('caretaker', caretaker)
+
 
                     // Fetch user information
                     const { data: userInfoData, error: userInfoError } = await supabase

@@ -5,7 +5,7 @@ import * as dayjs from 'dayjs'
 import '../../CSS/AntDesignOverride.css'
 import '../../CSS/ActivationPage.css'
 import 'antd/dist/reset.css';
-import {Form, Input, Button, Card, message, ConfigProvider, DatePicker, Radio, Select, Checkbox} from 'antd';
+import {Form, Input, Button, Card, message, ConfigProvider, DatePicker, Radio, Select, Checkbox, Divider} from 'antd';
 import {antThemeTokens, ButterflyIcon, themes} from '../../Extra components/themes';
 import { createClient } from "@supabase/supabase-js";
 import CryptoJS from 'crypto-js';
@@ -558,13 +558,14 @@ const ActivationPage = () => {
                     {step === 5 && (
                         <Form name="preferenceForm" onFinish={lvlSelect}
                               initialValues={{ niveau: userData.niveau || '' }}>
-                            <p>Selecteer de optie die het beste past bij jou en je begeleider</p>
+                            <b>Selecteer de optie die het beste past bij jou en je begeleider</b> <Divider/>
                             <Form.Item name="niveau" rules={[{ required: true, message: 'Selecteer een optie' }]}>
                                 <Radio.Group>
-                                    <Radio value="Volledige toegang">Begeleiding heeft volledige toegang en kan alles mee volgen en profiel aanpassen</Radio>
-                                    <Radio value="Gesprekken">Begeleiding kan enkel gesprekken lezen</Radio>
-                                    <Radio value="Contacten">Begeleiding kan zien met wie jij contact hebt</Radio>
-                                    <Radio value="Publiek profiel">Begeleiding kan zien wat jij op je profiel plaatst, net zoals andere gebruikers</Radio>
+                                    <Radio value="Volledige toegang">Mijn begeleider heeft volledige toegang en kan inloggen op mijn account</Radio>
+                                    <Divider/>
+                                    <Radio value="Gesprekken">Mijn begeleider kan mijn chats lezen</Radio> <Divider/>
+                                    <Radio value="Contacten">Mijn begeleider kan zien met wie ik chat maar kan de chats niet lezen</Radio> <Divider/>
+                                    <Radio value="Publiek profiel">Mijn begeleider kan enkel zien wat ik op mijn profiel zet, net zoals andere gebruikers</Radio> <Divider/>
                                 </Radio.Group>
                             </Form.Item>
                             <Form.Item>

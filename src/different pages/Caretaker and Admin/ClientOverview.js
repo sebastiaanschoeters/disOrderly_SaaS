@@ -117,6 +117,8 @@ const ClientOverview = () => {
 
     const [isWideEnough, setIsWideEnough] = useState(window.innerWidth >= 800);
 
+    const [accessLevels, setAccessLevels] = useState({});
+
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -168,6 +170,13 @@ const ClientOverview = () => {
 
     useEffect(() => {
         setLocalClients(clients);
+
+        const initialAccessLevels = clients.reduce((acc, client) => {
+            const [profilePicture, name, accessLevel, id] = client;
+            acc[id] = accessLevel; // Map client ID to their access level
+            return acc;
+        }, {});
+        setAccessLevels(initialAccessLevels);
     }, [clients]);
 
     useEffect(() => {
@@ -291,6 +300,10 @@ const ClientOverview = () => {
                 const requestedAccessLevel = notification.details?.requested_access_level || "Onbekend";
                 const userId = notification.requester_id;
                 // should change the access level on the corresponding select element
+                setAccessLevels((prev) => ({
+                    ...prev,
+                    [userId]: requestedAccessLevel, // Update the level for this user
+                }));
             }
         }
     )
@@ -396,7 +409,7 @@ const ClientOverview = () => {
                 return (
                     <div>
                         <Select
-                            defaultValue={accessLevel}
+                            value={accessLevels[record.id] || accessLevel}
                             onChange={(value) => handleAccessLevelChange(profileData.id, record.id, value)}
                             style={{ width: "90%", maxWidth: "400px" }}
                             className="prevent-row-click"

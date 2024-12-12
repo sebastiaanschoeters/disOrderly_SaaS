@@ -1,0 +1,19 @@
+{/* Theme selection dropdown (outside of Routes) */}
+            <div style={{ padding: '10px' }}>
+                <label htmlFor="theme-select">Choose a theme: </label>
+                <select
+                    id="theme-select"
+                    value={theme}
+                    onChange={(e) => setTheme(e.target.value)}
+                >
+                    {Object.keys(themes).map((themeKey) => (
+                        <option key={themeKey} value={themeKey}>
+                            {themeKey === "default"
+                                ? "Standaard"
+                                : themeKey.replace(/_/g, ' ').charAt(0).toUpperCase() + themeKey.replace(/_/g, ' ').slice(1)}
+                        </option>
+                    ))}
+                </select>
+            </div>
+
+            {/* Route definitions */}

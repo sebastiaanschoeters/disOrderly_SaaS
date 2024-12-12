@@ -13,7 +13,7 @@ const useLocations = (searchTerm = "") => {
             try {
                 const { data, error } = await supabase
                     .from("Location")
-                    .select("id, Gemeente")
+                    .select("id, Gemeente, Postcode")
                     .ilike("Gemeente", `%${searchTerm}%`) // Match search term
                     .limit(10); // Limit results for performance
 

@@ -661,7 +661,7 @@ const ProfileCard = () => {
                             filterOption={false} // Disable client-side filtering
                             options={locations.map((location) => ({
                                 value: location.id, // Use ID as the value
-                                label: location.Gemeente, // Display gemeente
+                                label: location.Gemeente + ' (' + location.Postcode + ')', // Display gemeente
                             }))}
                             notFoundContent={
                                 <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>

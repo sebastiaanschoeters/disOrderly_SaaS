@@ -500,7 +500,7 @@ const ActivationPage = () => {
                                     filterOption={false} // Disable client-side filtering
                                     options={locations.map((location) => ({
                                         value: location.id, // Use ID as the value
-                                        label: location.Gemeente, // Display gemeente
+                                        label: location.Gemeente +' (' + location.Postcode + ')', // Display gemeente
                                     }))}
                                 />
                             </Form.Item>

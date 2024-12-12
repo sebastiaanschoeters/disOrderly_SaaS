@@ -237,8 +237,8 @@ const ChatPage = () => {
             backgroundColor: themeColors.primary2,
         },
         card: {
-            width: '100%',
-            minWidth: '375px',
+            width: '80%',
+            minWidth: '350px',
             maxWidth: '800px',
             borderRadius: '10px',
             boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
@@ -248,7 +248,7 @@ const ChatPage = () => {
         },
         chatContainer: {
             padding: '10px',
-            height: '80dvh',
+            height: '70dvh',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'flex-start',
@@ -310,7 +310,8 @@ const ChatPage = () => {
         },
         input: {
             flex: 1,
-            marginRight: '10px',
+            marginRight: '5px',
+            marginLeft: '5px',
             height: '40px',
             borderRadius: '5px',
         },
@@ -347,7 +348,8 @@ const ChatPage = () => {
                 color: themeColors.primary10,
                 width: '100%',
                 boxSizing: 'border-box',
-                zIndex: '0'
+                zIndex: '0',
+                overflow: 'hidden'
                 }}
             >
                 {userType !== "caretaker" && userType !== "admin" && (<BreadcrumbComponent />)}

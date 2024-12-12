@@ -6,7 +6,7 @@ const routeLabels = {
     "/clienten_overzicht": "clienten overzicht",
     "/begeleider_profiel": "profiel",
     "/gebruiker_profiel": "profiel",
-    "/persoonlijke_instellingen": "persoonlijke instellingen",
+    "/persoonlijke_instellingen": "instellingen",
     "/chat_overzicht": "chats overzicht",
     "/chat_overzicht/chat": "chat",
     "/chat_overzicht/nieuwe_chat": "nieuwe chat",

@@ -275,7 +275,8 @@ const Search = () => {
                     color: themeColors.primary10,
                     width: '100%',
                     boxSizing: 'border-box',
-                    zIndex: '0'
+                    zIndex: '0',
+                    overflow: 'hidden'
                 }}
             >
                 <BreadcrumbComponent />

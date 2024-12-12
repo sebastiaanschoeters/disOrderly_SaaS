@@ -219,11 +219,14 @@ const HomePage = () => {
                     onClick={() => navigate('/gebruiker_profiel')}
                 >
                     <Avatar
-                        size={100}
                         src={profile_picture}
                         style={{
                             backgroundColor: themeColors.primary4,
                             color: themeColors.primary10,
+                            height: '15vw',
+                            width: '15vw',
+                            maxHeight: 100,
+                            maxWidth:100
                         }}
                     >
                         {name[0]}

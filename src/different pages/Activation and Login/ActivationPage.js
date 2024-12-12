@@ -1,5 +1,5 @@
 // ActivationPage.js
-import { useParams } from 'react-router-dom';
+import {useNavigate, useParams} from 'react-router-dom';
 import React, {useEffect, useState} from 'react';
 import * as dayjs from 'dayjs'
 import '../../CSS/AntDesignOverride.css'
@@ -13,6 +13,7 @@ import useLocations from "../../UseHooks/useLocations";
 import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
 import forestImage from '../../Media/forest.jpg';
 
+
 const ActivationPage = () => {
     const { activationCodeLink } = useParams();
     const [searchValue, setSearchValue] = useState(""); // For search functionality
@@ -21,6 +22,7 @@ const ActivationPage = () => {
     const [userData, setUserData] = useState({});
     const [form] = Form.useForm();
     const [userType, setUserType] = useState('');
+    const navigate = useNavigate();
 
     const theme = 'blauw'
     const themeColors = themes[theme] || themes.blauw;
@@ -113,7 +115,7 @@ const ActivationPage = () => {
             ...prevData,
             name: values.Voornaam,
             livingSituation: values.Woonsituatie,
-            birthDate: values.Geboortedatum ? values.Geboortedatum.format('YYYY-MM-DD') : null,
+            birthDate: values.Geboortedatum
         }));
         setStep(3);
     };
@@ -348,6 +350,7 @@ const ActivationPage = () => {
 
             // Show success message
             message.success("Account aangemaakt! Je kan een profielfoto toevoegen bij je profiel instellingen.");
+            navigate('/login');
         } catch (err) {
             console.error("Unexpected error during email validation:", err);
             message.error("Er is iets misgegaan. Probeer het later opnieuw.");
@@ -421,7 +424,9 @@ const ActivationPage = () => {
                                 className="form-item"
                                 label="Voornaam"
                                 name="Voornaam"
-                                rules={[{ required: true, message: 'Vul uw voornaam in' }]}
+                                rules={[{ required: true, message: 'Vul uw voornaam in' },
+                                    { min: 2, message: 'Naam moet minstens 2 letters lang zijn' }
+                                ]}
                             >
                                 <Input />
                             </Form.Item>
@@ -443,27 +448,29 @@ const ActivationPage = () => {
                             <Form.Item
                                 label="Geboortedatum"
                                 name="Geboortedatum"
-                                rules={[{ required: true, message: 'Selecteer uw geboortedatum, of typ het uit in het formaat "YYYY-MM-DD"' }]}
+                                rules={[{ required: true, message: 'Selecteer uw geboortedatum, of typ het uit in het formaat "DD-MM-YYYY"' }]}
                             >
                                 <div style={{marginBottom: '1rem'}}>
                                     <input
                                         type="date"
                                         id="birthdate"
                                         style={{
+                                            backgroundColor: themeColors.primary1,
                                             width: '100%',
                                             padding: '10px',
                                             fontSize: '16px',
-                                            border: '1px solid #d9d9d9',
+                                            border: `1px solid ${themeColors.primary4}`, // Use primary1 for the border color
                                             borderRadius: '4px',
                                             boxSizing: 'border-box',
                                         }}
+
                                         max={new Date().toISOString().split('T')[0]} // Disables future dates
                                         onChange={(e) => {
                                             const selectedDate = new Date(e.target.value);
                                             const today = new Date();
                                             const age = today.getFullYear() - selectedDate.getFullYear();
                                             if (age < 18) {
-                                                alert('You must be at least 18 years old.');
+                                                message.error('Je moet minstens 18 jaar oud zijn');
                                                 e.target.value = '';
                                             }
                                         }}

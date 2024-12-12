@@ -445,40 +445,46 @@ const ActivationPage = () => {
                                 name="Geboortedatum"
                                 rules={[{ required: true, message: 'Selecteer uw geboortedatum, of typ het uit in het formaat "YYYY-MM-DD"' }]}
                             >
-                                <DatePicker
-                                    style={{ width: '100%' }}
-                                    format="YYYY-MM-DD"
-                                    disabledDate={(current) => {
-                                        // Get today's date
-                                        const today = new Date();
-                                        // Calculate the minimum allowed birthdate (18 years ago)
-                                        const minimumBirthdate = new Date(
-                                            today.getFullYear() - 18,
-                                            today.getMonth(),
-                                            today.getDate()
-                                        );
-                                        // Disable future dates and dates after the minimum allowed birthdate
-                                        return current && (current > today || current > minimumBirthdate);
-                                    }}
-                                    // Default picker view set to 18 years ago
-                                    defaultPickerValue={dayjs().subtract(18, 'year')}
-                                />
+                                <div style={{marginBottom: '1rem'}}>
+                                    <input
+                                        type="date"
+                                        id="birthdate"
+                                        style={{
+                                            width: '100%',
+                                            padding: '10px',
+                                            fontSize: '16px',
+                                            border: '1px solid #d9d9d9',
+                                            borderRadius: '4px',
+                                            boxSizing: 'border-box',
+                                        }}
+                                        max={new Date().toISOString().split('T')[0]} // Disables future dates
+                                        onChange={(e) => {
+                                            const selectedDate = new Date(e.target.value);
+                                            const today = new Date();
+                                            const age = today.getFullYear() - selectedDate.getFullYear();
+                                            if (age < 18) {
+                                                alert('You must be at least 18 years old.');
+                                                e.target.value = '';
+                                            }
+                                        }}
+                                    />
+                                </div>
                             </Form.Item>
                             <Form.Item>
-                                <Button type="primary" htmlType="submit" style={{ width: '100%' }}>Volgende</Button>
-                                <Button onClick={goBack} style={{ marginTop: '8px', width: '100%' }}>Terug</Button>
+                                <Button type="primary" htmlType="submit" style={{width: '100%'}}>Volgende</Button>
+                                <Button onClick={goBack} style={{marginTop: '8px', width: '100%'}}>Terug</Button>
                             </Form.Item>
                         </Form>
                     )}
 
                     {step === 3 && (
                         <Form name="additionalInfoForm" onFinish={Location}
-                              initialValues={{ city: userData.city || ''}}>
+                              initialValues={{city: userData.city || ''}}>
                             <Form.Item
                                 className="form-item"
                                 label="Stad"
                                 name="city"
-                                rules={[{ required: true, message: 'Selecteer uw stad' }]}
+                                rules={[{required: true, message: 'Selecteer uw stad'}]}
                             >
                                 <Select
                                     showSearch

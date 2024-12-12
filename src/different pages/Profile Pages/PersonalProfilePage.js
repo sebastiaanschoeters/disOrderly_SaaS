@@ -149,7 +149,7 @@ const ProfileCard = () => {
         {id: 4, title: "Voeg extra foto's toe aan je profiel", earned: false},
         {id: 5, title: "Voeg een profielfoto toe", earned: false},
         {id: 6, title: "Voeg een biografie toe aan je profiel", earned: false},
-        {id: 7, title: "Verander je thema van de standaard kleuren", earned: themeTrophyEarned},
+        {id: 7, title: "Verander je kleuren thema", earned: themeTrophyEarned},
     ]);
 
     const checkMessageSentTrophy = async (userId) => {

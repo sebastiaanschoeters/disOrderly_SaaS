@@ -19,7 +19,6 @@ import {createClient} from "@supabase/supabase-js";
 import 'antd/dist/reset.css';
 import '../../CSS/AntDesignOverride.css';
 import '../../CSS/EditableProfilePage.css';
-import HomeButtonUser from "../../Extra components/HomeButtonUser";
 import useFetchProfileData from "../../UseHooks/useFetchProfileData";
 import {calculateAge, calculateSlidesToShow} from "../../Utils/calculations";
 import useLocations from "../../UseHooks/useLocations";

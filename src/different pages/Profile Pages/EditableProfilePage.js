@@ -627,7 +627,7 @@ const ProfileCard = () => {
 
                     <p style={{width: '100%'}}>
                         <strong style={{display: 'block', marginBottom: '10px'}}>
-                            <BookOutlined/> Biografie:
+                            <BookOutlined/> Biografie
                         </strong>
                         <div style={{position: 'relative', width: '100%', minWidth: '200px'}}>
                             <TextArea
@@ -657,7 +657,7 @@ const ProfileCard = () => {
 
                     <p style={{width: '100%'}}>
                         <strong style={{display: 'block', marginBottom: '10px'}}>
-                            <EnvironmentOutlined/> Locatie:
+                            <EnvironmentOutlined/> Locatie
                         </strong>
                         <Select
                             showSearch
@@ -695,7 +695,7 @@ const ProfileCard = () => {
 
                     <p style={{width: '100%'}}>
                         <strong style={{display: 'block', marginBottom: '10px'}}>
-                            <UserOutlined/> Geslacht:
+                            <UserOutlined/> Geslacht
                         </strong>
                         <Select
                             style={{width: '100%', minWidth: '200px'}}
@@ -715,7 +715,7 @@ const ProfileCard = () => {
 
                     <p style={{width: '100%'}}>
                         <strong style={{display: 'block', marginBottom: '10px'}}>
-                            <StarOutlined/> Interesses:
+                            <StarOutlined/> Interesses
                         </strong>
                         <Select
                             mode="multiple"
@@ -759,7 +759,7 @@ const ProfileCard = () => {
 
                     <p style={{width: '100%'}}>
                         <strong style={{display: 'block', marginBottom: '10px'}}>
-                            <HeartOutlined/> Ik zoek naar:
+                            <HeartOutlined/> Ik zoek naar
                         </strong>
                         <div
                             style={{
@@ -795,7 +795,7 @@ const ProfileCard = () => {
 
                     <p style={{width: '100%'}}>
                         <strong style={{display: 'block', marginBottom: '10px'}}>
-                            <HomeOutlined/> Woonsituatie:
+                            <HomeOutlined/> Woonsituatie
                         </strong>
                         <Select
                             placeholder="Selecteer jouw woonsituatie"
@@ -818,7 +818,7 @@ const ProfileCard = () => {
 
                     <p style={{width: '100%'}}>
                         <strong style={{display: 'block', marginBottom: '10px'}}>
-                            <CarOutlined/> Kan zich zelfstanding verplaatsen:
+                            <CarOutlined/> Kan zich zelfstanding verplaatsen
                         </strong>
                         <Select
                             value={mobility}
@@ -837,7 +837,7 @@ const ProfileCard = () => {
                     <div style={{marginTop: '20px', marginBottom: '20px'}}>
                         <p>
                             <strong style={{width: '40%', minWidth: '100px', flexShrink: 0}}>
-                                <PictureOutlined/> Meer fotos van jezelf tonen:
+                                <PictureOutlined/> Meer fotos van jezelf tonen
                             </strong>
                         </p>
                         <Carousel

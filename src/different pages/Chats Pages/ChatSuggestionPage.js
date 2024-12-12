@@ -45,20 +45,17 @@ const ChatSuggestionPage = () => {
             console.error("Error fetching messages:", error);
             return;
         }
-
         setMessage(data.message_content);
     };
 
     const updateAcceptance = async (chatroomId, newAcceptanceValue) => {
         const { data, error } = await supabase
-            .from('Chatroom') // Table name
-            .update({ acceptance: newAcceptanceValue }) // Column to update
-            .eq('id', chatroomId); // Condition: Match the row by id
+            .from('Chatroom')
+            .update({ acceptance: newAcceptanceValue })
+            .eq('id', chatroomId);
 
         if (error) {
             console.error("Error updating acceptance:", error);
-        } else {
-            console.log("Update successful:", data);
         }
     };
 
@@ -72,8 +69,6 @@ const ChatSuggestionPage = () => {
             console.error("Error deleting messages:", error);
             return;
         }
-
-        console.log('Messages deleted:');
     };
 
     const deleteChatroom = async (chatroomId) => {
@@ -86,8 +81,6 @@ const ChatSuggestionPage = () => {
             console.error('Error deleting chatroom:');
             return;
         }
-
-        console.log('Chatroom deleted:');
     };
 
     const updateMessage = async (chatroomId, newContent) => {
@@ -100,8 +93,6 @@ const ChatSuggestionPage = () => {
             console.error('Error updating message:', error);
             return;
         }
-
-        console.log('Message updated:', data);
         setMessage(newContent);
     };
 
@@ -120,8 +111,7 @@ const ChatSuggestionPage = () => {
         if (error) {
             console.error("Error updating blocked status:", error);
         } else {
-            console.log("Blocked status updated successfully:", data);
-            navigate('/chatOverview'); // Redirect to chat overview after successful block
+            navigate('/chatOverview');
         }
     };
 

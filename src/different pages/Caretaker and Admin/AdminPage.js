@@ -452,6 +452,23 @@ const AdminPage = () => {
                     type="primary"
                     style={{
                         position: 'absolute',
+                        bottom: '20px',
+                        left: '20px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '120px',
+                        height: '100px',
+                    }}
+                    onClick={() => { navigate('/chatoverview')}}
+                >
+                    <h6> ChatSupport </h6>
+                </Button>
+                <Button
+                    type="primary"
+                    style={{
+                        position: 'absolute',
                         top: '20px',
                         right: '20px',
                         display: 'flex',

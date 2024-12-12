@@ -19,6 +19,7 @@ const ChatOverviewPage = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [chatrooms, setChatrooms] = useState([]);
     const userID = parseInt(localStorage.getItem('user_id'), 10);
+    const userType = localStorage.getItem('userType');
 
     const [themeName, darkModeFlag] = JSON.parse(localStorage.getItem('theme')) || ['blauw', false];
     const { themeColors, setThemeName, setDarkModeFlag } = useTheme(themeName, darkModeFlag);
@@ -26,13 +27,23 @@ const ChatOverviewPage = () => {
     useThemeOnCSS(themeColors);
 
     const fetchChatrooms = async () => {
-        const { data, error } = await supabase
-            .from('Chatroom')
-            .select(`id, sender_id, receiver_id, acceptance, last_sender_id,
-            senderProfile: sender_id(name, profile_picture), 
-            receiverProfile: receiver_id(name, profile_picture)`)
-            .or(`sender_id.eq.${userID},receiver_id.eq.${userID}`)
-            .neq('receiver_id', 1);
+        let data, error;
+        if (userType !== "admin") {
+            ({ data, error } = await supabase
+                .from('Chatroom')
+                .select(`id, sender_id, receiver_id, acceptance, last_sender_id,
+                senderProfile: sender_id(name, profile_picture), 
+                receiverProfile: receiver_id(name, profile_picture)`)
+                .or(`sender_id.eq.${userID},receiver_id.eq.${userID}`)
+                .not('receiver_id', 'eq', 1));
+        } else {
+            ({ data, error } = await supabase
+                .from('Chatroom')
+                .select(`id, sender_id, receiver_id, acceptance, last_sender_id,
+                senderProfile: sender_id(name, profile_picture), 
+                receiverProfile: receiver_id(name, profile_picture)`)
+                .or(`sender_id.eq.${userID},receiver_id.eq.${userID}`));
+        }
 
         if (error) {
             console.error("Error fetching chatrooms:", error);
@@ -62,8 +73,8 @@ const ChatOverviewPage = () => {
                 if(message.startsWith("ButterflyIcon")) {
                     const contentAfterIcon = message.slice(13).trim();
 
-                    const indexMatch = contentAfterIcon.match(/^(\d+)\s*(.*)$/); // Regex to extract number and text
-                    const title = indexMatch ? indexMatch[2] : ""; // Rest is the title
+                    const indexMatch = contentAfterIcon.match(/^(\d+)\s*(.*)$/);
+                    const title = indexMatch ? indexMatch[2] : "";
 
                     const [mainTitle, extraContent] = title.split('!').map(part => part.trim());
                     return truncate(mainTitle);
@@ -192,7 +203,7 @@ const ChatOverviewPage = () => {
             >
                 <ButterflyIcon color={themeColors.primary3} />
 
-                <BreadcrumbComponent />
+                {userType !== "admin" &&<BreadcrumbComponent />}
 
                 <Input.Search
                     placeholder="Zoek in chats..."
@@ -236,7 +247,6 @@ const ChatOverviewPage = () => {
                                     title={
                                         <span style={styles.name}>
                                             <span style={{ fontWeight: chat.last_sender_id !== userID ? 'bold' : 'normal' }}>{chat.profileName}</span>
-                                            {' '}
                                         </span>
                                     }
                                     description={

@@ -15,13 +15,11 @@ const ProfileDetail = ({ label, value, icon }) => (
 
 const ProfileCard = ({ actCode }) => {
     const { profileData, isLoading, error } = useFetchCaretakerData(actCode)
-    // Derive theme colors
     const theme = profileData.theme || 'blauw';
     const themeColors = themes[theme] || themes.blauw;
 
     useThemeOnCSS(themeColors);
 
-    // Profile picture
     const profilePicture = profileData.profile_picture
         ? `${profileData.profile_picture}?t=${new Date().getTime()}`
         : "https://example.com/photo.jpg";
@@ -38,7 +36,6 @@ const ProfileCard = ({ actCode }) => {
                     zIndex: '0'
                 }}
             >
-                {/* Header section with profile picture, name, age, and biography */}
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingBottom: '20px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '10px' }}>
                         <Avatar

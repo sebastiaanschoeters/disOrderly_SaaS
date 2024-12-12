@@ -129,7 +129,7 @@ const ProfileCard = (profileToShow) => {
 
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [newMessage, setNewMessage] = useState('');
-    const [isChatroomExistent, setChatroomExistent] = useState(false); // State to track chatroom existence
+    const [isChatroomExistent, setChatroomExistent] = useState(false);
     const localTime = new Date();
     const userId = localStorage.getItem('user_id');
     const navigate = useNavigate();
@@ -149,11 +149,9 @@ const ProfileCard = (profileToShow) => {
 
         window.addEventListener('resize', handleResize);
 
-        // Cleanup on unmount
         return () => window.removeEventListener('resize', handleResize);
     }, [imageUrls.length]);
 
-    // Parse looking for array
     const parseLookingForArray = (lookingFor) => {
         if (typeof lookingFor === 'string') {
             try {
@@ -166,21 +164,17 @@ const ProfileCard = (profileToShow) => {
         return lookingFor || [];
     };
 
-    // Derive theme colors
     const theme = profileData.theme || 'blauw';
     const themeColors = themes[theme] || themes.blauw;
 
-    // Current user location (with fallback)
     const currentUserLocation = locationData
         ? { latitude: locationData.Latitude, longitude: locationData.Longitude }
         : { latitude: 50.8, longitude: 4.3333333 };
 
-    // Profile picture
     const profilePicture = profileData.profile_picture
         ? `${profileData.profile_picture}?t=${new Date().getTime()}`
         : "https://example.com/photo.jpg";
 
-    // Distance calculation
     const distanceToProfileUser = calculateDistance(
         currentUserLocation.latitude,
         currentUserLocation.longitude,
@@ -202,7 +196,6 @@ const ProfileCard = (profileToShow) => {
             const senderId = parseInt(localStorage.getItem('user_id'), 10);
             const receiverId = profileToShow.user_id;
 
-            // Insert into Chatroom table and return the 'id' of the newly inserted row
             const { data: chatroomData, error: chatroomError } = await supabase
                 .from('Chatroom')
                 .insert([{
@@ -212,22 +205,19 @@ const ProfileCard = (profileToShow) => {
                     last_sender_id: senderId
 
                 }])
-                .select('id')  // Specify the column(s) to return (in this case, 'id')
+                .select('id')
 
             if (chatroomError) {
                 console.error('Error inserting chatroom:', chatroomError);
                 throw chatroomError;
             }
 
-            // Ensure the ID is available
             const chatroomId = chatroomData?.[0]?.id;
 
             if (!chatroomId) {
                 console.error('Chatroom ID is missing');
-                return;  // Exit early if the ID is missing
+                return;
             }
-
-            // Insert the message into the Messages table
             const { data: messageData, error: messageError } = await supabase
                 .from('Messages')
                 .insert([{
@@ -249,7 +239,6 @@ const ProfileCard = (profileToShow) => {
 
         } catch (error) {
             console.error('Error sending message or inserting data:', error);
-            // Optionally handle user-friendly error messaging
         }
     };
 
@@ -259,7 +248,6 @@ const ProfileCard = (profileToShow) => {
             const receiverId = profileToShow.user_id;
 
             try {
-                // Check if the chatroom exists between sender and receiver
                 const { data: chatroomData, error } = await supabase
                     .from('Chatroom')
                     .select('id')
@@ -310,16 +298,16 @@ const ProfileCard = (profileToShow) => {
                             top: '0%',
                             left: '1%',
                             zIndex: 1000,
-                            display: 'flex', // Use flexbox for alignment
-                            flexDirection: 'row', // Keep icon and text horizontally aligned
-                            alignItems: 'center', // Center vertically
-                            justifyContent: 'center', // Center horizontally
-                            whiteSpace: 'normal', // Allow text wrapping
-                            wordBreak: 'break-word', // Break long text onto multiple lines
-                            textAlign: 'center', // Keep text visually centered
-                            padding: '12px 16px', // Add generous padding for better readability
-                            minHeight: '60px', // Increase the minimum height to allow room for wrapped text
-                            lineHeight: '1', // Adjust line height for better spacing between lines
+                            display: 'flex',
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            whiteSpace: 'normal',
+                            wordBreak: 'break-word',
+                            textAlign: 'center',
+                            padding: '12px 16px',
+                            minHeight: '60px',
+                            lineHeight: '1',
                         }}
                         onClick={() => {
                             if (!isChatroomExistent) {
@@ -333,7 +321,6 @@ const ProfileCard = (profileToShow) => {
                     </Button>
                 )}
 
-                {/* Header section with profile picture, name, age, and biography */}
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingBottom: '20px'}}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '10px' }}>
                         <Avatar
@@ -438,9 +425,9 @@ const ProfileCard = (profileToShow) => {
                                     src={imageUrl}
                                     alt={`carousel-image-${index}`}
                                     style={{
-                                        height: '200px', // Image height is set to fill the container's height
-                                        width: 'auto', // This maintains the aspect ratio
-                                        objectFit: 'cover', // Ensure the image covers the space without distortion
+                                        height: '200px',
+                                        width: 'auto',
+                                        objectFit: 'cover',
                                         borderRadius: '10px',
                                         margin: '0 auto'
                                     }}

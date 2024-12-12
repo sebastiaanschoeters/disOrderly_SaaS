@@ -1,4 +1,4 @@
-import 'antd/dist/reset.css'; // Import Ant Design styles
+import 'antd/dist/reset.css';
 import '../CSS/AntDesignOverride.css';
 import { ButterflyIcon, antThemeTokens} from '../Extra components/themes';
 import {Avatar, ConfigProvider, Input, List, Typography, Modal, Button, Slider, Radio, Checkbox, Spin} from 'antd';
@@ -30,10 +30,10 @@ const Search = () => {
     const [isModalProfileVisible, setIsModalProfileVisible] = useState(false);
 
     // Filter State
-    const [ageRange, setAgeRange] = useState([18, 100]);  // Set the default age range to 18-100
-    const [gender, setGender] = useState('');  // Gender filter: '' for all, 'Man' or 'Vrouw'
-    const [lookingFor, setLookingFor] = useState([]);  // Filter for "looking_for" options
-    const [mobility, setMobility] = useState(null);  // Mobility filter: TRUE for "Ja", null for "Maakt niet uit"
+    const [ageRange, setAgeRange] = useState([18, 100]);
+    const [gender, setGender] = useState('');
+    const [lookingFor, setLookingFor] = useState([]);
+    const [mobility, setMobility] = useState(null);
     const [selectedInterests, setSelectedInterests] = useState([]);
 
     const { Title } = Typography;
@@ -75,10 +75,8 @@ const Search = () => {
         return assembleProfileData(userId)
     };
 
-    // Fetch users from Supabase
     const fetchUsers = async () => {
         try {
-            // Fetch user data with related "User information"
             const { data: userData, error: userError } = await supabase
                 .from('User')
                 .select(`id`);
@@ -89,19 +87,12 @@ const Search = () => {
             }
 
             console.log(userData)
-            // If no user data is returned, log it
             if (!userData || userData.length === 0) {
                 console.log("No users found.");
                 return;
             }
-
-            // Retrieve the logged-in user's ID from localStorage
-            const loggedInUserId = parseInt(localStorage.getItem('user_id'), 10); // Convert to integer
-
-            // Filter out the logged-in user
+            const loggedInUserId = parseInt(localStorage.getItem('user_id'), 10);
             const filteredUserData = userData.filter(user => user.id !== loggedInUserId);
-
-            // Fetch chatroom data
             const { data: chatroomData, error: chatroomError } = await supabase
                 .from('Chatroom')
                 .select(`
@@ -114,47 +105,30 @@ const Search = () => {
                 throw chatroomError;
             }
 
-            // Log chatroom data for debugging
             console.log("Chatroom Data:", chatroomData);
-
-            // Create a set of excluded user IDs based on chatroom logic
             const excludedUserIds = new Set();
 
             chatroomData.forEach(chat => {
                 if (chat.sender_id === loggedInUserId) {
-                    // If logged-in user is the sender, exclude the receiver
                     excludedUserIds.add(chat.receiver_id);
                 }
                 if (chat.receiver_id === loggedInUserId) {
-                    // If logged-in user is the receiver, exclude the sender
                     excludedUserIds.add(chat.sender_id);
                 }
             });
 
             console.log("Excluded User IDs:", [...excludedUserIds]);
-
-            // Filter out excluded users from the fetched user data
             const finalFilteredUserData = filteredUserData.filter(user => !excludedUserIds.has(user.id));
-
-            // Optional: Log the final filtered data for debugging
             console.log("Final Filtered Users:", finalFilteredUserData);
-
-            // Array to store all users' profile data
             let users = [];
-
-            // Iterate over each user ID and fetch profile data
             for (let i = 0; i < finalFilteredUserData.length; i++) {
                 const userId = finalFilteredUserData[i].id;
-
-                // Fetch profile data for each user
                 const { profileData, error } = await fetchProfileData(userId);
 
                 if (error) {
                     console.error(`Error fetching profile data for user ${userId}:`, error);
-                    continue; // Skip to the next user on error
+                    continue;
                 }
-
-                // Add the profile data to the users array
                 users.push(profileData);
             }
 
@@ -168,7 +142,7 @@ const Search = () => {
         } catch (error) {
             console.error('Error fetching users:', error);
         } finally {
-            setLoading(false); // Set loading state to false after fetching
+            setLoading(false);
         }
     };
 
@@ -189,11 +163,11 @@ const Search = () => {
 
             return {
                 ...user,
-                age: calculateAge(new Date(user.birthdate)), // Add calculated age
-                looking_for: user.looking_for ? JSON.parse(user.looking_for) : [], // Parse looking_for
-                locationData: user.locationData || { gemeente: 'Onbekend', latitude: null, longitude: null }, // Fallback for location
-                bio: user.bio || 'Geen beschrijving beschikbaar', // Fallback for bio
-                distance: distance, // Add calculated distance (or null if not calculable)
+                age: calculateAge(new Date(user.birthdate)),
+                looking_for: user.looking_for ? JSON.parse(user.looking_for) : [],
+                locationData: user.locationData || { gemeente: 'Onbekend', latitude: null, longitude: null },
+                bio: user.bio || 'Geen beschrijving beschikbaar',
+                distance: distance,
             };
         });
     };
@@ -216,19 +190,12 @@ const Search = () => {
         return otherUserInterestedInLoggedInUser && loggedInUserInterestedInOtherUser
     }
 
-    // Filter Users Based on Criteria
     const applyFilters = () => {
         let filtered = [...users];
-
-        // Filter by age range
         filtered = filtered.filter((user) => user.age >= ageRange[0] && user.age <= ageRange[1]);
-
-        // Filter by gender (if selected)
         if (gender) {
             filtered = filtered.filter((user) => user.gender === gender);
         }
-
-        // Filter by looking_for options
         if (lookingFor.length > 0) {
             filtered = filtered.filter((user) =>
                 lookingFor.every(option => user.looking_for.includes(option))
@@ -239,7 +206,6 @@ const Search = () => {
             }
         }
 
-        // Filter by mobility
         if (mobility !== null) {
             filtered = filtered.filter((user) => user.mobility === mobility);
         }
@@ -257,31 +223,26 @@ const Search = () => {
         console.log(sortedUsers)
     };
 
-    // Handle changes for the age slider
     const handleAgeChange = (value) => {
         setAgeRange(value);
-        applyFilters(); // Reapply filters whenever the age range changes
+        applyFilters();
     };
 
-    // Handle gender filter change
     const handleGenderChange = (e) => {
         setGender(e.target.value);
-        applyFilters(); // Reapply filters whenever the gender changes
+        applyFilters();
     };
 
-    // Handle looking_for checkbox change
     const handleLookingForChange = (checkedValues) => {
         setLookingFor(checkedValues);
-        applyFilters(); // Reapply filters whenever the looking_for options change
+        applyFilters();
     };
 
-    // Handle mobility filter change
     const handleMobilityChange = (e) => {
         setMobility(e.target.value);
-        applyFilters(); // Reapply filters whenever the mobility option changes
+        applyFilters();
     };
 
-    // Placeholder for Modal
     const showModal = () => {
         setIsModalVisible(true);
     };
@@ -291,11 +252,11 @@ const Search = () => {
     };
 
     useEffect(() => {
-        fetchUsers(); // Fetch users when the component mounts
+        fetchUsers();
     }, [profileData]);
 
     useEffect(() => {
-        applyFilters(); // Reapply filters and sorting when users, filters, or sort criteria change
+        applyFilters();
     }, [users, ageRange, gender, lookingFor, mobility, sortCriteria, selectedInterests]);
 
     return (
@@ -320,7 +281,6 @@ const Search = () => {
                 <BreadcrumbComponent />
                 <ButterflyIcon color={themeColors.primary3}/>
 
-                {/* Flex container for the search bar, filter button, and user list */}
                 <div
                     style={{
                         display: 'flex',
@@ -332,7 +292,6 @@ const Search = () => {
                         marginBottom: '2vw',
                     }}
                 >
-                    {/* Search Bar and Filter Button */}
                     <div style={{flex: 1, display: 'flex', position: 'relative'}}>
                         <Input
                             placeholder="Zoek gebruikers..."
@@ -344,7 +303,6 @@ const Search = () => {
                             }}
                             onChange={(e) => setSearchQuery(e.target.value.toLowerCase())}
                         />
-                        {/* Filter Icon Inside the Search Bar */}
                         <Button
                             icon={<FilterOutlined/>}
                             style={{
@@ -385,15 +343,15 @@ const Search = () => {
                     <div
                         style={{
                             display: 'flex',
-                            flexDirection: 'column', // Stack text and spinner vertically
+                            flexDirection: 'column',
                             justifyContent: 'center',
                             alignItems: 'center',
                             width: '100%',
-                            height: '100px', // or whatever height you want for the loading area
+                            height: '100px',
                         }}
                     >
                         <div>Gebruikers aan het zoeken...</div>
-                        <Spin/> {/* Spinner below the text */}
+                        <Spin/>
                     </div>
                 ) : (
                     <div
@@ -405,7 +363,6 @@ const Search = () => {
                             maxWidth: '600px',
                         }}
                     >
-                        {/* Check if there are users to display */}
                         {filteredUsers.filter(
                             (user) =>
                                 user.name.toLowerCase().includes(searchQuery) ||
@@ -488,16 +445,13 @@ const Search = () => {
                     />
                 )}
 
-
-                {/* Modal for Filters */}
                 <Modal
                     title="Filteren"
                     open={isModalVisible}
                     onCancel={handleModalClose}
-                    footer={null}  // Remove the footer buttons
+                    footer={null}
                 >
                     <div style={{marginBottom: '1vw'}}>
-                        {/* Age Range Text */}
                         <p style={{fontWeight: 'bold'}}>
                             Leeftijd {ageRange[0]} - {ageRange[1]}
                         </p>

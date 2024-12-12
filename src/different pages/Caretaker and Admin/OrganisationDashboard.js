@@ -205,28 +205,28 @@ const OrganisationDashboard = () => {
 
     const styles = {
         list: {
-            width: '60%', // Increase the width of the list
+            width: '60%',
             height: '100%',
-            margin: '0 auto', // Center the list horizontally
+            margin: '0 auto',
             display: 'flex',
             flexDirection: 'column',
-            alignItems: 'center', // Center items horizontally
-            gap: '20px', // Add space between cards
+            alignItems: 'center',
+            gap: '20px',
         },
         card: {
             width: '100%',
-            height: '80px', // Increase the height of the card
+            height: '80px',
             marginBottom: '20px',
-            borderRadius: '15px', // Adjust border radius for a bigger card
+            borderRadius: '15px',
             borderWidth: '1px',
             borderColor: themeColors.primary7,
             cursor: 'pointer',
-            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', // Add a subtle shadow for better visibility
+            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
             display: 'flex',
             flexDirection: 'column',
-            justifyContent: 'center', // Center text vertically
-            alignItems: 'center', // Center text horizontally
-            padding: '20px', // Add padding for better spacing
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: '20px',
         },
         name: {
             fontSize: '14px'

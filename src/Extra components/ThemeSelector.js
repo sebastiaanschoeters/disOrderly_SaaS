@@ -5,10 +5,10 @@ import themes from './themes';
 
 const ThemeSelector = ({ theme, isDarkMode, handleThemeChange, handleThemeToggle }) => {
     const themeOptions = Object.keys(themes)
-        .filter((key) => !key.endsWith('_donker')) // Exclude dark themes
+        .filter((key) => !key.endsWith('_donker'))
         .map((themeKey) => ({
             value: themeKey,
-            label: themeKey.charAt(0).toUpperCase() + themeKey.slice(1), // Capitalize first letter
+            label: themeKey.charAt(0).toUpperCase() + themeKey.slice(1),
         }));
 
     return (
@@ -25,8 +25,8 @@ const ThemeSelector = ({ theme, isDarkMode, handleThemeChange, handleThemeToggle
                     onChange={handleThemeChange}
                     dropdownRender={(menu) => (
                         <div
-                            onWheel={(e) => e.stopPropagation()} // Prevent scroll propagation
-                            style={{maxHeight: 300}} // Only constrain dropdown height, no overflow here
+                            onWheel={(e) => e.stopPropagation()}
+                            style={{maxHeight: 300}}
                         >
                             {menu}
                         </div>
@@ -34,7 +34,7 @@ const ThemeSelector = ({ theme, isDarkMode, handleThemeChange, handleThemeToggle
                 />
                 <Switch
                     checked={isDarkMode}
-                    onChange={handleThemeToggle} // Trigger dark mode toggle
+                    onChange={handleThemeToggle}
                     checkedChildren={<span>Donker</span>}
                     unCheckedChildren={<span>Licht</span>}
                     style={{marginLeft: 'auto'}}

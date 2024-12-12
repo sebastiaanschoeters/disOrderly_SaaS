@@ -4,7 +4,6 @@ const LocalStorageViewer = () => {
     const [localStorageItems, setLocalStorageItems] = useState([]);
 
     useEffect(() => {
-        // Retrieve all items from localStorage
         const items = Object.keys(localStorage).map(key => ({
             key: key,
             value: localStorage.getItem(key)

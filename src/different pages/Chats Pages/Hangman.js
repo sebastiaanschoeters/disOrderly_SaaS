@@ -21,14 +21,9 @@ const ButterflyHangman = ({ wrongGuesses }) => {
         "M205.537 171.56C213.34 215.845 203.3 268.936 199.919 312.892"
     ];
 
-    // Function to get the stroke color based on the number of wrong guesses
     const getColorForStep = (index) => {
-        // Set the initial color to light gray
         const lightColor = "#D3D3D3";
-        // Calculate the darker color based on the number of wrong guesses
-        const darkColor = "#000000"; // Fully dark color for completed paths
-
-        // If wrongGuesses is greater than or equal to the index, we apply the dark color, otherwise light color
+        const darkColor = "#000000";
         return wrongGuesses > index ? darkColor : lightColor;
     };
 
@@ -38,7 +33,7 @@ const ButterflyHangman = ({ wrongGuesses }) => {
                 <path
                     key={index}
                     d={d}
-                    stroke={getColorForStep(index)}  // Get the color for each path based on wrong guesses
+                    stroke={getColorForStep(index)}
                     strokeOpacity="0.9"
                     strokeWidth="16"
                     strokeLinecap="round"
@@ -50,23 +45,6 @@ const ButterflyHangman = ({ wrongGuesses }) => {
 };
 
 const generateConversationStarter = async () => {
-    /*try {
-        const response = await fetch('/api/generateQuestion', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                prompt: "Generate a fun and creative conversation starter question in Dutch with a one word answer.",
-            }),
-        });
-
-        const data = await response.json();
-        return data.question || "Wat is jouw lievelingseten?"; // Fallback question
-    } catch (error) {
-        console.error("Error generating conversation starter:", error);
-        return "Wat is jouw lievelingseten?"; // Fallback question
-    }*/
     const randt = Math.floor(Math.random() * 99) + 1;
 
     const { data, error } = await supabase
@@ -85,7 +63,7 @@ const generateConversationStarter = async () => {
 
 const HangmanGame = ({ isModalVisible, setIsModalVisible, player1Id, player2Id, handleSendMessage }) => {
     const [gameId, setGameId] = useState(null);
-    const [step, setStep] = useState(null); // 1: Question, 2: Answer, 3: Hangman Game
+    const [step, setStep] = useState(null);
     const [question, setQuestion] = useState('');
     const [answer, setAnswer] = useState('');
     const [guessedLetters, setGuessedLetters] = useState([]);
@@ -139,7 +117,7 @@ const HangmanGame = ({ isModalVisible, setIsModalVisible, player1Id, player2Id, 
             .select('id')
             .or(`player_1_id.eq.${userId},player_2_id.eq.${userId}`)
             .or(`player_2_id.eq.${player2Id},player_1_id.eq.${player2Id}`)
-            .limit(1); // We only care if there's at least one game
+            .limit(1);
 
         if (fetchError) {
             console.error('Error checking for existing game:', fetchError);
@@ -149,7 +127,7 @@ const HangmanGame = ({ isModalVisible, setIsModalVisible, player1Id, player2Id, 
         if (existingGame && existingGame.length > 0) {
             console.log('A game already exists between these players:', existingGame[0].id);
             message.error({content: 'De andere persoon heeft al een nieuw spel gestart', style:{fontSize:'20px'}});
-            return; // Do not create a new game
+            return;
         }
 
         // Step 2: If no existing game, proceed to create a new game
@@ -180,7 +158,7 @@ const HangmanGame = ({ isModalVisible, setIsModalVisible, player1Id, player2Id, 
         // Step 4: Notify players about the new game
         handleSendMessage("ButterflyIcon0 " + localStorage.getItem('name') + " heeft een nieuw spel gestart! Klik links onderaan op de gamecontroller om te spelen");
 
-        return data; // Return the new game data
+        return data;
     };
 
     const handleAnswer = async (gameId, answer) => {
@@ -201,25 +179,19 @@ const HangmanGame = ({ isModalVisible, setIsModalVisible, player1Id, player2Id, 
         return answer
     };
 
-// handleGuess function - simplified
     const handleGuess = (letter) => {
-        // If the letter has already been guessed, do nothing
         if (guessedLetters.includes(letter)) return;
-
-        // Update the guessed letters
         setGuessedLetters((prevGuessedLetters) => [...prevGuessedLetters, letter]);
     };
 
-// useEffect to respond to state change in guessedLetters
     useEffect(() => {
         if(!isSender){
             return;
         }
         if (guessedLetters.length === 0) return;
 
-        const letter = guessedLetters[guessedLetters.length - 1];  // Get the most recent guessed letter
+        const letter = guessedLetters[guessedLetters.length - 1];
 
-        // Check if the guessed letter is correct or not
         if (answer.toUpperCase().includes(letter)) {
             if (handleSendMessage) {
                 handleSendMessage(`ButterflyIcon${wrongGuesses} ${letter.toUpperCase()} is juist!` + renderWord());
@@ -233,9 +205,8 @@ const HangmanGame = ({ isModalVisible, setIsModalVisible, player1Id, player2Id, 
             }
         }
 
-        // Update database with the new state
         handleGuessInDatabase(gameId, guessedLetters, wrongGuesses);
-    }, [guessedLetters]); // Trigger when guessedLetters changes
+    }, [guessedLetters]);
 
 
     const handleGuessInDatabase = async (gameId, guessedLetters, currentWrongGuesses) => {
@@ -245,20 +216,20 @@ const HangmanGame = ({ isModalVisible, setIsModalVisible, player1Id, player2Id, 
                 guessed_letters: guessedLetters,
                 wrong_guesses: currentWrongGuesses,
             })
-            .eq('id', gameId); // Use game ID to identify which game to update
+            .eq('id', gameId);
 
         if (error) {
             console.error('Error updating guess:', error);
         }
 
-        return data;  // Return the updated game data
+        return data;
     };
 
     const handleGameEnd = async (gameId) => {
         const { data, error } = await supabase
             .from('Hangman')
             .delete()
-            .eq('id', gameId); // Use game ID to update the correct game record
+            .eq('id', gameId);
 
         if (error) {
             console.error('Error finishing game', error);
@@ -271,7 +242,6 @@ const HangmanGame = ({ isModalVisible, setIsModalVisible, player1Id, player2Id, 
         try {
             const userId = localStorage.getItem('user_id');
             console.log(userId)
-            // Fetch the current value of hangman_wins
             const { data: userData, error: fetchError } = await supabase
                 .from('User information')
                 .select('hangman_wins')
@@ -282,13 +252,8 @@ const HangmanGame = ({ isModalVisible, setIsModalVisible, player1Id, player2Id, 
                 console.error('Error fetching hangman_wins:', fetchError);
                 return;
             }
-
             const currentWins = userData.hangman_wins || 0;
-
-            // Increment the value locally
             const updatedWins = currentWins + 1;
-
-            // Update the value in the database
             const { data, error: updateError } = await supabase
                 .from('User information')
                 .update({ hangman_wins: updatedWins })
@@ -332,7 +297,7 @@ const HangmanGame = ({ isModalVisible, setIsModalVisible, player1Id, player2Id, 
     }, [gameEnded, gameId]);
 
     const handleCancel = () => {
-        setIsModalVisible(false); // Close modal
+        setIsModalVisible(false);
     };
 
     return (
@@ -347,7 +312,7 @@ const HangmanGame = ({ isModalVisible, setIsModalVisible, player1Id, player2Id, 
                             </Tooltip>
                         </>
                     }
-                    open={step === 1} // Modal visibility controlled by state
+                    open={step === 1}
                     onCancel={() => setIsModalVisible(false)}
                     footer={null}
                 >
@@ -374,7 +339,7 @@ const HangmanGame = ({ isModalVisible, setIsModalVisible, player1Id, player2Id, 
                             type="primary"
                             style = {{ fontSize: '1rem', marginTop: 10}}
                             onClick={() => startNewGame(question)}
-                            disabled={!question} // Disable if the question is empty
+                            disabled={!question}
                         >
                             Vraag instellen
                         </Button>
@@ -392,7 +357,7 @@ const HangmanGame = ({ isModalVisible, setIsModalVisible, player1Id, player2Id, 
                             </Tooltip>
                         </>
                     }
-                    open={step === 2} // Modal visibility controlled by state
+                    open={step === 2}
                     onCancel={() => setIsModalVisible(false)}
                     footer={null}
                 >
@@ -402,7 +367,6 @@ const HangmanGame = ({ isModalVisible, setIsModalVisible, player1Id, player2Id, 
                         value={answer}
                         onChange={(e) => {
                             const input = e.target.value;
-                            // Validate input: no spaces allowed
                             if (/^[a-zA-Z]*$/.test(input)) {
                                 setAnswer(input);
                             }
@@ -425,12 +389,12 @@ const HangmanGame = ({ isModalVisible, setIsModalVisible, player1Id, player2Id, 
             {step === 2 && isSender && (
                 <Modal
                     title={`Wachtende op het antwoord van de ander`}
-                    open={step === 2} // Modal visibility controlled by state
+                    open={step === 2}
                     onCancel={handleCancel}
                     footer={null}
                 >
                     <div style={{textAlign: 'center', marginTop: 20}}>
-                        <Spin size="large"/> {/* You can adjust the size if needed */}
+                        <Spin size="large"/>
                     </div>
                 </Modal>
             )}
@@ -482,12 +446,12 @@ const HangmanGame = ({ isModalVisible, setIsModalVisible, player1Id, player2Id, 
             {step === 3 && !isSender && (
                 <Modal
                     title={`De andere persoon is jouw antwoord aan het zoeken`}
-                    open={step === 3} // Modal visibility controlled by state
+                    open={step === 3}
                     onCancel={handleCancel}
                     footer={null}
                 >
                     <div style={{textAlign: 'center', marginTop: 20}}>
-                        <Spin size="large"/> {/* You can adjust the size if needed */}
+                        <Spin size="large"/>
                     </div>
                 </Modal>
             )}

@@ -37,7 +37,6 @@ const useFetchProfileData = (actCode) => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // Fetch user data
                 const { data: userData, error: userError } = await supabase
                     .from('User')
                     .select('id, name, birthdate, profile_picture, caretaker, access_level')
@@ -50,8 +49,6 @@ const useFetchProfileData = (actCode) => {
                     const user = userData[0];
                     user.caretaker = Math.floor(user.id / 10000);
 
-
-                    // Fetch user information
                     const { data: userInfoData, error: userInfoError } = await supabase
                         .from('User information')
                         .select('theme, sexuality')
@@ -96,7 +93,6 @@ const useFetchProfileData = (actCode) => {
                         user.caretaker = {id: caretaker.id, name: caretaker.name, profilePicture: caretaker.profile_picture, accessLevel: user.access_level}
                     }
 
-                    // Set the user profile data with the theme
                     setProfileData({
                        ...user,
                         theme: [parsedTheme, isDarkMode]
@@ -151,7 +147,7 @@ const ProfileCard = () => {
 
         if (error) throw error;
 
-        if (data.length > 0) updateTrophyStatus(1, {earned: true});
+        if (data.length > 1) updateTrophyStatus(1, {earned: true});
     }
 
     const checkInterestsTrophy = async (userId) => {
@@ -164,12 +160,10 @@ const ProfileCard = () => {
 
         const interestsCount = data.length;
 
-        // Update trophy status with the current count
         if (interestsCount > 0) {
             updateTrophyStatus(3, { count: interestsCount }); // Update count only
         }
 
-        // If count reaches 3 or more, mark the trophy as earned
         if (interestsCount >= 3) {
             updateTrophyStatus(3, { earned: true, count: interestsCount});
         }
@@ -183,7 +177,7 @@ const ProfileCard = () => {
 
         if (error) throw error;
 
-        if (data.length > 1) updateTrophyStatus(4, {earned: true}); // Added Extra Pictures
+        if (data.length > 1) updateTrophyStatus(4, {earned: true});
     };
 
     const checkProfilePictureTrophy = async (userId) => {
@@ -195,7 +189,7 @@ const ProfileCard = () => {
 
         if (error) throw error;
 
-        if (data.profile_picture) updateTrophyStatus(5, {earned:true}); // Profile Picture Added
+        if (data.profile_picture) updateTrophyStatus(5, {earned:true});
     };
 
     const checkBioTrophy = async (userId) => {
@@ -207,7 +201,7 @@ const ProfileCard = () => {
 
         if (error) throw error;
 
-        if (data.bio) updateTrophyStatus(6, {earned:true}); // Bio Added
+        if (data.bio) updateTrophyStatus(6, {earned:true});
     };
 
     const checkHangmanWinsTrophy = async (userId) => {
@@ -261,7 +255,6 @@ const ProfileCard = () => {
         initializeNotifications();
     }, [profileData]);
 
-    // Set theme and dark mode when profileData changes
     useEffect(() => {
         if (profileData.theme) {
             try {
@@ -286,9 +279,8 @@ const ProfileCard = () => {
 
     const handleAccessLevelChange = async (caretakerId, clientId, newAccessLevel) => {
         try {
-            setPendingRequests((prev) => ({...prev, [clientId]: newAccessLevel})); // Mark as pending
+            setPendingRequests((prev) => ({...prev, [clientId]: newAccessLevel}));
 
-            // Check if a pending request already exists
             const {data: existingRequests, error: fetchError} = await supabase
                 .from('Notifications')
                 .select('id')
@@ -299,7 +291,6 @@ const ProfileCard = () => {
             if (fetchError) throw fetchError;
 
             if (existingRequests.length > 0) {
-                // If a request exists, update it
                 const {error: updateError} = await supabase
                     .from('Notifications')
                     .update({
@@ -311,7 +302,6 @@ const ProfileCard = () => {
 
                 message.success({content: "Toegangsniveau wijziging verzoek bijgewerkt!", style:{fontSize:'20px'}});
             } else {
-                // If no request exists, insert a new one
                 const {error: insertError} = await supabase
                     .from('Notifications')
                     .insert([{
@@ -330,7 +320,7 @@ const ProfileCard = () => {
 
             setPendingRequests((prev) => {
                 const updated = {...prev};
-                delete updated[clientId]; // Remove pending status on error
+                delete updated[clientId];
                 return updated;
             });
         }
@@ -344,16 +334,16 @@ const ProfileCard = () => {
             textAlign: 'center',
             margin: 0,
             fontSize: '48px',
-            transform: 'scale(1.5)', // Scale the title up
+            transform: 'scale(1.5)',
             paddingTop: '15px',
         },
     };
 
     const saveThemeData = async (theme, isDarkMode) => {
         try {
-            const themeData = [theme, isDarkMode]; // Ensure both theme and dark mode flag are saved together
+            const themeData = [theme, isDarkMode];
             await saveField(user_id, 'theme', JSON.stringify(themeData));
-            localStorage.setItem('theme', JSON.stringify(themeData)); // Save it as a stringified JSON array
+            localStorage.setItem('theme', JSON.stringify(themeData));
             if (theme !== "blauw" || isDarkMode !== false) {
                 updateTrophyStatus(7, { earned: true });
             }
@@ -425,7 +415,7 @@ const ProfileCard = () => {
                         }}
                     >
                         <Avatar
-                            src={profilePicture || 'https://example.com/photo.jpg'} // Fallback to default avatar
+                            src={profilePicture || 'https://example.com/photo.jpg'}
                             alt={name || 'No Name'}
                             style={{
                                 minWidth: '150px',
@@ -572,7 +562,6 @@ const ProfileCard = () => {
                                 className='trophy'
                                 key={trophy.id}
                                 style={{
-                                    //flex: '0 1 calc(50% - 20px)', // Two per row by default
                                     minWidth: '350px',
                                     display: 'flex',
                                     alignItems: 'center',
@@ -593,7 +582,6 @@ const ProfileCard = () => {
                                     if (trophy.earned) e.currentTarget.style.transform = 'scale(1)';
                                 }}
                             >
-                                {/* Left Icon Section */}
                                 <div style={{marginRight: '10px', display: 'flex', alignItems: 'center'}}>
                                     <div className={trophy.earned ? 'sparkle-icon' : ''}>
                                         <TrophyOutlined
@@ -605,7 +593,6 @@ const ProfileCard = () => {
                                         />
                                     </div>
                                 </div>
-                                {/* Right Content Section */}
                                 <div>
                                     <h4
                                         style={{

@@ -20,7 +20,6 @@ const fetchNotification = async ( userId ) => {
         if (notificationData && notificationData.length > 0) {
             const notification = notificationData[0]
 
-            // Fetch the caretaker (requester) name for each notification
             const {data: caretakerData, error: notificationError } = await supabase
                 .from('Caretaker')
                 .select('name')
@@ -38,7 +37,7 @@ const fetchNotification = async ( userId ) => {
 
             return{
                 ...notification,
-                requesterName: caretakerData?.[0]?.name || 'Onbekend', // Default to 'Unknown' if not found
+                requesterName: caretakerData?.[0]?.name || 'Onbekend',
                 currentAccessLevel: accessLevelUser?.access_level
             };
         } else{
@@ -53,7 +52,7 @@ const NotificationModal = () => {
     const [isVisible, setIsVisible] = useState(false);
     const [notification, setNotification] = useState(null);
 
-    const userId = localStorage.getItem('user_id') || null; // Assuming user_id is stored in localStorage
+    const userId = localStorage.getItem('user_id') || null;
 
     useEffect(() => {
         const loadNotification = async () => {
@@ -88,11 +87,11 @@ const NotificationModal = () => {
         <Modal
             title="Belangrijke melding"
             open={isVisible}
-            onCancel={() => setIsVisible(false)} // Close modal on cancel
-            footer={null} // Remove default footer
-            closable={false} // Prevent close button
-            maskClosable={false} // Prevent clicking outside to close
-            destroyOnClose={false} // Keep modal in DOM when closed
+            onCancel={() => setIsVisible(false)}
+            footer={null}
+            closable={false}
+            maskClosable={false}
+            destroyOnClose={false}
         >
             {notification ? (
                 <div>
@@ -127,7 +126,7 @@ const NotificationModal = () => {
                     </div>
                 </div>
             ) : (
-                <p>Geen nieuwe meldingen</p> // Display message if no notifications
+                <p>Geen nieuwe meldingen</p>
             )}
         </Modal>
     );

@@ -24,12 +24,9 @@ const ClientDetailsModal = ({ visible, onClose, clientData }) => {
             token: 'fake-session-token',
             user: { email },
         };
-
-        // Save user session to localStorage
         localStorage.setItem('sessionToken', LoginResponse.token);
         localStorage.setItem('userEmail', LoginResponse.user.email);
 
-        // Call the storeUserSession helper function
         storeUserSession(clientId, 'user', setIsTransitioning, navigate);
     };
 

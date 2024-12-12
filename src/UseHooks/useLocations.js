@@ -14,8 +14,8 @@ const useLocations = (searchTerm = "") => {
                 const { data, error } = await supabase
                     .from("Location")
                     .select("id, Gemeente, Postcode")
-                    .ilike("Gemeente", `%${searchTerm}%`) // Match search term
-                    .limit(10); // Limit results for performance
+                    .ilike("Gemeente", `%${searchTerm}%`)
+                    .limit(10);
 
                 if (error) {
                     console.error("Error fetching locations:", error.message);
@@ -28,7 +28,7 @@ const useLocations = (searchTerm = "") => {
         };
 
         fetchLocations();
-    }, [searchTerm]); // Fetch locations whenever searchTerm changes
+    }, [searchTerm]);
 
     return { locations };
 };

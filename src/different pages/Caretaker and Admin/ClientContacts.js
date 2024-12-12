@@ -73,9 +73,9 @@ const ContactsOverview = ({ id: userID , conversations: conversations}) => {
     useEffect(() => {
         const calculatePageSize = () => {
             const screenHeight = window.innerHeight;
-            const rowHeight = 130; // Approximate row height
-            const headerHeight = 300; // Approximate header and padding
-            const footerHeight = 30; // Approximate footer height
+            const rowHeight = 130;
+            const headerHeight = 300;
+            const footerHeight = 30;
             const availableHeight = screenHeight - headerHeight - footerHeight;
 
             return Math.max(1, Math.floor(availableHeight / rowHeight));
@@ -175,7 +175,6 @@ const ContactsOverview = ({ id: userID , conversations: conversations}) => {
                     style={{ marginTop: "20px", cursor: conversations ? "pointer" : "default" }}
                     onRow={conversations ? (record) => ({
                         onClick: (event) => {
-                            // Prevent clicks on select and buttons from triggering row click
                             if (!event.target.closest(".prevent-row-click")) {
                                 handleClientClick(record);
                             }
@@ -186,7 +185,6 @@ const ContactsOverview = ({ id: userID , conversations: conversations}) => {
             ) : (
                 <p>Geen contacten gevonden</p>
             ) }
-            {/* Modal to display caretaker details */}
             <Modal
                 title={`Contact gegevens begeleiding van ${clientName}`}
                 open={isModalVisible}

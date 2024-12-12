@@ -145,39 +145,31 @@ const ClientOverview = () => {
     useEffect(() => {
         const fetchNotifications = async () => {
             try {
-                // Fetch notifications
                 const { data: notificationData, error: notificationError } = await supabase
                     .from('Notifications')
-                    .select('*') // Fetch notifications
+                    .select('*')
                     .eq('recipient_id', caretaker_id || null);
 
                 if (notificationError) throw notificationError;
 
-                // If there are notifications, fetch the related caretaker data
                 if (notificationData.length > 0) {
-                    // Loop over the notifications to get the caretaker's name
                     const updatedNotifications = await Promise.all(notificationData.map(async (notification) => {
-                        // Fetch the caretaker data based on the request_id in the notification
                         const { data: clientData, error: clientError } = await supabase
                             .from('User')
                             .select('name, access_level')
                             .eq('id', notification.requester_id)
-                            .single(); // Only one result
+                            .single();
 
                         if (clientError) throw clientError;
 
-                        // Add the caretaker name to the notification object
                         return {
                             ...notification,
                             requesterName: clientData?.name || 'Onbekend',
-                            currentAccessLevel: clientData?.access_level// Default to 'Unknown Caretaker' if not found
+                            currentAccessLevel: clientData?.access_level
                         };
                     }));
-                    // Set the notifications state with updated data
                     setNotifications(updatedNotifications);
                 }
-
-                // Set unread count based on notifications
                 setUnreadCount(notificationData.filter((n) => !n.read).length);
 
             } catch (error) {
@@ -186,7 +178,7 @@ const ClientOverview = () => {
         };
 
         fetchNotifications();
-    }, [profileData]); // Re-run when profileData changes
+    }, [profileData]);
 
 
     useEffect(() => {
@@ -194,7 +186,7 @@ const ClientOverview = () => {
 
         const initialAccessLevels = clients.reduce((acc, client) => {
             const [profilePicture, name, accessLevel, id] = client;
-            acc[id] = accessLevel; // Map client ID to their access level
+            acc[id] = accessLevel;
             return acc;
         }, {});
         setAccessLevels(initialAccessLevels);
@@ -203,9 +195,9 @@ const ClientOverview = () => {
     useEffect(() => {
         const calculatePageSize = () => {
             const screenHeight = window.innerHeight;
-            const rowHeight = 130; // Approximate row height
-            const headerHeight = 160; // Approximate header and padding
-            const footerHeight = 100; // Approximate footer height
+            const rowHeight = 130;
+            const headerHeight = 160;
+            const footerHeight = 100;
             const availableHeight = screenHeight - headerHeight - footerHeight;
 
             return Math.max(1, Math.floor(availableHeight / rowHeight));
@@ -367,10 +359,9 @@ const ClientOverview = () => {
             if (action === 'accept'){
                 const requestedAccessLevel = notification.details?.requested_access_level || "Onbekend";
                 const userId = notification.requester_id;
-                // should change the access level on the corresponding select element
                 setAccessLevels((prev) => ({
                     ...prev,
-                    [userId]: requestedAccessLevel, // Update the level for this user
+                    [userId]: requestedAccessLevel,
                 }));
             }
         }
@@ -391,7 +382,7 @@ const ClientOverview = () => {
 
     const handleAccessLevelChange = async (caretakerId, clientId, newAccessLevel) => {
         try {
-            setPendingRequests((prev) => ({ ...prev, [clientId]: newAccessLevel })); // Mark as pending
+            setPendingRequests((prev) => ({ ...prev, [clientId]: newAccessLevel }));
 
             const { error } = await supabase
                 .from('Notifications')
@@ -412,7 +403,7 @@ const ClientOverview = () => {
 
             setPendingRequests((prev) => {
                 const updated = { ...prev };
-                delete updated[clientId]; // Remove pending status on error
+                delete updated[clientId];
                 return updated;
             });
         }
@@ -535,12 +526,12 @@ const ClientOverview = () => {
                             label: caretaker.name,
                         }))}
                         style={{ width: "100%", maxWidth: "400px" }}
-                        className="prevent-row-click" // Prevent row click
+                        className="prevent-row-click"
                     />
                     <Button
                         type="default"
                         onClick={() => handleDelete(record.id)}
-                        className="prevent-row-click" // Prevent row click
+                        className="prevent-row-click"
                         style={{
                             fontSize: "1rem",
                             width: "100%",
@@ -629,7 +620,6 @@ const ClientOverview = () => {
 
                         <ButterflyIcon color={themeColors.primary3} />
 
-                        {/* Notification Button */}
                         <div
                             style={{
                                 position: "absolute",
@@ -668,7 +658,6 @@ const ClientOverview = () => {
                                 }}
                                 onRow={(record) => ({
                                     onClick: (event) => {
-                                        // Prevent clicks on select and buttons from triggering row click
                                         if (!event.target.closest(".prevent-row-click")) {
                                             handleClientClick(record);
                                         }
@@ -680,7 +669,6 @@ const ClientOverview = () => {
                             <p>Cliënten laden...</p>
                         )}
 
-                        {/* Render the modal */}
                         {selectedClient && (
                             <ClientDetailsModal
                                 visible={isModalVisible}

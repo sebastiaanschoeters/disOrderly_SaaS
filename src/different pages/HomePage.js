@@ -1,4 +1,4 @@
-import 'antd/dist/reset.css'; // Import Ant Design styles
+import 'antd/dist/reset.css';
 import '../CSS/AntDesignOverride.css';
 import { antThemeTokens, ButterflyIcon, themes } from '../Extra components/themes';
 import { Button, ConfigProvider, Avatar, Badge } from 'antd';
@@ -51,7 +51,7 @@ const HomePage = () => {
                 .eq('receiver_id', 1)
                 .single();
 
-            if (fetchError && fetchError.code !== 'PGRST116') { // Ignore "No rows found" error
+            if (fetchError && fetchError.code !== 'PGRST116') {
                 console.error("Error fetching chatroom:", fetchError);
                 return;
             }
@@ -59,7 +59,6 @@ const HomePage = () => {
             if (dataChatroom) {
                 setChatroomId(dataChatroom.id);
             } else {
-                // Insert new chatroom if it doesn't exist
                 const { data: newChatroom, error: insertError } = await supabase
                     .from('Chatroom')
                     .insert({
@@ -139,7 +138,6 @@ const HomePage = () => {
                     zIndex: '0',
                 }}
             >
-                {/* Always show the NotificationModal globally for logged-in users */}
                 <NotificationModal />
                 <ButterflyIcon color={themeColors.primary3} />
 
@@ -317,7 +315,6 @@ const HomePage = () => {
                 </Button>
             </div>
 
-            {/* External CSS with Media Query */}
             <style>{`
                 .primary-button {
                     width: 240px;

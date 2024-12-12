@@ -108,7 +108,7 @@ const HomePage = () => {
                         }}
                         onClick={() => navigate('/search')}
                     >
-                        <h2 style={{ margin: '0', minWidth: '20px', whiteSpace: 'nowrap' }}>Matcher</h2>
+                        <h2 style={{ margin: '0', minWidth: '20px', whiteSpace: 'normal', lineHeight: '1.1', }}>Mensen ontdekken</h2>
                     </Button>
                     <Badge
                         count={newRequestCount} // Dynamic count

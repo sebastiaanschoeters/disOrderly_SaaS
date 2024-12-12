@@ -616,12 +616,11 @@ const ProfileCard = () => {
 
                     <Divider/>
 
-                    <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '5%'}}>
-                        <strong style={{width: '15%', minWidth: '100px'}}>
-                            <BookOutlined/> Biografie:
+                    <p style={{width: '100%'}}>
+                        <strong style={{display: 'block', marginBottom: '10px'}}>
+                            <BookOutlined/> Biografie
                         </strong>
-
-                        <div style={{position: 'relative', flex: 1, minWidth: '200px'}}>
+                        <div style={{position: 'relative', width: '100%', minWidth: '200px'}}>
                             <TextArea
                                 style={{width: '100%', paddingBottom: '20px'}}
                                 rows={3}
@@ -645,13 +644,16 @@ const ProfileCard = () => {
                         </div>
                     </p>
 
+
                     <Divider/>
 
-                    <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '5%'}}>
-                        <strong style={{width: '15%', minWidth: '100px'}}><EnvironmentOutlined/> Locatie: </strong>
+                    <p style={{width: '100%'}}>
+                        <strong style={{display: 'block', marginBottom: '10px'}}>
+                            <EnvironmentOutlined/> Locatie
+                        </strong>
                         <Select
                             showSearch
-                            style={{flex: 1, minWidth: '200px'}}
+                            style={{width: '100%', minWidth: '200px'}}
                             placeholder="Zoek en selecteer uw locatie"
                             value={location}
                             onChange={handleLocationChange}
@@ -663,28 +665,32 @@ const ProfileCard = () => {
                             }))}
                             notFoundContent={
                                 <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
-                                <span role="img" aria-label="no data"
-                                      style={{fontSize: '2rem'}}><EnvironmentOutlined/></span>
-                                <span>Locatie niet gevonden</span>
-                            </div>
-                        }
-                        dropdownRender={(menu) => (
-                            <div
-                                onWheel={(e) => e.stopPropagation()} // Prevent scroll propagation
-                                style={{ maxHeight: 300 }}
-                            >
-                                {menu}
-                            </div>
-                        )}
-                    />
-                </p>
+                <span role="img" aria-label="no data" style={{fontSize: '2rem'}}>
+                    <EnvironmentOutlined/>
+                </span>
+                                    <span>Locatie niet gevonden</span>
+                                </div>
+                            }
+                            dropdownRender={(menu) => (
+                                <div
+                                    onWheel={(e) => e.stopPropagation()} // Prevent scroll propagation
+                                    style={{maxHeight: 300}}
+                                >
+                                    {menu}
+                                </div>
+                            )}
+                        />
+                    </p>
+
 
                     <Divider/>
 
-                    <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '5%'}}>
-                        <strong style={{width: '15%', minWidth: '100px'}}><UserOutlined/> Geslacht: </strong>
+                    <p style={{width: '100%'}}>
+                        <strong style={{display: 'block', marginBottom: '10px'}}>
+                            <UserOutlined/> Geslacht
+                        </strong>
                         <Select
-                            style={{flex: 1, minWidth: '200px'}}
+                            style={{width: '100%', minWidth: '200px'}}
                             placeholder="Selecteer geslacht"
                             value={gender}
                             onChange={handleGenderChange}
@@ -696,15 +702,18 @@ const ProfileCard = () => {
                         />
                     </p>
 
+
                     <Divider/>
 
-                    <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '5%'}}>
-                        <strong style={{width: '15%', minWidth: '100px'}}><StarOutlined/> Interesses:</strong>
+                    <p style={{width: '100%'}}>
+                        <strong style={{display: 'block', marginBottom: '10px'}}>
+                            <StarOutlined/> Interesses
+                        </strong>
                         <Select
                             mode="multiple"
                             allowClear
                             placeholder="Selecteer interesses of voeg toe"
-                            style={{flex: 1, minWidth: '200px'}}
+                            style={{width: '100%', minWidth: '200px'}}
                             options={interestOptions}
                             value={selectedInterests}
                             onChange={handleInterestSelectChange}
@@ -716,33 +725,42 @@ const ProfileCard = () => {
                             }}
                             notFoundContent={
                                 <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
-                                <span role="img" aria-label="no data"
-                                      style={{fontSize: '2rem'}}><PlusCircleOutlined/></span>
-                                <span>Druk op enter om deze nieuwe interesse toe te voegen</span>
-                            </div>
-                        }
-                        dropdownRender={(menu) => (
-                            <div
-                                onWheel={(e) => e.stopPropagation()} // Prevent scroll propagation
-                                style={{ maxHeight: 300 }}
-                            >
-                                {menu}
-                            </div>
-                        )}
-                    />
-                </p>
+                <span
+                    role="img"
+                    aria-label="no data"
+                    style={{fontSize: '2rem'}}
+                >
+                    <PlusCircleOutlined/>
+                </span>
+                                    <span>Druk op enter om deze nieuwe interesse toe te voegen</span>
+                                </div>
+                            }
+                            dropdownRender={(menu) => (
+                                <div
+                                    onWheel={(e) => e.stopPropagation()} // Prevent scroll propagation
+                                    style={{maxHeight: 300}}
+                                >
+                                    {menu}
+                                </div>
+                            )}
+                        />
+                    </p>
+
 
                     <Divider/>
 
-                    <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '5%'}}>
-                        <strong style={{width: '15%', minWidth: '100px'}}><HeartOutlined/> Ik zoek naar:</strong>
-                        <div style={{
-                            flex: 1,
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: '10px',
-                            minWidth: '200px'
-                        }}>
+                    <p style={{width: '100%'}}>
+                        <strong style={{display: 'block', marginBottom: '10px'}}>
+                            <HeartOutlined/> Ik zoek naar
+                        </strong>
+                        <div
+                            style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '10px',
+                                minWidth: '200px'
+                            }}
+                        >
                             <Checkbox
                                 checked={lookingForArray.includes('Vrienden')}
                                 onChange={() => handleCheckboxChange('Vrienden')}
@@ -767,12 +785,14 @@ const ProfileCard = () => {
 
                     <Divider/>
 
-                    <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '5%'}}>
-                        <strong style={{width: '15%', minWidth: '100px'}}><HomeOutlined/> Woonsituatie:</strong>
+                    <p style={{width: '100%'}}>
+                        <strong style={{display: 'block', marginBottom: '10px'}}>
+                            <HomeOutlined/> Woonsituatie
+                        </strong>
                         <Select
                             placeholder="Selecteer jouw woonsituatie"
                             value={livingSituation}
-                            style={{flex: 1, minWidth: '200px'}}
+                            style={{width: '100%', minWidth: '200px'}}
                             onChange={handleLivingChange}
                             options={[
                                 {value: 'Woont alleen', label: 'Woont alleen'},
@@ -785,14 +805,16 @@ const ProfileCard = () => {
                         />
                     </p>
 
+
                     <Divider/>
 
-                    <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '5%'}}>
-                        <strong style={{width: '15%', minWidth: '100px'}}><CarOutlined/> Kan zich zelfstanding
-                            verplaatsen:</strong>
+                    <p style={{width: '100%'}}>
+                        <strong style={{display: 'block', marginBottom: '10px'}}>
+                            <CarOutlined/> Kan zich zelfstanding verplaatsen
+                        </strong>
                         <Select
                             value={mobility}
-                            style={{flex: 1, minWidth: '200px'}}
+                            style={{width: '100%', minWidth: '200px'}}
                             onChange={handleMobilityChange}
                             options={[
                                 {value: 'True', label: 'Ja'},
@@ -801,12 +823,13 @@ const ProfileCard = () => {
                         />
                     </p>
 
+
                     <Divider/>
 
                     <div style={{marginTop: '20px', marginBottom: '20px'}}>
                         <p>
                             <strong style={{width: '40%', minWidth: '100px', flexShrink: 0}}>
-                                <PictureOutlined/> Meer fotos van jezelf tonen:
+                                <PictureOutlined/> Meer fotos van jezelf tonen
                             </strong>
                         </p>
                         <Carousel

@@ -69,7 +69,8 @@ const OrganisationDashboard = () => {
             .from('Activation')
             .select('*', { count : 'exact'})
             .eq('organisation', organisationId)
-            .eq('type', 'user');
+            .eq('type', 'user')
+            .eq('usable', 'false');
         setCurrentUsers(data.length);
     }
 

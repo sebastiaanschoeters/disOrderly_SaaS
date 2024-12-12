@@ -183,75 +183,83 @@ const ProfileCard = () => {
                     }}
                 >
 
-                <HomeButton color={themeColors.primary7} />
-                <ButterflyIcon color={themeColors.primary3}/>
+                    <HomeButton color={themeColors.primary7}/>
+                    <ButterflyIcon color={themeColors.primary3}/>
 
-                <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', paddingBottom: '20px', marginTop: '20px'}}>
-                    <div style={{display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '10px'}}>
-                        <Avatar
-                            src={profilePicture}
-                            alt={name}
-                            style={{
-                                minWidth: '200px',
-                                minHeight: '200px',
-                                borderRadius: '50%'
-                            }}
-                        />
-                        <div>
-                            <h2 style={{margin: '0', textAlign: 'center'}}>
-                                {name || 'Naam'}, {profileData.organization || 'Organizatie'}
-                            </h2>
-                            <div style={{marginTop: '10px', marginBottom: '20px'}}>
-                                <Upload showUploadList={false} beforeUpload={() => false}
-                                        onChange={handleProfilePictureUpload}>
-                                    <Button icon={<UploadOutlined/>} loading={uploading}>Kies nieuwe
-                                        profielfoto</Button>
-                                </Upload>
+                    <div style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        paddingBottom: '20px',
+                        marginTop: '20px'
+                    }}>
+                        <div style={{display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '10px'}}>
+                            <Avatar
+                                src={profilePicture}
+                                alt={name}
+                                style={{
+                                    minWidth: '200px',
+                                    minHeight: '200px',
+                                    borderRadius: '50%'
+                                }}
+                            />
+                            <div>
+                                <h2 style={{margin: '0', textAlign: 'center'}}>
+                                    {name || 'Naam'}, {profileData.organization || 'Organizatie'}
+                                </h2>
+                                <div style={{marginTop: '10px', marginBottom: '20px'}}>
+                                    <Upload showUploadList={false} beforeUpload={() => false}
+                                            onChange={handleProfilePictureUpload}>
+                                        <Button icon={<UploadOutlined/>} loading={uploading}>Kies nieuwe
+                                            profielfoto</Button>
+                                    </Upload>
+                                </div>
                             </div>
                         </div>
                     </div>
+
+                    <Divider/>
+
+                    <ThemeSelector
+                        theme={theme}
+                        isDarkMode={isDarkMode}
+                        handleThemeChange={handleThemeChange}
+                        handleThemeToggle={handleThemeToggle}
+                    />
+
+                    <Divider/>
+
+                    <p style={{width: '100%'}}>
+                        <strong style={{display: 'block', marginBottom: '10px'}}>
+                            <PhoneOutlined/> Telefoon nummer:
+                        </strong>
+                        <TextArea
+                            style={{width: '100%', minWidth: '200px'}}
+                            placeholder="Geef je telefoon nummer in"
+                            value={phoneNumber}
+                            onChange={handlePhoneNumberChange}
+                            onBlur={handlePhoneNumberSave}
+                            maxLength={11}
+                        />
+                    </p>
+
+
+                    <Divider/>
+
+                    <p style={{width: '100%'}}>
+                        <strong style={{display: 'block', marginBottom: '10px'}}>
+                            <MailOutlined/> E-mail:
+                        </strong>
+                        <TextArea
+                            style={{width: '100%', minWidth: '200px'}}
+                            placeholder="Geef je e-mail adres in"
+                            value={email}
+                            onChange={handleEmailChange}
+                        />
+                    </p>
+
+
                 </div>
-
-                <Divider/>
-
-                <ThemeSelector
-                    theme={theme}
-                    isDarkMode={isDarkMode}
-                    handleThemeChange={handleThemeChange}
-                    handleThemeToggle={handleThemeToggle}
-                />
-
-                <Divider/>
-
-                <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
-                    <strong style={{width: '15%', minWidth: '100px'}}>
-                        <PhoneOutlined/> Telefoon nummer:
-                    </strong>
-                    <TextArea
-                        style={{flex: 1, minWidth: '200px'}}
-                        placeholder="Geef je telefoon nummer in"
-                        value={phoneNumber}
-                        onChange={handlePhoneNumberChange}
-                        onBlur={handlePhoneNumberSave}
-                        maxLength={11}
-                    />
-                </p>
-
-                <Divider/>
-
-                <p style={{display: 'flex', alignItems: 'center', width: '100%', gap: '2%'}}>
-                    <strong style={{width: '15%', minWidth: '100px'}}>
-                        <MailOutlined/> E-mail:
-                    </strong>
-                    <TextArea
-                        style={{minWidth: '200px', flex: 1}}
-                        placeholder="Geef je e-mail adres in"
-                        value={email}
-                        onChange={handleEmailChange}
-                    />
-                </p>
-
-            </div>
             </div>
         </ConfigProvider>
     );

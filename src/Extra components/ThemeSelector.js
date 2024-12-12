@@ -12,21 +12,21 @@ const ThemeSelector = ({ theme, isDarkMode, handleThemeChange, handleThemeToggle
         }));
 
     return (
-        <p style={{display: 'flex', alignItems: 'center', gap: '2%'}}>
-            <strong style={{width: '15%', minWidth: '100px'}}>
-                <BgColorsOutlined/> Kies een kleur:
+        <p style={{width: '100%'}}>
+            <strong style={{display: 'block', marginBottom: '10px'}}>
+                <BgColorsOutlined/> Kies een kleur
             </strong>
-            <div style={{display: 'flex', flexGrow: 1, alignItems: 'center'}}>
+            <div style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
                 <Select
-                    style={{flexGrow: 1, marginRight: '10px'}}
+                    style={{flexGrow: 1}}
                     placeholder="Selecteer een kleur"
-                    options={themeOptions} // Use the dynamically generated options
-                    value={theme} // Selected theme value
-                    onChange={handleThemeChange} // Trigger theme change
+                    options={themeOptions}
+                    value={theme} $
+                    onChange={handleThemeChange}
                     dropdownRender={(menu) => (
                         <div
                             onWheel={(e) => e.stopPropagation()} // Prevent scroll propagation
-                            style={{ maxHeight: 300 }} // Only constrain dropdown height, no overflow here
+                            style={{maxHeight: 300}} // Only constrain dropdown height, no overflow here
                         >
                             {menu}
                         </div>
@@ -41,6 +41,7 @@ const ThemeSelector = ({ theme, isDarkMode, handleThemeChange, handleThemeToggle
                 />
             </div>
         </p>
+
     );
 };
 

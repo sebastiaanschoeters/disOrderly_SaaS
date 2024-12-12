@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {Tag, Avatar, Button,Input, Modal, Divider, ConfigProvider, Spin, Carousel} from 'antd';
 import { MessageOutlined, EnvironmentOutlined, UserOutlined, HeartOutlined, StarOutlined, HomeOutlined, CarOutlined, LeftOutlined, RightOutlined } from '@ant-design/icons';
 import { createClient } from "@supabase/supabase-js";
+import { useNavigate } from 'react-router-dom';
 import 'antd/dist/reset.css';
 import '../../CSS/AntDesignOverride.css';
 import { antThemeTokens, themes } from '../../Extra components/themes';
@@ -131,6 +132,8 @@ const ProfileCard = (profileToShow) => {
     const [newMessage, setNewMessage] = useState('');
     const [isChatroomExistent, setChatroomExistent] = useState(false); // State to track chatroom existence
     const localTime = new Date();
+    const userId = localStorage.getItem('user_id');
+    const navigate = useNavigate();
 
     const imageUrls = pictures
         .filter(picture => picture.picture_url)
@@ -190,6 +193,9 @@ const ProfileCard = (profileToShow) => {
 
     const handleMessage = async () => {
         setIsModalVisible(true);
+    };
+    const navigateToChatOverview = async () => {
+        navigate(`/chatoverview`);
     };
 
     const handleSendMessage = async () => {
@@ -319,8 +325,13 @@ const ProfileCard = (profileToShow) => {
                             minHeight: '60px', // Increase the minimum height to allow room for wrapped text
                             lineHeight: '1', // Adjust line height for better spacing between lines
                         }}
-                        disabled={isChatroomExistent}
-                        onClick={handleMessage}
+                        onClick={() => {
+                            if (!isChatroomExistent) {
+                                handleMessage();
+                            } else {
+                                navigateToChatOverview();
+                            }
+                        }}
                     >
                         {isChatroomExistent ? 'Ga verder bij chats' : `Stuur verzoek naar ${profileData?.name || 'de gebruiker'}`}
                     </Button>

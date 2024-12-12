@@ -233,6 +233,7 @@ const LoginPage = () => {
                             ]}
                         >
                             <Input
+                                name="email"
                                 onBlur={(e) => {
                                     const emailValue = e.target.value;
                                     if(emailValue) {
@@ -251,6 +252,7 @@ const LoginPage = () => {
                             ]}
                         >
                             <Input.Password
+                                name="password"
                                 onChange={(e) => {
                                     const emailField = document.querySelector("#loginForm_email");
                                     if(!themeToSet) {
@@ -261,6 +263,7 @@ const LoginPage = () => {
                         </Form.Item>
                         <Form.Item>
                             <Button
+                                name ="submit"
                                 type="primary"
                                 htmlType="submit"
                                 style={{ width: '100%' }}

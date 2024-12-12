@@ -27,6 +27,7 @@ import {saveField} from "../../Api/Utils";
 import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
 import {requests} from "../../Utils/requests";
 import useTheme from "../../UseHooks/useTheme";
+import BreadcrumbComponent from "../../Extra components/BreadcrumbComponent";
 
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
 const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
@@ -554,28 +555,30 @@ const ProfileCard = () => {
 
     return (
         <ConfigProvider theme={{token: antThemeTokens(themeColors)}}>
-            <div style={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                position: 'relative',
-                minWidth: '100dvw',
-                minHeight: '100vh',
-                overflow: 'hidden',
-                backgroundColor: themeColors.primary2,
-                color: themeColors.primary10,
-                zIndex: '0'
-            }}>
+            <div
+                style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'flex-start',
+                    alignItems: 'center',
+                    position: 'relative',
+                    minWidth: '100dvw',
+                    minHeight: '100vh',
+                    overflow: 'hidden',
+                    overflowX: 'hidden',
+                    backgroundColor: themeColors.primary2,
+                    color: themeColors.primary10,
+                    boxSizing: 'border-box',
+                    zIndex: '0',
+                }}
+            >
+
+                <BreadcrumbComponent/>
                 <div
                     style={{
-                        width: '80%',
-                        boxSizing: 'border-box',
+                        width: '80%'
                     }}
                 >
-                    <div style={styles.titleButton}>
-                        <Title level={1} style={{...styles.title, fontSize: '64px'}}>Jouw profiel</Title>
-                    </div>
-                    <HomeButtonUser color={themeColors.primary7}/>
                     <ButterflyIcon color={themeColors.primary3}/>
 
                     <div style={{

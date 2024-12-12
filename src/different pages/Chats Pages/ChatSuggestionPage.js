@@ -9,6 +9,7 @@ import useTheme from "../../UseHooks/useTheme";
 import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
 import ProfileDetailsModal from "../Profile Pages/ProfileDetailsModal";
 import {handleModalProfileClose, handleProfileClick} from "../../Api/Utils";
+import BreadcrumbComponent from "../../Extra components/BreadcrumbComponent";
 
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
 const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
@@ -221,7 +222,7 @@ const ChatSuggestionPage = () => {
                     zIndex: '0'
                 }}
             >
-                <HomeButtonUser color={themeColors.primary7}/>
+                <BreadcrumbComponent />
                 <ButterflyIcon color={themeColors.primary3}/>
 
                 <div style={styles.header} onClick={() => handleProfileClick(otherUserId)}>

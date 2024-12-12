@@ -7,7 +7,7 @@ import moment from 'moment';
 import HomeButtonUser from "../../Extra components/HomeButtonUser";
 import useTheme from "../../UseHooks/useTheme";
 import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
-import '../../CSS/ChatOverviewPage.css';
+import BreadcrumbComponent from "../../Extra components/BreadcrumbComponent";
 
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
 const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
@@ -174,12 +174,9 @@ const ChatOverviewPage = () => {
             <div
                 style={styles.chatContainer}
             >
-                <HomeButtonUser color={themeColors.primary7} />
+                <BreadcrumbComponent />
                 <ButterflyIcon color={themeColors.primary3} />
 
-                <div style={styles.titleButton}>
-                    <Title level={2} style={styles.title}>Chats</Title>
-                </div>
                 <Input.Search
                     placeholder="Zoek in chats..."
                     style={styles.searchBar}

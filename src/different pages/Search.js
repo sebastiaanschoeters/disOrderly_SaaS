@@ -11,7 +11,8 @@ import useTheme from "../UseHooks/useTheme";
 import useThemeOnCSS from "../UseHooks/useThemeOnCSS";
 import {calculateAge, calculateDistance} from "../Utils/calculations";
 import useFetchProfileData from "../UseHooks/useFetchProfileData";
-import {assembleProfileData, handleModalProfileClose, handleProfileClick} from "../Api/Utils"; // Import useNavigate for routing
+import {assembleProfileData, handleModalProfileClose, handleProfileClick} from "../Api/Utils";
+import BreadcrumbComponent from "../Extra components/BreadcrumbComponent"; // Import useNavigate for routing
 
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
 const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
@@ -317,12 +318,8 @@ const Search = () => {
                     zIndex: '0'
                 }}
             >
-                <HomeButtonUser color={themeColors.primary7}/>
+                <BreadcrumbComponent />
                 <ButterflyIcon color={themeColors.primary3}/>
-
-                <Title level={2} style={{color: themeColors.primary10, marginBottom: '2vw'}}>
-                    Mensen vinden
-                </Title>
 
                 {/* Flex container for the search bar, filter button, and user list */}
                 <div

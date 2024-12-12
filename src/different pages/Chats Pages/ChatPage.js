@@ -1,10 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import {Avatar, Input, Button, ConfigProvider, Card, message} from 'antd';
-import { useNavigate, useLocation } from 'react-router-dom';
+import {Avatar, Input, Button, ConfigProvider, Card, message, Breadcrumb} from 'antd';
+import {useNavigate, useLocation, Link} from 'react-router-dom';
 import {ArrowDownOutlined, PlusOutlined, SendOutlined} from '@ant-design/icons';
 import {antThemeTokens, ButterflyIcon, ButterflyIconSmall, themes} from '../../Extra components/themes';
 import { createClient } from "@supabase/supabase-js";
 import HomeButtonUser from "../../Extra components/HomeButtonUser";
+import BreadcrumbComponent from "../../Extra components/BreadcrumbComponent";
 import HangmanGame from "./Hangman";
 import useTheme from "../../UseHooks/useTheme";
 import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
@@ -355,7 +356,7 @@ const ChatPage = () => {
                 zIndex: '0'
                 }}
             >
-                {userType !== "caretaker" && (<HomeButtonUser color={themeColors.primary7} />)}
+                {userType !== "caretaker" && (<BreadcrumbComponent />)}
 
                 <ButterflyIcon color={themeColors.primary3} />
 

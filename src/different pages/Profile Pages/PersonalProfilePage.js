@@ -19,6 +19,7 @@ import {saveField} from "../../Api/Utils";
 import ThemeSelector from "../../Extra components/ThemeSelector";
 import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
 import {fetchPendingRequestsData} from '../../Utils/requests';
+import BreadcrumbComponent from "../../Extra components/BreadcrumbComponent";
 
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
 const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
@@ -392,7 +393,9 @@ const ProfileCard = () => {
             <div
                 style={{
                     display: 'flex',
-                    justifyContent: 'center',
+                    flexDirection: 'column',
+                    justifyContent: 'flex-start',
+                    alignItems:'center',
                     position: 'relative',
                     minWidth: '100dvw',
                     minHeight: '100vh',
@@ -404,19 +407,14 @@ const ProfileCard = () => {
                     zIndex: '0',
                 }}
             >
+
+                <BreadcrumbComponent />
                 <div
                     style={{
                         width: '80%',
                     }}
                 >
-                    <HomeButtonUser color={themeColors.primary7}/>
                     <ButterflyIcon color={themeColors.primary3}/>
-
-                    <div style={styles.titleButton}>
-                        <Title level={1} style={{...styles.title, fontSize: '64px'}}>
-                            Instellingen
-                        </Title>
-                    </div>
 
                     <div
                         style={{

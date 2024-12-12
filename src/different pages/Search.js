@@ -1,6 +1,6 @@
 import 'antd/dist/reset.css'; // Import Ant Design styles
 import '../CSS/AntDesignOverride.css';
-import { ButterflyIcon, antThemeTokens, themes } from '../Extra components/themes';
+import { ButterflyIcon, antThemeTokens} from '../Extra components/themes';
 import { Avatar, ConfigProvider, Input, List, Typography, Modal, Button, Slider, Radio, Checkbox } from 'antd';
 import { FilterOutlined } from "@ant-design/icons";
 import { createClient } from "@supabase/supabase-js";
@@ -39,10 +39,10 @@ const Search = () => {
     const { Title } = Typography;
 
     const [themeName, darkModeFlag] = JSON.parse(localStorage.getItem('theme')) || ['blauw', false];
-    const { themeColors, setThemeName, setDarkModeFlag } = useTheme(themeName, darkModeFlag);
+    const { themeColors } = useTheme(themeName, darkModeFlag);
 
     const user_id = localStorage.getItem('user_id');
-    const { profileData, isLoading, error} = useFetchProfileData(user_id);
+    const { profileData} = useFetchProfileData(user_id);
 
     useThemeOnCSS(themeColors);
 
@@ -154,7 +154,7 @@ const Search = () => {
                 const userId = finalFilteredUserData[i].id;
 
                 // Fetch profile data for each user
-                const { profileData, isLoading, error } = await fetchProfileData(userId); // Assume `fetchProfileData` is a function that mimics `useFetchProfileData`
+                const { profileData, error } = await fetchProfileData(userId); // Assume `fetchProfileData` is a function that mimics `useFetchProfileData`
 
                 if (error) {
                     console.error(`Error fetching profile data for user ${userId}:`, error);

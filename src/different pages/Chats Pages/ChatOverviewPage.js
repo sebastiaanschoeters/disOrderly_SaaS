@@ -32,7 +32,8 @@ const ChatOverviewPage = () => {
             .select(`id, sender_id, receiver_id, acceptance, last_sender_id,
             senderProfile: sender_id(name, profile_picture), 
             receiverProfile: receiver_id(name, profile_picture)`)
-            .or(`sender_id.eq.${userID},receiver_id.eq.${userID}`);
+            .or(`sender_id.eq.${userID},receiver_id.eq.${userID}`)
+            .neq('receiver_id', 1);
 
         if (error) {
             console.error("Error fetching chatrooms:", error);

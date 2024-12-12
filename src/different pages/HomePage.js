@@ -116,6 +116,7 @@ const HomePage = () => {
             otherUserId: 1,
             isSender: true,
             chatroomId: chatroomId,
+            isAdmin: true,
         };
 
         navigate(`/chat`, { state: { profileData } });

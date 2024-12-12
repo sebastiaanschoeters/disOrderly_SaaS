@@ -29,7 +29,7 @@ const ChatPage = () => {
     console.log("usertype:", userType)
     const location = useLocation();
     const {profileData} = location.state || {};
-    const {name, profilePicture, chatroomId, otherUserId, user_id} = profileData || {};
+    const {name, profilePicture, chatroomId, otherUserId, isAdmin} = profileData || {};
     const navigate = useNavigate();
 
     const [messages, setMessages] = useState([]);
@@ -268,7 +268,6 @@ const ChatPage = () => {
             marginBottom: '15px',
             width: '100%',
             position: 'relative',
-            cursor: 'pointer',
         },
         avatar: {
             marginRight: '20px',
@@ -362,7 +361,9 @@ const ChatPage = () => {
 
                 <Card style={styles.card} bordered >
                     <div style={styles.chatContainer}>
-                        <div style={styles.header} onClick={() => handleProfileClick(otherUserId, setSelectedClient, setIsModalProfileVisible)}>
+                        <div style={{...styles.header,
+                            cursor: isAdmin ? 'default' : 'pointer'}}
+                            onClick={isAdmin ? null : () => handleProfileClick(otherUserId, setSelectedClient, setIsModalProfileVisible)}>
                             <Avatar
                                 src={profilePicture || 'default-avatar.png'}
                                 style={styles.avatar}
@@ -478,10 +479,14 @@ const ChatPage = () => {
                         </div>
                         {userType !== "caretaker" && (
                             <div style={styles.inputContainer}>
-                                <Button type="primary"
+                                {!isAdmin && (
+                                    <Button
+                                        type="primary"
                                         style={styles.sendButton}
                                         icon={<FontAwesomeIcon icon={faGamepad} />}
-                                        onClick={handleHangman}/>
+                                        onClick={handleHangman}
+                                    />
+                                )}
                                 <Input
                                     style={styles.input}
                                     placeholder="Type hier..."

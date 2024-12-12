@@ -1,12 +1,13 @@
-import React, { useState,useEffect } from 'react';
-import {List, Avatar, Typography, Input, ConfigProvider, Card } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { List, Avatar, Typography, Input, ConfigProvider, Card } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import {antThemeTokens, ButterflyIcon, themes} from '../../Extra components/themes';
+import { antThemeTokens, ButterflyIcon, themes } from '../../Extra components/themes';
 import { createClient } from "@supabase/supabase-js";
+import moment from 'moment';
 import HomeButtonUser from "../../Extra components/HomeButtonUser";
 import useTheme from "../../UseHooks/useTheme";
 import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
-import '../../CSS/ChatOverviewPage.css'
+import '../../CSS/ChatOverviewPage.css';
 
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
 const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
@@ -26,42 +27,84 @@ const ChatOverviewPage = () => {
     useThemeOnCSS(themeColors);
 
     const fetchChatrooms = async () => {
-        const {data, error} = await supabase
+        const { data, error } = await supabase
             .from('Chatroom')
-            .select('id,sender_id,receiver_id,acceptance,senderProfile: sender_id(name, profile_picture),receiverProfile: receiver_id(name, profile_picture)')
+            .select(`id, sender_id, receiver_id, acceptance, last_sender_id,
+            senderProfile: sender_id(name, profile_picture), 
+            receiverProfile: receiver_id(name, profile_picture)`)
             .or(`sender_id.eq.${userID},receiver_id.eq.${userID}`);
 
         if (error) {
             console.error("Error fetching chatrooms:", error);
-        } else {
-            const formattedChatrooms = data.map((chat) => {
-                const senderProfile = chat.senderProfile;
-                const receiverProfile = chat.receiverProfile;
-                const profile = chat.sender_id === userID ? receiverProfile : senderProfile;
-
-                return {
-                    ...chat,
-                    profileName: profile.name,
-                    profilePicture: profile.profile_picture
-                };
-            });
-            setChatrooms(formattedChatrooms);
+            return;
         }
+
+        const updatedChatrooms = await Promise.all(data.map(async (chat) => {
+            const { data: lastMessage, error: messageError } = await supabase
+                .from('Messages')
+                .select('message_content, created_at')
+                .eq('chatroom_id', chat.id)
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .single();
+
+            if (messageError) {
+                console.error(`Error fetching last message for chatroom ${chat.id}:`, messageError);
+                return { ...chat, last_message: '', last_message_time: null };
+            }
+
+            const lastMessageParse = (message) => {
+                if(message.startsWith("ButterflyIcon")) {
+                    const contentAfterIcon = message.slice(13).trim();
+
+                    const indexMatch = contentAfterIcon.match(/^(\d+)\s*(.*)$/); // Regex to extract number and text
+                    const title = indexMatch ? indexMatch[2] : ""; // Rest is the title
+
+                    const [mainTitle, extraContent] = title.split('!').map(part => part.trim());
+                    return mainTitle;
+
+                } else {
+                    return message;
+                }
+            }
+
+            return {
+                ...chat,
+                last_message: lastMessageParse(lastMessage?.message_content) || '',
+                last_message_time: lastMessage?.created_at || null,
+            };
+        }));
+
+        const formattedChatrooms = updatedChatrooms.map((chat) => {
+            const senderProfile = chat.senderProfile;
+            const receiverProfile = chat.receiverProfile;
+            const profile = chat.sender_id === userID ? receiverProfile : senderProfile;
+
+            return {
+                ...chat,
+                profileName: profile.name,
+                profilePicture: profile.profile_picture,
+            };
+        }).sort((a, b) => new Date(b.last_message_time) - new Date(a.last_message_time));
+        console.log(formattedChatrooms)
+
+        setChatrooms(formattedChatrooms);
     };
+
 
     useEffect(() => {
         fetchChatrooms();
     }, []);
 
     const filteredChats = chatrooms.filter((chat) => {
-        const chatName = chat.sender_id === userID
-            ? `${chat.receiverProfile.name}`
-            : `${chat.senderProfile.name}`;        return chatName.toLowerCase().includes(searchQuery.toLowerCase());
+        const chatName = chat.profileName;
+        return chatName.toLowerCase().includes(searchQuery.toLowerCase());
     });
 
     const handleSearch = (value) => {
         setSearchQuery(value);
     };
+
     const styles = {
         chatContainer: {
             padding: '20px',
@@ -97,48 +140,27 @@ const ChatOverviewPage = () => {
         },
         card: {
             width: '100%',
-            height: '75px',
+            height: '100px',
             marginBottom: '10px',
             borderRadius: '10px',
             borderWidth: '1px',
             borderColor: themeColors.primary7,
             cursor: 'pointer',
         },
-        newMessageIndicator: {
-            position: 'absolute',
-            top: '25px',
-            height: '25px',
-            right: '15px',
-            backgroundColor: themeColors.primary8,
-            color: themeColors.primary1,
-            padding: '0px 5px',
-            borderRadius: '5px',
-            fontSize: '1rem',
+        lastMessage: {
+            fontSize: '0.9rem',
+            color: themeColors.primary9,
+            marginTop: '5px',
         },
         name: {
-            fontSize: '1rem',
+            fontSize: '1.2rem',
         },
     };
-
 
     return (
         <ConfigProvider theme={{ token: antThemeTokens(themeColors) }}>
             <div
-                style={{
-                    padding: '20px',
-                    position: 'relative',
-                    minWidth: '100%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'flex-start',
-                    minHeight: '100vh',
-                    backgroundColor: themeColors.primary2,
-                    color: themeColors.primary10,
-                    width: '100%',
-                    boxSizing: 'border-box',
-                    zIndex: '0'
-                }}
+                style={styles.chatContainer}
             >
                 <HomeButtonUser color={themeColors.primary7} />
                 <ButterflyIcon color={themeColors.primary3} />
@@ -163,6 +185,7 @@ const ChatOverviewPage = () => {
                         const otherUserId = chat.sender_id === userID ? chat.receiver_id : chat.sender_id;
                         const isSender = chat.sender_id === userID;
                         return (
+
                             <Card
                                 style={styles.card}
                                 hoverable={true}
@@ -176,16 +199,40 @@ const ChatOverviewPage = () => {
                                         chatroomId: chat.id,
                                     };
                                     if (chat.acceptance === true) {
-                                        navigate(`/chat`, { state: { profileData } });
+                                        navigate('/chat', { state: { profileData } });
                                     } else {
-                                        navigate(`/chatsuggestion`, { state: { profileData } });
+                                        navigate('/chatsuggestion', { state: { profileData } });
                                     }
                                 }}
                             >
                                 <Card.Meta
-                                    avatar={<Avatar src={chat.profilePicture || 'default-avatar.png'} />}
-                                    title={<span style={styles.name}>{`${chat.profileName}`}</span>}
+                                    avatar={<Avatar src={chat.profilePicture || 'default-avatar.png'} style={{width: '70px', height: '70px'}}/>}
+                                    title={<span style={styles.name}>{chat.profileName}</span>}
+                                    description={
+                                        <span style={styles.lastMessage}>
+                                        {
+                                            // Check if the message was sent today
+                                            (() => {
+                                                const messageTime = moment(chat.last_message_time); // Convert string to moment object
+                                                const today = moment();
+
+                                                // If the message was sent today, show only the time
+                                                if (messageTime.isSame(today, 'day')) {
+                                                    return <i><b>{messageTime.format('HH:mm')}</b></i>; // Display time in HH:mm format and italic
+                                                } else {
+                                                    return <i><b>{messageTime.format('DD-MM')}</b></i>; // Display the date in DD-MM format and italic
+                                                }
+                                            })()
+                                        }
+                                        {' '}
+                                            {chat.last_sender_id === userID && (
+                                                "jij: "
+                                            )}
+                                            {chat.last_message}
+                                    </span>
+                                    }
                                 />
+
                                 {isSender && !chat.acceptance && (
                                     <div style={styles.newMessageIndicator}>Wachten</div>
                                 )}
@@ -206,6 +253,5 @@ const ChatOverviewPage = () => {
         </ConfigProvider>
     );
 };
-
 
 export default ChatOverviewPage;

@@ -4,7 +4,7 @@ import { antThemeTokens, themes } from '../../Extra components/themes';
 import {
     Button,
     Card, Col,
-    ConfigProvider, Divider, Form, List, message, Modal, Popover, Progress, Row, Select, Statistic,
+    ConfigProvider, Divider, Form, List, message, Modal, Popconfirm, Popover, Progress, Row, Select, Statistic,
 } from 'antd';
 import {PlusOutlined, RedoOutlined, TeamOutlined} from "@ant-design/icons";
 import React, {useEffect, useState} from "react";
@@ -26,6 +26,7 @@ const OrganisationDashboard = () => {
     const [isCaretakerVisible, setIsCaretakerVisible] = useState(false);
     const [isNewCaretakerVisible, setIsNewCaretakerVisible] = useState(false);
     const [generatedCode, setGeneratedCode] = useState(undefined);
+    const [maximumActivationCodes, setMaximumActivationCodes] = useState(undefined);
     const [maximumAmountUsers, setMaximumAmountUsers] = useState(undefined);
     const [allActivationCodes, setAllActivationCodes] = useState([])
     const [currentUsers, setCurrentUsers] = useState(undefined);
@@ -57,11 +58,11 @@ const OrganisationDashboard = () => {
             .select('name, maximum_activations_codes')
             .eq('id', organisationId);
         setOrganizationName(data[0].name);
-        setMaximumAmountUsers(data[0].maximum_activations_codes)
+        setMaximumActivationCodes(data[0].maximum_activations_codes);
+        console.log("Current plan: ", maximumActivationCodes);
         await fetchAmountUsers()
         handleMaximumAmountUsers(data[0].maximum_activations_codes);
         await fetchActiveUsers()
-        console.log("Organisation Info: ", data[0])
     }
 
     const fetchAmountUsers = async () => {
@@ -203,6 +204,22 @@ const OrganisationDashboard = () => {
         setIsNewCaretakerVisible(false);
     }
 
+    const handleUpgradePlan = async () => {
+        console.log(maximumActivationCodes)
+        if(maximumActivationCodes < 3) {
+            let newPlan = maximumActivationCodes + 1
+            const {error} = await supabase
+                .from('Organisations')
+                .update({maximum_activations_codes: newPlan})
+                .eq("id", organisationId);
+            await fetchOrganisationInfo();
+        }
+        else {
+            message.error({content:"Het aantal gebruikers kan niet meer verhoogd worden.", style:{fontSize:'20px'}})
+        }
+
+    }
+
     const styles = {
         list: {
             width: '60%',
@@ -337,6 +354,14 @@ const OrganisationDashboard = () => {
         }
     }, [caretakers]);
 
+    const confirm = async () => {
+        await handleUpgradePlan();
+    }
+
+    const cancel = () => {
+
+    }
+
 
     return (<ConfigProvider theme={{token: antThemeTokens(themeColors)}}>
         <div
@@ -396,7 +421,6 @@ const OrganisationDashboard = () => {
                 gap: '10px',
                 width: '100%',
                 alignItems: 'center',
-                paddingTop: '100px'
             }}>
                 <h1 style={{fontSize: '40px'}}>{organisationName}</h1>
                 <div style={{
@@ -405,7 +429,8 @@ const OrganisationDashboard = () => {
                     flexWrap: 'wrap',
                     alignItems: 'center',
                     width: '100%',
-                    gap: '60px'
+                    gap: '60px',
+                    height: '100%'
                 }}>
 
                     <div style={{
@@ -415,9 +440,23 @@ const OrganisationDashboard = () => {
                         justifyContent: 'center',
                         alignItems: 'center',
                         width: '100%',
+                        height: '100%',
                         gap: '30px',
                         top: '10px'
                     }}>
+                        <Popover content='Een gebruiker wordt beschouwd als actief vanaf de gebruiker deelneemt aan een chat.' color='lightgray' placement='bottom'>
+                            <Card style={{
+                                backgroundColor: 'lightgray',
+                                height: '100%'
+                            }}>
+                                <Card.Meta title='Actieve gebruikers'/>
+                                <div style={{display: 'flex', justifyContent: 'space-between', flexDirection: 'column', gap: '30px'}}>
+                                    <TeamOutlined style={{fontSize: '30px'}}/>
+                                    <Statistic value={activeUsers.length}/>
+                                </div>
+                            </Card>
+                        </Popover>
+
                         <Card style={{backgroundColor:'lightgray', height: '100%'}}>
                             <Card.Meta title='Geregistreerde gebruikers'/>
                             <div style={{
@@ -432,18 +471,38 @@ const OrganisationDashboard = () => {
                             <Progress percent={currentUsers*100/maximumAmountUsers} showInfo={false} />
                         </Card>
 
-                        <Popover content='Een gebruiker wordt beschouwd als actief vanaf de gebruiker deelneemt aan een chat.' color='lightgray' placement='bottom'>
-                            <Card style={{
-                                backgroundColor: 'lightgray',
-                                height: '100%'
-                            }}>
-                                <Card.Meta title='Actieve gebruikers'/>
-                                <div style={{display: 'flex', justifyContent: 'space-between', flexDirection: 'column', gap: '30px'}}>
-                                    <TeamOutlined style={{fontSize: '30px'}}/>
-                                    <Statistic value={activeUsers.length}/>
-                                </div>
+                        <Popconfirm
+                            title="Upgrade plan"
+                            description="Weet je zeker dat je je plan wilt upgraden, het maandelijks te betalen bedraag zal automatisch verhoogd worden."
+                            onConfirm={confirm}
+                            onCancel={cancel}
+                            color="lightgray"
+                            placement="bottom"
+                            okText="Ja"
+                            okType="default"
+                            okButtonProps={{style: {
+                                backgroundColor: 'green',
+                                    fontSize: '15px',
+                                    fontweight: 'bold',
+                            }, size: 'large'
+                        }}
+                            cancelButtonProps={{style: {
+                                backgroundColor: 'red',
+                                    fontSize: '15px',
+                                    fontweight: 'bold',
+                                }, size: 'large'}}
+                            cancelText="Nee"
+                            style={{height:'100%'}}
+                        >
+                            <Card style={{backgroundColor: 'lightgray',
+                                height: '100%', minHeight:'156px'}}
+                                  hoverable={true}>
+                                <h3>Upgrade plan</h3>
+                                +€35 /maand
                             </Card>
-                        </Popover>
+                        </Popconfirm>
+
+
                     </div>
 
                     <Divider/>
@@ -461,6 +520,7 @@ const OrganisationDashboard = () => {
                             itemLayout="horizontal"
                             dataSource={caretakersList}
                             style={styles.list}
+                            locale={{emptyText:"De organisatie heeft nog geen begeleiders, genereer hieronder een code."}}
                             renderItem={(caretaker) => (
                                 <List.Item>
                                     <Card
@@ -484,7 +544,6 @@ const OrganisationDashboard = () => {
                             <h6> Nieuwe begeleider toevoegen </h6>
                         </Button>
                     </div>
-
                 </div>
             </div>
         </div>

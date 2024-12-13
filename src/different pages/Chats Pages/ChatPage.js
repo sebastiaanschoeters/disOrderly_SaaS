@@ -199,6 +199,7 @@ const ChatPage = () => {
             .eq('id', chatroomId);
 
         setNewMessage("");
+        setIsModalVisible(false);
         scrollToBottom();
     };
 

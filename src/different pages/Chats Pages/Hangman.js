@@ -347,7 +347,7 @@ const HangmanGame = ({ isModalVisible, setIsModalVisible, player1Id, player2Id, 
                         <Button
                             type="primary"
                             style = {{ fontSize: '1rem', marginTop: 10}}
-                            onClick={() => startNewGame(question)}
+                            onClick={() => handleSendMessage(question)}
                             disabled={!question}
                         >
                             Vraag sturen als normaal bericht

@@ -418,7 +418,7 @@ const ClientOverview = () => {
             .from('Activation').delete().eq('code', clientId)
         if (error) {
             message.error("Probleem bij het verwijderen van client")
-            console.log("issue with delting client")
+            console.log("issue with deleting client" , error)
         } else {
             message.success("Client verwijderd")
             setLocalClients((prevClients) =>

@@ -461,7 +461,7 @@ const AdminPage = () => {
                         width: '120px',
                         height: '100px',
                     }}
-                    onClick={() => { navigate('/chatoverview')}}
+                    onClick={() => { navigate('/chat_overzicht')}}
                 >
                     <h6> ChatSupport </h6>
                 </Button>

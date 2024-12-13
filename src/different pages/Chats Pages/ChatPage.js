@@ -396,6 +396,49 @@ const ChatPage = () => {
                                     }}>
                                         <strong>{date}</strong>
                                     </div>
+                                    {(userType !== "admin" && isAdmin &&
+                                        <div>
+                                            <div style={{
+                                                textAlign: 'center',
+                                                margin: '10px 0',
+                                                color: themeColors.primary8
+                                            }}>
+                                                <strong>{new Date().toLocaleDateString()}</strong>
+                                            </div>
+                                            <div
+                                                style={{
+                                                    display: 'flex',
+                                                    flexDirection: 'column',
+                                                    alignItems: 'flex-start',
+                                                }}
+                                            >
+                                                <div
+                                                    style={{
+                                                        ...styles.bubble,
+                                                        ...styles.receiverBubble,
+                                                        display: "flex",
+                                                        justifyContent: "center",
+                                                        alignItems: "center",
+                                                    }}
+                                                >
+                                                    <p style={{ margin: 0 }}>
+                                                        Hey, dit is de helpdesk! Ondervind je een probleem met onze service, stuur dan hier uw vraag.
+                                                    </p>
+                                                </div>
+                                                <span
+                                                    style={{
+                                                        ...styles.timestamp,
+                                                        alignSelf: 'flex-start',
+                                                    }}
+                                                >
+                                        {new Date().toLocaleTimeString([], {
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                        })}
+                                    </span>
+                                            </div>
+                                        </div>
+                                    )}
                                     {groupedMessages[date].map((message) => {
                                         const isSender = message.sender_id === userId;
                                         return (

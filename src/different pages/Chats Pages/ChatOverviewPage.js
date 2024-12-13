@@ -91,7 +91,11 @@ const ChatOverviewPage = () => {
             };
         }));
 
-        const formattedChatrooms = updatedChatrooms.map((chat) => {
+        const filteredChatrooms = updatedChatrooms.filter(
+            (chat) => chat.last_message_time && chat.last_message
+        );
+
+        const formattedChatrooms = filteredChatrooms.map((chat) => {
             const senderProfile = chat.senderProfile;
             const receiverProfile = chat.receiverProfile;
             const profile = chat.sender_id === userID ? receiverProfile : senderProfile;

@@ -317,7 +317,7 @@ const ProfileCard = (profileToShow) => {
                             }
                         }}
                     >
-                        {isChatroomExistent ? 'Ga verder bij chats' : `Stuur verzoek naar ${profileData?.name || 'de gebruiker'}`}
+                        {isChatroomExistent ? 'Ga verder bij chats' : `Stuur bericht verzoek naar ${profileData?.name || 'de gebruiker'}`}
                     </Button>
                 )}
 

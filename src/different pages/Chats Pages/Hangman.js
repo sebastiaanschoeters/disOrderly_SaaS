@@ -152,7 +152,6 @@ const HangmanGame = ({ isModalVisible, setIsModalVisible, player1Id, player2Id, 
 
         // Step 3: Update state and UI
         setGameId(data[0].id);
-        setIsModalVisible(false);
         setStep(2);
 
         // Step 4: Notify players about the new game

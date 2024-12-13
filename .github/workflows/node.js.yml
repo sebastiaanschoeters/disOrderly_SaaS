@@ -7,8 +7,8 @@ env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
   process.env.CI : false
-  SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-  SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+  REACT_APP_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+  REACT_APP_SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
 
 on:
   push:

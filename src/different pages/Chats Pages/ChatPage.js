@@ -352,7 +352,7 @@ const ChatPage = () => {
                 overflow: 'hidden'
                 }}
             >
-                {userType !== "caretaker" && userType !== "admin" && (<BreadcrumbComponent />)}
+                {userType !== "caretaker" && userType !== "admin" && !isAdmin && (<BreadcrumbComponent />)}
 
                 <ButterflyIcon color={themeColors.primary3} />
 

@@ -63,11 +63,6 @@ jobs:
         env:
           CI: true
 
-      - name: Wait for the application to be ready
-        with:
-          url: http://localhost:3000
-          timeout: 60
-
       - name: Run Cypress tests
         uses: cypress-io/github-action@v5
         with:

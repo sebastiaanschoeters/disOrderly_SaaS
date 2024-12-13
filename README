@@ -51,26 +51,34 @@ chat lazy loading           "As a user i want a good performing website"
 meerdere fotos per profiel + manier om te displayen (done) "As a user i want a platform that has a modern style and look"
 User metrics                "As an administrative user i want an overview for my clients"
 
-**Supabase password**
+**Suapabase pasasword**
 ezeHoEBOW8sWvQQm
 
+2 Organisaties met 1 begeleider elk -Seb
+    -
+    -
+4 caretakers, 2 per org -Lotte
+    -
+    -
+    -
+    -
+caretaker 1, 4 verschillende users met andere acces levels -Wout
+    -
+    -
+    -
+    -
+caretaker 2, 2 accounts -Djeniz
+    -
+    -
+caretaker 3, 2 accounts -Alv
+    -
+    -
+caretaker 4, 2 accounts -Seb
+    -
+    -
 
-
-
-vraag stellen zonder hang man  -wout
-
-northstarmetric in organisation en admin dashboard => user id in sender_id bij chatroom tabel -seb
-media querries voor alle paginas -iedreen zijn eigen paginas
-
-knop van admin naar clarity -Seb, alvero?
-
-chat overview admin -Djeniz
-
-iedreen moet via webstorm checken voor duplicate code
-
-deployment
-realistic data
-presentatie afmaken (Alvaro)
-breadcrumb (Lotte)
-console logs
-payment duidelijk maken (Seb)
+-> als je klaar bent begin met matchen maar match niet met iedreen want de search moet ook nog accounts hebben,
+    berichten te sturen,
+    elke profiel heeft een profiel foto nodig,
+    bijna elke profiel heeft interesses nodig,
+    Djeniz en Alvero spelen galgje tussen 2 accounts 1 keer max per account, gebruik random generated vragen

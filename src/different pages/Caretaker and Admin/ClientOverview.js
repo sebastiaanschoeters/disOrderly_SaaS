@@ -33,7 +33,6 @@ const supabase = createClient(supabaseUrl, supabaseKey, {db: {schema: supabaseSc
 const useFetchClients = (actCode) => {
     const [clients, setClients] = useState([]);
     const [error, setError] = useState(null);
-    console.log(supabaseSchema)
 
     useEffect(() => {
         const fetchData = async () => {

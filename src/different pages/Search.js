@@ -353,7 +353,7 @@ const Search = () => {
                         }}
                     >
                         <div>Gebruikers aan het zoeken...</div>
-                        <Spin/>
+                        <Spin />
                     </div>
                 ) : (
                     <div
@@ -376,7 +376,7 @@ const Search = () => {
                                     marginTop: '2vw',
                                 }}
                             >
-                                Geen gebruikers gevonden voor deze zoek criteria.<br/> Pas je filters aan en probeer opnieuw.
+                                Geen gebruikers gevonden voor deze zoek criteria.<br /> Pas je filters aan en probeer opnieuw.
                             </div>
                         ) : (
                             <List
@@ -393,7 +393,9 @@ const Search = () => {
                                 renderItem={(item) => (
                                     <List.Item
                                         key={item.id}
-                                        onClick={() => handleProfileClick(item.id, setSelectedClient, setIsModalProfileVisible)}
+                                        onClick={() =>
+                                            handleProfileClick(item.id, setSelectedClient, setIsModalProfileVisible)
+                                        }
                                         style={{
                                             display: 'flex',
                                             flexDirection: 'row',
@@ -404,6 +406,15 @@ const Search = () => {
                                             boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
                                             justifyContent: 'space-between',
                                             cursor: 'pointer',
+                                            transition: 'background-color 0.3s, transform 0.2s', // Add smooth transitions
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.backgroundColor = themeColors.primary2; // Change background color on hover
+                                            e.currentTarget.style.transform = 'scale(1.02)'; // Slightly scale the item
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.backgroundColor = themeColors.primary1; // Revert background color
+                                            e.currentTarget.style.transform = 'scale(1)'; // Reset scaling
                                         }}
                                     >
                                         <Avatar
@@ -437,8 +448,6 @@ const Search = () => {
                         )}
                     </div>
                 )}
-
-
                 {selectedClient && (
                     <ProfileDetailsModal
                         visible={isModalProfileVisible}

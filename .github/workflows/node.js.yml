@@ -10,6 +10,13 @@ env:
   REACT_APP_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
   REACT_APP_SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
 
+
+  run: |
+    touch .env
+    echo REACT_APP_VERCEL_URL=${{ secrets.SUPABASE_URL }} >> .env
+    echo REACT_APP_VERCEL_KEY=${{ secrets.SUPABASE_KEY }} >> .env
+    cat .env
+
 on:
   push:
     branches: [ "main", "Sebastiaan-dev-branch" ]

@@ -64,7 +64,6 @@ jobs:
           CI: true
 
       - name: Wait for the application to be ready
-        uses: jakejarvis/wait-for-netlify-action@v1
         with:
           url: http://localhost:3000
           timeout: 60

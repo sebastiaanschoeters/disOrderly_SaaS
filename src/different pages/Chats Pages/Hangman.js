@@ -315,8 +315,9 @@ const HangmanGame = ({ isModalVisible, setIsModalVisible, player1Id, player2Id, 
                     open={step === 1}
                     onCancel={() => setIsModalVisible(false)}
                     footer={null}
+                    //width='90%'
                 >
-                    <p>Typ hier een vraag, of laat een vraag genereren</p>
+                    <p>Typ hier een vraag, of laat een vraag genereren. Het antwoord op deze vraag zal jij moeten raden</p>
                     <Input.TextArea
                         rows={3}
                         placeholder="Typ hier je vraag..."
@@ -342,6 +343,14 @@ const HangmanGame = ({ isModalVisible, setIsModalVisible, player1Id, player2Id, 
                             disabled={!question}
                         >
                             Vraag instellen
+                        </Button>
+                        <Button
+                            type="primary"
+                            style = {{ fontSize: '1rem', marginTop: 10}}
+                            onClick={() => startNewGame(question)}
+                            disabled={!question}
+                        >
+                            Vraag sturen als bericht
                         </Button>
                     </div>
                 </Modal>

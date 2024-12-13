@@ -544,14 +544,6 @@ const AdminPage = () => {
                             <h6> Genereer code voor een begeleider </h6>
                         </Button>
                     </div>
-                    <Button
-                        type="primary"
-                        className="chat-support-button"
-                        style={styles.button}
-                        onClick={() => { navigate('/chatoverview')}}
-                    >
-                        <h6> ChatSupport </h6>
-                    </Button>
                 </div>
             </div>
 

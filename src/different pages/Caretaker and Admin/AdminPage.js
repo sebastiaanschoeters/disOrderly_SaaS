@@ -242,9 +242,9 @@ const AdminPage = () => {
 
     const handleGenerateCode = async () => {
         await fetchActivationCodes();
-        const random = getRandomInt(1000, 9999);
+        let random = getRandomInt(1000, 9999);
         while(allActivationCodes.includes(random)) {
-            const random = getRandomInt(1000, 9999)
+            random = getRandomInt(1000, 9999)
         }
 
         const {error} = await supabase.from("Activation").insert({"code": random ,"usable": true, "type": "caretaker", "organisation": generatedOrganisation});

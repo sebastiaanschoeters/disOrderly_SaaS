@@ -451,14 +451,32 @@ const AdminPage = () => {
                     <h6> Reload data </h6>
                 </Button>
                 <Button
-                style={{width: '25%', margin:' 20px auto', height:'25%', backgroundColor:'white', maxWidth: '150px', maxHeight:'85px'}}
-                onClick={() => window.open('https://clarity.microsoft.com/projects/view/p658v8svx1/dashboard?date=Last%207%20days', '_blank')}>
+                    style={{width: '25%', margin:' 20px auto', height:'25%', backgroundColor:'white', maxWidth: '150px', maxHeight:'85px'}}
+                    onClick={() => window.open('https://clarity.microsoft.com/projects/view/p658v8svx1/dashboard?date=Last%207%20days', '_blank')}>
                     <img src={logo} width='100%' height='100%' alt="logo" style={{top:'40px'}}/>
                 </Button>
                 <Button
                     type="primary"
                     style={{
                         position: 'absolute',
+                        bottom: '20px',
+                        left: '20px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '120px',
+                        height: '100px',
+                    }}
+                    onClick={() => { navigate('/chat_overzicht')}}
+                >
+                    <h6> ChatSupport </h6>
+                </Button>
+                <Button
+                    type="primary"
+                    style={{
+                        position: 'absolute',
+                        top: '20px',
                         bottom: '20px',
                         right: '20px',
                         display: 'flex',

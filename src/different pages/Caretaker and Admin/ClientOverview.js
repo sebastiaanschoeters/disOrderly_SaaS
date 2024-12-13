@@ -27,11 +27,13 @@ import {fetchPendingRequestsData} from "../../Utils/requests";
 
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
 const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabaseSchema = process.env.REACT_APP_SUPABASE_SCHEMA;
+const supabase = createClient(supabaseUrl, supabaseKey, {db: {schema: supabaseSchema}});
 
 const useFetchClients = (actCode) => {
     const [clients, setClients] = useState([]);
     const [error, setError] = useState(null);
+    console.log(supabaseSchema)
 
     useEffect(() => {
         const fetchData = async () => {
@@ -418,7 +420,7 @@ const ClientOverview = () => {
             .from('Activation').delete().eq('code', clientId)
         if (error) {
             message.error("Probleem bij het verwijderen van client")
-            console.log("issue with delting client")
+            console.log("issue with deleting client: ", error)
         } else {
             message.success("Client verwijderd")
             setLocalClients((prevClients) =>

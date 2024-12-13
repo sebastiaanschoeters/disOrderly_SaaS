@@ -12,7 +12,8 @@ import '../../CSS/AdminPage.css'
 
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
 const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabaseSchema = process.env.REACT_APP_SUPABASE_SCHEMA;
+const supabase = createClient(supabaseUrl, supabaseKey, {db: {schema: supabaseSchema}});
 
 const AdminPage = () => {
     const theme = 'blauw'
@@ -559,7 +560,6 @@ const AdminPage = () => {
                     <Form
                         name="New Organisation Form"
                         initialValues={{remember: true}}
-                        onFinish={handleNewOrganisation}
                         onFinishFailed={(errorInfo) =>
                             console.log('Failed:', errorInfo)
                         }

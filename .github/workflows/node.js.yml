@@ -9,12 +9,15 @@ env:
   process.env.CI : false
   REACT_APP_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
   REACT_APP_SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+  REACT_APP_SUPABASE_SCHEMA: ${{ secret.SUPABASE_SCHEMA
 
 
   run: |
     touch .env
-    echo REACT_APP_VERCEL_URL=${{ secrets.SUPABASE_URL }} >> .env
-    echo REACT_APP_VERCEL_KEY=${{ secrets.SUPABASE_KEY }} >> .env
+    echo REACT_APP_SUPABASE_URL=${{ secrets.SUPABASE_URL }} >> .env
+    echo REACT_APP_SUPABASE_KEY=${{ secrets.SUPABASE_KEY }} >> .env
+    echo REACT_APP_SUPABASE_SCHEMA=${{ secrets.SUPABASE_SCHEMA }} >> .env
+    echo 
     cat .env
 
 on:
@@ -56,5 +59,3 @@ jobs:
         run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
       - name: Deploy Project Artifacts to Vercel
         run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
-
-  

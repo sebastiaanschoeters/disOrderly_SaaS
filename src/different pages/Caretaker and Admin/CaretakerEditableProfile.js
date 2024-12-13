@@ -15,7 +15,8 @@ import {requests} from "../../Utils/requests";
 
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
 const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabaseSchema = process.env.REACT_APP_SUPABASE_SCHEMA;
+const supabase = createClient(supabaseUrl, supabaseKey, {db: {schema: supabaseSchema}});
 
 const ProfileCard = () => {
     const caretaker_id = localStorage.getItem('user_id');

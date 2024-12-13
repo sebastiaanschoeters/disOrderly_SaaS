@@ -4,7 +4,7 @@ import { antThemeTokens, themes } from '../../Extra components/themes';
 import {
     Button,
     Card, Col,
-    ConfigProvider, Divider, Form, List, message, Modal, Popconfirm, Popover, Progress, Row, Select, Statistic,
+    ConfigProvider, Divider, Form, List, message, Modal, Popconfirm, Popover, Progress, Row, Statistic,
 } from 'antd';
 import {PlusOutlined, RedoOutlined, TeamOutlined} from "@ant-design/icons";
 import React, {useEffect, useState} from "react";
@@ -181,9 +181,9 @@ const OrganisationDashboard = () => {
 
     const handleGenerateCode = async () => {
         await fetchActivationCodes;
-        const newCode = getRandomInt(1000, 9999)
+        let newCode = getRandomInt(1000, 9999)
         while (allActivationCodes.includes(newCode)) {
-            const newCode = getRandomInt(1000, 9999);
+            newCode = getRandomInt(1000, 9999);
         }
 
         const {error} = await supabase.from("Activation").insert({"code": newCode,"usable": true, "type": "caretaker", "organisation": organisationId}).select();

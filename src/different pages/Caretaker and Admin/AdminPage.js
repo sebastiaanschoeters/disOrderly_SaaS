@@ -5,8 +5,10 @@ import {Button, Card, ConfigProvider, Form, Input, List, Modal, Select, AutoComp
 import {PlusOutlined, RedoOutlined} from "@ant-design/icons";
 import React, {useEffect, useState} from "react";
 import { useNavigate } from 'react-router-dom';
+import logo from '../../Media/clarity.jpg'
 import { createClient } from "@supabase/supabase-js";
 import useThemeOnCSS from "../../UseHooks/useThemeOnCSS";
+import '../../CSS/AdminPage.css'
 
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
 const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
@@ -240,9 +242,9 @@ const AdminPage = () => {
 
     const handleGenerateCode = async () => {
         await fetchActivationCodes();
-        const random = getRandomInt(1000, 9999);
+        let random = getRandomInt(1000, 9999);
         while(allActivationCodes.includes(random)) {
-            const random = getRandomInt(1000, 9999)
+            random = getRandomInt(1000, 9999)
         }
 
         const {error} = await supabase.from("Activation").insert({"code": random ,"usable": true, "type": "caretaker", "organisation": generatedOrganisation});
@@ -415,7 +417,6 @@ const AdminPage = () => {
     }
 
     return (<ConfigProvider theme={{token: antThemeTokens(themeColors)}}>
-
             <div
                 style={{
                     padding: '20px',
@@ -429,6 +430,7 @@ const AdminPage = () => {
                     flexDirection: 'column',
                     alignItems: 'begin',
                     gap: '20px',
+                    flexWrap: 'wrap'
                 }}>
                 <Button
                     type="primary"
@@ -447,6 +449,11 @@ const AdminPage = () => {
                     onClick={fetchData}
                 >
                     <h6> Reload data </h6>
+                </Button>
+                <Button
+                    style={{width: '25%', margin:' 20px auto', height:'25%', backgroundColor:'white', maxWidth: '150px', maxHeight:'85px'}}
+                    onClick={() => window.open('https://clarity.microsoft.com/projects/view/p658v8svx1/dashboard?date=Last%207%20days', '_blank')}>
+                    <img src={logo} width='100%' height='100%' alt="logo" style={{top:'40px'}}/>
                 </Button>
                 <Button
                     type="primary"
@@ -479,10 +486,10 @@ const AdminPage = () => {
                         height: '100px',
                     }}
                     onClick={() => navigate('/login')}
-
                 >
                     <h2 style={{margin: '0', fontSize: '1rem'}}>Afmelden</h2>
                 </Button>
+
                 <div style={{display: 'flex', flexDirection:'column', gap: '20px', width: '100%', alignItems: 'center', paddingTop:'100px'}}>
                     <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', gap: '20px'}}>
                         <div
@@ -537,241 +544,247 @@ const AdminPage = () => {
                             <h6> Genereer code voor een begeleider </h6>
                         </Button>
                     </div>
-
-
+                    <Button
+                        type="primary"
+                        className="chat-support-button"
+                        style={styles.button}
+                        onClick={() => { navigate('/chatoverview')}}
+                    >
+                        <h6> ChatSupport </h6>
+                    </Button>
                 </div>
+            </div>
 
-                <Modal
-                    title="Nieuwe Organisatie"
-                    name="newOrganisation"
-                    open={isModalVisible}
-                    onCancel={handleModalClose}
-                    footer={null}
-                    style={{padding: '10px'}}
-                >
-                    <div>
-                        <Form
-                            name="New Organisation Form"
-                            initialValues={{remember: true}}
-                            onFinish={handleNewOrganisation}
-                            onFinishFailed={(errorInfo) =>
-                                console.log('Failed:', errorInfo)
-                            }
-                        >
-                            <Form.Item
-                                label="De naam van de organisatie"
-                                name="organisationName"
-                                rules={[
-                                    {
-                                        required: true, message: 'Geef de naam van de nieuwe organisatie'
-                                    },]}>
-                                <Input onChange={async (e) => await handleFieldChange("name", e.target.value)}
-                                       value={selectedOrganisation.name}
-                                />
-                            </Form.Item>
-
-                            <Form.Item
-                                name="hoeveelAccounts"
-                                label="Hoeveel Accounts?"
-                                rules={[{required: true},]}
-                            >
-                                <Select placeholder="Hoeveel gebruikers?"
-                                        value={selectedOrganisation.amountUsers}
-                                        onChange={(value) => handleFieldChange("amountUsers", value)}>
-                                    <Select.Option value="1">1-50</Select.Option>
-                                    <Select.Option value="2">51-200</Select.Option>
-                                    <Select.Option value="3">200+</Select.Option>
-                                </Select>
-                            </Form.Item>
-
-                            <Form.Item
-                                label="Locatie"
-                                name="location"
-                                rules={[{required: true, message: 'Vul een locatie in!'}]}>
-
-                                <AutoComplete
-                                    fieldNames={{ value: 'label', key:'value'}}
-                                    value={selectedOrganisation.locationName}
-                                    placeholder="Locatie"
-                                    options={allLocations}
-                                    onSelect={(value, option) => {
-                                        handleNewLocation(option.value, value);
-                                    }}
-                                    filterOption={(input, option) =>
-                                        option.label.toLowerCase().startsWith(input.toLowerCase())}
-                                />
-
-                            </Form.Item>
-
-                            <Form.Item
-                                label="Contactpersoon"
-                                name="contactPerson"
-                                rules={[{required: true}]}>
-
-                                <AutoComplete
-                                    fieldNames={{ value: 'label', key:'value'}}
-                                    placeholder="Kies een contactpersoon"
-                                    options={names}
-                                    onSelect={(value, option) => {
-                                        handleFieldChange("responsible", option.value);
-                                    }}
-                                    filterOption={(input, option) =>
-                                        option.label.toLowerCase().startsWith(input.toLowerCase())}
-                                />
-
-                            </Form.Item>
-
-                            <Form.Item>
-                                <Button type="primary" htmlType="submit" style={styles.saveButton} onClick={handleNewOrganisation}>
-                                    Aanmaken
-                                </Button>
-                            </Form.Item>
-                        </Form>
-                    </div>
-                </Modal>
-
-                <Modal
-                    open={isOrganisationVisible}
-                    title={selectedOrganisation.name}
-                    onCancel={handleCloseOrganisation}
-                    footer={null}
-                    style={{padding: '10px'}}
-                >
+            <Modal
+                title="Nieuwe Organisatie"
+                name="newOrganisation"
+                open={isModalVisible}
+                onCancel={handleModalClose}
+                footer={null}
+                style={{padding: '10px'}}
+            >
+                <div>
                     <Form
-                        name="modal_form"
-                        initialValues={{
-                            organisation: selectedOrganisation.name,
-                            aantalGebruikers: selectedOrganisation.amountUsers,
-                            contactPerson: selectedOrganisation.responsible,
-                            location: selectedOrganisation.location,
-                        }}
-                        onValuesChange={(changedValues) => {
-                            const [key, value] = Object.entries(changedValues)[0];
-                            handleFieldChange(key, value);
-                        }}
-                        onFinish={handleUpdateOrganisation}
+                        name="New Organisation Form"
+                        initialValues={{remember: true}}
+                        onFinish={handleNewOrganisation}
+                        onFinishFailed={(errorInfo) =>
+                            console.log('Failed:', errorInfo)
+                        }
                     >
                         <Form.Item
-                            label="Organisation"
-                            name="organisation"
-                            value={selectedOrganisation.name}
-                        >
-                            <Input
-                                value={selectedOrganisation.name}
-                                onChange={(e) => handleFieldChange("name", e.target.value)}
+                            label="De naam van de organisatie"
+                            name="organisationName"
+                            rules={[
+                                {
+                                    required: true, message: 'Geef de naam van de nieuwe organisatie'
+                                },]}>
+                            <Input onChange={async (e) => await handleFieldChange("name", e.target.value)}
+                                   value={selectedOrganisation.name}
                             />
-                            <div></div>
                         </Form.Item>
 
                         <Form.Item
-                            label="Aantal gebruikers"
-                            name="aantalGebruikers"
+                            name="hoeveelAccounts"
+                            label="Hoeveel Accounts?"
+                            rules={[{required: true},]}
                         >
-                            <Select
-                                value={selectedOrganisation.amountUsers}
-                                onChange={(value) => handleFieldChange("amountUsers", value)}
-                            >
-                                <Select.Option value={1}>1-50</Select.Option>
-                                <Select.Option value={2}>51-200</Select.Option>
-                                <Select.Option value={3}>200+</Select.Option>
+                            <Select placeholder="Hoeveel gebruikers?"
+                                    value={selectedOrganisation.amountUsers}
+                                    onChange={(value) => handleFieldChange("amountUsers", value)}>
+                                <Select.Option value="1">1-50</Select.Option>
+                                <Select.Option value="2">51-200</Select.Option>
+                                <Select.Option value="3">200+</Select.Option>
                             </Select>
-                            <div/>
+                        </Form.Item>
+
+                        <Form.Item
+                            label="Locatie"
+                            name="location"
+                            rules={[{required: true, message: 'Vul een locatie in!'}]}>
+
+                            <AutoComplete
+                                fieldNames={{ value: 'label', key:'value'}}
+                                value={selectedOrganisation.locationName}
+                                placeholder="Locatie"
+                                options={allLocations}
+                                onSelect={(value, option) => {
+                                    handleNewLocation(option.value, value);
+                                }}
+                                filterOption={(input, option) =>
+                                    option.label.toLowerCase().startsWith(input.toLowerCase())}
+                            />
+
                         </Form.Item>
 
                         <Form.Item
                             label="Contactpersoon"
-                            name="contactPerson">
+                            name="contactPerson"
+                            rules={[{required: true}]}>
 
                             <AutoComplete
-                                value={selectedOrganisation.responsibleName}
                                 fieldNames={{ value: 'label', key:'value'}}
                                 placeholder="Kies een contactpersoon"
                                 options={names}
                                 onSelect={(value, option) => {
                                     handleFieldChange("responsible", option.value);
                                 }}
-                                onChange={(value) => handleFieldChange("responsibleName", value)}
                                 filterOption={(input, option) =>
                                     option.label.toLowerCase().startsWith(input.toLowerCase())}
                             />
-                            <div/>
-                        </Form.Item>
 
-                        <Form.Item
-                            label="Locatie"
-                            name="location">
-                            <AutoComplete
-                                value={selectedOrganisation.locationName}
-                                fieldNames={{ value: 'label', key:'value'}}
-                                placeholder="Kies een locatie"
-                                options={allLocations}
-                                onSelect={(value, option) => {
-                                    handleFieldChange("location", option.value);
-                                }}
-                                onChange={(value) => handleFieldChange("locationName", value)}
-                                filterOption={(input, option) =>
-                                    option.label.toLowerCase().startsWith(input.toLowerCase())}
-                            />
-                            <div/>
-                        </Form.Item>
-
-
-                        <Form.Item>
-                            <div style={{display:'flex', flexDirection:'column'}}>
-                                    <Button type="primary" htmlType="submit" onClick={() => {
-                                        handleUpdateOrganisation();
-                                        handleCloseOrganisation();
-                                    }} style={styles.saveButton}>
-                                        Opslaan
-                                    </Button>
-                            </div>
                         </Form.Item>
 
                         <Form.Item>
-                            <div>
-                                <Button type="primary" htmlType="submit"
-                                        onClick={() => {
-                                            handleDeleteOrganisation();
-                                            handleCloseOrganisation();
-                                        }}
-                                        style={styles.deleteButton}>
-                                    Verwijder organisatie
-                                </Button>
-                            </div>
+                            <Button type="primary" htmlType="submit" style={styles.saveButton} onClick={handleNewOrganisation}>
+                                Aanmaken
+                            </Button>
                         </Form.Item>
                     </Form>
-                </Modal>
+                </div>
+            </Modal>
 
-                <Modal
-                    open={isCaretakerVisible}
-                    onCancel={handleCloseCaretaker}
-                    footer={null}
-                    style={{padding: '10px'}}
+            <Modal
+                open={isOrganisationVisible}
+                title={selectedOrganisation.name}
+                onCancel={handleCloseOrganisation}
+                footer={null}
+                style={{padding: '10px'}}
+            >
+                <Form
+                    name="modal_form"
+                    initialValues={{
+                        organisation: selectedOrganisation.name,
+                        aantalGebruikers: selectedOrganisation.amountUsers,
+                        contactPerson: selectedOrganisation.responsible,
+                        location: selectedOrganisation.location,
+                    }}
+                    onValuesChange={(changedValues) => {
+                        const [key, value] = Object.entries(changedValues)[0];
+                        handleFieldChange(key, value);
+                    }}
+                    onFinish={handleUpdateOrganisation}
                 >
-                    <Select
-                        style={{ width: "95%" }}
-                        placeholder="Kies een organisatie"
-                        onChange={handleGeneratedOrganisation}
-                        value={generatedOrganisation}
-                        allowClear
+                    <Form.Item
+                        label="Organisation"
+                        name="organisation"
+                        value={selectedOrganisation.name}
                     >
-                        {Organisations.map((organisation) => (
-                            <Select.Option key={organisation.name} value={organisation.id}>
-                                {organisation.name}
-                            </Select.Option>
-                        ))}
-                    </Select>
-                    <h3>Code voor de nieuwe begeleider:</h3>
-                    <h2>{generatedCode}</h2>
+                        <Input
+                            value={selectedOrganisation.name}
+                            onChange={(e) => handleFieldChange("name", e.target.value)}
+                        />
+                        <div></div>
+                    </Form.Item>
 
-                    <Button
-                        type={"primary"}
-                        onClick={handleGenerateCode}
+                    <Form.Item
+                        label="Aantal gebruikers"
+                        name="aantalGebruikers"
                     >
-                        Genereer
-                    </Button>
-                </Modal>
-            </div>
+                        <Select
+                            value={selectedOrganisation.amountUsers}
+                            onChange={(value) => handleFieldChange("amountUsers", value)}
+                        >
+                            <Select.Option value={1}>1-50</Select.Option>
+                            <Select.Option value={2}>51-200</Select.Option>
+                            <Select.Option value={3}>200+</Select.Option>
+                        </Select>
+                        <div/>
+                    </Form.Item>
+
+                    <Form.Item
+                        label="Contactpersoon"
+                        name="contactPerson">
+
+                        <AutoComplete
+                            value={selectedOrganisation.responsibleName}
+                            fieldNames={{ value: 'label', key:'value'}}
+                            placeholder="Kies een contactpersoon"
+                            options={names}
+                            onSelect={(value, option) => {
+                                handleFieldChange("responsible", option.value);
+                            }}
+                            onChange={(value) => handleFieldChange("responsibleName", value)}
+                            filterOption={(input, option) =>
+                                option.label.toLowerCase().startsWith(input.toLowerCase())}
+                        />
+                        <div/>
+                    </Form.Item>
+
+                    <Form.Item
+                        label="Locatie"
+                        name="location">
+                        <AutoComplete
+                            value={selectedOrganisation.locationName}
+                            fieldNames={{ value: 'label', key:'value'}}
+                            placeholder="Kies een locatie"
+                            options={allLocations}
+                            onSelect={(value, option) => {
+                                handleFieldChange("location", option.value);
+                            }}
+                            onChange={(value) => handleFieldChange("locationName", value)}
+                            filterOption={(input, option) =>
+                                option.label.toLowerCase().startsWith(input.toLowerCase())}
+                        />
+                        <div/>
+                    </Form.Item>
+
+
+                    <Form.Item>
+                        <div style={{display:'flex', flexDirection:'column'}}>
+                                <Button type="primary" htmlType="submit" onClick={() => {
+                                    handleUpdateOrganisation();
+                                    handleCloseOrganisation();
+                                }} style={styles.saveButton}>
+                                    Opslaan
+                                </Button>
+                        </div>
+                    </Form.Item>
+
+                    <Form.Item>
+                        <div>
+                            <Button type="primary" htmlType="submit"
+                                    onClick={() => {
+                                        handleDeleteOrganisation();
+                                        handleCloseOrganisation();
+                                    }}
+                                    style={styles.deleteButton}>
+                                Verwijder organisatie
+                            </Button>
+                        </div>
+                    </Form.Item>
+                </Form>
+            </Modal>
+
+            <Modal
+                open={isCaretakerVisible}
+                onCancel={handleCloseCaretaker}
+                footer={null}
+                style={{padding: '10px'}}
+            >
+                <Select
+                    style={{ width: "95%" }}
+                    placeholder="Kies een organisatie"
+                    onChange={handleGeneratedOrganisation}
+                    value={generatedOrganisation}
+                    allowClear
+                >
+                    {Organisations.map((organisation) => (
+                        <Select.Option key={organisation.name} value={organisation.id}>
+                            {organisation.name}
+                        </Select.Option>
+                    ))}
+                </Select>
+                <h3>Code voor de nieuwe begeleider:</h3>
+                <h2>{generatedCode}</h2>
+
+                <Button
+                    type={"primary"}
+                    onClick={handleGenerateCode}
+                >
+                    Genereer
+                </Button>
+            </Modal>
         </ConfigProvider>
     );
 };

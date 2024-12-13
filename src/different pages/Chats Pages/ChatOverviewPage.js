@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { List, Avatar, Typography, Input, ConfigProvider, Card } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import { antThemeTokens, ButterflyIcon, themes } from '../../Extra components/themes';
+import { antThemeTokens, ButterflyIcon } from '../../Extra components/themes';
 import { createClient } from "@supabase/supabase-js";
 import moment from 'moment';
 import useTheme from "../../UseHooks/useTheme";
@@ -12,8 +12,6 @@ const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
 const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-const { Title } = Typography;
-
 const ChatOverviewPage = () => {
     const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState('');
@@ -22,7 +20,7 @@ const ChatOverviewPage = () => {
     const userType = localStorage.getItem('userType');
 
     const [themeName, darkModeFlag] = JSON.parse(localStorage.getItem('theme')) || ['blauw', false];
-    const { themeColors, setThemeName, setDarkModeFlag } = useTheme(themeName, darkModeFlag);
+    const { themeColors } = useTheme(themeName, darkModeFlag);
 
     useThemeOnCSS(themeColors);
 
